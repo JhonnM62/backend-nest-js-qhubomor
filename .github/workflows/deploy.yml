@@ -9,11 +9,24 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Parse SSH Credentials
+        id: parse
+        env:
+          AUTH_SERVER: ${{ secrets.AUTH_SERVER }}
+        run: |
+          if [[ "$AUTH_SERVER" == *"@"* ]]; then
+            echo "username=$(echo $AUTH_SERVER | cut -d'@' -f1)" >> $GITHUB_OUTPUT
+            echo "host=$(echo $AUTH_SERVER | cut -d'@' -f2)" >> $GITHUB_OUTPUT
+          else
+            echo "username=root" >> $GITHUB_OUTPUT
+            echo "host=$AUTH_SERVER" >> $GITHUB_OUTPUT
+          fi
+
       - name: Deploy to Contabo VPS
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.AUTH_SERVER }}
-          username: root
+          host: ${{ steps.parse.outputs.host }}
+          username: ${{ steps.parse.outputs.username }}
           password: ${{ secrets.AUTH_PASS }}
           script: |
             # 1. Crear directorio del proyecto si no existe
