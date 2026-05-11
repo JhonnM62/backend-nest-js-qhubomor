@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: qhubomor-api
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRATION=${JWT_EXPIRATION}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - BULLMQ_REDIS_HOST=redis
+      - BULLMQ_REDIS_PORT=6379
+      - NODE_ENV=production
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+    networks:
+      - qhubomor-network
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: qhubomor-postgres
+    environment:
+      - POSTGRES_USER=${DATABASE_USERNAME}
+      - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
+      - POSTGRES_DB=${DATABASE_NAME}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    networks:
+      - qhubomor-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: qhubomor-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    networks:
+      - qhubomor-network
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  qhubomor-network:
+    driver: bridge

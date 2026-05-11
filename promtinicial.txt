@@ -1,0 +1,33 @@
+# Rol
+Actúa como un Arquitecto de Software Senior experto en NestJS, PostgreSQL, Redis y React Native.
+
+# Contexto del Proyecto
+Estamos construyendo el backend de un ERP a medida para **Q'hubo Mor**, un negocio de alto volumen de granizados y comidas rápidas. El frontend está hecho en React Native (Expo) y requiere respuestas extremadamente rápidas y ligeras para operar eficientemente en tablets de punto de venta (POS) y celulares del personal.
+
+# Stack Tecnológico
+* **Framework:** NestJS (TypeScript)
+* **Base de Datos:** PostgreSQL (usando Prisma ORM para tipado estricto)
+* **Caché y Eventos en Tiempo Real:** Redis
+* **Colas de Tareas:** BullMQ
+
+# Instrucciones de Arquitectura y Salida de Datos
+Necesito que generes el código para este módulo cumpliendo estrictamente con estas reglas para optimizar el consumo desde React Native:
+
+1. **Formato de Respuesta Estandarizado:** Todas las respuestas HTTP deben pasar por un Interceptor de NestJS que devuelva un JSON predecible. React Native no debe adivinar la estructura.
+   * *Éxito:* `{ "success": true, "data": { ... }, "meta": { ... } }`
+   * *Error:* `{ "success": false, "error": { "code": "ERR_CODE", "message": "Descripción clara" } }`
+
+2. **Carga Perezosa (Paginación Obligatoria):** Ningún endpoint que devuelva listas (ej. historial de ventas, inventario) debe devolver más de 20 registros por defecto. Implementa paginación por cursor (ideal para *Infinite Scroll* en apps móviles) o por página/límite en Prisma.
+
+3. **Data Transfer Objects (DTOs) Planos:** El frontend no debe hacer transformaciones complejas. Si la app necesita mostrar el nombre del producto y su categoría, el DTO debe enviar un objeto plano, evitando anidaciones profundas e innecesarias de relaciones SQL.
+
+4. **Uso de Redis para Catálogos:** Los datos de lectura intensiva y poca mutación (como el menú de granizados, precios actuales o la lista de empleados activos) deben servirse desde la caché de Redis para responder en milisegundos.
+
+5. **WebSockets para el POS:** Las acciones críticas (como registrar una nueva orden) deben emitir un evento a través de Redis Pub/Sub hacia un *Gateway* de WebSockets en NestJS, para que las pantallas de la cocina se actualicen instantáneamente sin hacer *polling* (peticiones HTTP repetitivas).
+
+6. **Offloading a BullMQ:** Si el endpoint requiere generar un reporte (ej. cierre de caja o deducciones de nómina), el controlador debe devolver un `jobId` inmediatamente con status `202 Accepted`. El trabajo pesado debe enviarse a BullMQ, y el frontend usará ese `jobId` para consultar el estado o recibir una notificación por WebSocket cuando el reporte esté listo.
+
+---
+
+# Tarea Actual
+Con estas reglas claras, por favor genera la estructura inicial (Controlador, Servicio, DTOs y Schema de Prisma) para el módulo de: **[INSERTA AQUÍ EL MÓDULO, ej. Registro de Ventas en el POS]**

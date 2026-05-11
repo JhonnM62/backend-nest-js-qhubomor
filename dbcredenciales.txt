@@ -1,0 +1,4 @@
+server=100.42.185.2:8003
+Username=postgres
+Database=ventas1_2
+Password=jonnyca237

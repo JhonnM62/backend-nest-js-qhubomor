@@ -1,0 +1,1054 @@
+{
+  "info": {
+    "name": "Q'hubo Mor POS API",
+    "description": "API para el sistema de punto de venta del restaurante Q'hubo Mor",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api/v1"
+    },
+    {
+      "key": "token",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth (Públicos)",
+      "item": [
+        {
+          "name": "Register",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.success && jsonData.data.accessToken) {",
+                  "    pm.collectionVariables.set('token', jsonData.data.accessToken);",
+                  "}",
+                  "",
+                  "pm.test('Status is 201', function() {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"nombre\": \"Administrador\",\n    \"email\": \"admin@qhubomor.com\",\n    \"password\": \"admin123\",\n    \"rol\": \"admin\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.success && jsonData.data.accessToken) {",
+                  "    pm.collectionVariables.set('token', jsonData.data.accessToken);",
+                  "    pm.test('Login exitoso', function() {",
+                  "        pm.expect(jsonData.success).to.eql(true);",
+                  "    });",
+                  "}",
+                  "",
+                  "pm.test('Status is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"admin@qhubomor.com\",\n    \"password\": \"admin123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Auth (Protegidos)",
+      "item": [
+        {
+          "name": "Get Profile",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "profile"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Usuarios",
+      "item": [
+        {
+          "name": "Get All Usuarios",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios?page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["usuarios"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Usuario by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/usuarios/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["usuarios", ":id"]
+            }
+          }
+        },
+        {
+          "name": "Create Usuario",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"nombre\": \"Juan Pérez\",\n    \"email\": \"juan@qhubomor.com\",\n    \"password\": \"juan123\",\n    \"rol\": \"usuario\",\n    \"telefono\": \"3001234567\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/usuarios",
+              "host": ["{{baseUrl}}"],
+              "path": ["usuarios"]
+            }
+          }
+        },
+        {
+          "name": "Update Usuario",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"nombre\": \"Juan Pérez Actualizado\",\n    \"telefono\": \"3001234568\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/usuarios/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["usuarios", ":id"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Productos",
+      "item": [
+        {
+          "name": "Get All Productos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/productos?page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["productos"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Producto by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/productos/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["productos", ":id"]
+            }
+          }
+        },
+        {
+          "name": "Create Producto",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"nombre\": \"Granizado de Fresa\",\n    \"categoria\": \"granizados\",\n    \"precioUnitario\": 8000,\n    \"cantidad\": 100,\n    \"mostrar\": \"si\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/productos",
+              "host": ["{{baseUrl}}"],
+              "path": ["productos"]
+            }
+          }
+        },
+        {
+          "name": "Update Producto",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"precioUnitario\": 8500,\n    \"cantidad\": 150\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/productos/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["productos", ":id"]
+            }
+          }
+        },
+        {
+          "name": "Delete Producto",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/productos/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["productos", ":id"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Categorias",
+      "item": [
+        {
+          "name": "Get All Categorias",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/categorias",
+              "host": ["{{baseUrl}}"],
+              "path": ["categorias"]
+            }
+          }
+        },
+        {
+          "name": "Get Categoria by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/categorias/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["categorias", ":id"]
+            }
+          }
+        },
+        {
+          "name": "Create Categoria",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"nombre\": \"Granizados\",\n    \"image\": \"https://example.com/granizados.jpg\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/categorias",
+              "host": ["{{baseUrl}}"],
+              "path": ["categorias"]
+            }
+          }
+        },
+        {
+          "name": "Update Categoria",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"nombre\": \"Granizados Premium\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/categorias/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["categorias", ":id"]
+            }
+          }
+        },
+        {
+          "name": "Delete Categoria",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/categorias/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["categorias", ":id"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Ventas",
+      "item": [
+        {
+          "name": "Get All Ventas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/ventas?page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["ventas"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Ventas de Hoy",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/ventas/hoy",
+              "host": ["{{baseUrl}}"],
+              "path": ["ventas", "hoy"]
+            }
+          }
+        },
+        {
+          "name": "Get Ventas by Mesa",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/ventas/mesa/:mesaId",
+              "host": ["{{baseUrl}}"],
+              "path": ["ventas", "mesa", ":mesaId"]
+            }
+          }
+        },
+        {
+          "name": "Get Venta by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/ventas/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["ventas", ":id"]
+            }
+          }
+        },
+        {
+          "name": "Create Venta Completa",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"venta\": {\n        \"mesa\": \"mesa1\",\n        \"estado\": \"completada\",\n        \"medioDePago\": \"efectivo\",\n        \"efectivoRecibido\": 50000,\n        \"totalInput\": 24000\n    },\n    \"productos\": [\n        {\n            \"nombre\": \"Granizado de Fresa\",\n            \"categoria\": \"granizados\",\n            \"cantidad\": 2,\n            \"precio\": 8000,\n            \"precioTotal\": 16000,\n            \"estado\": \"completada\"\n        },\n        {\n            \"nombre\": \"Perro Caliente\",\n            \"categoria\": \"comidas\",\n            \"cantidad\": 1,\n            \"precio\": 8000,\n            \"precioTotal\": 8000,\n            \"estado\": \"completada\"\n        }\n    ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/ventas/completa",
+              "host": ["{{baseUrl}}"],
+              "path": ["ventas", "completa"]
+            }
+          }
+        },
+        {
+          "name": "Update Estado Venta",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"estado\": \"completada\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/ventas/:id/estado",
+              "host": ["{{baseUrl}}"],
+              "path": ["ventas", ":id", "estado"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Caja",
+      "item": [
+        {
+          "name": "Get Caja Activa",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/caja/activa",
+              "host": ["{{baseUrl}}"],
+              "path": ["caja", "activa"]
+            }
+          }
+        },
+        {
+          "name": "Get All Cajas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/caja",
+              "host": ["{{baseUrl}}"],
+              "path": ["caja"]
+            }
+          }
+        },
+        {
+          "name": "Get Caja by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/caja/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["caja", ":id"]
+            }
+          }
+        },
+        {
+          "name": "Abrir Caja",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"nombre\": \"Caja Principal\",\n    \"efectivoDeApertura\": 100000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/caja/abrir",
+              "host": ["{{baseUrl}}"],
+              "path": ["caja", "abrir"]
+            }
+          }
+        },
+        {
+          "name": "Cerrar Caja",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"efectivoDeCierre\": 250000,\n    \"resumen\": 150000,\n    \"total12Onz\": 50,\n    \"total24Onz\": 30,\n    \"observaciones\": \"Cierre sin novedades\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/caja/cerrar/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["caja", "cerrar", ":id"]
+            }
+          }
+        },
+        {
+          "name": "Get Resumen Caja",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/caja/resumen/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["caja", "resumen", ":id"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Inventario",
+      "item": [
+        {
+          "name": "Get All Inventarios",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/inventario?page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["inventario"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Inventario Bajo",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/inventario/bajo",
+              "host": ["{{baseUrl}}"],
+              "path": ["inventario", "bajo"]
+            }
+          }
+        },
+        {
+          "name": "Get Inventario by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/inventario/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["inventario", ":id"]
+            }
+          }
+        },
+        {
+          "name": "Create Inventario",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"nombre\": \"Inventario General\",\n    \"tipo\": \"general\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/inventario",
+              "host": ["{{baseUrl}}"],
+              "path": ["inventario"]
+            }
+          }
+        },
+        {
+          "name": "Agregar Item a Inventario",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"IDinventario\": \"id-del-inventario\",\n    \"nombreDelAlimento\": \"Fresa\",\n    \"categoria\": \"frutas\",\n    \"cantidad\": 50,\n    \"precio\": 5000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/inventario/item",
+              "host": ["{{baseUrl}}"],
+              "path": ["inventario", "item"]
+            }
+          }
+        },
+        {
+          "name": "Marcar Item Comprado",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/inventario/item/:id/comprar",
+              "host": ["{{baseUrl}}"],
+              "path": ["inventario", "item", ":id", "comprar"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Clientes",
+      "item": [
+        {
+          "name": "Get All Clientes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/clientes?page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["clientes"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Cliente by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/clientes/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["clientes", ":id"]
+            }
+          }
+        },
+        {
+          "name": "Create Cliente",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"nombre\": \"Carlos García\",\n    \"cedula\": 12345678,\n    \"whatsapp\": \"3001234567\",\n    \"direccion\": \"Calle 123 #45-67\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/clientes",
+              "host": ["{{baseUrl}}"],
+              "path": ["clientes"]
+            }
+          }
+        },
+        {
+          "name": "Update Cliente",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"whatsapp\": \"3007654321\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/clientes/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["clientes", ":id"]
+            }
+          }
+        },
+        {
+          "name": "Delete Cliente",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/clientes/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["clientes", ":id"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Proveedores",
+      "item": [
+        {
+          "name": "Get All Proveedores",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/proveedores?page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["proveedores"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Proveedore by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/proveedores/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["proveedores", ":id"]
+            }
+          }
+        },
+        {
+          "name": "Create Proveedore",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"nombre\": \"Distribuidora de Frutas El Verde\",\n    \"telefono\": \"3007654321\",\n    \"direccion_y_ciudad\": \"Calle 10 #5-20, Bogotá\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/proveedores",
+              "host": ["{{baseUrl}}"],
+              "path": ["proveedores"]
+            }
+          }
+        },
+        {
+          "name": "Update Proveedore",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"telefono\": \"3001112222\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/proveedores/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["proveedores", ":id"]
+            }
+          }
+        },
+        {
+          "name": "Delete Proveedore",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/proveedores/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["proveedores", ":id"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Gastos",
+      "item": [
+        {
+          "name": "Get All Gastos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/gastos?page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["gastos"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Total Gastos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/gastos/total?fechaDesde=2026-04-01&fechaHasta=2026-04-30",
+              "host": ["{{baseUrl}}"],
+              "path": ["gastos", "total"],
+              "query": [
+                {
+                  "key": "fechaDesde",
+                  "value": "2026-04-01"
+                },
+                {
+                  "key": "fechaHasta",
+                  "value": "2026-04-30"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All Gastos Personales",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/gastos/personales?page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["gastos", "personales"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Gasto by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/gastos/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["gastos", ":id"]
+            }
+          }
+        },
+        {
+          "name": "Create Gasto",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"concepto\": \"Compra de insumos de limpieza\",\n    \"valor\": 50000,\n    \"medioDePago\": \"efectivo\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/gastos",
+              "host": ["{{baseUrl}}"],
+              "path": ["gastos"]
+            }
+          }
+        },
+        {
+          "name": "Create Gasto Personal",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"concepto\": \"Transporte\",\n    \"valor\": 10000,\n    \"medioDePago\": \"efectivo\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/gastos/personales",
+              "host": ["{{baseUrl}}"],
+              "path": ["gastos", "personales"]
+            }
+          }
+        },
+        {
+          "name": "Update Gasto",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"valor\": 55000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/gastos/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["gastos", ":id"]
+            }
+          }
+        },
+        {
+          "name": "Delete Gasto",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/gastos/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["gastos", ":id"]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  }
+}

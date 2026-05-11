@@ -1,0 +1,377 @@
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
+import { CreateInventarioDto, UpdateInventarioDto, CreateOrderInventarioDto, InventarioQueryDto, OrderInventarioQueryDto } from './dto/inventario.dto';
+import { Prisma } from '@prisma/client';
+import { AppGateway } from '../websocket/app.gateway';
+import { SocketEvent } from '../websocket/types/socket.types';
+
+@Injectable()
+export class InventarioService {
+  constructor(
+    private prisma: PrismaService,
+    private appGateway: AppGateway
+  ) {}
+
+  async create(createInventarioDto: CreateInventarioDto) {
+    const inventario = await this.prisma.inventario.create({
+      data: {
+        ...createInventarioDto,
+        fechaYHora: new Date(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+    });
+    this.appGateway.emitToInventario(SocketEvent.REFRESH_INVENTARIO, { action: 'create', data: inventario });
+    return inventario;
+  }
+
+  async findAll(query: InventarioQueryDto) {
+    const { page = 1, limit = 20, tipo, buscar } = query;
+    const skip = (page - 1) * limit;
+
+    const where: Prisma.InventarioWhereInput = {};
+
+    if (tipo) {
+      where.tipo = { contains: tipo, mode: 'insensitive' };
+    }
+
+    if (buscar) {
+      where.nombre = { contains: buscar, mode: 'insensitive' };
+    }
+
+    const [data, total] = await Promise.all([
+      this.prisma.inventario.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { fechaYHora: 'desc' },
+        include: {
+          ordenInventario: true,
+        },
+      }),
+      this.prisma.inventario.count({ where }),
+    ]);
+
+    return {
+      data,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+        hasNextPage: page < Math.ceil(total / limit),
+        hasPreviousPage: page > 1,
+      },
+    };
+  }
+
+  async findAllOrdenes(query: OrderInventarioQueryDto) {
+    const { page = 1, limit = 50, buscar, tipo, provedor, fechaInicio, fechaFin, categoria } = query;
+    const skip = (page - 1) * limit;
+
+    const where: Prisma.OrderinventarioWhereInput = {};
+
+    if (buscar) {
+      where.OR = [
+        { nombreDelAlimento: { contains: buscar, mode: 'insensitive' } },
+        { observacion: { contains: buscar, mode: 'insensitive' } },
+        { provedor: { contains: buscar, mode: 'insensitive' } },
+      ];
+    }
+
+    if (provedor) {
+      where.provedor = { contains: provedor, mode: 'insensitive' };
+    }
+
+    if (categoria) {
+      where.categoria = { contains: categoria, mode: 'insensitive' };
+    }
+
+    if (tipo) {
+      where.inventario = {
+        tipo: { contains: tipo, mode: 'insensitive' },
+      };
+    }
+
+    if (fechaInicio || fechaFin) {
+      where.fechaYHora = {};
+      if (fechaInicio) where.fechaYHora.gte = new Date(fechaInicio);
+      if (fechaFin) where.fechaYHora.lte = new Date(fechaFin);
+    }
+
+    const [data, total] = await Promise.all([
+      this.prisma.orderinventario.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+        include: {
+          inventario: true,
+        },
+      }),
+      this.prisma.orderinventario.count({ where }),
+    ]);
+
+    return {
+      data,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+        hasNextPage: page < Math.ceil(total / limit),
+        hasPreviousPage: page > 1,
+      },
+    };
+  }
+
+  async findOne(id: string) {
+    const inventario = await this.prisma.inventario.findUnique({
+      where: { IDinventario: id },
+      include: {
+        ordenInventario: true,
+      },
+    });
+
+    if (!inventario) {
+      throw new NotFoundException(`Inventario con ID ${id} no encontrado`);
+    }
+
+    return inventario;
+  }
+
+  async update(id: string, updateInventarioDto: UpdateInventarioDto) {
+    const updated = await this.prisma.inventario.update({
+      where: { IDinventario: id },
+      data: updateInventarioDto,
+    });
+    this.appGateway.emitToInventario(SocketEvent.REFRESH_INVENTARIO, { action: 'update', data: updated });
+    return updated;
+  }
+
+  async remove(id: string, restoreStock: boolean = true) {
+    const inventario = await this.prisma.inventario.findUnique({
+      where: { IDinventario: id },
+      include: { ordenInventario: true }
+    });
+
+    if (!inventario) {
+      throw new NotFoundException(`Inventario con ID ${id} no encontrado`);
+    }
+
+    if (restoreStock && inventario.ordenInventario && inventario.ordenInventario.length > 0) {
+      const isEntrada = inventario.tipo?.toUpperCase().includes('ENTRADA');
+      let stockChanged = false;
+
+      for (const item of inventario.ordenInventario) {
+        if (item.seCompro?.toLowerCase() === 'si' && item.nombreDelAlimento) {
+          const insumo = await this.prisma.insumos.findFirst({
+            where: { OR: [{ IDalimentos: item.nombreDelAlimento }, { nombre: item.nombreDelAlimento }] },
+          });
+
+          if (insumo) {
+            let nuevaCantidadHist = insumo.cantidad || 0;
+            let nuevoDisponible = Number(insumo.disponible) || 0;
+
+            if (isEntrada) {
+              nuevaCantidadHist -= (item.cantidad || 0);
+              nuevoDisponible -= (item.cantidad || 0);
+              if (nuevaCantidadHist < 0) nuevaCantidadHist = 0;
+            } else {
+              nuevoDisponible += (item.cantidad || 0);
+            }
+
+            await this.prisma.insumos.update({
+              where: { IDalimentos: insumo.IDalimentos },
+              data: {
+                cantidad: nuevaCantidadHist,
+                disponible: nuevoDisponible
+              }
+            });
+            stockChanged = true;
+          }
+        }
+      }
+
+      if (stockChanged) {
+        this.appGateway.emitToInsumos(SocketEvent.REFRESH_INSUMOS, { action: 'update_stock_batch' });
+      }
+    }
+
+    // Asegurarse de eliminar los items hijos primero
+    await this.prisma.orderinventario.deleteMany({
+      where: { IDinventario: id }
+    });
+
+    const deleted = await this.prisma.inventario.delete({
+      where: { IDinventario: id },
+    });
+    this.appGateway.emitToInventario(SocketEvent.REFRESH_INVENTARIO, { action: 'delete', id });
+    return deleted;
+  }
+
+  async agregarItem(createOrderDto: CreateOrderInventarioDto) {
+    const item = await this.prisma.orderinventario.create({
+      data: {
+        ...createOrderDto,
+        fechaYHora: new Date(),
+        disponible: 'si',
+        seCompro: 'no',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+    });
+    this.appGateway.emitToInventario(SocketEvent.REFRESH_INVENTARIO, { action: 'agregarItem', data: item });
+    return item;
+  }
+
+  async eliminarItem(id: string, restoreStock: boolean = true) {
+    const item = await this.prisma.orderinventario.findUnique({
+      where: { IDorderinventario: id },
+      include: { inventario: true }
+    });
+
+    if (!item) {
+      throw new NotFoundException(`Item con ID ${id} no encontrado`);
+    }
+
+    // Si el item ya había sido procesado y se pide restaurar el stock
+    if (restoreStock && item.seCompro?.toLowerCase() === 'si' && item.nombreDelAlimento) {
+      const insumo = await this.prisma.insumos.findFirst({
+        where: { OR: [{ IDalimentos: item.nombreDelAlimento }, { nombre: item.nombreDelAlimento }] },
+      });
+
+      if (insumo) {
+        const isEntrada = item.inventario?.tipo?.toUpperCase().includes('ENTRADA');
+        let nuevaCantidadHist = insumo.cantidad || 0;
+        let nuevoDisponible = Number(insumo.disponible) || 0;
+
+        if (isEntrada) {
+          nuevaCantidadHist -= (item.cantidad || 0);
+          nuevoDisponible -= (item.cantidad || 0);
+          if (nuevaCantidadHist < 0) nuevaCantidadHist = 0;
+        } else {
+          nuevoDisponible += (item.cantidad || 0);
+        }
+
+        await this.prisma.insumos.update({
+          where: { IDalimentos: insumo.IDalimentos },
+          data: { cantidad: nuevaCantidadHist, disponible: nuevoDisponible },
+        });
+      }
+    }
+
+    const deleted = await this.prisma.orderinventario.delete({
+      where: { IDorderinventario: id },
+    });
+    this.appGateway.emitToInventario(SocketEvent.REFRESH_INVENTARIO, { action: 'eliminarItem', id });
+    if (restoreStock && item.seCompro?.toLowerCase() === 'si' && item.nombreDelAlimento) {
+      this.appGateway.emitToInsumos(SocketEvent.REFRESH_INSUMOS, { action: 'update_stock' });
+    }
+    return deleted;
+  }
+
+  async marcarComprado(id: string) {
+    const item = await this.prisma.orderinventario.findUnique({
+      where: { IDorderinventario: id },
+      include: { inventario: true }
+    });
+
+    if (!item) {
+      throw new NotFoundException(`Item con ID ${id} no encontrado`);
+    }
+
+    const newStatus = item.seCompro?.toLowerCase() === 'si' ? 'no' : 'si';
+    const isEntrada = item.inventario?.tipo?.toUpperCase().includes('ENTRADA');
+
+    await this.prisma.orderinventario.update({
+      where: { IDorderinventario: id },
+      data: { 
+        seCompro: newStatus === 'si' ? 'Si' : 'No',
+        agregarAInsumos: newStatus === 'si' ? 'Si' : 'No'
+      },
+    });
+
+    if (item.nombreDelAlimento) {
+      const insumo = await this.prisma.insumos.findFirst({
+        where: {
+          OR: [
+            { IDalimentos: item.nombreDelAlimento },
+            { nombre: item.nombreDelAlimento },
+          ],
+        },
+      });
+
+      if (insumo) {
+        let nuevaCantidadHist = insumo.cantidad || 0;
+        let nuevoDisponible = Number(insumo.disponible) || 0;
+        
+        if (isEntrada) {
+          if (newStatus === 'si') {
+            nuevaCantidadHist += (item.cantidad || 0);
+            nuevoDisponible += (item.cantidad || 0);
+          } else {
+            nuevaCantidadHist -= (item.cantidad || 0);
+            nuevoDisponible -= (item.cantidad || 0);
+            if (nuevaCantidadHist < 0) nuevaCantidadHist = 0;
+          }
+        } else {
+          // Es una salida (Salida)
+          if (newStatus === 'si') {
+            nuevoDisponible -= (item.cantidad || 0);
+          } else {
+            nuevoDisponible += (item.cantidad || 0);
+          }
+        }
+
+        await this.prisma.insumos.update({
+          where: { IDalimentos: insumo.IDalimentos },
+          data: { 
+            cantidad: nuevaCantidadHist,
+            disponible: nuevoDisponible,
+            ...(newStatus === 'si' && isEntrada && item.precioActual ? { precio: item.precioActual } : {})
+          },
+        });
+
+        // Guardamos en el item del inventario el stock disponible actual que quedó en ese momento
+        await this.prisma.orderinventario.update({
+          where: { IDorderinventario: id },
+          data: { cantInsumos: nuevoDisponible }
+        });
+
+        // Emitir cambio de insumo para reflejar en el inventario real-time
+        this.appGateway.emitToInsumos(SocketEvent.REFRESH_INSUMOS, { action: 'update_stock' });
+      }
+    }
+
+    const updatedItem = await this.prisma.orderinventario.findUnique({
+      where: { IDorderinventario: id },
+    });
+    this.appGateway.emitToInventario(SocketEvent.REFRESH_INVENTARIO, { action: 'marcarComprado', data: updatedItem });
+    return updatedItem;
+  }
+
+  async marcarVariosComprado(ids: string[]) {
+    const resultados = [];
+    for (const id of ids) {
+      try {
+        const result = await this.marcarComprado(id);
+        resultados.push({ id, success: true, data: result });
+      } catch (error) {
+        resultados.push({ id, success: false, error: error.message });
+      }
+    }
+    return resultados;
+  }
+
+  async getInventarioBajo() {
+    const items = await this.prisma.orderinventario.findMany({
+      where: {
+        disponible: 'si',
+        seCompro: 'no',
+      },
+    });
+
+    return items.filter((item) => (item.cantidad ?? 0) < 10);
+  }
+}
