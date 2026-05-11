@@ -31,7 +31,9 @@ jobs:
             fi
             
             # 3. Inyectar las variables de entorno desde los secretos de GitHub
-            echo "${{ secrets.ENV_FILE_CONTENT }}" > .env
+            cat << 'EOF' > .env
+            ${{ secrets.ENV_FILE_CONTENT }}
+            EOF
             
             # 4. Construir la nueva imagen de Docker localmente en Contabo
             echo "Construyendo imagen Docker..."
