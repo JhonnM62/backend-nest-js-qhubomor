@@ -3,10 +3,15 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { CreateUsuarioDto, UpdateUsuarioDto, UsuarioQueryDto, ROLES_DISPONIBLES } from './dto/usuario.dto';
 import { Prisma } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
+import { AppGateway } from '../../websocket/app.gateway';
+import { SocketEvent } from '../../websocket/types/socket.types';
 
 @Injectable()
 export class UsuariosService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private readonly appGateway: AppGateway
+  ) {}
 
   async create(createUsuarioDto: CreateUsuarioDto) {
     const existingUser = await this.prisma.usuarios.findFirst({
@@ -172,10 +177,21 @@ export class UsuariosService {
       }
     }
 
-    return this.prisma.usuarios.update({
+    const updatedUser = await this.prisma.usuarios.update({
       where: { IDusuarios: id },
       data: updateUsuarioDto,
     });
+
+    // Notify the specific user about their permission update if permissions changed
+    if (updateUsuarioDto.permisos !== undefined) {
+      this.appGateway.server.to(`user_${id}`).emit(SocketEvent.USER_PERMISSIONS_UPDATED, {
+        userId: id,
+        permisos: updatedUser.permisos,
+        rol: updatedUser.rol
+      });
+    }
+
+    return updatedUser;
   }
 
   async remove(id: string) {

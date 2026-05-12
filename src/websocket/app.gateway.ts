@@ -31,7 +31,8 @@ import {
   MessageBody,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { Logger, UseGuards, Req } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import { SocketEvent, Room } from './types/socket.types';
 
 interface ConnectedClient {
@@ -52,6 +53,8 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
   private readonly logger = new Logger(AppGateway.name);
   private connectedClients = new Map<string, ConnectedClient>();
 
+  constructor(private readonly jwtService: JwtService) {}
+
   handleConnection(client: Socket) {
     try {
       const token = client.handshake.auth?.token;
@@ -63,12 +66,32 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
         return;
       }
 
+      let userId: string | undefined;
+      try {
+        // Decode token to get user ID
+        const decoded = this.jwtService.verify(token);
+        userId = decoded.sub; // Assuming the token has 'sub' as user ID
+      } catch (e) {
+        this.logger.warn(`Client ${client.id} provided invalid token`);
+        // We might not want to disconnect them immediately if they are just logging out
+      }
+
       this.connectedClients.set(client.id, {
         socket: client,
         rooms: new Set(),
+        userId,
       });
-
-      this.logger.log(`Client connected: ${client.id}`);
+      
+      // Automatically join a personal room for direct messages
+      if (userId) {
+        const personalRoom = `user_${userId}`;
+        client.join(personalRoom);
+        const clientData = this.connectedClients.get(client.id);
+        if (clientData) clientData.rooms.add(personalRoom);
+        this.logger.log(`Client ${client.id} mapped to user ${userId} and joined ${personalRoom}`);
+      } else {
+        this.logger.log(`Client connected without valid userId: ${client.id}`);
+      }
     } catch (error) {
       this.logger.error(`Connection error for ${client.id}:`, error);
       client.disconnect();
