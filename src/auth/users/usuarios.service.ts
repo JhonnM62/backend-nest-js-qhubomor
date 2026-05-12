@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException, BadRequestException, Inject, forwardRef } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateUsuarioDto, UpdateUsuarioDto, UsuarioQueryDto, ROLES_DISPONIBLES } from './dto/usuario.dto';
 import { Prisma } from '@prisma/client';
@@ -10,6 +10,7 @@ import { SocketEvent } from '../../websocket/types/socket.types';
 export class UsuariosService {
   constructor(
     private prisma: PrismaService,
+    @Inject(forwardRef(() => AppGateway))
     private readonly appGateway: AppGateway
   ) {}
 
