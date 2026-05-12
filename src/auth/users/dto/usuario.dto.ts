@@ -111,6 +111,10 @@ export class UpdateUsuarioDto {
   @ApiPropertyOptional()
   @IsOptional()
   permisos?: any;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  isActive?: boolean;
 }
 
 export class UsuarioQueryDto extends PaginationDto {
