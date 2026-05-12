@@ -8,26 +8,58 @@ export class ClientesService {
   constructor(private prisma: PrismaService) {}
 
   async create(createClienteDto: CreateClienteDto) {
+    let finalId = createClienteDto.IDcliente;
+
+    if (!finalId) {
+      // Generar un ID aleatorio de 4 a 5 dígitos que no exista
+      let isUnique = false;
+      while (!isUnique) {
+        finalId = Math.floor(1000 + Math.random() * 90000); // 1000 a 99999
+        const exists = await this.prisma.clientes.findUnique({
+          where: { IDcliente: finalId }
+        });
+        if (!exists) {
+          isUnique = true;
+        }
+      }
+    } else {
+      // Verificar si el ID manual ya existe
+      const exists = await this.prisma.clientes.findUnique({
+        where: { IDcliente: finalId }
+      });
+      if (exists) {
+        throw new NotFoundException(`El ID de cliente ${finalId} ya está en uso.`);
+      }
+    }
+
     return this.prisma.clientes.create({
       data: {
         ...createClienteDto,
+        IDcliente: finalId,
         fecha_y_hora_creacion: new Date(),
       },
     });
   }
 
-  async findAll(query: ClienteQueryDto) {
-    const { page = 1, limit = 20, buscar } = query;
+  async findAll(query: any) {
+    const { page = 1, limit = 20, buscar, isActive } = query;
     const skip = (page - 1) * limit;
 
     const where: Prisma.ClientesWhereInput = {};
 
+    if (isActive !== undefined) {
+      where.isActive = isActive;
+    }
+
     if (buscar) {
       where.OR = [
         { nombre: { contains: buscar, mode: 'insensitive' } },
-        { cedula: { equals: isNaN(Number(buscar)) ? undefined : Number(buscar) } },
         { whatsapp: { contains: buscar, mode: 'insensitive' } },
       ];
+      if (!isNaN(Number(buscar))) {
+        where.OR.push({ cedula: { equals: BigInt(buscar) } });
+        where.OR.push({ IDcliente: { equals: Number(buscar) } });
+      }
     }
 
     const [data, total] = await Promise.all([
@@ -35,13 +67,18 @@ export class ClientesService {
         where,
         skip,
         take: limit,
-        orderBy: { fecha_y_hora_creacion: 'desc' },
+        orderBy: { IDcliente: 'desc' },
       }),
       this.prisma.clientes.count({ where }),
     ]);
 
+    const formattedData = data.map(item => ({
+      ...item,
+      cedula: item.cedula ? Number(item.cedula) : null,
+    }));
+
     return {
-      data,
+      data: formattedData,
       meta: {
         total,
         page,
@@ -56,13 +93,17 @@ export class ClientesService {
   async findOne(id: number) {
     const cliente = await this.prisma.clientes.findUnique({
       where: { IDcliente: id },
+      include: { ventas: true }
     });
 
     if (!cliente) {
       throw new NotFoundException(`Cliente con ID ${id} no encontrado`);
     }
 
-    return cliente;
+    return {
+      ...cliente,
+      cedula: cliente.cedula ? Number(cliente.cedula) : null,
+    };
   }
 
   async update(id: number, updateClienteDto: UpdateClienteDto) {
@@ -74,13 +115,18 @@ export class ClientesService {
       throw new NotFoundException(`Cliente con ID ${id} no encontrado`);
     }
 
-    return this.prisma.clientes.update({
+    const updated = await this.prisma.clientes.update({
       where: { IDcliente: id },
       data: {
         ...updateClienteDto,
         fecha_y_hora_actualizacion: new Date(),
       },
     });
+
+    return {
+      ...updated,
+      cedula: updated.cedula ? Number(updated.cedula) : null,
+    };
   }
 
   async remove(id: number) {
@@ -92,8 +138,9 @@ export class ClientesService {
       throw new NotFoundException(`Cliente con ID ${id} no encontrado`);
     }
 
-    return this.prisma.clientes.delete({
+    return this.prisma.clientes.update({
       where: { IDcliente: id },
+      data: { isActive: false, fecha_y_hora_actualizacion: new Date() }
     });
   }
 }

@@ -151,6 +151,41 @@ export class VentasService {
     return `${mesaStr}-${inicial}-${numeroConsecutivo}`;
   }
 
+  private async actualizarComprasCliente(prisma: any, clienteId: number, ventaId: string, productos: any[]) {
+    // Calcular cantidad total de productos en esta venta
+    const cantidadVenta = productos.reduce((total, p) => total + (p.cantidad || 1), 0);
+
+    const cliente = await prisma.clientes.findUnique({
+      where: { IDcliente: clienteId }
+    });
+
+    if (cliente) {
+      // Intentamos extraer el valor actual de 'compras' como número (AppSheet guardaba enteros como string)
+      let comprasTotales = parseInt(cliente.compras || '0', 10);
+      if (isNaN(comprasTotales)) comprasTotales = 0; // Por si acaso había CSV de IDs, lo reseteamos a 0 o manejamos diferente
+
+      comprasTotales += cantidadVenta;
+
+      // Actualizamos el contador modulo 10
+      let nuevoContador = (cliente.contador || parseInt(cliente.compras || '0', 10) || 0) + cantidadVenta;
+      
+      // La lógica del contador de 1 a 10 (se resetea después de 10)
+      if (nuevoContador > 10) {
+        nuevoContador = nuevoContador % 10;
+        if (nuevoContador === 0) nuevoContador = 10; // Si era exactamente múltiplo de 10
+      }
+
+      await prisma.clientes.update({
+        where: { IDcliente: clienteId },
+        data: {
+          contador: nuevoContador,
+          compras: comprasTotales.toString(), // Guardamos el entero total en formato string para retrocompatibilidad
+          fecha_y_hora_actualizacion: new Date()
+        }
+      });
+    }
+  }
+
   async createVentaCompleta(createVentaCompletaDto: CreateVentaCompletaDto, usuarioId: string) {
     const { venta, productos } = createVentaCompletaDto;
 
@@ -191,8 +226,15 @@ export class VentasService {
         fecha: localDate, // Use local date
         hora: new Date().toTimeString().split(' ')[0],
         registroDeTiempo: this.generateTiempoLog(venta.estado || 'EN_EL_CARRITO', (venta as any).cartStartTime),
+        // We can optionally connect the cliente explicitly if it exists
+        ...(venta.clienteId ? { clienteRelacion: { connect: { IDcliente: venta.clienteId } } } : {})
       } as Prisma.VentasCreateInput,
     });
+
+    // Si hay un cliente asociado, actualizar sus compras y contador
+    if (venta.clienteId) {
+      await this.actualizarComprasCliente(this.prisma, venta.clienteId, ventaCreada.IDventas, productos);
+    }
 
     const ordenesVentas = await Promise.all(
       productos.map(async (producto) => {
@@ -343,6 +385,9 @@ export class VentasService {
           usuarioRelacion: {
             select: { IDusuarios: true, nombre: true, email: true },
           },
+          clienteRelacion: {
+            select: { IDcliente: true, nombre: true, cedula: true, whatsapp: true, compras: true, contador: true }
+          }
         },
       }),
       this.prisma.ventas.count({ where }),

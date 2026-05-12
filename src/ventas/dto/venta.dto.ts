@@ -80,6 +80,11 @@ export class CreateVentaDto {
 
   @ApiPropertyOptional()
   @IsOptional()
+  @IsNumber()
+  clienteId?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
   @IsString()
   cartStartTime?: string | null;
 }

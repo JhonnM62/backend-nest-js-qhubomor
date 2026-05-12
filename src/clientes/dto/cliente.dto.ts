@@ -4,6 +4,11 @@ import { PaginationDto } from '../../common/dto/pagination.dto';
 
 export class CreateClienteDto {
   @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  IDcliente?: number;
+
+  @ApiPropertyOptional()
   @IsString()
   nombre?: string;
 

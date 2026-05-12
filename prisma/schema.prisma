@@ -66,6 +66,9 @@ model Clientes {
   contador               Int?      @map("Contador")
   whatsapp               String?   @map("Whatsapp")
   observaciones          String?   @map("Observaciones")
+  isActive               Boolean   @default(true) @map("isActive")
+
+  ventas                 Ventas[]
 
   @@map("CLIENTES")
 }
@@ -249,6 +252,8 @@ model Ventas {
   mesaRelacion          Mesas?     @relation(fields: [mesa], references: [IdMesas])
   ordenVentas           Orderventas[]
   aperturaCierreCaja    AperturaCierreCaja[]
+  clienteId             Int?       @map("IDcliente_FK")
+  clienteRelacion       Clientes?  @relation(fields: [clienteId], references: [IDcliente], onDelete: SetNull)
 
   @@index([fechaYHora])
   @@index([createdAt])
