@@ -72,8 +72,18 @@ export class InventarioService {
     const where: Prisma.OrderinventarioWhereInput = {};
 
     if (buscar) {
+      // Find matching Insumos by name so we can search by their IDs
+      const matchingInsumos = await this.prisma.insumos.findMany({
+        where: {
+          nombre: { contains: buscar, mode: 'insensitive' }
+        },
+        select: { IDalimentos: true }
+      });
+      const insumoIds = matchingInsumos.map(i => i.IDalimentos);
+
       where.OR = [
         { nombreDelAlimento: { contains: buscar, mode: 'insensitive' } },
+        { nombreDelAlimento: { in: insumoIds } },
         { observacion: { contains: buscar, mode: 'insensitive' } },
         { provedor: { contains: buscar, mode: 'insensitive' } },
       ];
