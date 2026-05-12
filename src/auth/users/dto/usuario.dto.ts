@@ -56,6 +56,10 @@ export class CreateUsuarioDto {
   @IsOptional()
   @IsNumber()
   salario?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  permisos?: any;
 }
 
 export class UpdateUsuarioDto {
@@ -103,6 +107,10 @@ export class UpdateUsuarioDto {
   @IsOptional()
   @IsString()
   foto?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  permisos?: any;
 }
 
 export class UsuarioQueryDto extends PaginationDto {

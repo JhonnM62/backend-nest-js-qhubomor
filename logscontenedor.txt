@@ -1,0 +1,97 @@
+[Nest] 19  - 05/11/2026, 7:14:30 PM     LOG [RouterExplorer] Mapped {/api/v1/inventario/:id, GET} route +1ms
+[Nest] 19  - 05/11/2026, 7:14:30 PM     LOG [RouterExplorer] Mapped {/api/v1/inventario/:id, PATCH} route +0ms
+[Nest] 19  - 05/11/2026, 7:14:30 PM     LOG [RouterExplorer] Mapped {/api/v1/inventario/:id, DELETE} route +0ms
+[Nest] 19  - 05/11/2026, 7:14:30 PM     LOG [RouterExplorer] Mapped {/api/v1/inventario/item, POST} route +0ms
+[Nest] 19  - 05/11/2026, 7:14:30 PM     LOG [RouterExplorer] Mapped {/api/v1/inventario/item/:id, DELETE} route +0ms
+[Nest] 19  - 05/11/2026, 7:14:30 PM     LOG [RouterExplorer] Mapped {/api/v1/inventario/item/:id/comprar, PATCH} route +0ms
+[Nest] 19  - 05/11/2026, 7:14:30 PM     LOG [RouterExplorer] Mapped {/api/v1/inventario/items/comprar, PATCH} route +0ms
+[Nest] 19  - 05/11/2026, 7:14:30 PM     LOG [RoutesResolver] InsumosController {/api/v1/insumos}: +0ms
+[Nest] 19  - 05/11/2026, 7:14:30 PM     LOG [RouterExplorer] Mapped {/api/v1/insumos, POST} route +1ms
+[Nest] 19  - 05/11/2026, 7:14:30 PM     LOG [RouterExplorer] Mapped {/api/v1/insumos, GET} route +0ms
+[Nest] 19  - 05/11/2026, 7:14:30 PM     LOG [RouterExplorer] Mapped {/api/v1/insumos/alertas, GET} route +0ms
+[Nest] 19  - 05/11/2026, 7:14:30 PM     LOG [RouterExplorer] Mapped {/api/v1/insumos/estadisticas, GET} route +0ms
+[Nest] 19  - 05/11/2026, 7:14:30 PM     LOG [RouterExplorer] Mapped {/api/v1/insumos/:id, GET} route +0ms
+[Nest] 19  - 05/11/2026, 7:14:30 PM     LOG [RouterExplorer] Mapped {/api/v1/insumos/:id/movimientos, GET} route +0ms
+[Nest] 19  - 05/11/2026, 7:14:30 PM     LOG [RouterExplorer] Mapped {/api/v1/insumos/:id, PATCH} route +0ms
+[Nest] 19  - 05/11/2026, 7:14:30 PM     LOG [RouterExplorer] Mapped {/api/v1/insumos/:id, DELETE} route +0ms
+[Nest] 19  - 05/11/2026, 7:14:30 PM     LOG [RouterExplorer] Mapped {/api/v1/insumos/:id/movimiento, POST} route +0ms
+[Nest] 19  - 05/11/2026, 7:14:30 PM     LOG [RouterExplorer] Mapped {/api/v1/insumos/bulk, POST} route +0ms
+[Nest] 19  - 05/11/2026, 7:14:30 PM     LOG [RouterExplorer] Mapped {/api/v1/insumos/:id/agregar, POST} route +1ms
+[Nest] 19  - 05/11/2026, 7:14:30 PM     LOG [RouterExplorer] Mapped {/api/v1/insumos/:id/descontar, POST} route +0ms
+[Nest] 19  - 05/11/2026, 7:14:30 PM     LOG [RoutesResolver] NotificationsController {/api/v1/notifications}: +0ms
+[Nest] 19  - 05/11/2026, 7:14:30 PM     LOG [RouterExplorer] Mapped {/api/v1/notifications/token, POST} route +0ms
+[Nest] 19  - 05/11/2026, 7:14:30 PM     LOG [RouterExplorer] Mapped {/api/v1/notifications/settings/:userId, GET} route +0ms
+[Nest] 19  - 05/11/2026, 7:14:30 PM     LOG [RouterExplorer] Mapped {/api/v1/notifications/settings/:userId, PATCH} route +0ms
+[Nest] 19  - 05/11/2026, 7:14:30 PM     LOG [RouterExplorer] Mapped {/api/v1/notifications/history/:userId, GET} route +0ms
+[Nest] 19  - 05/11/2026, 7:14:30 PM     LOG [RouterExplorer] Mapped {/api/v1/notifications/history/:id/read, PATCH} route +0ms
+[Nest] 19  - 05/11/2026, 7:14:30 PM     LOG [RoutesResolver] ClientesController {/api/v1/clientes}: +0ms
+[Nest] 19  - 05/11/2026, 7:14:30 PM     LOG [RouterExplorer] Mapped {/api/v1/clientes, POST} route +1ms
+[Nest] 19  - 05/11/2026, 7:14:30 PM     LOG [RouterExplorer] Mapped {/api/v1/clientes, GET} route +0ms
+[Nest] 19  - 05/11/2026, 7:14:30 PM     LOG [RouterExplorer] Mapped {/api/v1/clientes/:id, GET} route +0ms
+[Nest] 19  - 05/11/2026, 7:14:30 PM     LOG [RouterExplorer] Mapped {/api/v1/clientes/:id, PATCH} route +0ms
+[Nest] 19  - 05/11/2026, 7:14:30 PM     LOG [RouterExplorer] Mapped {/api/v1/clientes/:id, DELETE} route +0ms
+[Nest] 19  - 05/11/2026, 7:14:30 PM     LOG [RoutesResolver] ProveedoresController {/api/v1/proveedores}: +0ms
+[Nest] 19  - 05/11/2026, 7:14:30 PM     LOG [RouterExplorer] Mapped {/api/v1/proveedores, POST} route +1ms
+[Nest] 19  - 05/11/2026, 7:14:30 PM     LOG [RouterExplorer] Mapped {/api/v1/proveedores, GET} route +0ms
+[Nest] 19  - 05/11/2026, 7:14:30 PM     LOG [RouterExplorer] Mapped {/api/v1/proveedores/:id, GET} route +0ms
+[Nest] 19  - 05/11/2026, 7:14:30 PM     LOG [RouterExplorer] Mapped {/api/v1/proveedores/:id, PATCH} route +0ms
+[Nest] 19  - 05/11/2026, 7:14:30 PM     LOG [RouterExplorer] Mapped {/api/v1/proveedores/:id, DELETE} route +0ms
+[Nest] 19  - 05/11/2026, 7:14:30 PM     LOG [RoutesResolver] CajaController {/api/v1/caja}: +0ms
+[Nest] 19  - 05/11/2026, 7:14:30 PM     LOG [RouterExplorer] Mapped {/api/v1/caja/abrir, POST} route +1ms
+[Nest] 19  - 05/11/2026, 7:14:30 PM     LOG [RouterExplorer] Mapped {/api/v1/caja/:id, PATCH} route +0ms
+[Nest] 19  - 05/11/2026, 7:14:30 PM     LOG [RouterExplorer] Mapped {/api/v1/caja/cerrar/:id, PATCH} route +0ms
+[Nest] 19  - 05/11/2026, 7:14:30 PM     LOG [RouterExplorer] Mapped {/api/v1/caja/activa, GET} route +0ms
+[Nest] 19  - 05/11/2026, 7:14:30 PM     LOG [RouterExplorer] Mapped {/api/v1/caja/resumen/:id, GET} route +0ms
+[Nest] 19  - 05/11/2026, 7:14:30 PM     LOG [RouterExplorer] Mapped {/api/v1/caja, GET} route +0ms
+[Nest] 19  - 05/11/2026, 7:14:30 PM     LOG [RouterExplorer] Mapped {/api/v1/caja/:id, GET} route +0ms
+[Nest] 19  - 05/11/2026, 7:14:30 PM     LOG [RouterExplorer] Mapped {/api/v1/caja/:id, DELETE} route +0ms
+[Nest] 19  - 05/11/2026, 7:14:30 PM     LOG [RoutesResolver] GastosController {/api/v1/gastos}: +1ms
+[Nest] 19  - 05/11/2026, 7:14:30 PM     LOG [RouterExplorer] Mapped {/api/v1/gastos, POST} route +0ms
+[Nest] 19  - 05/11/2026, 7:14:30 PM     LOG [RouterExplorer] Mapped {/api/v1/gastos, GET} route +0ms
+[Nest] 19  - 05/11/2026, 7:14:30 PM     LOG [RouterExplorer] Mapped {/api/v1/gastos/total, GET} route +0ms
+[Nest] 19  - 05/11/2026, 7:14:30 PM     LOG [RouterExplorer] Mapped {/api/v1/gastos/:id, GET} route +0ms
+[Nest] 19  - 05/11/2026, 7:14:30 PM     LOG [RouterExplorer] Mapped {/api/v1/gastos/:id, PATCH} route +0ms
+[Nest] 19  - 05/11/2026, 7:14:30 PM     LOG [RouterExplorer] Mapped {/api/v1/gastos/:id, DELETE} route +0ms
+[Nest] 19  - 05/11/2026, 7:14:30 PM     LOG [RoutesResolver] MesasController {/api/v1/mesas}: +0ms
+[Nest] 19  - 05/11/2026, 7:14:30 PM     LOG [RouterExplorer] Mapped {/api/v1/mesas, GET} route +0ms
+[Nest] 19  - 05/11/2026, 7:14:30 PM     LOG [RouterExplorer] Mapped {/api/v1/mesas/:id, GET} route +0ms
+[Nest] 19  - 05/11/2026, 7:14:30 PM     LOG [RoutesResolver] ComentariosController {/api/v1/comentarios}: +1ms
+[Nest] 19  - 05/11/2026, 7:14:30 PM     LOG [RouterExplorer] Mapped {/api/v1/comentarios, POST} route +0ms
+[Nest] 19  - 05/11/2026, 7:14:30 PM     LOG [RouterExplorer] Mapped {/api/v1/comentarios, GET} route +0ms
+[Nest] 19  - 05/11/2026, 7:14:30 PM     LOG [RouterExplorer] Mapped {/api/v1/comentarios/:id, GET} route +0ms
+[Nest] 19  - 05/11/2026, 7:14:30 PM     LOG [RouterExplorer] Mapped {/api/v1/comentarios/:id, PATCH} route +0ms
+[Nest] 19  - 05/11/2026, 7:14:30 PM     LOG [RouterExplorer] Mapped {/api/v1/comentarios/:id, DELETE} route +0ms
+[Nest] 19  - 05/11/2026, 7:14:30 PM     LOG [RoutesResolver] PrinterConfigController {/api/v1/printer-config}: +0ms
+[Nest] 19  - 05/11/2026, 7:14:30 PM     LOG [RouterExplorer] Mapped {/api/v1/printer-config, GET} route +0ms
+[Nest] 19  - 05/11/2026, 7:14:30 PM     LOG [RouterExplorer] Mapped {/api/v1/printer-config, PUT} route +0ms
+[Nest] 19  - 05/11/2026, 7:14:30 PM     LOG [RoutesResolver] EstadisticasController {/api/v1/estadisticas}: +0ms
+[Nest] 19  - 05/11/2026, 7:14:30 PM     LOG [RouterExplorer] Mapped {/api/v1/estadisticas/generales, GET} route +1ms
+[Nest] 19  - 05/11/2026, 7:14:30 PM     LOG [RoutesResolver] ReportesController {/api/v1/reportes}: +0ms
+[Nest] 19  - 05/11/2026, 7:14:30 PM     LOG [RouterExplorer] Mapped {/api/v1/reportes/dinero-guardado, GET} route +0ms
+[Nest] 19  - 05/11/2026, 7:14:30 PM     LOG [RouterExplorer] Mapped {/api/v1/reportes/dinero-guardado, POST} route +0ms
+[Nest] 19  - 05/11/2026, 7:14:30 PM     LOG [RouterExplorer] Mapped {/api/v1/reportes/dinero-guardado/:filterId, DELETE} route +0ms
+[Nest] 19  - 05/11/2026, 7:14:30 PM     LOG [RouterExplorer] Mapped {/api/v1/reportes/dinero-guardado/:filterId, GET} route +0ms
+[Nest] 19  - 05/11/2026, 7:14:30 PM     LOG [RouterExplorer] Mapped {/api/v1/reportes/dinero-guardado/:filterId/retiros, POST} route +0ms
+[Nest] 19  - 05/11/2026, 7:14:30 PM     LOG [RouterExplorer] Mapped {/api/v1/reportes/dinero-guardado/retiros/:retiroId, DELETE} route +0ms
+/app/node_modules/@prisma/client/runtime/library.js:112
+You may have to run ${qe("prisma generate")} for your changes to take effect.`,this.config.clientVersion);return t}}parseEngineResponse(t){if(!t)throw new B("Response from the Engine was empty",{clientVersion:this.config.clientVersion});try{return JSON.parse(t)}catch{throw new B("Unable to JSON.parse response from engine",{clientVersion:this.config.clientVersion})}}async loadEngine(){if(!this.engine){this.QueryEngineConstructor||(this.library=await this.libraryLoader.loadLibrary(this.config),this.QueryEngineConstructor=this.library.QueryEngine);try{let t=new WeakRef(this),{adapter:r}=this.config;r&&Ae("Using driver adapter: %O",r),this.engine=new this.QueryEngineConstructor({datamodel:this.datamodel,env:process.env,logQueries:this.config.logQueries??!1,ignoreEnvVarErrors:!0,datasourceOverrides:this.datasourceOverrides??{},logLevel:this.logLevel,configDir:this.config.cwd,engineProtocol:"json"},n=>{t.deref()?.logger(n)},r)}catch(t){let r=t,n=this.parseInitError(r.message);throw typeof n=="string"?r:new R(n.message,this.config.clientVersion,n.error_code)}}}logger(t){let r=this.parseEngineResponse(t);if(r){if("span"in r){this.config.tracingHelper.createEngineSpan(r);return}r.level=r?.level.toLowerCase()??"unknown",fm(r)?this.logEmitter.emit("query",{timestamp:new Date,query:r.query,params:r.params,duration:Number(r.duration_ms),target:r.module_path}):gm(r)?this.loggerRustPanic=new le(lo(this,`${r.message}: ${r.reason} in ${r.file}:${r.line}:${r.column}`),this.config.clientVersion):this.logEmitter.emit(r.level,{timestamp:new Date,message:r.message,target:r.module_path})}}parseInitError(t){try{return JSON.parse(t)}catch{}return t}parseRequestError(t){try{return JSON.parse(t)}catch{}return t}onBeforeExit(){throw new Error('"beforeExit" hook is not applicable to the library engine since Prisma 5.0.0, it is only relevant and implemented for the binary engine. Please add your event listener to the `process` object directly instead.')}async start(){if(await this.libraryInstantiationPromise,await this.libraryStoppingPromise,this.libraryStartingPromise)return Ae(`library already starting, this.libraryStarted: ${this.libraryStarted}`),this.libraryStartingPromise;if(this.libraryStarted)return;let t=async()=>{Ae("library starting");try{let r={traceparent:this.config.tracingHelper.getTraceParent()};await this.engine?.connect(JSON.stringify(r)),this.libraryStarted=!0,Ae("library started")}catch(r){let n=this.parseInitError(r.message);throw typeof n=="string"?r:new R(n.message,this.config.clientVersion,n.error_code)}finally{this.libraryStartingPromise=void 0}};return this.libraryStartingPromise=this.config.tracingHelper.runInChildSpan("connect",t),this.libraryStartingPromise}async stop(){if(await this.libraryStartingPromise,await this.executingQueryPromise,this.libraryStoppingPromise)return Ae("library is already stopping"),this.libraryStoppingPromise;if(!this.libraryStarted)return;let t=async()=>{await new Promise(n=>setTimeout(n,5)),Ae("library stopping");let r={traceparent:this.config.tracingHelper.getTraceParent()};await this.engine?.disconnect(JSON.stringify(r)),this.libraryStarted=!1,this.libraryStoppingPromise=void 0,Ae("library stopped")};return this.libraryStoppingPromise=this.config.tracingHelper.runInChildSpan("disconnect",t),this.libraryStoppingPromise}version(){return this.versionInfo=this.library?.version(),this.versionInfo?.version??"unknown"}debugPanic(t){return this.library?.debugPanic(t)}async request(t,{traceparent:r,interactiveTransaction:n}){Ae(`sending request, this.libraryStarted: ${this.libraryStarted}`);let i=JSON.stringify({traceparent:r}),o=JSON.stringify(t);try{await this.start(),this.executingQueryPromise=this.engine?.query(o,i,n?.id),this.lastQuery=o;let s=this.parseEngineResponse(await this.executingQueryPromise);if(s.errors)throw s.errors.length===1?this.buildQueryError(s.errors[0]):new B(JSON.stringify(s.errors),{clientVersion:this.config.clientVersion});if(this.loggerRustPanic)throw this.loggerRustPanic;return{data:s,elapsed:0}}catch(s){if(s instanceof R)throw s;if(s.code==="GenericFailure"&&s.message?.startsWith("PANIC:"))throw new le(lo(this,s.message),this.config.clientVersion);let a=this.parseRequestError(s.message);throw typeof a=="string"?s:new B(`${a.message}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
+PrismaClientInitializationError: error: Error validating datasource `db`: the URL must start with the protocol `postgresql://` or `postgres://`.
+  -->  schema.prisma:7
+   | 
+ 6 |   provider = "postgresql"
+ 7 |   url      = env("DATABASE_URL")
+   | 
+Validation Error Count: 1
+    at t (/app/node_modules/@prisma/client/runtime/library.js:112:2488)
+    at async Proxy.onModuleInit (/app/dist/src/prisma/prisma.service.js:14:9)
+    at async Promise.all (index 0)
+    at async callModuleInitHook (/app/node_modules/@nestjs/core/hooks/on-module-init.hook.js:43:5)
+    at async NestApplication.callInitHook (/app/node_modules/@nestjs/core/nest-application-context.js:252:13)
+    at async NestApplication.init (/app/node_modules/@nestjs/core/nest-application.js:103:9)
+    at async NestApplication.listen (/app/node_modules/@nestjs/core/nest-application.js:175:13)
+    at async bootstrap (/app/dist/src/main.js:43:5) {
+  clientVersion: '5.22.0',
+  errorCode: 'P1012'
+}
+Node.js v20.20.2

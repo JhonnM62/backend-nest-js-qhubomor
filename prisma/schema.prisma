@@ -20,6 +20,7 @@ model Usuarios {
   salario       Decimal? @db.Money @map("Salario")
   password      String?
   isActive      Boolean?
+  permisos      Json?    @map("Permisos")
   createdAt     DateTime? @map("createdAt")
   updatedAt     DateTime? @map("updatedAt")
 

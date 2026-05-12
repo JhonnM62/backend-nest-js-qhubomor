@@ -37,6 +37,7 @@ export class UsuariosService {
         telefono: true,
         rol: true,
         isActive: true,
+        permisos: true,
         createdAt: true,
       },
     });
@@ -91,6 +92,7 @@ export class UsuariosService {
           salario: true,
           propinas: true,
           isActive: true,
+          permisos: true,
           createdAt: true,
         },
       }),
@@ -125,6 +127,7 @@ export class UsuariosService {
         salario: true,
         propinas: true,
         isActive: true,
+        permisos: true,
         createdAt: true,
       },
     });
@@ -184,9 +187,8 @@ export class UsuariosService {
       throw new NotFoundException(`Usuario con ID ${id} no encontrado`);
     }
 
-    return this.prisma.usuarios.update({
+    return this.prisma.usuarios.delete({
       where: { IDusuarios: id },
-      data: { isActive: false },
     });
   }
 
