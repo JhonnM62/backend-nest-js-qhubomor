@@ -94,8 +94,9 @@ export class VentasService {
     
     const [corteHours, corteMinutes] = config.horaCorteDia.split(':').map(Number);
 
-    const offset = date.getTimezoneOffset() * 60000;
-    const localDate = new Date(date.getTime() - offset);
+    // FIX: Los servidores Docker están en UTC. 
+    // Forzamos el cálculo basado en la zona horaria local (UTC-5 Colombia)
+    const localDate = new Date(date.getTime() - (5 * 60 * 60 * 1000));
 
     // Si la hora local es antes de la hora de corte, pertenece al día contable anterior
     const currentMinutes = (localDate.getUTCHours() * 60) + localDate.getUTCMinutes();
@@ -107,6 +108,7 @@ export class VentasService {
 
     // Normalizamos a medianoche para que funcione como una "fecha pura" sin horas
     localDate.setUTCHours(0, 0, 0, 0);
+    // Para guardarlo en la BD de Prisma sin desfases, devolvemos la fecha UTC normalizada
     return localDate;
   }
 
