@@ -162,9 +162,8 @@ export class CajaService {
         // Whitelist: only pass fields that exist in the Prisma schema
         const allowedFields = [
           'nombre', 'apertura', 'fechaDeApertura', 'horaDeApertura',
-          'efectivoDeApertura', 'fechaDeCierre', 'horaDeCierre',
-          'efectivoDeCierre', 'resumen', 'pdf', 'pdfcount', 'observaciones',
-          'cierre', 'total12Onz', 'total24Onz', 'productos', 'tipoDeVaso',
+          'efectivoDeApertura', 'resumen', 'pdf', 'pdfcount', 'observaciones',
+          'total12Onz', 'total24Onz', 'productos', 'tipoDeVaso',
           'cantAAgregar', 'plataGuardada', 'cuadroCaja', 'valorFaltante',
           'valorExcedente', 'transferenciasContadas', 'horaEnLaQueSeActualizo', 'contador', 'contador2'
         ];
@@ -173,7 +172,7 @@ export class CajaService {
           if (key in cajaData && cajaData[key as keyof typeof cajaData] !== undefined) {
             let value = (cajaData as any)[key];
             // Parse date strings to Date objects
-            if ((key === 'fechaDeApertura' || key === 'fechaDeCierre') && typeof value === 'string') {
+            if ((key === 'fechaDeApertura') && typeof value === 'string') {
               value = new Date(value + 'T00:00:00.000Z');
             }
             parsedData[key] = value;
