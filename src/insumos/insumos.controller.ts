@@ -8,9 +8,15 @@ import {
   Delete,
   Query,
   UseGuards,
-  Put
+  Put,
+  UseInterceptors,
+  UploadedFile,
+  BadRequestException
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiConsumes, ApiBody } from '@nestjs/swagger';
 import { InsumosService } from './insumos.service';
 import { CreateInsumoDto, UpdateInsumoDto, InsumoQueryDto, MovimientoInsumoDto, BulkInsumoDto } from './dto/insumo.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
@@ -23,6 +29,51 @@ import { Roles } from '../common/decorators/roles.decorator';
 @ApiBearerAuth()
 export class InsumosController {
   constructor(private readonly insumosService: InsumosService) {}
+
+  @Post('upload-image')
+  @UseGuards(RolesGuard)
+  @Roles('Admin app', 'Admin negocio', 'Inventarista')
+  @ApiOperation({ summary: 'Subir imagen para un insumo' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
+  @UseInterceptors(FileInterceptor('file', {
+    storage: diskStorage({
+      destination: './public/uploads/insumos',
+      filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+        const ext = extname(file.originalname);
+        cb(null, `${uniqueSuffix}${ext}`);
+      },
+    }),
+    fileFilter: (req, file, cb) => {
+      if (!file.mimetype.match(/\/(jpg|jpeg|png|gif|webp)$/)) {
+        return cb(new BadRequestException('Solo se permiten archivos de imagen'), false);
+      }
+      cb(null, true);
+    },
+    limits: {
+      fileSize: 5 * 1024 * 1024, // 5MB
+    },
+  }))
+  uploadImage(@UploadedFile() file: Express.Multer.File) {
+    if (!file) {
+      throw new BadRequestException('Ningún archivo fue subido');
+    }
+    return {
+      message: 'Imagen subida correctamente',
+      imageUrl: `/uploads/insumos/${file.filename}`,
+    };
+  }
 
   @Post()
   @UseGuards(RolesGuard)

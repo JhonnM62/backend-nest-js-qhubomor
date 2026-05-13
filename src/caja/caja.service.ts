@@ -422,6 +422,40 @@ export class CajaService {
       }
     });
 
+    const notasAnalysis: any[] = [];
+    const validVentas = allVentas.filter(v => v.estado !== 'ELIMINADA' && v.estado !== 'CANCELADO');
+
+    validVentas.forEach(v => {
+      let ventaHasNotes = false;
+      const ventaNotes: any[] = [];
+
+      v.ordenVentas.forEach(ov => {
+        if ((ov as any).comentarios) {
+          try {
+            const parsed = JSON.parse((ov as any).comentarios);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              ventaHasNotes = true;
+              ventaNotes.push({
+                producto: (ov as any).nombreProducto || (ov as any).nombre || 'Producto',
+                cantidad: ov.cantidad || 1,
+                notas: parsed
+              });
+            }
+          } catch (e) {}
+        }
+      });
+
+      if (ventaHasNotes) {
+        notasAnalysis.push({
+          pedido: (v as any).pedido || 'Sin Pedido',
+          hora: (v as any).hora,
+          fecha: v.fecha,
+          total: v.totalInput,
+          productosConNotas: ventaNotes
+        });
+      }
+    });
+
     let totalEfectivo = 0;
     let totalTransferencia = 0;
     let totalNequi = 0;
@@ -430,7 +464,7 @@ export class CajaService {
     let efectivoRepartido = 0;
     let transferenciasRepartidas = 0;
 
-    for (const v of allVentas) {
+    for (const v of validVentas) {
       // Remover guiones bajos, espacios extras y pasar a mayúsculas para normalizar
       const medioRaw = (v.medioDePago || '').toUpperCase().replace(/_/g, ' ').trim();
 
@@ -489,7 +523,7 @@ export class CajaService {
 
       let ventasEnSistema = 0;
 
-      allVentas.forEach(v => {
+      validVentas.forEach(v => {
         v.ordenVentas.forEach(ov => {
           // Si este insumo en la caja está filtrado para un producto específico,
           // saltar si la orden de venta no es de ese producto.
@@ -535,6 +569,7 @@ export class CajaService {
 
     return {
       caja,
+      notasAnalysis,
       resumen: {
         totalEfectivo,
         totalTransferencia,
