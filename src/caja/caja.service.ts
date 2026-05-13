@@ -435,10 +435,23 @@ export class CajaService {
             const parsed = JSON.parse((ov as any).comentarios);
             if (Array.isArray(parsed) && parsed.length > 0) {
               ventaHasNotes = true;
+              
+              // Normalizar las notas para que siempre tengan nombre y precio
+              const normalizedNotas = parsed.map(n => {
+                if (typeof n === 'string') return { nombre: n, precio: 0 };
+                if (typeof n === 'object' && n !== null) {
+                  return {
+                    nombre: n.name || n.nombre || n.Nombre || 'Nota',
+                    precio: Number(n.price || n.precio || n.Precio || 0)
+                  };
+                }
+                return { nombre: String(n), precio: 0 };
+              });
+
               ventaNotes.push({
                 producto: (ov as any).nombreProducto || (ov as any).nombre || 'Producto',
                 cantidad: ov.cantidad || 1,
-                notas: parsed
+                notas: normalizedNotas
               });
             } else if (typeof parsed === 'string' && parsed.trim().length > 0) {
               ventaHasNotes = true;
