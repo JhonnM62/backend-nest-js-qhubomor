@@ -354,7 +354,7 @@ export class VentasService {
       await Promise.all(
         productos.map(async (producto) => {
           const productoData = await this.prisma.productos.findFirst({
-            where: { id: producto.productoId },
+            where: { IDproductos: producto.productoId },
             select: { nombre: true, categoria: true, categoriaNombre: true },
           });
 
