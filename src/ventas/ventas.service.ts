@@ -79,29 +79,46 @@ export class VentasService {
     ];
   }
 
-  private getFechaContable(date: Date = new Date()): Date {
+  private async getFechaContable(date: Date = new Date(), manualDate?: string): Promise<Date> {
+    if (manualDate) {
+      // Si el frontend envía una fecha manual ("Ventas Olvidadas"), la respetamos
+      const parts = manualDate.split('-');
+      if (parts.length === 3) {
+        return new Date(Date.UTC(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2])));
+      }
+    }
+
+    // Buscar configuración dinámica
+    let config = await this.prisma.configuracionNegocio.findUnique({ where: { id: 1 } });
+    if (!config) config = { id: 1, horaCorteDia: '00:00', updatedAt: new Date() };
+    
+    const [corteHours, corteMinutes] = config.horaCorteDia.split(':').map(Number);
+
     const offset = date.getTimezoneOffset() * 60000;
     const localDate = new Date(date.getTime() - offset);
-    
-    // Si la hora local es antes de las 5:00 AM, pertenece al día contable anterior
-    if (localDate.getUTCHours() < 5) {
+
+    // Si la hora local es antes de la hora de corte, pertenece al día contable anterior
+    const currentMinutes = (localDate.getUTCHours() * 60) + localDate.getUTCMinutes();
+    const corteTotalMinutes = (corteHours * 60) + corteMinutes;
+
+    if (currentMinutes < corteTotalMinutes) {
       localDate.setUTCDate(localDate.getUTCDate() - 1);
     }
-    
+
     // Normalizamos a medianoche para que funcione como una "fecha pura" sin horas
     localDate.setUTCHours(0, 0, 0, 0);
     return localDate;
   }
 
-  async create(createVentaDto: CreateVentaDto) {
-    const pedido = await this.generatePedidoNumber(createVentaDto.mesa, undefined);
-    
+  async create(createVentaDto: CreateVentaDto & { fechaContableManual?: string }) {
     const now = new Date();
-    const fechaContable = this.getFechaContable(now);
+    const fechaContable = await this.getFechaContable(now, createVentaDto.fechaContableManual);
+    const pedido = await this.generatePedidoNumber(createVentaDto.mesa, undefined, fechaContable);
 
     return this.prisma.ventas.create({
       data: {
         ...createVentaDto,
+        fechaContableManual: undefined, // ensure it's not saved directly
         mesa: createVentaDto.mesa === 'V.R' ? null : createVentaDto.mesa,
         pedido,
         fechaYHora: now,
@@ -113,8 +130,8 @@ export class VentasService {
     });
   }
 
-  async generatePedidoNumber(mesaId: string | null | undefined, usuarioNombre: string | null | undefined): Promise<string> {
-    const fechaContable = this.getFechaContable(new Date());
+  async generatePedidoNumber(mesaId: string | null | undefined, usuarioNombre: string | null | undefined, providedFechaContable?: Date): Promise<string> {
+    const fechaContable = providedFechaContable || await this.getFechaContable(new Date());
 
     const ventasDelTurno = await this.prisma.ventas.findMany({
       where: {
@@ -195,17 +212,21 @@ export class VentasService {
     }
   }
 
-  async createVentaCompleta(createVentaCompletaDto: CreateVentaCompletaDto, usuarioId: string) {
-    const { venta, productos } = createVentaCompletaDto;
+  async createVentaCompleta(createVentaCompletaDto: CreateVentaCompletaDto & { fechaContableManual?: string }, usuarioId: string) {
+    const { venta, productos, fechaContableManual } = createVentaCompletaDto;
 
     const usuario = await this.prisma.usuarios.findUnique({
       where: { IDusuarios: usuarioId },
       select: { nombre: true },
     });
 
+    const fechaVenta = new Date();
+    const fechaContable = await this.getFechaContable(fechaVenta, fechaContableManual);
+
     const pedidoGenerado = await this.generatePedidoNumber(
       venta.mesa && venta.mesa !== 'V.R' ? venta.mesa : null,
-      usuario?.nombre
+      usuario?.nombre,
+      fechaContable
     );
 
     const ventaData = {
@@ -218,10 +239,6 @@ export class VentasService {
       descuento: venta.descuento,
       porcentajeDeDescuento: venta.porcentajeDeDescuento,
     };
-
-    // Fix: Local timezone adjustment for 'fecha' field using Jornada Comercial
-    const fechaVenta = new Date();
-    const fechaContable = this.getFechaContable(fechaVenta);
 
     const ventaCreada = await this.prisma.ventas.create({
       data: {
@@ -260,7 +277,7 @@ export class VentasService {
         }
 
         // Apply Jornada Comercial to Orderventas
-        const orderFechaContable = this.getFechaContable(new Date());
+        const orderFechaContable = fechaContable;
 
         return this.prisma.orderventas.create({
           data: {
@@ -289,6 +306,91 @@ export class VentasService {
       ...ventaCreada,
       ordenVentas: ordenesVentas,
     };
+  }
+
+  async updateVentaCompleta(id: string, updateVentaCompletaDto: CreateVentaCompletaDto & { fechaContableManual?: string }, usuarioId: string) {
+    const { venta, productos, fechaContableManual } = updateVentaCompletaDto;
+
+    const ventaExistente = await this.prisma.ventas.findUnique({
+      where: { IDventas: id },
+    });
+
+    if (!ventaExistente) {
+      throw new NotFoundException(`Venta con ID ${id} no encontrada`);
+    }
+
+    const fechaContable = fechaContableManual ? 
+      await this.getFechaContable(new Date(), fechaContableManual) : 
+      ventaExistente.fecha; // Maintain existing if not overridden
+
+    const ventaData = {
+      mesa: venta.mesa && venta.mesa !== 'V.R' ? venta.mesa : null,
+      medioDePago: venta.medioDePago,
+      efectivoRecibido: venta.efectivoRecibido,
+      devueltas: venta.devueltas,
+      banco: venta.medioDePago === 'EFECTIVO' ? null : venta.banco,
+      totalInput: venta.totalInput,
+      descuento: venta.descuento,
+      porcentajeDeDescuento: venta.porcentajeDeDescuento,
+      estado: venta.estado || ventaExistente.estado,
+      fecha: fechaContable, // Update accounting date
+    };
+
+    // Update Venta
+    const ventaActualizada = await this.prisma.ventas.update({
+      where: { IDventas: id },
+      data: {
+        ...ventaData,
+        ...(venta.clienteId ? { clienteRelacion: { connect: { IDcliente: venta.clienteId } } } : {})
+      } as Prisma.VentasUpdateInput,
+    });
+
+    // Replace all Orderventas
+    await this.prisma.orderventas.deleteMany({
+      where: { IDventas: id },
+    });
+
+    if (productos && productos.length > 0) {
+      await Promise.all(
+        productos.map(async (producto) => {
+          const productoData = await this.prisma.productos.findFirst({
+            where: { id: producto.productoId },
+            select: { nombre: true, categoria: true, categoriaNombre: true },
+          });
+
+          let nombreProducto = producto.nombre;
+          let categoriaProducto = producto.categoria;
+
+          if (productoData) {
+            if (!nombreProducto || nombreProducto.trim() === '') {
+              nombreProducto = productoData.nombre;
+            }
+            if (!categoriaProducto || categoriaProducto.trim() === '') {
+              categoriaProducto = productoData.categoriaNombre || productoData.categoria || undefined;
+            }
+          }
+
+          return this.prisma.orderventas.create({
+            data: {
+              ...producto,
+              nombre: nombreProducto,
+              categoria: categoriaProducto,
+              nombreProducto,
+              categoriaProducto,
+              imagenUrl: producto.imagenUrl,
+              IDventas: ventaActualizada.IDventas,
+              usuarioId,
+              fecha: fechaContable,
+            } as Prisma.OrderventasCreateInput,
+          });
+        }),
+      );
+    }
+
+    return this.prisma.ventas.findUnique({
+      where: { IDventas: id },
+      include: { ordenVentas: true },
+    });
   }
 
   async findAll(query: VentaQueryDto) {

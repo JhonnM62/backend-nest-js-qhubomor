@@ -25,6 +25,7 @@ import { PrinterConfigModule } from './printer-config/printer-config.module';
 import { EstadisticasModule } from './estadisticas/estadisticas.module';
 import { ReportesModule } from './reportes/reportes.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { ConfiguracionModule } from './configuracion/configuracion.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 
@@ -69,6 +70,7 @@ import { join } from 'path';
     EstadisticasModule,
     ReportesModule,
     NotificationsModule,
+    ConfiguracionModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: AllExceptionsFilter },

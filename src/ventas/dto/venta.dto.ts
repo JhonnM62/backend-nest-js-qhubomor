@@ -87,6 +87,11 @@ export class CreateVentaDto {
   @IsOptional()
   @IsString()
   cartStartTime?: string | null;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  fechaContableManual?: string;
 }
 
 export class CreateOrderVentaDto {
@@ -176,6 +181,10 @@ export class CreateVentaCompletaDto {
   @ValidateNested({ each: true })
   @Type(() => CreateOrderVentaDto)
   productos: CreateOrderVentaDto[];
+
+  @IsOptional()
+  @IsString()
+  fechaContableManual?: string;
 }
 
 export class UpdateVentaDto {

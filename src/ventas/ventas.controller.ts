@@ -6,6 +6,7 @@ import {
   Post,
   Body,
   Patch,
+  Put,
   Param,
   Query,
   UseGuards,
@@ -77,6 +78,19 @@ export class VentasController {
   @ApiResponse({ status: 200, description: 'Tiempo calculado' })
   calcularTiempoTotal(@Param('id') id: string) {
     return this.ventasService.calcularTiempoTotal(id);
+  }
+
+  @Put(':id')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Actualizar completamente una venta (Super Edición)' })
+  @ApiResponse({ status: 200, description: 'Venta actualizada' })
+  updateVenta(
+    @Param('id') id: string,
+    @Body() updateVentaCompletaDto: CreateVentaCompletaDto & { fechaContableManual?: string },
+    @CurrentUser('id') usuarioId: string,
+  ) {
+    return this.ventasService.updateVentaCompleta(id, updateVentaCompletaDto, usuarioId);
   }
 
   @Patch(':id/estado')

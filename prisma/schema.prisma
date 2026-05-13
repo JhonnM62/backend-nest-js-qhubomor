@@ -499,6 +499,12 @@ model ConfiguracionImpresora {
   @@map("CONFIGURACION_IMPRESORA")
 }
 
+model ConfiguracionNegocio {
+  id            Int      @id @default(1)
+  horaCorteDia  String   @default("00:00") // Formato "HH:mm" (ej. "04:00")
+  updatedAt     DateTime @updatedAt
+}
+
 model PushToken {
   id         String   @id @default(cuid())
   userId     String   @map("UsuarioId")
