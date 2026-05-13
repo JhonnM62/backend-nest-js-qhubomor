@@ -19,13 +19,13 @@ export class CajaService {
 
     // Whitelist fields for aperturaCierreCaja creation
     const allowedFields = [
-      'nombre', 'apertura', 'fechaDeApertura', 'horaDeApertura',
-      'efectivoDeApertura', 'fechaDeCierre', 'horaDeCierre',
-      'efectivoDeCierre', 'resumen', 'pdf', 'pdfcount', 'observaciones',
-      'cierre', 'total12Onz', 'total24Onz', 'productos', 'tipoDeVaso',
-      'cantAAgregar', 'plataGuardada', 'cuadroCaja', 'valorFaltante',
-      'valorExcedente', 'transferenciasContadas', 'contador', 'contador2'
-    ];
+        'nombre', 'apertura', 'fechaDeApertura', 'horaDeApertura',
+        'efectivoDeApertura', 'fechaDeCierre', 'horaDeCierre',
+        'efectivoDeCierre', 'resumen', 'pdf', 'pdfcount', 'observaciones',
+        'cierre', 'total12Onz', 'total24Onz', 'productos', 'tipoDeVaso',
+        'cantAAgregar', 'plataGuardada', 'cuadroCaja', 'valorFaltante',
+        'valorExcedente', 'transferenciasContadas', 'horaCongelada', 'contador', 'contador2'
+      ];
     const parsedData: any = {};
     for (const key of allowedFields) {
       if (key in cajaData && (cajaData as any)[key] !== undefined) {
@@ -161,12 +161,12 @@ export class CajaService {
       if (Object.keys(cajaData).length > 0) {
         // Whitelist: only pass fields that exist in the Prisma schema
         const allowedFields = [
-          'nombre', 'apertura', 'fechaDeApertura', 'horaDeApertura',
-          'efectivoDeApertura', 'resumen', 'pdf', 'pdfcount', 'observaciones',
-          'total12Onz', 'total24Onz', 'productos', 'tipoDeVaso',
-          'cantAAgregar', 'plataGuardada', 'cuadroCaja', 'valorFaltante',
-          'valorExcedente', 'transferenciasContadas', 'horaEnLaQueSeActualizo', 'contador', 'contador2'
-        ];
+            'nombre', 'apertura', 'fechaDeApertura', 'horaDeApertura',
+            'efectivoDeApertura', 'resumen', 'pdf', 'pdfcount', 'observaciones',
+            'total12Onz', 'total24Onz', 'productos', 'tipoDeVaso',
+            'cantAAgregar', 'plataGuardada', 'cuadroCaja', 'valorFaltante',
+            'valorExcedente', 'transferenciasContadas', 'horaCongelada', 'horaEnLaQueSeActualizo', 'contador', 'contador2'
+          ];
         const parsedData: any = {};
         for (const key of allowedFields) {
           if (key in cajaData && cajaData[key as keyof typeof cajaData] !== undefined) {
@@ -259,13 +259,13 @@ export class CajaService {
 
       // 2. Actualizar Caja
       const allowedFields = [
-        'nombre', 'apertura', 'fechaDeApertura', 'horaDeApertura',
-        'efectivoDeApertura', 'fechaDeCierre', 'horaDeCierre',
-        'efectivoDeCierre', 'resumen', 'pdf', 'pdfcount', 'observaciones',
-        'cierre', 'total12Onz', 'total24Onz', 'productos', 'tipoDeVaso',
-        'cantAAgregar', 'plataGuardada', 'cuadroCaja', 'valorFaltante',
-        'valorExcedente', 'transferenciasContadas', 'horaEnLaQueSeActualizo', 'contador', 'contador2'
-      ];
+          'nombre', 'apertura', 'fechaDeApertura', 'horaDeApertura',
+          'efectivoDeApertura', 'fechaDeCierre', 'horaDeCierre',
+          'efectivoDeCierre', 'resumen', 'pdf', 'pdfcount', 'observaciones',
+          'cierre', 'total12Onz', 'total24Onz', 'productos', 'tipoDeVaso',
+          'cantAAgregar', 'plataGuardada', 'cuadroCaja', 'valorFaltante',
+          'valorExcedente', 'transferenciasContadas', 'horaCongelada', 'horaEnLaQueSeActualizo', 'contador', 'contador2'
+        ];
       const parsedCierreData: any = {};
       for (const key of allowedFields) {
         if (key in cajaData && (cajaData as any)[key] !== undefined) {

@@ -335,6 +335,7 @@ model AperturaCierreCaja {
   valorFaltante          Decimal?  @map("Valor Faltante") @db.Money
   valorExcedente            Decimal?  @db.Money @map("Valor Excedente")
   transferenciasContadas    Decimal?  @db.Money @map("Transferencias Contadas")
+  horaCongelada          String?   @map("Hora Congelada")
   horaEnLaQueSeActualizo   DateTime? @map("Hora en la que se actualizo")
   contador               Int?      @map("Contador")
   contador2              Int?      @map("Contador 2")
