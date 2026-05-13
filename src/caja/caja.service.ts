@@ -378,7 +378,7 @@ export class CajaService {
     });
   }
 
-  async getResumenCaja(id: string) {
+  async getResumenCaja(id: string, horaCorteSnapshot?: string) {
     const caja = await this.findOne(id);
 
     if (!caja.fechaDeApertura) {
@@ -393,9 +393,11 @@ export class CajaService {
     // Para que sea las 00:00:00 de Colombia, necesitamos sumar 5 horas.
     fechaInicio.setUTCHours(5, 0, 0, 0);
 
-    // Asegurar que fechaFin toma hasta el final del día en hora local (UTC-5)
+    // Asegurar que fechaFin toma hasta el final del día en hora local (UTC-5) o usar el Snapshot
     let fechaFin = new Date();
-    if (caja.fechaDeCierre) {
+    if (horaCorteSnapshot) {
+      fechaFin = new Date(horaCorteSnapshot);
+    } else if (caja.fechaDeCierre) {
       fechaFin = new Date(caja.fechaDeCierre);
       fechaFin.setUTCHours(28, 59, 59, 999); // 23:59:59 local -> +5 = 28 (se ajusta al día siguiente automáticamente)
     }
@@ -424,6 +426,26 @@ export class CajaService {
 
     const notasAnalysis: any[] = [];
     const validVentas = allVentas.filter(v => v.estado !== 'ELIMINADA' && v.estado !== 'CANCELADO');
+
+    let primerPedido = 'N/A';
+    let ultimoPedido = 'N/A';
+    
+    const ventasOrdenadas = [...validVentas].sort((a, b) => {
+      const timeA = new Date(a.fechaYHora || 0).getTime();
+      const timeB = new Date(b.fechaYHora || 0).getTime();
+      return timeA - timeB;
+    });
+
+    if (ventasOrdenadas.length > 0) {
+      primerPedido = ventasOrdenadas[0].pedido || 'N/A';
+      ultimoPedido = ventasOrdenadas[ventasOrdenadas.length - 1].pedido || 'N/A';
+    }
+
+    const rangoPedidos = {
+      primerPedido,
+      ultimoPedido,
+      totalVentas: validVentas.length
+    };
 
     validVentas.forEach(v => {
       let ventaHasNotes = false;
@@ -598,6 +620,7 @@ export class CajaService {
 
     return {
       caja,
+      rangoPedidos,
       notasAnalysis,
       resumen: {
         totalEfectivo,

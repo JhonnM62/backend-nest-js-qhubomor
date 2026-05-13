@@ -57,8 +57,11 @@ export class CajaController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Obtener resumen de caja' })
   @ApiResponse({ status: 200, description: 'Resumen de caja' })
-  getResumenCaja(@Param('id') id: string) {
-    return this.cajaService.getResumenCaja(id);
+  getResumenCaja(
+    @Param('id') id: string,
+    @Query('horaCorteSnapshot') horaCorteSnapshot?: string
+  ) {
+    return this.cajaService.getResumenCaja(id, horaCorteSnapshot);
   }
 
   @Get()

@@ -79,16 +79,34 @@ export class VentasService {
     ];
   }
 
+  private getFechaContable(date: Date = new Date()): Date {
+    const offset = date.getTimezoneOffset() * 60000;
+    const localDate = new Date(date.getTime() - offset);
+    
+    // Si la hora local es antes de las 5:00 AM, pertenece al día contable anterior
+    if (localDate.getUTCHours() < 5) {
+      localDate.setUTCDate(localDate.getUTCDate() - 1);
+    }
+    
+    // Normalizamos a medianoche para que funcione como una "fecha pura" sin horas
+    localDate.setUTCHours(0, 0, 0, 0);
+    return localDate;
+  }
+
   async create(createVentaDto: CreateVentaDto) {
     const pedido = await this.generatePedidoNumber(createVentaDto.mesa, undefined);
+    
+    const now = new Date();
+    const fechaContable = this.getFechaContable(now);
+
     return this.prisma.ventas.create({
       data: {
         ...createVentaDto,
         mesa: createVentaDto.mesa === 'V.R' ? null : createVentaDto.mesa,
         pedido,
-        fechaYHora: new Date(),
-        fecha: new Date(),
-        hora: new Date().toTimeString().split(' ')[0],
+        fechaYHora: now,
+        fecha: fechaContable,
+        hora: now.toTimeString().split(' ')[0],
         estado: createVentaDto.estado || 'iniciado',
         registroDeTiempo: this.generateTiempoLog(createVentaDto.estado || 'iniciado', createVentaDto.cartStartTime),
       } as Prisma.VentasCreateInput,
@@ -96,20 +114,11 @@ export class VentasService {
   }
 
   async generatePedidoNumber(mesaId: string | null | undefined, usuarioNombre: string | null | undefined): Promise<string> {
-    const now = new Date();
-    const hora = now.getHours();
-
-    const shiftStart = new Date(now);
-    if (hora < 15) {
-      shiftStart.setDate(shiftStart.getDate() - 1);
-    }
-    shiftStart.setHours(15, 0, 0, 0);
+    const fechaContable = this.getFechaContable(new Date());
 
     const ventasDelTurno = await this.prisma.ventas.findMany({
       where: {
-        fechaYHora: {
-          gte: shiftStart,
-        },
+        fecha: fechaContable,
       },
       select: {
         pedido: true,
@@ -210,10 +219,9 @@ export class VentasService {
       porcentajeDeDescuento: venta.porcentajeDeDescuento,
     };
 
-    // Fix: Local timezone adjustment for 'fecha' field
+    // Fix: Local timezone adjustment for 'fecha' field using Jornada Comercial
     const fechaVenta = new Date();
-    const offset = fechaVenta.getTimezoneOffset() * 60000;
-    const localDate = new Date(fechaVenta.getTime() - offset);
+    const fechaContable = this.getFechaContable(fechaVenta);
 
     const ventaCreada = await this.prisma.ventas.create({
       data: {
@@ -222,9 +230,9 @@ export class VentasService {
         pedido: pedidoGenerado,
         estado: venta.estado || 'EN_EL_CARRITO',
         usuario: usuarioId,
-        fechaYHora: new Date(),
-        fecha: localDate, // Use local date
-        hora: new Date().toTimeString().split(' ')[0],
+        fechaYHora: fechaVenta,
+        fecha: fechaContable, // Use accounting date
+        hora: fechaVenta.toTimeString().split(' ')[0],
         registroDeTiempo: this.generateTiempoLog(venta.estado || 'EN_EL_CARRITO', (venta as any).cartStartTime),
         // We can optionally connect the cliente explicitly if it exists
         ...(venta.clienteId ? { clienteRelacion: { connect: { IDcliente: venta.clienteId } } } : {})
@@ -251,11 +259,8 @@ export class VentasService {
           }
         }
 
-        // Create the date adjusting for local time safely so that "fecha" (which is Date type) 
-        // doesn't jump forward if we are past 7PM UTC-5
-        const fechaVenta = new Date();
-        const offset = fechaVenta.getTimezoneOffset() * 60000;
-        const localDate = new Date(fechaVenta.getTime() - offset);
+        // Apply Jornada Comercial to Orderventas
+        const orderFechaContable = this.getFechaContable(new Date());
 
         return this.prisma.orderventas.create({
           data: {
@@ -267,7 +272,7 @@ export class VentasService {
             imagenUrl: producto.imagenUrl,
             IDventas: ventaCreada.IDventas,
             usuarioId,
-            fecha: localDate, // Fix: Use local date to avoid shifting to next day
+            fecha: orderFechaContable, // Use accounting date
           } as Prisma.OrderventasCreateInput,
         });
       }),
