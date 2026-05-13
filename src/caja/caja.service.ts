@@ -440,8 +440,24 @@ export class CajaService {
                 cantidad: ov.cantidad || 1,
                 notas: parsed
               });
+            } else if (typeof parsed === 'string' && parsed.trim().length > 0) {
+              ventaHasNotes = true;
+              ventaNotes.push({
+                producto: (ov as any).nombreProducto || (ov as any).nombre || 'Producto',
+                cantidad: ov.cantidad || 1,
+                notas: [{ nombre: parsed.trim(), precio: 0 }]
+              });
             }
-          } catch (e) {}
+          } catch (e) {
+            if (typeof (ov as any).comentarios === 'string' && (ov as any).comentarios.trim().length > 0) {
+              ventaHasNotes = true;
+              ventaNotes.push({
+                producto: (ov as any).nombreProducto || (ov as any).nombre || 'Producto',
+                cantidad: ov.cantidad || 1,
+                notas: [{ nombre: (ov as any).comentarios.trim(), precio: 0 }]
+              });
+            }
+          }
         }
       });
 
