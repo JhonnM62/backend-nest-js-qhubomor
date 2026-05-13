@@ -93,6 +93,12 @@ export class CreateAperturaCierreCajaDto {
   @IsString()
   horaDeApertura?: string;
 
+  @ApiPropertyOptional()
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  transferenciasContadas?: number;
+
   @ApiPropertyOptional({ type: [InsumoAperturaDto] })
   @IsOptional()
   @IsArray()
@@ -141,6 +147,12 @@ export class UpdateCierreCajaDto {
   @IsOptional()
   @IsNumber()
   valorExcedente?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  transferenciasContadas?: number;
 
   @ApiPropertyOptional()
   @IsOptional()

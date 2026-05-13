@@ -24,7 +24,7 @@ export class CajaService {
       'efectivoDeCierre', 'resumen', 'pdf', 'pdfcount', 'observaciones',
       'cierre', 'total12Onz', 'total24Onz', 'productos', 'tipoDeVaso',
       'cantAAgregar', 'plataGuardada', 'cuadroCaja', 'valorFaltante',
-      'valorExcedente', 'contador', 'contador2'
+      'valorExcedente', 'transferenciasContadas', 'contador', 'contador2'
     ];
     const parsedData: any = {};
     for (const key of allowedFields) {
@@ -166,7 +166,7 @@ export class CajaService {
           'efectivoDeCierre', 'resumen', 'pdf', 'pdfcount', 'observaciones',
           'cierre', 'total12Onz', 'total24Onz', 'productos', 'tipoDeVaso',
           'cantAAgregar', 'plataGuardada', 'cuadroCaja', 'valorFaltante',
-          'valorExcedente', 'horaEnLaQueSeActualizo', 'contador', 'contador2'
+          'valorExcedente', 'transferenciasContadas', 'horaEnLaQueSeActualizo', 'contador', 'contador2'
         ];
         const parsedData: any = {};
         for (const key of allowedFields) {
@@ -265,7 +265,7 @@ export class CajaService {
         'efectivoDeCierre', 'resumen', 'pdf', 'pdfcount', 'observaciones',
         'cierre', 'total12Onz', 'total24Onz', 'productos', 'tipoDeVaso',
         'cantAAgregar', 'plataGuardada', 'cuadroCaja', 'valorFaltante',
-        'valorExcedente', 'horaEnLaQueSeActualizo', 'contador', 'contador2'
+        'valorExcedente', 'transferenciasContadas', 'horaEnLaQueSeActualizo', 'contador', 'contador2'
       ];
       const parsedCierreData: any = {};
       for (const key of allowedFields) {
