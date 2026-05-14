@@ -179,6 +179,7 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     this.server.to(Room.KITCHEN).emit(SocketEvent.ORDEN_ACTUALIZADA_KITCHEN, enrichedData);
     this.server.to(Room.CAJA).emit(SocketEvent.ORDEN_ACTUALIZADA_CAJA, enrichedData);
+    this.server.to(Room.CAJA).emit(SocketEvent.ORDEN_ACTUALIZADA, enrichedData); // Agregamos este evento
 
     return { success: true };
   }
