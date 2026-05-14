@@ -48,7 +48,9 @@ export class InsumosController {
   })
   @UseInterceptors(FileInterceptor('file', {
     storage: diskStorage({
-      destination: './public/uploads/insumos',
+      destination: process.env.NODE_ENV === 'production' 
+        ? '/app/public/uploads/insumos' 
+        : './public/uploads/insumos',
       filename: (req, file, cb) => {
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
         const ext = extname(file.originalname);
