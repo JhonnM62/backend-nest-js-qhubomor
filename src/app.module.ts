@@ -34,6 +34,7 @@ import { join } from 'path';
     AppConfigModule,
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'public'),
+      serveRoot: '/api/v1',
     }),
     CacheModule.register({
       isGlobal: true,
