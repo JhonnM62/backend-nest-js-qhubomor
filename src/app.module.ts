@@ -33,7 +33,7 @@ import { join } from 'path';
   imports: [
     AppConfigModule,
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'public'),
+      rootPath: join(process.cwd(), 'public'),
       serveRoot: '/api/v1',
     }),
     CacheModule.register({

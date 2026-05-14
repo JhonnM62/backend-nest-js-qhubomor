@@ -27,6 +27,9 @@ COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/prisma ./prisma
 
+# Crear directorios para subidas de archivos
+RUN mkdir -p /app/public/uploads/insumos /app/public/uploads/gastos
+
 EXPOSE 3000
 
 # Iniciamos la app con el script de producción
