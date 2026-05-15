@@ -1,168 +1,102 @@
-> puntodeventabackend@0.0.1 start:prod
-> node dist/src/main
-[Nest] 20  - 05/14/2026, 1:51:37 PM     LOG [NestFactory] Starting Nest application...
-[Nest] 20  - 05/14/2026, 1:51:37 PM     LOG [InstanceLoader] PrismaModule dependencies initialized +23ms
-[Nest] 20  - 05/14/2026, 1:51:37 PM     LOG [InstanceLoader] PassportModule dependencies initialized +0ms
-[Nest] 20  - 05/14/2026, 1:51:37 PM     LOG [InstanceLoader] ConfigHostModule dependencies initialized +2ms
-[Nest] 20  - 05/14/2026, 1:51:37 PM     LOG [InstanceLoader] ThrottlerModule dependencies initialized +0ms
-[Nest] 20  - 05/14/2026, 1:51:37 PM     LOG [InstanceLoader] JwtModule dependencies initialized +0ms
-[Nest] 20  - 05/14/2026, 1:51:37 PM     LOG [InstanceLoader] ConfigModule dependencies initialized +1ms
-[Nest] 20  - 05/14/2026, 1:51:37 PM     LOG [InstanceLoader] CacheModule dependencies initialized +0ms
-[Nest] 20  - 05/14/2026, 1:51:37 PM     LOG [InstanceLoader] WebsocketModule dependencies initialized +0ms
-[Nest] 20  - 05/14/2026, 1:51:37 PM     LOG [InstanceLoader] ServeStaticModule dependencies initialized +0ms
-[Nest] 20  - 05/14/2026, 1:51:37 PM     LOG [InstanceLoader] MesasModule dependencies initialized +1ms
-[Nest] 20  - 05/14/2026, 1:51:37 PM     LOG [InstanceLoader] NotificationsModule dependencies initialized +0ms
-[Nest] 20  - 05/14/2026, 1:51:37 PM     LOG [InstanceLoader] ComentariosModule dependencies initialized +0ms
-[Nest] 20  - 05/14/2026, 1:51:37 PM     LOG [InstanceLoader] AppConfigModule dependencies initialized +0ms
-[Nest] 20  - 05/14/2026, 1:51:37 PM     LOG [InstanceLoader] AuthModule dependencies initialized +1ms
-[Nest] 20  - 05/14/2026, 1:51:37 PM     LOG [InstanceLoader] AppModule dependencies initialized +1ms
-[Nest] 20  - 05/14/2026, 1:51:37 PM     LOG [InstanceLoader] PrinterConfigModule dependencies initialized +0ms
-[Nest] 20  - 05/14/2026, 1:51:37 PM     LOG [InstanceLoader] EstadisticasModule dependencies initialized +0ms
-[Nest] 20  - 05/14/2026, 1:51:37 PM     LOG [InstanceLoader] ReportesModule dependencies initialized +0ms
-[Nest] 20  - 05/14/2026, 1:51:37 PM     LOG [InstanceLoader] ConfiguracionModule dependencies initialized +1ms
-[Nest] 20  - 05/14/2026, 1:51:37 PM     LOG [InstanceLoader] ProductosModule dependencies initialized +0ms
-[Nest] 20  - 05/14/2026, 1:51:37 PM     LOG [InstanceLoader] CategoriasModule dependencies initialized +0ms
-[Nest] 20  - 05/14/2026, 1:51:37 PM     LOG [InstanceLoader] VentasModule dependencies initialized +0ms
-[Nest] 20  - 05/14/2026, 1:51:37 PM     LOG [InstanceLoader] ClientesModule dependencies initialized +0ms
-[Nest] 20  - 05/14/2026, 1:51:37 PM     LOG [InstanceLoader] ProveedoresModule dependencies initialized +0ms
-[Nest] 20  - 05/14/2026, 1:51:37 PM     LOG [InstanceLoader] GastosModule dependencies initialized +0ms
-[Nest] 20  - 05/14/2026, 1:51:37 PM     LOG [InstanceLoader] InventarioModule dependencies initialized +0ms
-[Nest] 20  - 05/14/2026, 1:51:37 PM     LOG [InstanceLoader] InsumosModule dependencies initialized +0ms
-[Nest] 20  - 05/14/2026, 1:51:37 PM     LOG [InstanceLoader] UsuariosModule dependencies initialized +0ms
-[Nest] 20  - 05/14/2026, 1:51:37 PM     LOG [InstanceLoader] CajaModule dependencies initialized +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [WebSocketsController] AppGateway subscribed to the "joinRoom" message +58ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [WebSocketsController] AppGateway subscribed to the "leaveRoom" message +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [WebSocketsController] AppGateway subscribed to the "nuevaOrden" message +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [WebSocketsController] AppGateway subscribed to the "ordenActualizada" message +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [WebSocketsController] AppGateway subscribed to the "ordenCompletada" message +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RoutesResolver] AuthController {/api/v1/auth}: +2ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/auth/register, POST} route +1ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/auth/login, POST} route +1ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RoutesResolver] UsuariosController {/api/v1/usuarios}: +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/usuarios/roles, GET} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/usuarios, POST} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/usuarios, GET} route +1ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/usuarios/:id, GET} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/usuarios/:id, PATCH} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/usuarios/:id, DELETE} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RoutesResolver] ProductosController {/api/v1/productos}: +1ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/productos, POST} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/productos, GET} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/productos/:id, GET} route +1ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/productos/:id, PATCH} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/productos/:id, DELETE} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RoutesResolver] CategoriasController {/api/v1/categorias}: +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/categorias, POST} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/categorias, GET} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/categorias/:id, GET} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/categorias/:id, PATCH} route +1ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/categorias/:id, DELETE} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RoutesResolver] VentasController {/api/v1/ventas}: +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/ventas, POST} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/ventas/completa, POST} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/ventas, GET} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/ventas/hoy, GET} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/ventas/mesa/:mesaId, GET} route +1ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/ventas/:id, GET} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/ventas/:id/tiempo-total, GET} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/ventas/:id, PUT} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/ventas/:id/estado, PATCH} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/ventas/:id/pago, PATCH} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/ventas/:id/productos, POST} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/ventas/bulk, DELETE} route +1ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/ventas/trash/empty, DELETE} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/ventas/:id, DELETE} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/ventas/:id/hard, DELETE} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/ventas/bulk/hard, DELETE} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/ventas/:id/restore, POST} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RoutesResolver] InventarioController {/api/v1/inventario}: +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/inventario, POST} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/inventario, GET} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/inventario/items, GET} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/inventario/bajo, GET} route +1ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/inventario/:id, GET} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/inventario/:id, PATCH} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/inventario/:id, DELETE} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/inventario/item, POST} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/inventario/item/:id, DELETE} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/inventario/item/:id/comprar, PATCH} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/inventario/items/comprar, PATCH} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RoutesResolver] InsumosController {/api/v1/insumos}: +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/insumos/upload-image, POST} route +1ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/insumos, POST} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/insumos, GET} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/insumos/alertas, GET} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/insumos/estadisticas, GET} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/insumos/:id, GET} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/insumos/:id/movimientos, GET} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/insumos/:id, PATCH} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/insumos/:id, DELETE} route +1ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/insumos/:id/movimiento, POST} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/insumos/bulk, POST} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/insumos/:id/agregar, POST} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/insumos/:id/descontar, POST} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RoutesResolver] NotificationsController {/api/v1/notifications}: +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/notifications/token, POST} route +1ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/notifications/settings/:userId, GET} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/notifications/settings/:userId, PATCH} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/notifications/history/:userId, GET} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/notifications/history/:id/read, PATCH} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RoutesResolver] ClientesController {/api/v1/clientes}: +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/clientes, POST} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/clientes, GET} route +1ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/clientes/:id, GET} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/clientes/:id, PATCH} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/clientes/:id, DELETE} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RoutesResolver] ProveedoresController {/api/v1/proveedores}: +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/proveedores, POST} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/proveedores, GET} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/proveedores/:id, GET} route +1ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/proveedores/:id, PATCH} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/proveedores/:id, DELETE} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RoutesResolver] CajaController {/api/v1/caja}: +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/caja/abrir, POST} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/caja/:id, PATCH} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/caja/cerrar/:id, PATCH} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/caja/activa, GET} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/caja/resumen/:id, GET} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/caja, GET} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/caja/:id, GET} route +1ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/caja/:id, DELETE} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RoutesResolver] GastosController {/api/v1/gastos}: +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/gastos/upload-image, POST} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/gastos, POST} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/gastos, GET} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/gastos/total, GET} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/gastos/:id, GET} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/gastos/:id, PATCH} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/gastos/:id, DELETE} route +1ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RoutesResolver] MesasController {/api/v1/mesas}: +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/mesas, GET} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/mesas/:id, GET} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RoutesResolver] ComentariosController {/api/v1/comentarios}: +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/comentarios, POST} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/comentarios, GET} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/comentarios/:id, GET} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/comentarios/:id, PATCH} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/comentarios/:id, DELETE} route +1ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RoutesResolver] PrinterConfigController {/api/v1/printer-config}: +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/printer-config, GET} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/printer-config, PUT} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RoutesResolver] EstadisticasController {/api/v1/estadisticas}: +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/estadisticas/generales, GET} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RoutesResolver] ReportesController {/api/v1/reportes}: +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/reportes/dinero-guardado, GET} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/reportes/dinero-guardado, POST} route +1ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/reportes/dinero-guardado/:filterId, DELETE} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/reportes/dinero-guardado/:filterId, GET} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/reportes/dinero-guardado/:filterId/retiros, POST} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/reportes/dinero-guardado/retiros/:retiroId, DELETE} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RoutesResolver] ConfiguracionController {/api/v1/configuracion}: +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/configuracion, GET} route +0ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [RouterExplorer] Mapped {/api/v1/configuracion, PUT} route +1ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [NestApplication] Nest application successfully started +43ms
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [Bootstrap] Application is running on: http://0.0.0.0:3000
-[Nest] 20  - 05/14/2026, 1:51:38 PM     LOG [Bootstrap] Swagger documentation: http://0.0.0.0:3000/api/docs
-[Nest] 20  - 05/14/2026, 1:54:53 PM     LOG [AppGateway] Client v0CrFhncb2eCkUE1AAAB mapped to user cmom4whz80000k0qnjs8qb3sc and joined user_cmom4whz80000k0qnjs8qb3sc
-[Nest] 20  - 05/14/2026, 1:54:53 PM     LOG [AppGateway] Client disconnected: v0CrFhncb2eCkUE1AAAB (was in rooms: user_cmom4whz80000k0qnjs8qb3sc)
-[Nest] 20  - 05/14/2026, 1:55:07 PM     LOG [AppGateway] Client eQMN56yQew9x8EgBAAAD mapped to user cmom4whz80000k0qnjs8qb3sc and joined user_cmom4whz80000k0qnjs8qb3sc
+  fecha_de_vencimiento: undefined,
+  precio: 2200,
+  total: undefined,
+  agregar_cantidad: 0,
+  descontar_cant_de_ventas: undefined,
+  notificar_a_whatsapp: undefined,
+  apartir_de_cantidad: 0,
+  enviar_si_o_no: undefined,
+  disponible: '0',
+  estado: 'ACTIVO',
+  llevar_control_en_caja: undefined,
+  contador: undefined,
+  contador2: undefined,
+  imagencard: undefined,
+  fecha: undefined,
+  stockMinimo: undefined,
+  stockMaximo: undefined,
+  puntoReorden: undefined,
+  unidadMedida: undefined,
+  proveedorId: undefined,
+  proveedorNombre: undefined
+}
+[Nest] 19  - 05/14/2026, 3:14:11 PM     LOG [AppGateway] Client disconnected: wbLX8iV_i1G1nlB1AAAV (was in rooms: user_cmom4whz80000k0qnjs8qb3sc)
+[Nest] 19  - 05/14/2026, 3:14:34 PM     LOG [AppGateway] Client Rd4mSyDYuh8CIouAAAAX mapped to user cmom4whz80000k0qnjs8qb3sc and joined user_cmom4whz80000k0qnjs8qb3sc
+[Nest] 19  - 05/14/2026, 3:17:29 PM     LOG [AppGateway] Client disconnected: Rd4mSyDYuh8CIouAAAAX (was in rooms: user_cmom4whz80000k0qnjs8qb3sc)
+[Nest] 19  - 05/14/2026, 3:17:49 PM     LOG [AppGateway] Client rItEPbQsEErp6tqXAAAZ mapped to user cmom4whz80000k0qnjs8qb3sc and joined user_cmom4whz80000k0qnjs8qb3sc
+[Nest] 19  - 05/14/2026, 3:30:17 PM     LOG [AppGateway] Client disconnected: rItEPbQsEErp6tqXAAAZ (was in rooms: user_cmom4whz80000k0qnjs8qb3sc)
+[Nest] 19  - 05/14/2026, 3:31:15 PM     LOG [AppGateway] Client HMO0QC1NpScbgDfHAAAb mapped to user cmom4whz80000k0qnjs8qb3sc and joined user_cmom4whz80000k0qnjs8qb3sc
+[Nest] 19  - 05/14/2026, 3:31:18 PM     LOG [AppGateway] Client disconnected: HMO0QC1NpScbgDfHAAAb (was in rooms: user_cmom4whz80000k0qnjs8qb3sc)
+[Nest] 19  - 05/14/2026, 3:43:13 PM     LOG [AppGateway] Client qOSxsGd2wXviSpEDAAAd mapped to user cmom4whz80000k0qnjs8qb3sc and joined user_cmom4whz80000k0qnjs8qb3sc
+[Nest] 19  - 05/14/2026, 3:43:17 PM     LOG [AppGateway] Client disconnected: qOSxsGd2wXviSpEDAAAd (was in rooms: user_cmom4whz80000k0qnjs8qb3sc)
+[Nest] 19  - 05/14/2026, 3:43:48 PM     LOG [AppGateway] Client 8oJODCpTLY67XO-pAAAf mapped to user cmom4whz80000k0qnjs8qb3sc and joined user_cmom4whz80000k0qnjs8qb3sc
+[Nest] 19  - 05/14/2026, 3:46:51 PM     LOG [AppGateway] Client disconnected: 8oJODCpTLY67XO-pAAAf (was in rooms: user_cmom4whz80000k0qnjs8qb3sc)
+[Nest] 19  - 05/14/2026, 3:50:27 PM     LOG [AppGateway] Client z8msQgcjH485LPumAAAh mapped to user cmom4whz80000k0qnjs8qb3sc and joined user_cmom4whz80000k0qnjs8qb3sc
+[Nest] 19  - 05/14/2026, 3:50:27 PM     LOG [AppGateway] Client disconnected: z8msQgcjH485LPumAAAh (was in rooms: user_cmom4whz80000k0qnjs8qb3sc)
+[Nest] 19  - 05/14/2026, 3:50:40 PM     LOG [AppGateway] Client A-XJZsM35lLkGPIUAAAj mapped to user cmom4whz80000k0qnjs8qb3sc and joined user_cmom4whz80000k0qnjs8qb3sc
+[Nest] 19  - 05/14/2026, 3:51:12 PM     LOG [AppGateway] Client A-XJZsM35lLkGPIUAAAj joined room: kitchen
+[Nest] 19  - 05/14/2026, 3:51:12 PM     LOG [AppGateway] Client A-XJZsM35lLkGPIUAAAj joined room: caja
+[Nest] 19  - 05/14/2026, 3:53:21 PM     LOG [AppGateway] Client A-XJZsM35lLkGPIUAAAj joined room: kitchen
+[Nest] 19  - 05/14/2026, 3:58:07 PM     LOG [AppGateway] Client disconnected: A-XJZsM35lLkGPIUAAAj (was in rooms: user_cmom4whz80000k0qnjs8qb3sc, kitchen, caja)
+[Nest] 19  - 05/14/2026, 4:04:11 PM     LOG [AppGateway] Client FAPKkI3xC6igRdoCAAAm mapped to user cmom4whz80000k0qnjs8qb3sc and joined user_cmom4whz80000k0qnjs8qb3sc
+[Nest] 19  - 05/14/2026, 4:05:05 PM     LOG [AppGateway] Client disconnected: FAPKkI3xC6igRdoCAAAm (was in rooms: user_cmom4whz80000k0qnjs8qb3sc)
+[Nest] 19  - 05/14/2026, 4:05:20 PM     LOG [AppGateway] Client p6kdO52idH5Hm7PRAAAo mapped to user cmom4whz80000k0qnjs8qb3sc and joined user_cmom4whz80000k0qnjs8qb3sc
+[Nest] 19  - 05/14/2026, 4:08:28 PM     LOG [AppGateway] Client disconnected: p6kdO52idH5Hm7PRAAAo (was in rooms: user_cmom4whz80000k0qnjs8qb3sc)
+[Nest] 19  - 05/15/2026, 1:42:19 AM     LOG [AuthController] Request to login user: pruebas@gmail.com
+[Nest] 19  - 05/15/2026, 1:42:19 AM     LOG [AuthService] Attempting to login user: pruebas@gmail.com
+[Nest] 19  - 05/15/2026, 1:42:19 AM     LOG [AuthService] User logged in successfully: pruebas@gmail.com
+[Nest] 19  - 05/15/2026, 1:42:20 AM     LOG [AppGateway] Client scjn6Dbl8bKH4AXRAAAq mapped to user cmom4whz80000k0qnjs8qb3sc and joined user_cmom4whz80000k0qnjs8qb3sc
+[Nest] 19  - 05/15/2026, 1:42:26 AM     LOG [AppGateway] Client scjn6Dbl8bKH4AXRAAAq joined room: caja
+[Nest] 19  - 05/15/2026, 1:42:34 AM   ERROR [NotificationsService] Error enviando notificaciones push chunk
+[Nest] 19  - 05/15/2026, 1:42:34 AM   ERROR [NotificationsService] Error: All push notification messages in the same request must be for the same project; check the details field to investigate conflicting tokens.
+    at Expo.getErrorFromResultError (file:///app/node_modules/expo-server-sdk/build/ExpoClient.js:252:23)
+    at Expo.getErrorFromResult (file:///app/node_modules/expo-server-sdk/build/ExpoClient.js:241:28)
+    at Expo.parseErrorResponseAsync (file:///app/node_modules/expo-server-sdk/build/ExpoClient.js:224:21)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Expo.requestAsync (file:///app/node_modules/expo-server-sdk/build/ExpoClient.js:191:30)
+    at async promiseRetry.retries (file:///app/node_modules/expo-server-sdk/build/ExpoClient.js:55:28)
+    at async file:///app/node_modules/expo-server-sdk/build/ExpoClient.js:53:20
+    at async Expo.sendPushNotificationsAsync (file:///app/node_modules/expo-server-sdk/build/ExpoClient.js:52:22)
+    at async NotificationsService.sendNotification (/app/dist/src/notifications/notifications.service.js:120:45) {
+  code: 'PUSH_TOO_MANY_EXPERIENCE_IDS',
+
+  details: {
+    '@jhonnierm/qhubomor-pos-app': [
+      'ExponentPushToken[6l19NsAkbPhN9md0Pkn377]',
+      'ExponentPushToken[jXCiowD2SeY6sVJR10IA0q]'
+    ],
+    '@jhonnierm2/qhubomor-pos-app': [
+      'ExponentPushToken[GdlgtCAYnoMG2ypFXO7AFD]'
+    ]
+  },
+  statusCode: 400
+}
+[Nest] 19  - 05/15/2026, 1:42:35 AM     LOG [AppGateway] Nueva orden received: cmp695u98002s3sjuf1ndm5cp
+[Nest] 19  - 05/15/2026, 1:43:20 AM     LOG [AppGateway] Client scjn6Dbl8bKH4AXRAAAq joined room: kitchen
+[Nest] 19  - 05/15/2026, 1:43:28 AM   ERROR [NotificationsService] Error enviando notificaciones push chunk
+[Nest] 19  - 05/15/2026, 1:43:28 AM   ERROR [NotificationsService] Error: All push notification messages in the same request must be for the same project; check the details field to investigate conflicting tokens.
+    at Expo.getErrorFromResultError (file:///app/node_modules/expo-server-sdk/build/ExpoClient.js:252:23)
+    at Expo.getErrorFromResult (file:///app/node_modules/expo-server-sdk/build/ExpoClient.js:241:28)
+    at Expo.parseErrorResponseAsync (file:///app/node_modules/expo-server-sdk/build/ExpoClient.js:224:21)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Expo.requestAsync (file:///app/node_modules/expo-server-sdk/build/ExpoClient.js:191:30)
+    at async promiseRetry.retries (file:///app/node_modules/expo-server-sdk/build/ExpoClient.js:55:28)
+    at async file:///app/node_modules/expo-server-sdk/build/ExpoClient.js:53:20
+    at async Expo.sendPushNotificationsAsync (file:///app/node_modules/expo-server-sdk/build/ExpoClient.js:52:22)
+    at async NotificationsService.sendNotification (/app/dist/src/notifications/notifications.service.js:120:45) {
+  code: 'PUSH_TOO_MANY_EXPERIENCE_IDS',
+
+  details: {
+    '@jhonnierm/qhubomor-pos-app': [
+      'ExponentPushToken[6l19NsAkbPhN9md0Pkn377]',
+      'ExponentPushToken[jXCiowD2SeY6sVJR10IA0q]'
+    ],
+    '@jhonnierm2/qhubomor-pos-app': [
+      'ExponentPushToken[GdlgtCAYnoMG2ypFXO7AFD]'
+    ]
+  },
+  statusCode: 400
+}
+[Nest] 19  - 05/15/2026, 1:43:46 AM     LOG [AppGateway] Client scjn6Dbl8bKH4AXRAAAq joined room: caja
+[Nest] 19  - 05/15/2026, 1:43:50 AM     LOG [AppGateway] Client scjn6Dbl8bKH4AXRAAAq joined room: caja
+[Nest] 19  - 05/15/2026, 1:44:49 AM     LOG [AppGateway] Client disconnected: scjn6Dbl8bKH4AXRAAAq (was in rooms: user_cmom4whz80000k0qnjs8qb3sc, caja, kitchen)

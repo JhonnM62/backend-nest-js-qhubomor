@@ -1,0 +1,55 @@
+# Q Hubo Mor POS - Backend Documentation & AI Instructions
+
+## 1. Project Overview & Tech Stack
+This is the NestJS backend API for the Q Hubo Mor POS system, providing services for inventory management, sales processing, cash register operations, and real-time synchronization.
+- **Framework:** NestJS (Node.js)
+- **Database ORM:** Prisma Client
+- **Database Engine:** PostgreSQL
+- **Real-time:** Socket.io (via NestJS WebSockets Gateway)
+- **File Uploads:** Multer + Sharp (Image optimization to `.webp`)
+- **Authentication:** JWT (JSON Web Tokens)
+- **Validation:** `class-validator` and `class-transformer`
+
+## 2. Architecture & File Structure
+- `src/`: Core application logic.
+  - `auth/`: Authentication logic, JWT strategies, and User CRUD (`usuarios.service.ts`).
+  - `caja/`: Cash register logic (Apertura, Cierre, Congelamiento).
+  - `insumos/`, `productos/`, `inventario/`: Inventory management.
+  - `ventas/`, `orders/`: Sales and order processing.
+  - `gastos/`, `reportes/`: Financial tracking and reporting.
+  - `websocket/`: `AppGateway` for emitting real-time events (`refreshInsumos`, `ordenActualizada`, etc.).
+  - `common/`: Guards (RBAC), Decorators, and Interceptors.
+- `prisma/`: Database schema (`schema.prisma`) and SQL migrations.
+- `scripts/`: Maintenance scripts (e.g., zeroing out inventory, cleaning users).
+- `public/uploads/`: Persistent storage for uploaded images.
+
+## 3. Deployment & DevOps
+- **Dockerized Environment:** The backend runs inside a Docker container.
+- **Base Image:** Must use Debian-based `node:20-slim` (NOT alpine) to ensure compatibility with Prisma's Query Engine and OpenSSL.
+- **CI/CD:** GitHub Actions (`.github/workflows/deploy.yml`). Commits to `main` trigger an automatic build and deployment to a Contabo VPS.
+- **Volumes:** Uploaded files are persisted using Docker Bind Mounts (`-v /root/backend-qhubomor/public/uploads:/app/public/uploads`) to prevent data loss between deployments.
+- **Nginx Proxy:** The VPS uses Nginx to route traffic to the container.
+
+## 4. Business Logic & Conventions
+- **Insumos Stock Logic:** The `INSUMOS` table uses `Cantidad` (Int) for historical entry totals, and `Disponible` (Decimal) for the current actual stock. `Estado` handles active/inactive toggles.
+- **Reportes (Dinero Guardado):** Generates a `Filter` record. It auto-preloads daily `AperturaCierreCaja` entries into the `Dinero retirado` table. Users can register withdrawals on these slots, updating the `retiro` and `sobrante` columns.
+- **Real-time Sync:** Any mutating action (Create/Update/Delete) on critical modules MUST emit a corresponding Socket.io event via `AppGateway` to keep mobile clients in sync.
+
+## 5. 🚨 Core AI Memories & Iterated Fixes (CRITICAL)
+If you are an AI or developer editing this codebase, strictly follow these rules based on past debugging iterations:
+
+### Prisma & Database
+- **Cascading Deletes:** When implementing cascading deletes requiring mathematical rollbacks (e.g., `Inventario -> OrderInventario -> Insumos stock`), double-check relation names in Prisma's `include: {}` (e.g., `ordenInventario` vs `orderinventario`). Typos will crash the deletion and mathematically desync the stock.
+- **Raw SQL Queries:** When writing raw SQL for the `VENTAS` table, column names are strictly case-sensitive and must be quoted exactly: `"IDventas"`, `"Pedido"`, `"TOTAL INPUT"`, `"Medio de pago"`, `"Fecha y hora"`.
+- **Field Mappings:** Ensure foreign keys match exactly. E.g., `DineroRetirado.filterID` maps to `Filter.FilterID`, NOT `Ventas.IDventas`.
+
+### Static Files & Images (Nginx + Docker)
+- **Serving Static Assets:** The NestJS `ServeStaticModule` (`app.module.ts`) MUST be configured with `serveRoot: '/api/v1'` to match the Nginx proxy routing. Without this, Nginx will return `404 ENOENT` for image requests.
+- **Multer Paths:** Multer's destination MUST use absolute paths in production (`/app/public/uploads/...`) instead of relative paths (`./public/...`) because Docker compiles the code into a `dist/` folder, causing relative paths to resolve incorrectly to `dist/public`.
+- **Image Optimization:** Always use `memoryStorage()` in Multer and process the buffer with `sharp` to convert images to `.webp` before saving to disk. This drastically reduces payload size for mobile clients.
+
+### Docker Environment Constraints
+- **OpenSSL Compatibility:** Always include `RUN apt-get update && apt-get install -y openssl` in the `Dockerfile` to guarantee native Prisma engine compatibility on slim images.
+
+### Security & DTOs
+- **Class Validator Rejections:** Do not spread raw frontend `formData` directly into Prisma updates if they contain internal DB fields. Map `dataToSave` explicitly in the DTOs to avoid `400 Bad Request: property X should not exist` errors.

@@ -14,8 +14,10 @@ import {
   BadRequestException
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { extname } from 'path';
+import { memoryStorage } from 'multer';
+import { extname, join } from 'path';
+import * as fs from 'fs';
+import * as sharp from 'sharp';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiConsumes, ApiBody } from '@nestjs/swagger';
 import { InsumosService } from './insumos.service';
 import { CreateInsumoDto, UpdateInsumoDto, InsumoQueryDto, MovimientoInsumoDto, BulkInsumoDto } from './dto/insumo.dto';
@@ -47,33 +49,43 @@ export class InsumosController {
     },
   })
   @UseInterceptors(FileInterceptor('file', {
-    storage: diskStorage({
-      destination: process.env.NODE_ENV === 'production' 
-        ? '/app/public/uploads/insumos' 
-        : './public/uploads/insumos',
-      filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-        const ext = extname(file.originalname);
-        cb(null, `${uniqueSuffix}${ext}`);
-      },
-    }),
+    storage: memoryStorage(),
     fileFilter: (req, file, cb) => {
-      if (!file.mimetype.match(/\/(jpg|jpeg|png|gif|webp)$/)) {
+      if (!file.mimetype.match(/\/(jpg|jpeg|png|gif|webp|avif)$/)) {
         return cb(new BadRequestException('Solo se permiten archivos de imagen'), false);
       }
       cb(null, true);
     },
     limits: {
-      fileSize: 5 * 1024 * 1024, // 5MB
+      fileSize: 10 * 1024 * 1024, // 10MB
     },
   }))
-  uploadImage(@UploadedFile() file: Express.Multer.File) {
+  async uploadImage(@UploadedFile() file: Express.Multer.File) {
     if (!file) {
       throw new BadRequestException('Ningún archivo fue subido');
     }
+
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+    const destFolder = process.env.NODE_ENV === 'production' 
+      ? '/app/public/uploads/insumos' 
+      : './public/uploads/insumos';
+
+    if (!fs.existsSync(destFolder)) {
+      fs.mkdirSync(destFolder, { recursive: true });
+    }
+
+    // Convertir y optimizar la imagen a WebP con Sharp
+    const finalFilename = `${uniqueSuffix}.webp`;
+    const filePath = join(destFolder, finalFilename);
+
+    await sharp(file.buffer)
+      .resize({ width: 800, withoutEnlargement: true }) // Resolución optimizada para insumos
+      .webp({ quality: 80, effort: 6 })
+      .toFile(filePath);
+
     return {
-      message: 'Imagen subida correctamente',
-      imageUrl: `/uploads/insumos/${file.filename}`,
+      message: 'Imagen subida y optimizada correctamente',
+      imageUrl: `/uploads/insumos/${finalFilename}`,
     };
   }
 

@@ -14,8 +14,10 @@ import {
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiConsumes, ApiBody } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { extname } from 'path';
+import { memoryStorage } from 'multer';
+import { extname, join } from 'path';
+import * as fs from 'fs';
+import * as sharp from 'sharp';
 import { GastosService } from './gastos.service';
 import { CreateGastoDto, UpdateGastoDto, GastosQueryDto } from './dto/gasto.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
@@ -42,18 +44,9 @@ export class GastosController {
     },
   })
   @UseInterceptors(FileInterceptor('file', {
-    storage: diskStorage({
-      destination: process.env.NODE_ENV === 'production' 
-        ? '/app/public/uploads/gastos' 
-        : './public/uploads/gastos',
-      filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-        const ext = extname(file.originalname);
-        cb(null, `${uniqueSuffix}${ext}`);
-      },
-    }),
+    storage: memoryStorage(),
     fileFilter: (req, file, cb) => {
-      if (!file.mimetype.match(/\/(jpg|jpeg|png|gif|webp|pdf)$/)) {
+      if (!file.mimetype.match(/\/(jpg|jpeg|png|gif|webp|avif|pdf)$/)) {
         return cb(new BadRequestException('Solo se permiten archivos de imagen o pdf'), false);
       }
       cb(null, true);
@@ -62,13 +55,40 @@ export class GastosController {
       fileSize: 10 * 1024 * 1024, // 10MB
     },
   }))
-  uploadImage(@UploadedFile() file: Express.Multer.File) {
+  async uploadImage(@UploadedFile() file: Express.Multer.File) {
     if (!file) {
       throw new BadRequestException('Ningún archivo fue subido');
     }
+
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+    const destFolder = process.env.NODE_ENV === 'production' 
+      ? '/app/public/uploads/gastos' 
+      : './public/uploads/gastos';
+
+    // Crear carpeta si no existe (por precaución)
+    if (!fs.existsSync(destFolder)) {
+      fs.mkdirSync(destFolder, { recursive: true });
+    }
+
+    let finalFilename = `${uniqueSuffix}${extname(file.originalname)}`;
+
+    // Procesar imágenes con sharp a formato AVIF (ultra ligero) o WebP
+    if (file.mimetype.match(/\/(jpg|jpeg|png|webp|avif)$/)) {
+      finalFilename = `${uniqueSuffix}.webp`; // Guardamos en webp para máxima compatibilidad
+      const filePath = join(destFolder, finalFilename);
+      await sharp(file.buffer)
+        .resize({ width: 1280, withoutEnlargement: true }) // Redimensionar si es muy grande
+        .webp({ quality: 75, effort: 6 }) // Convertir a WebP ultra ligero
+        .toFile(filePath);
+    } else {
+      // Es un PDF u otro formato
+      const filePath = join(destFolder, finalFilename);
+      fs.writeFileSync(filePath, file.buffer);
+    }
+
     return {
-      message: 'Archivo subido correctamente',
-      imageUrl: `/uploads/gastos/${file.filename}`,
+      message: 'Archivo subido y optimizado correctamente',
+      imageUrl: `/uploads/gastos/${finalFilename}`,
     };
   }
 
