@@ -136,16 +136,22 @@ export class NotificationsService {
       // Enviar notificaciones push a Expo
       if (messages.length > 0) {
         const chunks = this.expo.chunkPushNotifications(messages);
-        const tickets = [];
         
-        for (const chunk of chunks) {
-          try {
-            const ticketChunk = await this.expo.sendPushNotificationsAsync(chunk);
-            tickets.push(...ticketChunk);
-          } catch (error) {
-            this.logger.error('Error enviando notificaciones push chunk', error);
-          }
-        }
+        // Ejecutar los chunks en paralelo pero atrapando errores de forma aislada
+        await Promise.allSettled(
+          chunks.map(async (chunk) => {
+            try {
+              await this.expo.sendPushNotificationsAsync(chunk);
+            } catch (error) {
+              // Si falla un chunk (ej. PUSH_TOO_MANY_EXPERIENCE_IDS), solo lo registramos
+              // pero no dejamos que rompa el flujo principal de la aplicación.
+              this.logger.error(`Error enviando notificaciones push chunk: ${error.message}`);
+              if (error.details) {
+                 this.logger.error(`Detalles del conflicto de tokens: ${JSON.stringify(error.details)}`);
+              }
+            }
+          })
+        );
       }
     } catch (error) {
       this.logger.error(`Error enviando notificación general: ${error.message}`);
