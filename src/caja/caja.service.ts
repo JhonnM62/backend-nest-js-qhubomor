@@ -223,6 +223,13 @@ export class CajaService {
     const { insumos, ...cajaData } = updateCierreDto;
 
     return this.prisma.$transaction(async (tx) => {
+      // 0. Eliminar insumos si es necesario (para que no quede rastro en la base de datos si el usuario los quitó del UI)
+      if ((updateCierreDto as any).insumosAEliminar && (updateCierreDto as any).insumosAEliminar.length > 0) {
+        await tx.aperturaCierreInsumos.deleteMany({
+          where: { Idcierreyapertura: { in: (updateCierreDto as any).insumosAEliminar } }
+        });
+      }
+
       // 1. Actualizar Insumos
       if (insumos && insumos.length > 0) {
         for (const insumoCierre of insumos as any[]) {
@@ -230,17 +237,30 @@ export class CajaService {
             const existing = await tx.aperturaCierreInsumos.findUnique({
               where: { Idcierreyapertura: insumoCierre.Idcierreyapertura }
             });
-            const gastadoFisico = (existing?.cantApertura || 0) - (insumoCierre.cantDeCierre || 0);
+            const gastadoFisico = (insumoCierre.cantApertura !== undefined ? insumoCierre.cantApertura : (existing?.cantApertura || 0)) - (insumoCierre.cantDeCierre || 0);
 
             await tx.aperturaCierreInsumos.update({
               where: { Idcierreyapertura: insumoCierre.Idcierreyapertura },
               data: {
+                cantApertura: insumoCierre.cantApertura !== undefined ? insumoCierre.cantApertura : existing?.cantApertura,
                 cantDeCierre: insumoCierre.cantDeCierre,
                 observacion: insumoCierre.observacion,
                 seUtilizaron: gastadoFisico,
                 paraQueProducto: insumoCierre.paraQueProducto,
               },
             });
+
+            if (existing && existing.cantApertura !== insumoCierre.cantApertura && insumoCierre.cantApertura !== undefined) {
+              await tx.historialCajaInsumos.create({
+                data: {
+                  Idcierreyapertura: insumoCierre.Idcierreyapertura,
+                  usuario: (updateCierreDto as any).usuario || caja.nombre || 'Sistema',
+                  campoModificado: 'cantApertura',
+                  valorAnterior: String(existing.cantApertura || 0),
+                  valorNuevo: String(insumoCierre.cantApertura || 0),
+                }
+              });
+            }
 
             if (existing && existing.cantDeCierre !== insumoCierre.cantDeCierre) {
               await tx.historialCajaInsumos.create({
@@ -253,6 +273,19 @@ export class CajaService {
                 }
               });
             }
+          } else {
+            // Es un insumo nuevo agregado en el momento del cierre
+            await tx.aperturaCierreInsumos.create({
+              data: {
+                cajaRelacionada: id,
+                nombreInsumo: insumoCierre.nombreInsumo,
+                cantApertura: insumoCierre.cantApertura || 0,
+                cantDeCierre: insumoCierre.cantDeCierre || 0,
+                seUtilizaron: (insumoCierre.cantApertura || 0) - (insumoCierre.cantDeCierre || 0),
+                observacion: insumoCierre.observacion || '',
+                paraQueProducto: insumoCierre.paraQueProducto || '',
+              }
+            });
           }
         }
       }

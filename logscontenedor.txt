@@ -1,102 +1,100 @@
-  fecha_de_vencimiento: undefined,
-  precio: 2200,
-  total: undefined,
-  agregar_cantidad: 0,
-  descontar_cant_de_ventas: undefined,
-  notificar_a_whatsapp: undefined,
-  apartir_de_cantidad: 0,
-  enviar_si_o_no: undefined,
-  disponible: '0',
-  estado: 'ACTIVO',
-  llevar_control_en_caja: undefined,
-  contador: undefined,
-  contador2: undefined,
-  imagencard: undefined,
-  fecha: undefined,
-  stockMinimo: undefined,
-  stockMaximo: undefined,
-  puntoReorden: undefined,
-  unidadMedida: undefined,
-  proveedorId: undefined,
-  proveedorNombre: undefined
-}
-[Nest] 19  - 05/14/2026, 3:14:11 PM     LOG [AppGateway] Client disconnected: wbLX8iV_i1G1nlB1AAAV (was in rooms: user_cmom4whz80000k0qnjs8qb3sc)
-[Nest] 19  - 05/14/2026, 3:14:34 PM     LOG [AppGateway] Client Rd4mSyDYuh8CIouAAAAX mapped to user cmom4whz80000k0qnjs8qb3sc and joined user_cmom4whz80000k0qnjs8qb3sc
-[Nest] 19  - 05/14/2026, 3:17:29 PM     LOG [AppGateway] Client disconnected: Rd4mSyDYuh8CIouAAAAX (was in rooms: user_cmom4whz80000k0qnjs8qb3sc)
-[Nest] 19  - 05/14/2026, 3:17:49 PM     LOG [AppGateway] Client rItEPbQsEErp6tqXAAAZ mapped to user cmom4whz80000k0qnjs8qb3sc and joined user_cmom4whz80000k0qnjs8qb3sc
-[Nest] 19  - 05/14/2026, 3:30:17 PM     LOG [AppGateway] Client disconnected: rItEPbQsEErp6tqXAAAZ (was in rooms: user_cmom4whz80000k0qnjs8qb3sc)
-[Nest] 19  - 05/14/2026, 3:31:15 PM     LOG [AppGateway] Client HMO0QC1NpScbgDfHAAAb mapped to user cmom4whz80000k0qnjs8qb3sc and joined user_cmom4whz80000k0qnjs8qb3sc
-[Nest] 19  - 05/14/2026, 3:31:18 PM     LOG [AppGateway] Client disconnected: HMO0QC1NpScbgDfHAAAb (was in rooms: user_cmom4whz80000k0qnjs8qb3sc)
-[Nest] 19  - 05/14/2026, 3:43:13 PM     LOG [AppGateway] Client qOSxsGd2wXviSpEDAAAd mapped to user cmom4whz80000k0qnjs8qb3sc and joined user_cmom4whz80000k0qnjs8qb3sc
-[Nest] 19  - 05/14/2026, 3:43:17 PM     LOG [AppGateway] Client disconnected: qOSxsGd2wXviSpEDAAAd (was in rooms: user_cmom4whz80000k0qnjs8qb3sc)
-[Nest] 19  - 05/14/2026, 3:43:48 PM     LOG [AppGateway] Client 8oJODCpTLY67XO-pAAAf mapped to user cmom4whz80000k0qnjs8qb3sc and joined user_cmom4whz80000k0qnjs8qb3sc
-[Nest] 19  - 05/14/2026, 3:46:51 PM     LOG [AppGateway] Client disconnected: 8oJODCpTLY67XO-pAAAf (was in rooms: user_cmom4whz80000k0qnjs8qb3sc)
-[Nest] 19  - 05/14/2026, 3:50:27 PM     LOG [AppGateway] Client z8msQgcjH485LPumAAAh mapped to user cmom4whz80000k0qnjs8qb3sc and joined user_cmom4whz80000k0qnjs8qb3sc
-[Nest] 19  - 05/14/2026, 3:50:27 PM     LOG [AppGateway] Client disconnected: z8msQgcjH485LPumAAAh (was in rooms: user_cmom4whz80000k0qnjs8qb3sc)
-[Nest] 19  - 05/14/2026, 3:50:40 PM     LOG [AppGateway] Client A-XJZsM35lLkGPIUAAAj mapped to user cmom4whz80000k0qnjs8qb3sc and joined user_cmom4whz80000k0qnjs8qb3sc
-[Nest] 19  - 05/14/2026, 3:51:12 PM     LOG [AppGateway] Client A-XJZsM35lLkGPIUAAAj joined room: kitchen
-[Nest] 19  - 05/14/2026, 3:51:12 PM     LOG [AppGateway] Client A-XJZsM35lLkGPIUAAAj joined room: caja
-[Nest] 19  - 05/14/2026, 3:53:21 PM     LOG [AppGateway] Client A-XJZsM35lLkGPIUAAAj joined room: kitchen
-[Nest] 19  - 05/14/2026, 3:58:07 PM     LOG [AppGateway] Client disconnected: A-XJZsM35lLkGPIUAAAj (was in rooms: user_cmom4whz80000k0qnjs8qb3sc, kitchen, caja)
-[Nest] 19  - 05/14/2026, 4:04:11 PM     LOG [AppGateway] Client FAPKkI3xC6igRdoCAAAm mapped to user cmom4whz80000k0qnjs8qb3sc and joined user_cmom4whz80000k0qnjs8qb3sc
-[Nest] 19  - 05/14/2026, 4:05:05 PM     LOG [AppGateway] Client disconnected: FAPKkI3xC6igRdoCAAAm (was in rooms: user_cmom4whz80000k0qnjs8qb3sc)
-[Nest] 19  - 05/14/2026, 4:05:20 PM     LOG [AppGateway] Client p6kdO52idH5Hm7PRAAAo mapped to user cmom4whz80000k0qnjs8qb3sc and joined user_cmom4whz80000k0qnjs8qb3sc
-[Nest] 19  - 05/14/2026, 4:08:28 PM     LOG [AppGateway] Client disconnected: p6kdO52idH5Hm7PRAAAo (was in rooms: user_cmom4whz80000k0qnjs8qb3sc)
-[Nest] 19  - 05/15/2026, 1:42:19 AM     LOG [AuthController] Request to login user: pruebas@gmail.com
-[Nest] 19  - 05/15/2026, 1:42:19 AM     LOG [AuthService] Attempting to login user: pruebas@gmail.com
-[Nest] 19  - 05/15/2026, 1:42:19 AM     LOG [AuthService] User logged in successfully: pruebas@gmail.com
-[Nest] 19  - 05/15/2026, 1:42:20 AM     LOG [AppGateway] Client scjn6Dbl8bKH4AXRAAAq mapped to user cmom4whz80000k0qnjs8qb3sc and joined user_cmom4whz80000k0qnjs8qb3sc
-[Nest] 19  - 05/15/2026, 1:42:26 AM     LOG [AppGateway] Client scjn6Dbl8bKH4AXRAAAq joined room: caja
-[Nest] 19  - 05/15/2026, 1:42:34 AM   ERROR [NotificationsService] Error enviando notificaciones push chunk
-[Nest] 19  - 05/15/2026, 1:42:34 AM   ERROR [NotificationsService] Error: All push notification messages in the same request must be for the same project; check the details field to investigate conflicting tokens.
-    at Expo.getErrorFromResultError (file:///app/node_modules/expo-server-sdk/build/ExpoClient.js:252:23)
-    at Expo.getErrorFromResult (file:///app/node_modules/expo-server-sdk/build/ExpoClient.js:241:28)
-    at Expo.parseErrorResponseAsync (file:///app/node_modules/expo-server-sdk/build/ExpoClient.js:224:21)
-    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
-    at async Expo.requestAsync (file:///app/node_modules/expo-server-sdk/build/ExpoClient.js:191:30)
-    at async promiseRetry.retries (file:///app/node_modules/expo-server-sdk/build/ExpoClient.js:55:28)
-    at async file:///app/node_modules/expo-server-sdk/build/ExpoClient.js:53:20
-    at async Expo.sendPushNotificationsAsync (file:///app/node_modules/expo-server-sdk/build/ExpoClient.js:52:22)
-    at async NotificationsService.sendNotification (/app/dist/src/notifications/notifications.service.js:120:45) {
-  code: 'PUSH_TOO_MANY_EXPERIENCE_IDS',
-
-  details: {
-    '@jhonnierm/qhubomor-pos-app': [
-      'ExponentPushToken[6l19NsAkbPhN9md0Pkn377]',
-      'ExponentPushToken[jXCiowD2SeY6sVJR10IA0q]'
-    ],
-    '@jhonnierm2/qhubomor-pos-app': [
-      'ExponentPushToken[GdlgtCAYnoMG2ypFXO7AFD]'
-    ]
-  },
-  statusCode: 400
-}
-[Nest] 19  - 05/15/2026, 1:42:35 AM     LOG [AppGateway] Nueva orden received: cmp695u98002s3sjuf1ndm5cp
-[Nest] 19  - 05/15/2026, 1:43:20 AM     LOG [AppGateway] Client scjn6Dbl8bKH4AXRAAAq joined room: kitchen
-[Nest] 19  - 05/15/2026, 1:43:28 AM   ERROR [NotificationsService] Error enviando notificaciones push chunk
-[Nest] 19  - 05/15/2026, 1:43:28 AM   ERROR [NotificationsService] Error: All push notification messages in the same request must be for the same project; check the details field to investigate conflicting tokens.
-    at Expo.getErrorFromResultError (file:///app/node_modules/expo-server-sdk/build/ExpoClient.js:252:23)
-    at Expo.getErrorFromResult (file:///app/node_modules/expo-server-sdk/build/ExpoClient.js:241:28)
-    at Expo.parseErrorResponseAsync (file:///app/node_modules/expo-server-sdk/build/ExpoClient.js:224:21)
-    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
-    at async Expo.requestAsync (file:///app/node_modules/expo-server-sdk/build/ExpoClient.js:191:30)
-    at async promiseRetry.retries (file:///app/node_modules/expo-server-sdk/build/ExpoClient.js:55:28)
-    at async file:///app/node_modules/expo-server-sdk/build/ExpoClient.js:53:20
-    at async Expo.sendPushNotificationsAsync (file:///app/node_modules/expo-server-sdk/build/ExpoClient.js:52:22)
-    at async NotificationsService.sendNotification (/app/dist/src/notifications/notifications.service.js:120:45) {
-  code: 'PUSH_TOO_MANY_EXPERIENCE_IDS',
-
-  details: {
-    '@jhonnierm/qhubomor-pos-app': [
-      'ExponentPushToken[6l19NsAkbPhN9md0Pkn377]',
-      'ExponentPushToken[jXCiowD2SeY6sVJR10IA0q]'
-    ],
-    '@jhonnierm2/qhubomor-pos-app': [
-      'ExponentPushToken[GdlgtCAYnoMG2ypFXO7AFD]'
-    ]
-  },
-  statusCode: 400
-}
-[Nest] 19  - 05/15/2026, 1:43:46 AM     LOG [AppGateway] Client scjn6Dbl8bKH4AXRAAAq joined room: caja
-[Nest] 19  - 05/15/2026, 1:43:50 AM     LOG [AppGateway] Client scjn6Dbl8bKH4AXRAAAq joined room: caja
-[Nest] 19  - 05/15/2026, 1:44:49 AM     LOG [AppGateway] Client disconnected: scjn6Dbl8bKH4AXRAAAq (was in rooms: user_cmom4whz80000k0qnjs8qb3sc, caja, kitchen)
+[Nest] 19  - 05/15/2026, 1:58:05 AM     LOG [RouterExplorer] Mapped {/api/v1/insumos/alertas, GET} route +0ms
+[Nest] 19  - 05/15/2026, 1:58:05 AM     LOG [RouterExplorer] Mapped {/api/v1/insumos/estadisticas, GET} route +1ms
+[Nest] 19  - 05/15/2026, 1:58:05 AM     LOG [RouterExplorer] Mapped {/api/v1/insumos/:id, GET} route +0ms
+[Nest] 19  - 05/15/2026, 1:58:05 AM     LOG [RouterExplorer] Mapped {/api/v1/insumos/:id/movimientos, GET} route +0ms
+[Nest] 19  - 05/15/2026, 1:58:05 AM     LOG [RouterExplorer] Mapped {/api/v1/insumos/:id, PATCH} route +0ms
+[Nest] 19  - 05/15/2026, 1:58:05 AM     LOG [RouterExplorer] Mapped {/api/v1/insumos/:id, DELETE} route +0ms
+[Nest] 19  - 05/15/2026, 1:58:05 AM     LOG [RouterExplorer] Mapped {/api/v1/insumos/:id/movimiento, POST} route +0ms
+[Nest] 19  - 05/15/2026, 1:58:05 AM     LOG [RouterExplorer] Mapped {/api/v1/insumos/bulk, POST} route +0ms
+[Nest] 19  - 05/15/2026, 1:58:05 AM     LOG [RouterExplorer] Mapped {/api/v1/insumos/:id/agregar, POST} route +1ms
+[Nest] 19  - 05/15/2026, 1:58:05 AM     LOG [RouterExplorer] Mapped {/api/v1/insumos/:id/descontar, POST} route +0ms
+[Nest] 19  - 05/15/2026, 1:58:05 AM     LOG [RoutesResolver] NotificationsController {/api/v1/notifications}: +0ms
+[Nest] 19  - 05/15/2026, 1:58:05 AM     LOG [RouterExplorer] Mapped {/api/v1/notifications/token, POST} route +0ms
+[Nest] 19  - 05/15/2026, 1:58:05 AM     LOG [RouterExplorer] Mapped {/api/v1/notifications/settings/:userId, GET} route +0ms
+[Nest] 19  - 05/15/2026, 1:58:05 AM     LOG [RouterExplorer] Mapped {/api/v1/notifications/settings/:userId, PATCH} route +1ms
+[Nest] 19  - 05/15/2026, 1:58:05 AM     LOG [RouterExplorer] Mapped {/api/v1/notifications/history/:userId, GET} route +0ms
+[Nest] 19  - 05/15/2026, 1:58:05 AM     LOG [RouterExplorer] Mapped {/api/v1/notifications/history/:id/read, PATCH} route +0ms
+[Nest] 19  - 05/15/2026, 1:58:05 AM     LOG [RoutesResolver] ClientesController {/api/v1/clientes}: +0ms
+[Nest] 19  - 05/15/2026, 1:58:05 AM     LOG [RouterExplorer] Mapped {/api/v1/clientes, POST} route +0ms
+[Nest] 19  - 05/15/2026, 1:58:05 AM     LOG [RouterExplorer] Mapped {/api/v1/clientes, GET} route +0ms
+[Nest] 19  - 05/15/2026, 1:58:05 AM     LOG [RouterExplorer] Mapped {/api/v1/clientes/:id, GET} route +0ms
+[Nest] 19  - 05/15/2026, 1:58:05 AM     LOG [RouterExplorer] Mapped {/api/v1/clientes/:id, PATCH} route +0ms
+[Nest] 19  - 05/15/2026, 1:58:05 AM     LOG [RouterExplorer] Mapped {/api/v1/clientes/:id, DELETE} route +1ms
+[Nest] 19  - 05/15/2026, 1:58:05 AM     LOG [RoutesResolver] ProveedoresController {/api/v1/proveedores}: +0ms
+[Nest] 19  - 05/15/2026, 1:58:05 AM     LOG [RouterExplorer] Mapped {/api/v1/proveedores, POST} route +0ms
+[Nest] 19  - 05/15/2026, 1:58:05 AM     LOG [RouterExplorer] Mapped {/api/v1/proveedores, GET} route +0ms
+[Nest] 19  - 05/15/2026, 1:58:05 AM     LOG [RouterExplorer] Mapped {/api/v1/proveedores/:id, GET} route +0ms
+[Nest] 19  - 05/15/2026, 1:58:05 AM     LOG [RouterExplorer] Mapped {/api/v1/proveedores/:id, PATCH} route +0ms
+[Nest] 19  - 05/15/2026, 1:58:05 AM     LOG [RouterExplorer] Mapped {/api/v1/proveedores/:id, DELETE} route +1ms
+[Nest] 19  - 05/15/2026, 1:58:05 AM     LOG [RoutesResolver] CajaController {/api/v1/caja}: +0ms
+[Nest] 19  - 05/15/2026, 1:58:05 AM     LOG [RouterExplorer] Mapped {/api/v1/caja/abrir, POST} route +0ms
+[Nest] 19  - 05/15/2026, 1:58:05 AM     LOG [RouterExplorer] Mapped {/api/v1/caja/:id, PATCH} route +0ms
+[Nest] 19  - 05/15/2026, 1:58:05 AM     LOG [RouterExplorer] Mapped {/api/v1/caja/cerrar/:id, PATCH} route +0ms
+[Nest] 19  - 05/15/2026, 1:58:05 AM     LOG [RouterExplorer] Mapped {/api/v1/caja/activa, GET} route +0ms
+[Nest] 19  - 05/15/2026, 1:58:05 AM     LOG [RouterExplorer] Mapped {/api/v1/caja/resumen/:id, GET} route +0ms
+[Nest] 19  - 05/15/2026, 1:58:05 AM     LOG [RouterExplorer] Mapped {/api/v1/caja, GET} route +0ms
+[Nest] 19  - 05/15/2026, 1:58:05 AM     LOG [RouterExplorer] Mapped {/api/v1/caja/:id, GET} route +1ms
+[Nest] 19  - 05/15/2026, 1:58:05 AM     LOG [RouterExplorer] Mapped {/api/v1/caja/:id, DELETE} route +0ms
+[Nest] 19  - 05/15/2026, 1:58:05 AM     LOG [RoutesResolver] GastosController {/api/v1/gastos}: +0ms
+[Nest] 19  - 05/15/2026, 1:58:05 AM     LOG [RouterExplorer] Mapped {/api/v1/gastos/upload-image, POST} route +0ms
+[Nest] 19  - 05/15/2026, 1:58:05 AM     LOG [RouterExplorer] Mapped {/api/v1/gastos, POST} route +0ms
+[Nest] 19  - 05/15/2026, 1:58:05 AM     LOG [RouterExplorer] Mapped {/api/v1/gastos, GET} route +0ms
+[Nest] 19  - 05/15/2026, 1:58:05 AM     LOG [RouterExplorer] Mapped {/api/v1/gastos/total, GET} route +0ms
+[Nest] 19  - 05/15/2026, 1:58:05 AM     LOG [RouterExplorer] Mapped {/api/v1/gastos/:id, GET} route +1ms
+[Nest] 19  - 05/15/2026, 1:58:05 AM     LOG [RouterExplorer] Mapped {/api/v1/gastos/:id, PATCH} route +0ms
+[Nest] 19  - 05/15/2026, 1:58:05 AM     LOG [RouterExplorer] Mapped {/api/v1/gastos/:id, DELETE} route +0ms
+[Nest] 19  - 05/15/2026, 1:58:05 AM     LOG [RoutesResolver] MesasController {/api/v1/mesas}: +0ms
+[Nest] 19  - 05/15/2026, 1:58:05 AM     LOG [RouterExplorer] Mapped {/api/v1/mesas, GET} route +0ms
+[Nest] 19  - 05/15/2026, 1:58:05 AM     LOG [RouterExplorer] Mapped {/api/v1/mesas/:id, GET} route +0ms
+[Nest] 19  - 05/15/2026, 1:58:05 AM     LOG [RoutesResolver] ComentariosController {/api/v1/comentarios}: +0ms
+[Nest] 19  - 05/15/2026, 1:58:05 AM     LOG [RouterExplorer] Mapped {/api/v1/comentarios, POST} route +0ms
+[Nest] 19  - 05/15/2026, 1:58:05 AM     LOG [RouterExplorer] Mapped {/api/v1/comentarios, GET} route +0ms
+[Nest] 19  - 05/15/2026, 1:58:05 AM     LOG [RouterExplorer] Mapped {/api/v1/comentarios/:id, GET} route +1ms
+[Nest] 19  - 05/15/2026, 1:58:05 AM     LOG [RouterExplorer] Mapped {/api/v1/comentarios/:id, PATCH} route +0ms
+[Nest] 19  - 05/15/2026, 1:58:05 AM     LOG [RouterExplorer] Mapped {/api/v1/comentarios/:id, DELETE} route +0ms
+[Nest] 19  - 05/15/2026, 1:58:05 AM     LOG [RoutesResolver] PrinterConfigController {/api/v1/printer-config}: +0ms
+[Nest] 19  - 05/15/2026, 1:58:05 AM     LOG [RouterExplorer] Mapped {/api/v1/printer-config, GET} route +0ms
+[Nest] 19  - 05/15/2026, 1:58:05 AM     LOG [RouterExplorer] Mapped {/api/v1/printer-config, PUT} route +0ms
+[Nest] 19  - 05/15/2026, 1:58:05 AM     LOG [RoutesResolver] EstadisticasController {/api/v1/estadisticas}: +0ms
+[Nest] 19  - 05/15/2026, 1:58:05 AM     LOG [RouterExplorer] Mapped {/api/v1/estadisticas/generales, GET} route +0ms
+[Nest] 19  - 05/15/2026, 1:58:05 AM     LOG [RoutesResolver] ReportesController {/api/v1/reportes}: +0ms
+[Nest] 19  - 05/15/2026, 1:58:05 AM     LOG [RouterExplorer] Mapped {/api/v1/reportes/dinero-guardado, GET} route +1ms
+[Nest] 19  - 05/15/2026, 1:58:05 AM     LOG [RouterExplorer] Mapped {/api/v1/reportes/dinero-guardado, POST} route +0ms
+[Nest] 19  - 05/15/2026, 1:58:05 AM     LOG [RouterExplorer] Mapped {/api/v1/reportes/dinero-guardado/:filterId, DELETE} route +0ms
+[Nest] 19  - 05/15/2026, 1:58:05 AM     LOG [RouterExplorer] Mapped {/api/v1/reportes/dinero-guardado/:filterId, GET} route +0ms
+[Nest] 19  - 05/15/2026, 1:58:05 AM     LOG [RouterExplorer] Mapped {/api/v1/reportes/dinero-guardado/:filterId/retiros, POST} route +0ms
+[Nest] 19  - 05/15/2026, 1:58:05 AM     LOG [RouterExplorer] Mapped {/api/v1/reportes/dinero-guardado/retiros/:retiroId, DELETE} route +0ms
+[Nest] 19  - 05/15/2026, 1:58:05 AM     LOG [RoutesResolver] ConfiguracionController {/api/v1/configuracion}: +0ms
+[Nest] 19  - 05/15/2026, 1:58:05 AM     LOG [RouterExplorer] Mapped {/api/v1/configuracion, GET} route +0ms
+[Nest] 19  - 05/15/2026, 1:58:05 AM     LOG [RouterExplorer] Mapped {/api/v1/configuracion, PUT} route +1ms
+[Nest] 19  - 05/15/2026, 1:58:05 AM     LOG [NestApplication] Nest application successfully started +50ms
+[Nest] 19  - 05/15/2026, 1:58:05 AM     LOG [Bootstrap] Application is running on: http://0.0.0.0:3000
+[Nest] 19  - 05/15/2026, 1:58:05 AM     LOG [Bootstrap] Swagger documentation: http://0.0.0.0:3000/api/docs
+[Nest] 19  - 05/15/2026, 5:42:59 AM     LOG [AuthController] Request to login user: pruebas@gmail.com
+[Nest] 19  - 05/15/2026, 5:42:59 AM     LOG [AuthService] Attempting to login user: pruebas@gmail.com
+[Nest] 19  - 05/15/2026, 5:42:59 AM     LOG [AuthService] User logged in successfully: pruebas@gmail.com
+[Nest] 19  - 05/15/2026, 5:43:00 AM     LOG [AppGateway] Client hTQB-t20nUaKsGBuAAAB mapped to user cmom4whz80000k0qnjs8qb3sc and joined user_cmom4whz80000k0qnjs8qb3sc
+[Nest] 19  - 05/15/2026, 5:43:04 AM     LOG [AppGateway] Client hTQB-t20nUaKsGBuAAAB joined room: caja
+[Nest] 19  - 05/15/2026, 5:43:12 AM   ERROR [NotificationsService] Error enviando notificaciones push chunk: All push notification messages in the same request must be for the same project; check the details field to investigate conflicting tokens.
+[Nest] 19  - 05/15/2026, 5:43:12 AM   ERROR [NotificationsService] Detalles del conflicto de tokens: {"@jhonnierm/qhubomor-pos-app":["ExponentPushToken[6l19NsAkbPhN9md0Pkn377]","ExponentPushToken[jXCiowD2SeY6sVJR10IA0q]"],"@jhonnierm2/qhubomor-pos-app":["ExponentPushToken[GdlgtCAYnoMG2ypFXO7AFD]","ExponentPushToken[yaNRwtFhUgf3kOHK9kn-Dg]"]}
+[Nest] 19  - 05/15/2026, 5:43:12 AM     LOG [AppGateway] Nueva orden received: cmp6hra8j0003125wg1s4fv6r
+[Nest] 19  - 05/15/2026, 5:43:21 AM     LOG [AppGateway] Client hTQB-t20nUaKsGBuAAAB joined room: caja
+[Nest] 19  - 05/15/2026, 5:43:24 AM     LOG [AppGateway] Client hTQB-t20nUaKsGBuAAAB joined room: caja
+[Nest] 19  - 05/15/2026, 5:43:53 AM     LOG [AppGateway] Client disconnected: hTQB-t20nUaKsGBuAAAB (was in rooms: user_cmom4whz80000k0qnjs8qb3sc, caja)
+[Nest] 19  - 05/15/2026, 3:06:42 PM     LOG [AuthController] Request to login user: pruebas@gmail.com
+[Nest] 19  - 05/15/2026, 3:06:42 PM     LOG [AuthService] Attempting to login user: pruebas@gmail.com
+[Nest] 19  - 05/15/2026, 3:06:42 PM     LOG [AuthService] User logged in successfully: pruebas@gmail.com
+[Nest] 19  - 05/15/2026, 3:06:44 PM     LOG [AppGateway] Client 3Vm0_Cl3qr1qBvSzAAAD mapped to user cmom4whz80000k0qnjs8qb3sc and joined user_cmom4whz80000k0qnjs8qb3sc
+[Nest] 19  - 05/15/2026, 3:06:54 PM     LOG [AppGateway] Client 3Vm0_Cl3qr1qBvSzAAAD joined room: caja
+[Nest] 19  - 05/15/2026, 3:06:56 PM     LOG [AppGateway] Client 3Vm0_Cl3qr1qBvSzAAAD joined room: caja
+[Nest] 19  - 05/15/2026, 3:08:50 PM     LOG [AppGateway] Client disconnected: 3Vm0_Cl3qr1qBvSzAAAD (was in rooms: user_cmom4whz80000k0qnjs8qb3sc, caja)
+[Nest] 19  - 05/15/2026, 3:35:52 PM     LOG [AppGateway] Client famodqiq39agKNPjAAAF mapped to user cmom4whz80000k0qnjs8qb3sc and joined user_cmom4whz80000k0qnjs8qb3sc
+[Nest] 19  - 05/15/2026, 3:35:56 PM     LOG [AppGateway] Client famodqiq39agKNPjAAAF joined room: caja
+[Nest] 19  - 05/15/2026, 3:36:02 PM     LOG [AppGateway] Nueva orden received: cmp72xo3l000a125w52d857tu
+[Nest] 19  - 05/15/2026, 3:36:02 PM   ERROR [NotificationsService] Error enviando notificaciones push chunk: All push notification messages in the same request must be for the same project; check the details field to investigate conflicting tokens.
+[Nest] 19  - 05/15/2026, 3:36:02 PM   ERROR [NotificationsService] Detalles del conflicto de tokens: {"@jhonnierm/qhubomor-pos-app":["ExponentPushToken[6l19NsAkbPhN9md0Pkn377]","ExponentPushToken[jXCiowD2SeY6sVJR10IA0q]"],"@jhonnierm2/qhubomor-pos-app":["ExponentPushToken[GdlgtCAYnoMG2ypFXO7AFD]","ExponentPushToken[JNemAxFsQJCkbaYhKX0eWO]","ExponentPushToken[yaNRwtFhUgf3kOHK9kn-Dg]"]}
+[Nest] 19  - 05/15/2026, 3:36:24 PM     LOG [AppGateway] Client famodqiq39agKNPjAAAF joined room: kitchen
+[Nest] 19  - 05/15/2026, 3:36:31 PM     LOG [AppGateway] Client famodqiq39agKNPjAAAF joined room: caja
+[Nest] 19  - 05/15/2026, 3:36:47 PM   ERROR [NotificationsService] Error enviando notificaciones push chunk: All push notification messages in the same request must be for the same project; check the details field to investigate conflicting tokens.
+[Nest] 19  - 05/15/2026, 3:36:47 PM   ERROR [NotificationsService] Detalles del conflicto de tokens: {"@jhonnierm/qhubomor-pos-app":["ExponentPushToken[6l19NsAkbPhN9md0Pkn377]","ExponentPushToken[jXCiowD2SeY6sVJR10IA0q]"],"@jhonnierm2/qhubomor-pos-app":["ExponentPushToken[GdlgtCAYnoMG2ypFXO7AFD]","ExponentPushToken[yaNRwtFhUgf3kOHK9kn-Dg]","ExponentPushToken[JNemAxFsQJCkbaYhKX0eWO]"]}
+[Nest] 19  - 05/15/2026, 3:36:48 PM     LOG [AppGateway] Nueva orden received: cmp72ynku000f125wyk2gfya0

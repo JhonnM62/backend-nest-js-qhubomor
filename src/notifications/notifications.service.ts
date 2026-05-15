@@ -143,11 +143,44 @@ export class NotificationsService {
             try {
               await this.expo.sendPushNotificationsAsync(chunk);
             } catch (error) {
-              // Si falla un chunk (ej. PUSH_TOO_MANY_EXPERIENCE_IDS), solo lo registramos
-              // pero no dejamos que rompa el flujo principal de la aplicación.
+              // Si falla un chunk (ej. PUSH_TOO_MANY_EXPERIENCE_IDS), registramos y auto-corregimos
               this.logger.error(`Error enviando notificaciones push chunk: ${error.message}`);
               if (error.details) {
                  this.logger.error(`Detalles del conflicto de tokens: ${JSON.stringify(error.details)}`);
+                 
+                 // ERROR HANDLING PATTERN: Auto-recuperación (Self-Healing)
+                 // Si detectamos tokens de múltiples proyectos, eliminamos los tokens del proyecto antiguo
+                 // para que en el próximo envío ya no haya conflictos.
+                 const details = error.details;
+                 const tokensToDelete = [];
+                 
+                 // El proyecto actual que estamos usando (el que tiene más tokens válidos o el nuevo)
+                 // Para hacerlo dinámico, eliminaremos los tokens de cualquier proyecto que no sea el actual
+                 // o simplemente eliminaremos los que estén fallando.
+                 // Expo details object shape: { "@old_account/project": ["ExponentPushToken[...]"], "@new_account/project": ["ExponentPushToken[...]"] }
+                 
+                 // Obtenemos todos los nombres de proyectos involucrados
+                 const projectNames = Object.keys(details);
+                 if (projectNames.length > 1) {
+                    // Ordenamos asumiendo que el nuevo proyecto es el que queremos conservar 
+                    // (podemos asumir que el que tiene "@jhonnierm/" es el viejo y "@jhonnierm2/" es el nuevo)
+                    for (const projectName of projectNames) {
+                      if (projectName.includes('@jhonnierm/')) {
+                        tokensToDelete.push(...details[projectName]);
+                      }
+                    }
+
+                    if (tokensToDelete.length > 0) {
+                      this.logger.log(`Auto-Healing: Eliminando ${tokensToDelete.length} tokens conflictivos del proyecto antiguo (${tokensToDelete.join(', ')})...`);
+                      await this.prisma.pushToken.deleteMany({
+                        where: {
+                          token: {
+                            in: tokensToDelete
+                          }
+                        }
+                      }).catch(e => this.logger.error(`Fallo al eliminar tokens viejos: ${e.message}`));
+                    }
+                 }
               }
             }
           })

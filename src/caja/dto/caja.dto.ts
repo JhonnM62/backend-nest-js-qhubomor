@@ -113,13 +113,63 @@ export class CreateAperturaCierreCajaDto {
 }
 
 export class InsumoCierreDto {
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  Idcierreyapertura?: string;
+
   @ApiProperty()
   @IsString()
   nombreInsumo: string;
 
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  nombreInsumoReal?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  paraQueProducto?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  nombreProductoReal?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  categoria?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  unidadDeMedida?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  cantApertura?: number;
+
   @ApiProperty()
   @IsNumber()
   cantDeCierre: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  observacion?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  imageUrl?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsArray()
+  historial?: any[];
 }
 
 export class UpdateCierreCajaDto {
