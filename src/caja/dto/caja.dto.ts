@@ -175,6 +175,17 @@ export class InsumoCierreDto {
 export class UpdateCierreCajaDto {
   @ApiPropertyOptional()
   @IsOptional()
+  @IsString()
+  usuario?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  insumosAEliminar?: string[];
+
+  @ApiPropertyOptional()
+  @IsOptional()
   @IsNumber()
   efectivoDeCierre?: number;
 
