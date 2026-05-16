@@ -188,7 +188,8 @@ export class InsumosService {
     if (updateInsumoDto.apartir_de_cantidad !== undefined) data.apartirDeCantidad = updateInsumoDto.apartir_de_cantidad;
     if (updateInsumoDto.enviar_si_o_no !== undefined) data.enviarSiONo = updateInsumoDto.enviar_si_o_no;
     if (updateInsumoDto.estado !== undefined) data.estado = updateInsumoDto.estado;
-    if (updateInsumoDto.disponible !== undefined) data.disponible = Number(updateInsumoDto.disponible) || 0;
+    if (updateInsumoDto.disponible !== undefined) data.disponible = String(updateInsumoDto.disponible);
+    if (updateInsumoDto.precioActual !== undefined) data.precio = updateInsumoDto.precioActual;
     if (updateInsumoDto.llevar_control_en_caja !== undefined) data.llevarControlEnCaja = updateInsumoDto.llevar_control_en_caja;
     if (updateInsumoDto.contador !== undefined) data.contador = updateInsumoDto.contador;
     if (updateInsumoDto.contador2 !== undefined) data.contador2 = updateInsumoDto.contador2;

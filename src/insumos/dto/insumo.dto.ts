@@ -235,6 +235,12 @@ export class UpdateInsumoDto {
   @IsString()
   disponible?: string;
 
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  precioActual?: number;
+
   @IsOptional()
   @IsString()
   estado?: string;
