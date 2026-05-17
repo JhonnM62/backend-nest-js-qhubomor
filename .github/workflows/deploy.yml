@@ -29,6 +29,8 @@ jobs:
           username: ${{ steps.parse.outputs.username }}
           password: ${{ secrets.AUTH_PASS }}
           script: |
+            set -e
+            
             # 1. Crear directorio del proyecto si no existe
             mkdir -p /root/backend-qhubomor
             cd /root/backend-qhubomor
@@ -40,7 +42,9 @@ jobs:
             else
               echo "Actualizando repositorio existente..."
               git remote set-url origin https://${{ secrets.TOKEN_NESTQHUBOMOR }}@github.com/JhonnM62/backend-nest-js-qhubomor.git
-              git pull origin main
+              git fetch --all
+              git reset --hard origin/main
+              git clean -fd
             fi
             
             # 3. Inyectar las variables de entorno desde los secretos de GitHub

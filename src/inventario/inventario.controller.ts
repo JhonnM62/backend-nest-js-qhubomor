@@ -17,7 +17,9 @@ import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 @ApiTags('Inventario')
 @Controller('inventario')
 export class InventarioController {
-  constructor(private readonly inventarioService: InventarioService) {}
+  constructor(private readonly inventarioService: InventarioService) {
+    console.log('✅ InventarioController Inicializado - VERSIÓN CON RUTAS PATCH CORREGIDAS');
+  }
 
   @Post()
   @UseGuards(JwtAuthGuard)
