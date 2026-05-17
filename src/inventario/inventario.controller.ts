@@ -47,6 +47,14 @@ export class InventarioController {
     return this.inventarioService.getInventarioBajo();
   }
 
+  @Patch('item/update/:id')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Actualizar item del inventario' })
+  updateItem(@Param('id') id: string, @Body() updateOrderDto: UpdateOrderInventarioDto) {
+    return this.inventarioService.updateItem(id, updateOrderDto);
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Obtener inventario por ID' })
   findOne(@Param('id') id: string) {
@@ -76,14 +84,6 @@ export class InventarioController {
   @ApiOperation({ summary: 'Agregar item al inventario' })
   agregarItem(@Body() createOrderDto: CreateOrderInventarioDto) {
     return this.inventarioService.agregarItem(createOrderDto);
-  }
-
-  @Patch('item/update/:id')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Actualizar item del inventario' })
-  updateItem(@Param('id') id: string, @Body() updateOrderDto: UpdateOrderInventarioDto) {
-    return this.inventarioService.updateItem(id, updateOrderDto);
   }
 
   @Delete('item/:id')
