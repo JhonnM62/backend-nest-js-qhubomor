@@ -15,9 +15,9 @@ import {
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiConsumes, ApiBody } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
-import * as path from 'path';
+import { extname, join } from 'path';
 import * as fs from 'fs';
-import * as sharp from 'sharp';
+import sharp from 'sharp';
 import { GastosService } from './gastos.service';
 import { CreateGastoDto, UpdateGastoDto, GastosQueryDto } from './dto/gasto.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
