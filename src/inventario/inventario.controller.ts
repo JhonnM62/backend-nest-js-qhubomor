@@ -47,14 +47,6 @@ export class InventarioController {
     return this.inventarioService.getInventarioBajo();
   }
 
-  @Patch('item/update/:id')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Actualizar item del inventario' })
-  updateItem(@Param('id') id: string, @Body() updateOrderDto: UpdateOrderInventarioDto) {
-    return this.inventarioService.updateItem(id, updateOrderDto);
-  }
-
   @Get(':id')
   @ApiOperation({ summary: 'Obtener inventario por ID' })
   findOne(@Param('id') id: string) {
@@ -76,6 +68,15 @@ export class InventarioController {
   remove(@Param('id') id: string, @Query('restoreStock') restoreStock?: string) {
     const shouldRestore = restoreStock !== 'false';
     return this.inventarioService.remove(id, shouldRestore);
+  }
+
+  @Patch('item/update/:id')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Actualizar item del inventario' })
+  updateItem(@Param('id') id: string, @Body() updateOrderDto: UpdateOrderInventarioDto) {
+    console.log(`[InventarioController] PATCH /inventario/item/update/${id}`, updateOrderDto);
+    return this.inventarioService.updateItem(id, updateOrderDto);
   }
 
   @Post('item')
