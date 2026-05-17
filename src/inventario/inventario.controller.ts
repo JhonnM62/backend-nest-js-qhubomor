@@ -78,7 +78,7 @@ export class InventarioController {
     return this.inventarioService.agregarItem(createOrderDto);
   }
 
-  @Patch('item/:id')
+  @Patch('item/update/:id')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Actualizar item del inventario' })
