@@ -17,6 +17,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import { extname, join } from 'path';
 import * as fs from 'fs';
+// @ts-ignore
 import * as sharp from 'sharp';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiConsumes, ApiBody } from '@nestjs/swagger';
 import { InsumosService } from './insumos.service';

@@ -277,7 +277,7 @@ export class CajaService {
             // Es un insumo nuevo agregado en el momento del cierre
             await tx.aperturaCierreInsumos.create({
               data: {
-                cajaRelacionada: id,
+                IDcaja: id,
                 nombreInsumo: insumoCierre.nombreInsumo,
                 cantApertura: insumoCierre.cantApertura || 0,
                 cantDeCierre: insumoCierre.cantDeCierre || 0,
