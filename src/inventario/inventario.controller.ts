@@ -47,13 +47,30 @@ export class InventarioController {
     return this.inventarioService.getInventarioBajo();
   }
 
-  @Patch('item/update/:id')
+  @Patch('item/:id/update')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Actualizar item del inventario' })
   updateItem(@Param('id') id: string, @Body() updateOrderDto: UpdateOrderInventarioDto) {
-    console.log(`[InventarioController] PATCH /inventario/item/update/${id}`, updateOrderDto);
+    console.log(`[InventarioController] PATCH /inventario/item/${id}/update`, updateOrderDto);
     return this.inventarioService.updateItem(id, updateOrderDto);
+  }
+
+  @Patch('item/update/:id')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Actualizar item del inventario (Legacy)' })
+  updateItemLegacy(@Param('id') id: string, @Body() updateOrderDto: UpdateOrderInventarioDto) {
+    console.log(`[InventarioController] PATCH /inventario/item/update/${id} (Legacy)`, updateOrderDto);
+    return this.inventarioService.updateItem(id, updateOrderDto);
+  }
+
+  @Patch('item/update')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  updateItemMissingId(@Body() updateOrderDto: any) {
+    console.log(`[InventarioController] PATCH /inventario/item/update (FALTA EL ID!)`, updateOrderDto);
+    throw new Error('Falta el ID del item a actualizar. Revisa el frontend.');
   }
 
   @Get(':id')
@@ -91,7 +108,6 @@ export class InventarioController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Eliminar item del inventario' })
-  @Delete('item/:id')
   eliminarItem(@Param('id') id: string, @Query('restoreStock') restoreStock?: string) {
     const shouldRestore = restoreStock !== 'false';
     return this.inventarioService.eliminarItem(id, shouldRestore);
