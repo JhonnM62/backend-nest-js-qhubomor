@@ -239,6 +239,42 @@ export class InventarioService {
     return item;
   }
 
+  async updateItem(id: string, updateOrderDto: any) {
+    const item = await this.prisma.orderinventario.findUnique({
+      where: { IDorderinventario: id },
+    });
+
+    if (!item) {
+      throw new NotFoundException(`Item con ID ${id} no encontrado`);
+    }
+
+    const dataToUpdate: any = {};
+
+    if (updateOrderDto.cantidad !== undefined) {
+      dataToUpdate.cantidad = updateOrderDto.cantidad;
+    }
+    if (updateOrderDto.precio !== undefined) {
+      dataToUpdate.precio = updateOrderDto.precio;
+      dataToUpdate.precioActual = updateOrderDto.precio;
+    } else if (updateOrderDto.precioActual !== undefined) {
+      dataToUpdate.precioActual = updateOrderDto.precioActual;
+      dataToUpdate.precio = updateOrderDto.precioActual;
+    }
+
+    // Recalcular subtotal
+    const cant = dataToUpdate.cantidad !== undefined ? dataToUpdate.cantidad : (item.cantidad || 0);
+    const prec = dataToUpdate.precioActual !== undefined ? dataToUpdate.precioActual : (item.precioActual || item.precio || 0);
+    dataToUpdate.subtotal = cant * Number(prec);
+
+    const updated = await this.prisma.orderinventario.update({
+      where: { IDorderinventario: id },
+      data: dataToUpdate,
+    });
+
+    this.appGateway.emitToInventario(SocketEvent.REFRESH_INVENTARIO, { action: 'updateItem', id });
+    return updated;
+  }
+
   async eliminarItem(id: string, restoreStock: boolean = true) {
     const item = await this.prisma.orderinventario.findUnique({
       where: { IDorderinventario: id },

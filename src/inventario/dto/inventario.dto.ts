@@ -120,6 +120,23 @@ export class CreateOrderInventarioDto {
   fecha?: string;
 }
 
+export class UpdateOrderInventarioDto {
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  cantidad?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  precio?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  precioActual?: number;
+}
+
 export class InventarioQueryDto extends PaginationDto {
   @ApiPropertyOptional()
   @IsOptional()

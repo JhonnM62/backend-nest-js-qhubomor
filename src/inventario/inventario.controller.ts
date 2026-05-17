@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { InventarioService } from './inventario.service';
-import { CreateInventarioDto, UpdateInventarioDto, CreateOrderInventarioDto, InventarioQueryDto, OrderInventarioQueryDto } from './dto/inventario.dto';
+import { CreateInventarioDto, UpdateInventarioDto, CreateOrderInventarioDto, UpdateOrderInventarioDto, InventarioQueryDto, OrderInventarioQueryDto } from './dto/inventario.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 
 @ApiTags('Inventario')
@@ -76,6 +76,14 @@ export class InventarioController {
   @ApiOperation({ summary: 'Agregar item al inventario' })
   agregarItem(@Body() createOrderDto: CreateOrderInventarioDto) {
     return this.inventarioService.agregarItem(createOrderDto);
+  }
+
+  @Patch('item/:id')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Actualizar item del inventario' })
+  updateItem(@Param('id') id: string, @Body() updateOrderDto: UpdateOrderInventarioDto) {
+    return this.inventarioService.updateItem(id, updateOrderDto);
   }
 
   @Delete('item/:id')
