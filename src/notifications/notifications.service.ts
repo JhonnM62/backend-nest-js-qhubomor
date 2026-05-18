@@ -141,7 +141,27 @@ export class NotificationsService {
         await Promise.allSettled(
           chunks.map(async (chunk) => {
             try {
-              await this.expo.sendPushNotificationsAsync(chunk);
+              const tickets = await this.expo.sendPushNotificationsAsync(chunk);
+              
+              // Verificar si hay errores en los tickets devueltos por Expo (ej. DeviceNotRegistered)
+              const invalidTokens: string[] = [];
+              for (let i = 0; i < tickets.length; i++) {
+                const ticket = tickets[i];
+                if (ticket.status === 'error') {
+                  this.logger.error(`Error en ticket para ${chunk[i].to}: ${ticket.message}`);
+                  if (ticket.details && ticket.details.error === 'DeviceNotRegistered') {
+                    invalidTokens.push(chunk[i].to as string);
+                  }
+                }
+              }
+
+              // Eliminar tokens desregistrados automáticamente
+              if (invalidTokens.length > 0) {
+                this.logger.log(`Eliminando ${invalidTokens.length} tokens inactivos (DeviceNotRegistered)...`);
+                await this.prisma.pushToken.deleteMany({
+                  where: { token: { in: invalidTokens } }
+                }).catch(e => this.logger.error(`Error eliminando tokens inactivos: ${e.message}`));
+              }
             } catch (error) {
               // Si falla un chunk (ej. PUSH_TOO_MANY_EXPERIENCE_IDS), registramos y auto-corregimos
               this.logger.error(`Error enviando notificaciones push chunk: ${error.message}`);
