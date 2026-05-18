@@ -152,7 +152,7 @@ export class NotificationsService {
                  // Si detectamos tokens de múltiples proyectos, eliminamos los tokens del proyecto antiguo
                  // para que en el próximo envío ya no haya conflictos.
                  const details = error.details;
-                 const tokensToDelete = [];
+                 const tokensToDelete: string[] = [];
                  
                  // El proyecto actual que estamos usando (el que tiene más tokens válidos o el nuevo)
                  // Para hacerlo dinámico, eliminaremos los tokens de cualquier proyecto que no sea el actual
@@ -161,7 +161,7 @@ export class NotificationsService {
                  
                  // Obtenemos todos los nombres de proyectos involucrados
                  const projectNames = Object.keys(details);
-                 const validTokens = [];
+                 const validTokens: string[] = [];
                  
                  if (projectNames.length > 1) {
                     // Ordenamos asumiendo que el nuevo proyecto es el que queremos conservar 
