@@ -505,6 +505,19 @@ model ConfiguracionNegocio {
   updatedAt     DateTime @updatedAt
 }
 
+model ConfiguracionIA {
+  id             Int      @id @default(1)
+  apiKey         String?
+  modeloDefecto  String   @default("gemini-1.5-flash")
+  temperatura    Float    @default(0.4)
+  topP           Float    @default(0.95)
+  maxTokens      Int      @default(2048)
+  isActive       Boolean  @default(true)
+  updatedAt      DateTime @updatedAt
+
+  @@map("CONFIGURACION_IA")
+}
+
 model PushToken {
   id         String   @id @default(cuid())
   userId     String   @map("UsuarioId")
