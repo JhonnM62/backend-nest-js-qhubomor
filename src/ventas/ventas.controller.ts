@@ -140,6 +140,16 @@ export class VentasController {
     return this.ventasService.emptyTrash();
   }
 
+  @Delete('bulk/hard')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('Admin app')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Eliminar definitivamente múltiples ventas (Bulk Hard Delete)' })
+  @ApiResponse({ status: 200, description: 'Ventas eliminadas permanentemente' })
+  hardDeleteBulk(@Body('ids') ids: string[]) {
+    return this.ventasService.hardDeleteBulk(ids);
+  }
+
   @Delete(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('Admin app')
@@ -158,16 +168,6 @@ export class VentasController {
   @ApiResponse({ status: 200, description: 'Venta eliminada permanentemente' })
   hardDelete(@Param('id') id: string) {
     return this.ventasService.hardDelete(id);
-  }
-
-  @Delete('bulk/hard')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('Admin app')
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Eliminar definitivamente múltiples ventas (Bulk Hard Delete)' })
-  @ApiResponse({ status: 200, description: 'Ventas eliminadas permanentemente' })
-  hardDeleteBulk(@Body('ids') ids: string[]) {
-    return this.ventasService.hardDeleteBulk(ids);
   }
 
   @Post(':id/restore')
