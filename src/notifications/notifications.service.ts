@@ -161,12 +161,24 @@ export class NotificationsService {
                  
                  // Obtenemos todos los nombres de proyectos involucrados
                  const projectNames = Object.keys(details);
+                 const validTokens = [];
+                 
                  if (projectNames.length > 1) {
                     // Ordenamos asumiendo que el nuevo proyecto es el que queremos conservar 
                     // (podemos asumir que el que tiene "@jhonnierm/" es el viejo y "@jhonnierm2/" es el nuevo)
                     for (const projectName of projectNames) {
-                      if (projectName.includes('@jhonnierm/')) {
-                        tokensToDelete.push(...details[projectName]);
+                      // Identificamos el proyecto antiguo explícitamente, o asumimos que el nuevo es jhonnierm2
+                      if (projectName === '@jhonnierm/qhubomor-pos-app' || projectName.includes('@jhonnierm/')) {
+                        // Si hay varios y este es el viejo, lo marcamos para eliminar
+                        // Pero asegurémonos de no eliminar si es el único (por si acaso)
+                        if (projectName !== '@jhonnierm2/qhubomor-pos-app') {
+                          tokensToDelete.push(...details[projectName]);
+                        } else {
+                          validTokens.push(...details[projectName]);
+                        }
+                      } else {
+                        // Cualquier otro proyecto (ej. el nuevo @jhonnierm2) se considera válido
+                        validTokens.push(...details[projectName]);
                       }
                     }
 
@@ -179,6 +191,20 @@ export class NotificationsService {
                           }
                         }
                       }).catch(e => this.logger.error(`Fallo al eliminar tokens viejos: ${e.message}`));
+                    }
+                    
+                    // REINTENTO CON TOKENS VÁLIDOS
+                    if (validTokens.length > 0) {
+                      this.logger.log(`Auto-Healing: Reintentando envío de notificaciones con ${validTokens.length} tokens válidos...`);
+                      const retryMessages = chunk.filter(msg => validTokens.includes(msg.to as string));
+                      if (retryMessages.length > 0) {
+                        try {
+                          await this.expo.sendPushNotificationsAsync(retryMessages);
+                          this.logger.log('Auto-Healing: Reintento exitoso.');
+                        } catch (retryError) {
+                          this.logger.error(`Auto-Healing: Fallo en el reintento: ${retryError.message}`);
+                        }
+                      }
                     }
                  }
               }
