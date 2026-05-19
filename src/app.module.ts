@@ -36,6 +36,7 @@ import { AiModule } from './ai/ai.module'; // IMPORT AI MODULE
     ServeStaticModule.forRoot({
       rootPath: join(process.cwd(), 'public'),
       serveRoot: '/api/v1',
+      exclude: ['/api*'],
     }),
     CacheModule.register({
       isGlobal: true,
