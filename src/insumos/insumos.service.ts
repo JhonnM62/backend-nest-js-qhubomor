@@ -178,7 +178,14 @@ export class InsumosService {
     if (updateInsumoDto.unidades !== undefined) data.unidades = updateInsumoDto.unidades;
     if (updateInsumoDto.cantidad !== undefined) data.cantidad = updateInsumoDto.cantidad;
     if (updateInsumoDto.imagen !== undefined) data.imagen = updateInsumoDto.imagen;
+    if (updateInsumoDto.imagen === null) data.imagen = null;
+    
     if (updateInsumoDto.imageUrl !== undefined) data.imageUrl = updateInsumoDto.imageUrl;
+    if (updateInsumoDto.imageUrl === null) data.imageUrl = null;
+    
+    if (updateInsumoDto.imagencard !== undefined) data.imagencard = updateInsumoDto.imagencard;
+    if (updateInsumoDto.imagencard === null) data.imagencard = null;
+
     if (updateInsumoDto.fecha_de_vencimiento !== undefined) data.fechaDeVencimiento = new Date(updateInsumoDto.fecha_de_vencimiento);
     if (updateInsumoDto.precio !== undefined) data.precio = updateInsumoDto.precio;
     if (updateInsumoDto.total !== undefined) data.total = updateInsumoDto.total;
@@ -193,7 +200,6 @@ export class InsumosService {
     if (updateInsumoDto.llevar_control_en_caja !== undefined) data.llevarControlEnCaja = updateInsumoDto.llevar_control_en_caja;
     if (updateInsumoDto.contador !== undefined) data.contador = updateInsumoDto.contador;
     if (updateInsumoDto.contador2 !== undefined) data.contador2 = updateInsumoDto.contador2;
-    if (updateInsumoDto.imagencard !== undefined) data.imagencard = updateInsumoDto.imagencard;
     if (updateInsumoDto.fecha !== undefined) data.fecha = new Date(updateInsumoDto.fecha);
     
     data.updatedAt = new Date();
