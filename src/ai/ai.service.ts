@@ -27,26 +27,28 @@ export class AiService {
       // 1. Obtener catálogo
       const [productosRaw, comentariosRaw] = await Promise.all([
         this.prisma.productos.findMany({
-          // Removed where: { estadoProducto: 'Activo' } as 'estadoProducto' does not exist either
-          select: { IDproductos: true, nombre: true, precioUnitario: true },
+          select: { IDproductos: true, nombre: true },
         }),
         this.prisma.comentarios.findMany({
-          select: { ID: true, comentarios: true, precio: true },
+          select: { ID: true, comentarios: true },
         }),
       ]);
 
-      const systemInstruction = `
-Eres el sistema inteligente de un punto de venta.
-Catálogo actual en JSON:
-PRODUCTOS: ${JSON.stringify(productosRaw)}
-COMENTARIOS (MODIFICADORES): ${JSON.stringify(comentariosRaw)}
+      // Optimize payload size for faster TTFT (Time to First Token)
+      const catalogProductos = productosRaw.map(p => ({ id: p.IDproductos, n: p.nombre }));
+      const catalogComentarios = comentariosRaw.map(c => ({ id: c.ID, n: c.comentarios }));
 
-Escucha el audio del cliente y extrae el pedido.
-REGLAS:
-1. Mapea el audio con el 'nombre' más parecido del catálogo de PRODUCTOS y devuelve su ID en 'productoId'.
-2. Extrae los modificadores (ej. "sin cebolla") y mapealos a COMENTARIOS y devuelve sus IDs en 'comentariosIds'.
-3. Extrae las cantidades solicitadas de cada producto.
-4. Devuelve estrictamente el JSON con los ítems solicitados.
+      const systemInstruction = `
+Catálogo JSON:
+P: ${JSON.stringify(catalogProductos)}
+C: ${JSON.stringify(catalogComentarios)}
+
+Mapea el audio a los IDs correspondientes.
+Reglas:
+1. 'productoId' = ID en 'P'
+2. 'comentariosIds' = array de IDs en 'C'
+3. 'cantidad' = numero
+Devuelve JSON estricto.
       `;
 
       const responseSchema: Schema = {
