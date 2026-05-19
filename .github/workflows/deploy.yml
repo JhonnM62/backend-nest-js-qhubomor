@@ -61,16 +61,22 @@ jobs:
             docker stop qhubomor-backend-app || true
             docker rm qhubomor-backend-app || true
             
-            # 5.1 Crear directorios de subidas en el host para persistencia
-            mkdir -p /root/backend-qhubomor/public/uploads/insumos
-            mkdir -p /root/backend-qhubomor/public/uploads/gastos
+            # 5.1 Crear directorios de subidas persistentes fuera de la carpeta del repo
+            mkdir -p /root/backend-data/uploads/insumos
+            mkdir -p /root/backend-data/uploads/gastos
+            mkdir -p /root/backend-data/uploads/productos
+            
+            # Copiar archivos existentes si los hay en el repo clonado hacia el volumen persistente
+            if [ -d "/root/backend-qhubomor/public/uploads" ]; then
+              cp -r /root/backend-qhubomor/public/uploads/* /root/backend-data/uploads/ 2>/dev/null || true
+            fi
             
             # 6. Levantar el nuevo contenedor mapeando el puerto y el volumen de persistencia
             echo "Levantando nuevo contenedor..."
             docker run -d \
               --name qhubomor-backend-app \
               -p 8061:3000 \
-              -v /root/backend-qhubomor/public/uploads:/app/public/uploads \
+              -v /root/backend-data/uploads:/app/public/uploads \
               --restart unless-stopped \
               --env-file .env \
               qhubomor-backend
