@@ -208,7 +208,7 @@ model Orderinventario {
   createdAt         DateTime?
   updatedAt         DateTime?
 
-  inventario Inventario?  @relation(fields: [IDinventario], references: [IDinventario])
+  inventario Inventario?  @relation(fields: [IDinventario], references: [IDinventario], onDelete: Cascade)
   proveedor  Proveedores? @relation(fields: [provedor], references: [IDprovedor])
 
   @@map("ORDERINVENTARIO")

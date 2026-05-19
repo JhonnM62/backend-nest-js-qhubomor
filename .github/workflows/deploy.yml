@@ -52,11 +52,16 @@ jobs:
             ${{ secrets.ENV_FILE_CONTENT }}
             EOF
             
-            # 4. Construir la nueva imagen de Docker localmente en Contabo
+            # 5. Construir la nueva imagen de Docker localmente en Contabo
             echo "Construyendo imagen Docker..."
             docker build -t qhubomor-backend .
             
-            # 5. Detener y eliminar el contenedor anterior si existe
+            # 5.5 Aplicar migraciones/push de Prisma a la base de datos remotamente (sin borrar data)
+            # Como el contenedor tiene prisma instalado, podemos correrlo efímeramente
+            echo "Sincronizando esquema de base de datos..."
+            docker run --rm --env-file .env qhubomor-backend npx prisma db push --accept-data-loss
+            
+            # 6. Detener y eliminar el contenedor anterior si existe
             echo "Deteniendo contenedor anterior..."
             docker stop qhubomor-backend-app || true
             docker rm qhubomor-backend-app || true
