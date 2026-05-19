@@ -178,13 +178,13 @@ export class InsumosService {
     if (updateInsumoDto.unidades !== undefined) data.unidades = updateInsumoDto.unidades;
     if (updateInsumoDto.cantidad !== undefined) data.cantidad = updateInsumoDto.cantidad;
     if (updateInsumoDto.imagen !== undefined) data.imagen = updateInsumoDto.imagen;
-    if (updateInsumoDto.imagen === null) data.imagen = null;
+    if (updateInsumoDto.imagen === null || updateInsumoDto.imagen === '') data.imagen = null;
     
     if (updateInsumoDto.imageUrl !== undefined) data.imageUrl = updateInsumoDto.imageUrl;
-    if (updateInsumoDto.imageUrl === null) data.imageUrl = null;
+    if (updateInsumoDto.imageUrl === null || updateInsumoDto.imageUrl === '') data.imageUrl = null;
     
     if (updateInsumoDto.imagencard !== undefined) data.imagencard = updateInsumoDto.imagencard;
-    if (updateInsumoDto.imagencard === null) data.imagencard = null;
+    if (updateInsumoDto.imagencard === null || updateInsumoDto.imagencard === '') data.imagencard = null;
 
     if (updateInsumoDto.fecha_de_vencimiento !== undefined) data.fechaDeVencimiento = new Date(updateInsumoDto.fecha_de_vencimiento);
     if (updateInsumoDto.precio !== undefined) data.precio = updateInsumoDto.precio;
