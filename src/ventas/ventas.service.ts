@@ -3,12 +3,14 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateVentaDto, CreateOrderVentaDto, CreateVentaCompletaDto, VentaQueryDto } from './dto/venta.dto';
 import { Prisma } from '@prisma/client';
 import { NotificationsService } from '../notifications/notifications.service';
+import { InsumosService } from '../insumos/insumos.service';
 
 @Injectable()
 export class VentasService {
   constructor(
     private prisma: PrismaService,
-    private notificationsService: NotificationsService
+    private notificationsService: NotificationsService,
+    private insumosService: InsumosService
   ) {}
 
   private formatDuration(diffMs: number): string {
@@ -77,6 +79,51 @@ export class VentasService {
         duracion,
       },
     ];
+  }
+
+  private async applyRecipeDeductions(
+    productos: CreateOrderVentaDto[] | Prisma.OrderventasGetPayload<{}>[], 
+    tipo: 'entrada' | 'salida', 
+    motivoPrefijo: string
+  ) {
+    if (!productos || productos.length === 0) return;
+
+    for (const producto of productos) {
+      const productoId = 'productoId' in producto ? producto.productoId : producto.IDproductos;
+      const cantidadVendida = producto.cantidad || 0;
+      const nombreProd = producto.nombre || producto.nombreProducto || 'Producto';
+
+      if (!productoId || cantidadVendida <= 0) continue;
+
+      // Buscar la receta de este producto
+      const recetas = await this.prisma.recetainsumos.findMany({
+        where: { IDproductos: productoId },
+        include: { insumoRelacion: true },
+      });
+
+      for (const receta of recetas) {
+        const insumo = receta.insumoRelacion;
+        const descontarFlag = insumo?.descontarCantDeVentas?.toLowerCase() === 'si';
+        
+        if (insumo && descontarFlag && receta.cantidad) {
+          const cantidadTotal = cantidadVendida * receta.cantidad;
+          if (cantidadTotal > 0) {
+            try {
+              await this.insumosService.movimientoStock(
+                insumo.IDalimentos,
+                tipo,
+                cantidadTotal,
+                `${motivoPrefijo}: ${nombreProd}`,
+                undefined,
+                true // allowNegative
+              );
+            } catch (error) {
+              console.error(`Error aplicando descuento de receta para insumo ${insumo.nombre}:`, error);
+            }
+          }
+        }
+      }
+    }
   }
 
   private async getFechaContable(date: Date = new Date(), manualDate?: string): Promise<Date> {
@@ -304,6 +351,11 @@ export class VentasService {
       { ventaId: ventaCreada.IDventas }
     );
 
+    // DEDUCCIÓN DE INVENTARIO
+    // Si la venta está completada/pagada (o se asume que al crearse ya afecta inventario)
+    // Descontar los insumos según la receta
+    await this.applyRecipeDeductions(productos, 'salida', 'Descuento por venta');
+
     return {
       ...ventaCreada,
       ordenVentas: ordenesVentas,
@@ -348,6 +400,14 @@ export class VentasService {
     });
 
     // Replace all Orderventas
+    const oldOrderventas = await this.prisma.orderventas.findMany({
+      where: { IDventas: id },
+    });
+
+    // REVERSO DE INVENTARIO
+    // Devolvemos el stock de los productos viejos
+    await this.applyRecipeDeductions(oldOrderventas, 'entrada', 'Reverso por edición de venta');
+
     await this.prisma.orderventas.deleteMany({
       where: { IDventas: id },
     });
@@ -387,6 +447,9 @@ export class VentasService {
           });
         }),
       );
+
+      // APLICACIÓN DE NUEVO INVENTARIO
+      await this.applyRecipeDeductions(productos, 'salida', 'Descuento por venta editada');
     }
 
     return this.prisma.ventas.findUnique({
@@ -702,6 +765,14 @@ export class VentasService {
     // inventory queries or raw CSV exports as valid active items.
     // If you need them for audit, you could add deletedAt to Orderventas in the future,
     // but currently the easiest robust fix is deleting them.
+
+    const oldOrderventas = await this.prisma.orderventas.findMany({
+      where: { IDventas: id },
+    });
+
+    // REVERSO DE INVENTARIO
+    await this.applyRecipeDeductions(oldOrderventas, 'entrada', 'Reverso por anulación de venta');
+
     await this.prisma.orderventas.deleteMany({
       where: { IDventas: id },
     });
@@ -726,6 +797,12 @@ export class VentasService {
   }
 
   async removeBulk(ids: string[], usuarioId: string, reason?: string) {
+    // REVERSO DE INVENTARIO PARA TODAS LAS VENTAS
+    const oldOrderventas = await this.prisma.orderventas.findMany({
+      where: { IDventas: { in: ids } },
+    });
+    await this.applyRecipeDeductions(oldOrderventas, 'entrada', 'Reverso por anulación masiva');
+
     // Intelligently clean up child items first
     await this.prisma.orderventas.deleteMany({
       where: { IDventas: { in: ids } },
@@ -755,6 +832,13 @@ export class VentasService {
       throw new NotFoundException(`Venta eliminada con ID ${id} no encontrada`);
     }
 
+    const orderventas = await this.prisma.orderventas.findMany({
+      where: { IDventas: id },
+    });
+
+    // DEDUCCIÓN DE INVENTARIO (Vuelve a restar al restaurar)
+    await this.applyRecipeDeductions(orderventas, 'salida', 'Descuento por restauración de venta');
+
     return this.prisma.ventas.update({
       where: { IDventas: id },
       data: {
@@ -774,6 +858,13 @@ export class VentasService {
       throw new NotFoundException(`Venta con ID ${id} no encontrada`);
     }
 
+    if (venta.deletedAt === null) {
+      const oldOrderventas = await this.prisma.orderventas.findMany({
+        where: { IDventas: id },
+      });
+      await this.applyRecipeDeductions(oldOrderventas, 'entrada', 'Reverso por hard-delete');
+    }
+
     // Intelligently clean up child items first just in case
     await this.prisma.orderventas.deleteMany({
       where: { IDventas: id },
@@ -785,6 +876,18 @@ export class VentasService {
   }
 
   async hardDeleteBulk(ids: string[]) {
+    const activeVentas = await this.prisma.ventas.findMany({
+      where: { IDventas: { in: ids }, deletedAt: null },
+    });
+
+    if (activeVentas.length > 0) {
+      const activeIds = activeVentas.map(v => v.IDventas);
+      const oldOrderventas = await this.prisma.orderventas.findMany({
+        where: { IDventas: { in: activeIds } },
+      });
+      await this.applyRecipeDeductions(oldOrderventas, 'entrada', 'Reverso por hard-delete masivo');
+    }
+
     // Intelligently clean up child items first
     await this.prisma.orderventas.deleteMany({
       where: { IDventas: { in: ids } },

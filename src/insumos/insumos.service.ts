@@ -257,7 +257,8 @@ export class InsumosService {
     tipo: 'entrada' | 'salida' | 'ajuste',
     cantidad: number,
     motivo: string,
-    usuarioId?: string
+    usuarioId?: string,
+    allowNegative: boolean = false
   ) {
     if (cantidad <= 0) {
       throw new BadRequestException('La cantidad debe ser mayor a 0');
@@ -279,7 +280,7 @@ export class InsumosService {
       nuevaCantidad += cantidad;
       nuevaCantidadHist += cantidad;
     } else if (tipo === 'salida') {
-      if (nuevaCantidad < cantidad) {
+      if (!allowNegative && nuevaCantidad < cantidad) {
         throw new BadRequestException(
           `Stock insuficiente. Disponible: ${nuevaCantidad}, Solicitado: ${cantidad}`
         );
