@@ -27,12 +27,17 @@ export class AiService {
       // 1. Obtener catálogo
       const [productosRaw, comentariosRaw] = await Promise.all([
         this.prisma.productos.findMany({
-          where: { estado: 'Activo' },
-          select: { IDproducto: true, nombre: true, precio: true },
+          where: { estadoProducto: 'Activo' },
+          select: { IDproductos: true, nombre: true, precioUnitario: true },
         }),
         this.prisma.comentarios.findMany({
-          where: { estado: 'Activo' },
-          select: { IDcomentario: true, nombre: true, precio: true },
+          // The Comentarios table schema:
+          // IDcomentario  String    @id @default(uuid()) @map("IDcomentario")
+          // comentarios   String?   @map("comentarios") @db.VarChar(200)
+          // precio        Decimal?  @map("precio") @db.Decimal(10, 2)
+          // tipo          String?   @map("tipo") @db.VarChar(50)
+          // Since it doesn't have an 'estado' column, we fetch all or filter by 'tipo' if needed. We'll fetch all.
+          select: { IDcomentario: true, comentarios: true, precio: true },
         }),
       ]);
 
