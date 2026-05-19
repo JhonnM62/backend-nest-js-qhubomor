@@ -7,10 +7,37 @@ import { GoogleGenAI, Type, Schema } from '@google/genai';
 export class AiService {
   private readonly logger = new Logger(AiService.name);
 
+  // In-memory cache for catalogs to prevent DB queries on every voice request
+  private catalogCache: { productos: any[], comentarios: any[], timestamp: number } | null = null;
+  private readonly CACHE_TTL = 1000 * 60 * 5; // 5 minutes cache
+
   constructor(
     private readonly configService: ConfiguracionService,
     private readonly prisma: PrismaService,
   ) {}
+
+  private async getCatalogs() {
+    const now = Date.now();
+    if (this.catalogCache && (now - this.catalogCache.timestamp) < this.CACHE_TTL) {
+      return this.catalogCache;
+    }
+
+    const [productosRaw, comentariosRaw] = await Promise.all([
+      this.prisma.productos.findMany({
+        select: { IDproductos: true, nombre: true },
+      }),
+      this.prisma.comentarios.findMany({
+        select: { ID: true, comentarios: true },
+      }),
+    ]);
+
+    // Optimize payload size for faster TTFT (Time to First Token)
+    const productos = productosRaw.map(p => ({ i: p.IDproductos, n: p.nombre }));
+    const comentarios = comentariosRaw.map(c => ({ i: c.ID, n: c.comentarios }));
+
+    this.catalogCache = { productos, comentarios, timestamp: now };
+    return this.catalogCache;
+  }
 
   async processVoiceOrder(audioBuffer: Buffer, mimeType: string) {
     const configIA = await this.configService.getConfiguracionIA();
@@ -24,33 +51,18 @@ export class AiService {
     }
 
     try {
-      // 1. Obtener catálogo
-      const [productosRaw, comentariosRaw] = await Promise.all([
-        this.prisma.productos.findMany({
-          select: { IDproductos: true, nombre: true },
-        }),
-        this.prisma.comentarios.findMany({
-          select: { ID: true, comentarios: true },
-        }),
-      ]);
+      // 1. Obtener catálogo desde Cache en memoria (0ms DB trip)
+      const { productos: catalogProductos, comentarios: catalogComentarios } = await this.getCatalogs();
 
-      // Optimize payload size for faster TTFT (Time to First Token)
-      const catalogProductos = productosRaw.map(p => ({ id: p.IDproductos, n: p.nombre }));
-      const catalogComentarios = comentariosRaw.map(c => ({ id: c.ID, n: c.comentarios }));
-
-      const systemInstruction = `
-Catálogo JSON:
-P: ${JSON.stringify(catalogProductos)}
-C: ${JSON.stringify(catalogComentarios)}
-
-Mapea el audio a los IDs correspondientes.
-Reglas:
-1. 'productoId' = ID en 'P'
-2. 'comentariosIds' = array de IDs en 'C'
-3. Si el cliente pide modificadores que NO ESTÁN en 'C' (ej. "carro rojo", "mesa 5"), guárdalos como texto libre en el array 'notasAdicionales'.
-4. 'cantidad' = numero
-Devuelve JSON estricto.
-      `;
+      // Ultra-concise prompt to save input tokens parsing time
+      const systemInstruction = `P:${JSON.stringify(catalogProductos)}
+C:${JSON.stringify(catalogComentarios)}
+Map audio to IDs.
+Rules:
+1. productoId=ID in P
+2. comentariosIds=IDs in C
+3. If modifier not in C (e.g. "carro rojo"), put raw text in 'notasAdicionales'
+4. cantidad=number`;
 
       const responseSchema: Schema = {
         type: Type.OBJECT,
