@@ -119,7 +119,7 @@ Rules:
           systemInstruction: systemInstruction,
           temperature: 0.1, // low temperature for precise mapping
           topP: configIA.topP,
-          maxOutputTokens: configIA.maxTokens,
+          maxOutputTokens: 8192, // FORCE MAX TOKENS! Thinking models require large output limits or the JSON gets cut off.
           responseMimeType: "application/json",
           responseSchema: responseSchema,
           // SDK types for advanced configs
@@ -130,11 +130,61 @@ Rules:
         }
       });
 
-      if (!response.text) {
+      let responseText = response.text;
+      if (!responseText) {
         throw new BadRequestException('La IA no pudo procesar el audio o devolvió una respuesta vacía.');
       }
 
-      return JSON.parse(response.text);
+      // Función robusta para reparar y parsear JSON
+      const repairAndParseJSON = (text: string) => {
+        // 1. Limpiar wrappers de markdown
+        let cleaned = text.replace(/```json\n?/gi, '').replace(/```\n?/g, '').trim();
+        
+        // 2. Reemplazar saltos de línea reales (ASCII 10) por espacios. 
+        // Esto soluciona el error "Unterminated string in JSON" si Gemini incluye saltos de línea literales dentro de un string.
+        cleaned = cleaned.replace(/\n/g, ' ').replace(/\r/g, '');
+
+        try {
+          return JSON.parse(cleaned);
+        } catch (e) {
+          // 3. Intento de reparación por truncamiento (si la IA se corta por límite de tokens)
+          let repaired = cleaned;
+          
+          // Si el último caracter es una coma, la quitamos
+          if (repaired.endsWith(',')) {
+            repaired = repaired.slice(0, -1);
+          }
+          
+          // Contar llaves y corchetes
+          const openBraces = (repaired.match(/{/g) || []).length;
+          const closeBraces = (repaired.match(/}/g) || []).length;
+          const openBrackets = (repaired.match(/\[/g) || []).length;
+          const closeBrackets = (repaired.match(/\]/g) || []).length;
+          
+          // Si hay un número impar de comillas, cerrar el string actual
+          const quoteCount = (repaired.match(/(?<!\\)"/g) || []).length;
+          if (quoteCount % 2 !== 0) {
+            repaired += '"';
+          }
+          
+          // Cerrar corchetes y llaves pendientes
+          for (let i = 0; i < (openBrackets - closeBrackets); i++) {
+            repaired += ']';
+          }
+          for (let i = 0; i < (openBraces - closeBraces); i++) {
+            repaired += '}';
+          }
+          
+          return JSON.parse(repaired);
+        }
+      };
+
+      try {
+        return repairAndParseJSON(responseText);
+      } catch (parseError: any) {
+        this.logger.error(`JSON Parse Error. Raw text: ${response.text}`);
+        throw new BadRequestException(`La IA devolvió un formato incompleto o inválido. Intenta de nuevo.`);
+      }
 
     } catch (error: any) {
       this.logger.error(`Error en processVoiceOrder: ${error.message}`);
