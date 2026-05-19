@@ -89,7 +89,7 @@ export class VentasService {
     if (!productos || productos.length === 0) return;
 
     for (const producto of productos) {
-      const productoId = 'productoId' in producto ? producto.productoId : producto.IDproductos;
+      const productoId = producto.productoId || (producto as any).IDproductos;
       const cantidadVendida = producto.cantidad || 0;
       const nombreProd = producto.nombre || producto.nombreProducto || 'Producto';
 
