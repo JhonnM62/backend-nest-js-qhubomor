@@ -47,7 +47,8 @@ Mapea el audio a los IDs correspondientes.
 Reglas:
 1. 'productoId' = ID en 'P'
 2. 'comentariosIds' = array de IDs en 'C'
-3. 'cantidad' = numero
+3. Si el cliente pide modificadores que NO ESTÁN en 'C' (ej. "carro rojo", "mesa 5"), guárdalos como texto libre en el array 'notasAdicionales'.
+4. 'cantidad' = numero
 Devuelve JSON estricto.
       `;
 
@@ -65,8 +66,13 @@ Devuelve JSON estricto.
                   type: Type.ARRAY,
                   items: { type: Type.STRING },
                 },
+                notasAdicionales: {
+                  type: Type.ARRAY,
+                  items: { type: Type.STRING },
+                  description: "Modificadores o notas que no se encontraron en el catálogo C",
+                },
               },
-              required: ["productoId", "cantidad", "comentariosIds"],
+              required: ["productoId", "cantidad"],
             },
           },
         },
