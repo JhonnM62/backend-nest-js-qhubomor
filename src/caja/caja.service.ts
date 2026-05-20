@@ -768,11 +768,15 @@ export class CajaService {
 
     this.logger.debug(`[getVerificacionPendiente] Caja: ${id}, Insumos en caja: ${insumosCaja.length}`);
     for (const ic of insumosCaja) {
-      this.logger.debug(`[getVerificacionPendiente] Insumo: ${ic.nombreInsumo}, cuadrarInsumos: ${ic.insumo?.cuadrarInsumos}, conteoVerificadoHoy: ${ic.conteoVerificadoHoy}, ultimoConteoAt: ${ic.ultimoConteoAt}`);
+      this.logger.debug(`[getVerificacionPendiente] IC Id: ${ic.Idcierreyapertura}, nombreInsumo: ${ic.nombreInsumo}, insumo exists: ${!!ic.insumo}, cuadrarInsumos: ${ic.insumo?.cuadrarInsumos}, conteoVerificadoHoy: ${ic.conteoVerificadoHoy}, ultimoConteoAt: ${ic.ultimoConteoAt}`);
     }
 
     const insumosPendientes = insumosCaja
-      .filter(ic => ic.insumo?.cuadrarInsumos === true)
+      .filter(ic => {
+        const hasCuadrar = ic.insumo?.cuadrarInsumos === true;
+        this.logger.debug(`[getVerificacionPendiente] Filter check for ${ic.nombreInsumo}: insumo=${!!ic.insumo}, cuadrarInsumos=${ic.insumo?.cuadrarInsumos}, hasCuadrar=${hasCuadrar}`);
+        return hasCuadrar;
+      })
       .map(ic => {
         const verificadoHoy = ic.conteoVerificadoHoy && ic.ultimoConteoAt &&
           new Date(ic.ultimoConteoAt) >= hoy;
