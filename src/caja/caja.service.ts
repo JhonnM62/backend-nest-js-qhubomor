@@ -766,6 +766,11 @@ export class CajaService {
       }
     });
 
+    this.logger.debug(`[getVerificacionPendiente] Caja: ${id}, Insumos en caja: ${insumosCaja.length}`);
+    for (const ic of insumosCaja) {
+      this.logger.debug(`[getVerificacionPendiente] Insumo: ${ic.nombreInsumo}, cuadrarInsumos: ${ic.insumo?.cuadrarInsumos}, conteoVerificadoHoy: ${ic.conteoVerificadoHoy}, ultimoConteoAt: ${ic.ultimoConteoAt}`);
+    }
+
     const insumosPendientes = insumosCaja
       .filter(ic => ic.insumo?.cuadrarInsumos === true)
       .map(ic => {
@@ -784,8 +789,12 @@ export class CajaService {
         };
       });
 
+    this.logger.debug(`[getVerificacionPendiente] Insumos con cuadrarInsumos=true: ${insumosPendientes.length}`);
+
     const pendientesSinVerificar = insumosPendientes.filter(p => !p.conteoVerificadoHoy);
     const todasVerificadas = pendientesSinVerificar.length === 0;
+
+    this.logger.debug(`[getVerificacionPendiente] Pendientes sin verificar: ${pendientesSinVerificar.length}, TodasVerificadas: ${todasVerificadas}`);
 
     return {
       pendientes: insumosPendientes,
