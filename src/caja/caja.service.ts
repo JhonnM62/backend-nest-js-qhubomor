@@ -742,14 +742,7 @@ export class CajaService {
 
   async getVerificacionPendiente(id: string) {
     const caja = await this.prisma.aperturaCierreCaja.findUnique({
-      where: { IDcaja: id },
-      include: {
-        venta: {
-          where: {
-            fecha: { gte: new Date() }
-          }
-        }
-      }
+      where: { IDcaja: id }
     });
 
     if (!caja) {
@@ -757,54 +750,39 @@ export class CajaService {
     }
 
     const hoy = new Date();
-    hoy.setHours(5, 0, 0, 0); // Start of day in Colombia (UTC-5)
+    hoy.setHours(5, 0, 0, 0);
 
-    const insumosCaja = await this.prisma.aperturaCierreInsumos.findMany({
-      where: { IDcaja: id },
-      include: {
-        insumo: true
-      }
+    const insumos = await this.prisma.insumos.findMany({
+      where: { cuadrarInsumos: true, estado: 'ACTIVO' }
     });
 
-    console.debug(`[getVerificacionPendiente] Caja: ${id}, Insumos en caja: ${insumosCaja.length}`);
-    for (const ic of insumosCaja) {
-      console.debug(`[getVerificacionPendiente] IC Id: ${ic.Idcierreyapertura}, nombreInsumo: ${ic.nombreInsumo}, insumo exists: ${!!ic.insumo}, cuadrarInsumos: ${ic.insumo?.cuadrarInsumos}, conteoVerificadoHoy: ${ic.conteoVerificadoHoy}, ultimoConteoAt: ${ic.ultimoConteoAt}`);
-    }
+    const pendientes = insumos.map(insumo => {
+      const conteos = (insumo.ultimosConteos as any[]) || [];
+      const ultimoConteo = conteos.length > 0 ? conteos[conteos.length - 1] : null;
+      
+      let verificadoHoy = false;
+      if (ultimoConteo?.fecha) {
+        const fechaConteo = new Date(ultimoConteo.fecha);
+        verificadoHoy = fechaConteo >= hoy;
+      }
 
-    const insumosPendientes = insumosCaja
-      .filter(ic => {
-        const hasCuadrar = ic.insumo?.cuadrarInsumos === true;
-        console.debug(`[getVerificacionPendiente] Filter check for ${ic.nombreInsumo}: insumo=${!!ic.insumo}, cuadrarInsumos=${ic.insumo?.cuadrarInsumos}, hasCuadrar=${hasCuadrar}`);
-        return hasCuadrar;
-      })
-      .map(ic => {
-        const verificadoHoy = ic.conteoVerificadoHoy && ic.ultimoConteoAt &&
-          new Date(ic.ultimoConteoAt) >= hoy;
+      return {
+        id: insumo.IDalimentos,
+        nombre: insumo.nombre,
+        unidadDeMedida: insumo.unidades || 'und',
+        disponibleEnSistema: Number(insumo.disponible) || 0,
+        ultimoConteoAt: ultimoConteo?.fecha || null,
+        conteoVerificadoHoy: verificadoHoy
+      };
+    });
 
-        return {
-          id: ic.Idcierreyapertura,
-          nombre: ic.insumo?.nombre || ic.nombreInsumo || 'Sin nombre',
-          unidadDeMedida: ic.unidadDeMedida || ic.insumo?.unidades || 'und',
-          disponibleEnSistema: Number(ic.insumo?.disponible) || 0,
-          cantApertura: ic.cantApertura,
-          ultimoConteoAt: ic.ultimoConteoAt,
-          conteoVerificadoHoy: verificadoHoy,
-          diferenciaDetectada: false
-        };
-      });
-
-    console.debug(`[getVerificacionPendiente] Insumos con cuadrarInsumos=true: ${insumosPendientes.length}`);
-
-    const pendientesSinVerificar = insumosPendientes.filter(p => !p.conteoVerificadoHoy);
-    const todasVerificadas = pendientesSinVerificar.length === 0;
-
-    console.debug(`[getVerificacionPendiente] Pendientes sin verificar: ${pendientesSinVerificar.length}, TodasVerificadas: ${todasVerificadas}`);
+    const pendientesSinVerificar = pendientes.filter(p => !p.conteoVerificadoHoy);
 
     return {
-      pendientes: insumosPendientes,
+      pendientes,
       totalPendientes: pendientesSinVerificar.length,
-      yaVerificadoHoy: insumosPendientes.some(p => p.conteoVerificadoHoy),
-      todasVerificadas
+      yaVerificadoHoy: pendientes.some(p => p.conteoVerificadoHoy),
+      todasVerificadas: pendientesSinVerificar.length === 0
     };
   }
 
@@ -823,36 +801,30 @@ export class CajaService {
 
     return this.prisma.$transaction(async (tx) => {
       for (const insumoConteo of dto.insumos) {
-        const { idcierreyapertura, cantContada, diferenciaDetectada, razonDiferencia, pinConfirmacion } = insumoConteo;
+        const { idInsumo, cantContada, disponibleEnSistema } = insumoConteo;
 
-        const existing = await tx.aperturaCierreInsumos.findUnique({
-          where: { Idcierreyapertura: idcierreyapertura }
+        const insumo = await tx.insumos.findUnique({
+          where: { IDalimentos: idInsumo }
         });
 
-        if (!existing) continue;
+        if (!insumo) continue;
 
-        const gastadoFisico = (existing.cantApertura || 0) - cantContada;
+        const conteosActuales = (insumo.ultimosConteos as any[]) || [];
+        const nuevoConteo = {
+          fecha: new Date().toISOString(),
+          cajaId: id,
+          disponibleEnSistema: disponibleEnSistema,
+          cantContada: cantContada,
+          diferencia: cantContada - disponibleEnSistema
+        };
 
-        await tx.aperturaCierreInsumos.update({
-          where: { Idcierreyapertura: idcierreyapertura },
+        const MAX_CONTEOS = 30;
+        const nuevosConteos = [...conteosActuales, nuevoConteo].slice(-MAX_CONTEOS);
+
+        await tx.insumos.update({
+          where: { IDalimentos: idInsumo },
           data: {
-            cantDeCierre: cantContada,
-            seUtilizaron: gastadoFisico,
-            ultimoConteoAt: new Date(),
-            conteoVerificadoHoy: true,
-            observacion: diferenciaDetectada && razonDiferencia
-              ? `${existing.observacion || ''}[DIFERENCIA: ${razonDiferencia}]`.trim()
-              : existing.observacion
-          }
-        });
-
-        await tx.historialCajaInsumos.create({
-          data: {
-            Idcierreyapertura: idcierreyapertura,
-            usuario: pinConfirmacion ? `PIN:${pinConfirmacion}` : 'Sistema',
-            campoModificado: diferenciaDetectada ? 'CONTEO_DIFERENCIA' : 'CONteo_VERIFICADO',
-            valorAnterior: String(existing.cantDeCierre || 0),
-            valorNuevo: String(cantContada)
+            ultimosConteos: nuevosConteos
           }
         });
       }
