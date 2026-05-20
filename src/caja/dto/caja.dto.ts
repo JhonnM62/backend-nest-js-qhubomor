@@ -249,3 +249,36 @@ export class CajaQueryDto {
   @IsString()
   fechaHasta?: string;
 }
+
+export class InsumoVerificacionDto {
+  @ApiProperty()
+  @IsString()
+  idcierreyapertura: string;
+
+  @ApiProperty()
+  @IsNumber()
+  cantContada: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsBoolean()
+  diferenciaDetectada?: boolean;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  razonDiferencia?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  pinConfirmacion?: string;
+}
+
+export class RegistrarConteoDto {
+  @ApiProperty({ type: [InsumoVerificacionDto] })
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => InsumoVerificacionDto)
+  insumos: InsumoVerificacionDto[];
+}

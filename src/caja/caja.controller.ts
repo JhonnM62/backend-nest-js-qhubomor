@@ -11,7 +11,12 @@ import {
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { CajaService } from './caja.service';
-import { CreateAperturaCierreCajaDto, UpdateCierreCajaDto, CajaQueryDto } from './dto/caja.dto';
+import {
+  CreateAperturaCierreCajaDto,
+  UpdateCierreCajaDto,
+  CajaQueryDto,
+  RegistrarConteoDto
+} from './dto/caja.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 
 @ApiTags('Caja')
@@ -86,5 +91,21 @@ export class CajaController {
   @ApiResponse({ status: 200, description: 'Caja eliminada exitosamente' })
   remove(@Param('id') id: string) {
     return this.cajaService.remove(id);
+  }
+
+  @Get(':id/verificacion-pendiente')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Obtener insumos pendientes de verificacion en una caja' })
+  getVerificacionPendiente(@Param('id') id: string) {
+    return this.cajaService.getVerificacionPendiente(id);
+  }
+
+  @Post(':id/registrar-conteo')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Registrar conteo de insumos verificacion' })
+  registrarConteo(@Param('id') id: string, @Body() dto: RegistrarConteoDto) {
+    return this.cajaService.registrarConteo(id, dto);
   }
 }

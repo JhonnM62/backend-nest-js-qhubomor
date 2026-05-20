@@ -220,6 +220,28 @@ export class CajaService {
       throw new NotFoundException('Esta caja ya está cerrada');
     }
 
+    // Validar que todos los insumos cuadrarInsumos=true tengan conteo verificado hoy
+    const insumosCaja = await this.prisma.aperturaCierreInsumos.findMany({
+      where: { IDcaja: id },
+      include: { insumo: true }
+    });
+
+    const hoy = new Date();
+    hoy.setHours(5, 0, 0, 0);
+
+    const pendientesSinVerificar = insumosCaja
+      .filter(ic => ic.insumo?.cuadrarInsumos === true)
+      .filter(ic => !ic.conteoVerificadoHoy || !ic.ultimoConteoAt || new Date(ic.ultimoConteoAt) < hoy);
+
+    if (pendientesSinVerificar.length > 0) {
+      const nombres = pendientesSinVerificar
+        .map(p => p.insumo?.nombre || p.nombreInsumo || 'Sin nombre')
+        .join(', ');
+      throw new NotFoundException(
+        `No se puede cerrar la caja. Los siguientes insumos de alto riesgo no han sido verificados hoy: ${nombres}`
+      );
+    }
+
     const { insumos, ...cajaData } = updateCierreDto;
 
     return this.prisma.$transaction(async (tx) => {
@@ -715,6 +737,124 @@ export class CajaService {
       );
 
       return deletedCaja;
+    });
+  }
+
+  async getVerificacionPendiente(id: string) {
+    const caja = await this.prisma.aperturaCierreCaja.findUnique({
+      where: { IDcaja: id },
+      include: {
+        venta: {
+          where: {
+            fecha: { gte: new Date() }
+          }
+        }
+      }
+    });
+
+    if (!caja) {
+      throw new NotFoundException(`Caja con ID ${id} no encontrada`);
+    }
+
+    const hoy = new Date();
+    hoy.setHours(5, 0, 0, 0); // Start of day in Colombia (UTC-5)
+
+    const insumosCaja = await this.prisma.aperturaCierreInsumos.findMany({
+      where: { IDcaja: id },
+      include: {
+        insumo: true
+      }
+    });
+
+    const insumosPendientes = insumosCaja
+      .filter(ic => ic.insumo?.cuadrarInsumos === true)
+      .map(ic => {
+        const verificadoHoy = ic.conteoVerificadoHoy && ic.ultimoConteoAt &&
+          new Date(ic.ultimoConteoAt) >= hoy;
+
+        return {
+          id: ic.Idcierreyapertura,
+          nombre: ic.insumo?.nombre || ic.nombreInsumo || 'Sin nombre',
+          unidadDeMedida: ic.unidadDeMedida || ic.insumo?.unidades || 'und',
+          disponibleEnSistema: Number(ic.insumo?.disponible) || 0,
+          cantApertura: ic.cantApertura,
+          ultimoConteoAt: ic.ultimoConteoAt,
+          conteoVerificadoHoy: verificadoHoy,
+          diferenciaDetectada: false
+        };
+      });
+
+    const pendientesSinVerificar = insumosPendientes.filter(p => !p.conteoVerificadoHoy);
+    const todasVerificadas = pendientesSinVerificar.length === 0;
+
+    return {
+      pendientes: insumosPendientes,
+      totalPendientes: pendientesSinVerificar.length,
+      yaVerificadoHoy: insumosPendientes.some(p => p.conteoVerificadoHoy),
+      todasVerificadas
+    };
+  }
+
+  async registrarConteo(id: string, dto: { insumos: any[] }) {
+    const caja = await this.prisma.aperturaCierreCaja.findUnique({
+      where: { IDcaja: id }
+    });
+
+    if (!caja) {
+      throw new NotFoundException(`Caja con ID ${id} no encontrada`);
+    }
+
+    if (caja.cierre === 'cerrada') {
+      throw new NotFoundException('No se puede registrar conteo en una caja cerrada');
+    }
+
+    return this.prisma.$transaction(async (tx) => {
+      for (const insumoConteo of dto.insumos) {
+        const { idcierreyapertura, cantContada, diferenciaDetectada, razonDiferencia, pinConfirmacion } = insumoConteo;
+
+        const existing = await tx.aperturaCierreInsumos.findUnique({
+          where: { Idcierreyapertura: idcierreyapertura }
+        });
+
+        if (!existing) continue;
+
+        const gastadoFisico = (existing.cantApertura || 0) - cantContada;
+
+        await tx.aperturaCierreInsumos.update({
+          where: { Idcierreyapertura: idcierreyapertura },
+          data: {
+            cantDeCierre: cantContada,
+            seUtilizaron: gastadoFisico,
+            ultimoConteoAt: new Date(),
+            conteoVerificadoHoy: true,
+            observacion: diferenciaDetectada && razonDiferencia
+              ? `${existing.observacion || ''}[DIFERENCIA: ${razonDiferencia}]`.trim()
+              : existing.observacion
+          }
+        });
+
+        await tx.historialCajaInsumos.create({
+          data: {
+            Idcierreyapertura: idcierreyapertura,
+            usuario: pinConfirmacion ? `PIN:${pinConfirmacion}` : 'Sistema',
+            campoModificado: diferenciaDetectada ? 'CONTEO_DIFERENCIA' : 'CONteo_VERIFICADO',
+            valorAnterior: String(existing.cantDeCierre || 0),
+            valorNuevo: String(cantContada)
+          }
+        });
+      }
+
+      this.appGateway.emitToCaja(SocketEvent.REFRESH_CAJA, {
+        action: 'conteo_registrado',
+        cajaId: id
+      });
+
+      this.appGateway.emitToRoom('insumos', SocketEvent.REFRESH_INSUMOS, {
+        action: 'conteo_registrado',
+        cajaId: id
+      });
+
+      return { success: true, message: 'Conteo registrado correctamente' };
     });
   }
 }
