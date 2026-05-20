@@ -1,101 +1,100 @@
-[Nest] 19  - 05/17/2026, 11:03:51 PM     LOG [RouterExplorer] Mapped {/api/v1/comentarios/:id, DELETE} route +0ms
-[Nest] 19  - 05/17/2026, 11:03:51 PM     LOG [RoutesResolver] PrinterConfigController {/api/v1/printer-config}: +0ms
-[Nest] 19  - 05/17/2026, 11:03:51 PM     LOG [RouterExplorer] Mapped {/api/v1/printer-config, GET} route +0ms
-[Nest] 19  - 05/17/2026, 11:03:51 PM     LOG [RouterExplorer] Mapped {/api/v1/printer-config, PUT} route +0ms
-[Nest] 19  - 05/17/2026, 11:03:51 PM     LOG [RoutesResolver] EstadisticasController {/api/v1/estadisticas}: +0ms
-[Nest] 19  - 05/17/2026, 11:03:51 PM     LOG [RouterExplorer] Mapped {/api/v1/estadisticas/generales, GET} route +0ms
-[Nest] 19  - 05/17/2026, 11:03:51 PM     LOG [RoutesResolver] ReportesController {/api/v1/reportes}: +0ms
-[Nest] 19  - 05/17/2026, 11:03:51 PM     LOG [RouterExplorer] Mapped {/api/v1/reportes/dinero-guardado, GET} route +1ms
-[Nest] 19  - 05/17/2026, 11:03:51 PM     LOG [RouterExplorer] Mapped {/api/v1/reportes/dinero-guardado, POST} route +0ms
-[Nest] 19  - 05/17/2026, 11:03:51 PM     LOG [RouterExplorer] Mapped {/api/v1/reportes/dinero-guardado/:filterId, DELETE} route +0ms
-[Nest] 19  - 05/17/2026, 11:03:51 PM     LOG [RouterExplorer] Mapped {/api/v1/reportes/dinero-guardado/:filterId, GET} route +0ms
-[Nest] 19  - 05/17/2026, 11:03:51 PM     LOG [RouterExplorer] Mapped {/api/v1/reportes/dinero-guardado/:filterId/retiros, POST} route +0ms
-[Nest] 19  - 05/17/2026, 11:03:51 PM     LOG [RouterExplorer] Mapped {/api/v1/reportes/dinero-guardado/retiros/:retiroId, DELETE} route +0ms
-[Nest] 19  - 05/17/2026, 11:03:51 PM     LOG [RoutesResolver] ConfiguracionController {/api/v1/configuracion}: +0ms
-[Nest] 19  - 05/17/2026, 11:03:51 PM     LOG [RouterExplorer] Mapped {/api/v1/configuracion, GET} route +0ms
-[Nest] 19  - 05/17/2026, 11:03:51 PM     LOG [RouterExplorer] Mapped {/api/v1/configuracion, PUT} route +0ms
-[Nest] 19  - 05/17/2026, 11:03:51 PM     LOG [NestApplication] Nest application successfully started +72ms
-[Nest] 19  - 05/17/2026, 11:03:51 PM     LOG [Bootstrap] Application is running on: http://0.0.0.0:3000
-[Nest] 19  - 05/17/2026, 11:03:51 PM     LOG [Bootstrap] Swagger documentation: http://0.0.0.0:3000/api/docs
-[Nest] 19  - 05/17/2026, 11:03:52 PM     LOG [AppGateway] Client d-vcsoszwb6MrYktAAAB mapped to user cmom4whz80000k0qnjs8qb3sc and joined user_cmom4whz80000k0qnjs8qb3sc
-[InventarioController] PATCH /inventario/item/cmp7t7119000zi2zgxs2vtnqc/update UpdateOrderInventarioDto {
-  cantidad: 2,
-  precio: 46250,
-  precioActual: undefined
+  cantidad: 0,
+  imagen: null,
+  imageUrl: null,
+  fecha_de_vencimiento: undefined,
+  precio: 53,
+  total: undefined,
+  agregar_cantidad: 0,
+  descontar_cant_de_ventas: undefined,
+  notificar_a_whatsapp: undefined,
+  apartir_de_cantidad: 0,
+  enviar_si_o_no: undefined,
+  disponible: '3',
+  precioActual: undefined,
+  estado: 'ACTIVO',
+  llevar_control_en_caja: undefined,
+  contador: undefined,
+  contador2: undefined,
+  imagencard: undefined,
+  fecha: undefined,
+  stockMinimo: undefined,
+  stockMaximo: undefined,
+  puntoReorden: undefined,
+  unidadMedida: undefined,
+  proveedorId: undefined,
+  proveedorNombre: undefined
 }
-[Nest] 19  - 05/17/2026, 11:10:26 PM     LOG [AppGateway] Client disconnected: d-vcsoszwb6MrYktAAAB (was in rooms: user_cmom4whz80000k0qnjs8qb3sc)
-[Nest] 19  - 05/17/2026, 11:10:33 PM     LOG [AppGateway] Client w7RfC_taMURGHVQCAAAD mapped to user cmom4whz80000k0qnjs8qb3sc and joined user_cmom4whz80000k0qnjs8qb3sc
-[InventarioController] PATCH /inventario/item/cmp7t71g20011i2zgys8bqd8a/update UpdateOrderInventarioDto {
-  cantidad: 2,
-  precio: 4790,
-  precioActual: undefined
+[Nest] 19  - 05/19/2026, 9:43:51 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[GdlgtCAYnoMG2ypFXO7AFD]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 05/19/2026, 9:43:51 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[yaNRwtFhUgf3kOHK9kn-Dg]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 05/19/2026, 9:43:51 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[JNemAxFsQJCkbaYhKX0eWO]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 05/19/2026, 9:43:51 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[pmQRnHJWWrmmLovhcOWAT5]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[DEBUG] Petición PUT /insumos/:id recibida. ID: 937c0fa5 Payload: UpdateInsumoDto {
+  nombre: 'Pitillos',
+  categoria: '4ff5b09a',
+  nombreCategoria: 'ICOPORES',
+  unidades: 'Unidad',
+  cantidad: 0,
+  imagen: '',
+  imageUrl: '',
+  fecha_de_vencimiento: undefined,
+  precio: 53,
+  total: undefined,
+  agregar_cantidad: 100,
+  descontar_cant_de_ventas: 'SI',
+  notificar_a_whatsapp: 'SI',
+  apartir_de_cantidad: 0,
+  enviar_si_o_no: undefined,
+  disponible: '0',
+  precioActual: undefined,
+  estado: 'ACTIVO',
+  llevar_control_en_caja: 'NO',
+  contador: undefined,
+  contador2: undefined,
+  imagencard: undefined,
+  fecha: undefined,
+  stockMinimo: undefined,
+  stockMaximo: undefined,
+  puntoReorden: undefined,
+  unidadMedida: undefined,
+  proveedorId: undefined,
+  proveedorNombre: undefined
 }
-[Nest] 19  - 05/17/2026, 11:10:59 PM     LOG [AppGateway] Client disconnected: w7RfC_taMURGHVQCAAAD (was in rooms: user_cmom4whz80000k0qnjs8qb3sc)
-[Nest] 19  - 05/17/2026, 11:12:18 PM     LOG [AppGateway] Client qw2JEDSkzHok7ZWCAAAF mapped to user cmom4whz80000k0qnjs8qb3sc and joined user_cmom4whz80000k0qnjs8qb3sc
-[InventarioController] PATCH /inventario/item/cmp7t71g20011i2zgys8bqd8a/update UpdateOrderInventarioDto {
-  cantidad: 50,
-  precio: 4790,
-  precioActual: undefined
+[Nest] 19  - 05/19/2026, 9:44:18 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[GdlgtCAYnoMG2ypFXO7AFD]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 05/19/2026, 9:44:18 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[yaNRwtFhUgf3kOHK9kn-Dg]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 05/19/2026, 9:44:18 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[JNemAxFsQJCkbaYhKX0eWO]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 05/19/2026, 9:44:18 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[pmQRnHJWWrmmLovhcOWAT5]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[DEBUG] Petición PUT /insumos/:id recibida. ID: 937c0fa5 Payload: UpdateInsumoDto {
+  nombre: 'Pitillos',
+  categoria: '4ff5b09a',
+  nombreCategoria: 'ICOPORES',
+  unidades: 'Unidad',
+  cantidad: 0,
+  imagen: null,
+  imageUrl: null,
+  fecha_de_vencimiento: undefined,
+  precio: 53,
+  total: undefined,
+  agregar_cantidad: 0,
+  descontar_cant_de_ventas: undefined,
+  notificar_a_whatsapp: undefined,
+  apartir_de_cantidad: 0,
+  enviar_si_o_no: undefined,
+  disponible: '0',
+  precioActual: undefined,
+  estado: 'ACTIVO',
+  llevar_control_en_caja: undefined,
+  contador: undefined,
+  contador2: undefined,
+  imagencard: undefined,
+  fecha: undefined,
+  stockMinimo: undefined,
+  stockMaximo: undefined,
+  puntoReorden: undefined,
+  unidadMedida: undefined,
+  proveedorId: undefined,
+  proveedorNombre: undefined
 }
-[Nest] 19  - 05/17/2026, 11:17:27 PM     LOG [AppGateway] Client disconnected: qw2JEDSkzHok7ZWCAAAF (was in rooms: user_cmom4whz80000k0qnjs8qb3sc)
-[Nest] 19  - 05/17/2026, 11:17:42 PM     LOG [AppGateway] Client WnH4BOzwVWdeN32bAAAH mapped to user cmom4whz80000k0qnjs8qb3sc and joined user_cmom4whz80000k0qnjs8qb3sc
-[Nest] 19  - 05/17/2026, 11:32:24 PM     LOG [AppGateway] Client disconnected: WnH4BOzwVWdeN32bAAAH (was in rooms: user_cmom4whz80000k0qnjs8qb3sc)
-[Nest] 19  - 05/17/2026, 11:42:36 PM     LOG [AppGateway] Client NNzGMXO76NqkHAHBAAAJ mapped to user cmom4whz80000k0qnjs8qb3sc and joined user_cmom4whz80000k0qnjs8qb3sc
-[InventarioController] PATCH /inventario/item/cmp7t720i0013i2zgtyqc1u6h/update UpdateOrderInventarioDto {
-  cantidad: 16,
-  precio: 6813,
-  precioActual: undefined
-}
-[InventarioController] PATCH /inventario/item/cmp7t72cp0015i2zguwbwry1z/update UpdateOrderInventarioDto {
-  cantidad: 3,
-  precio: 20000,
-  precioActual: undefined
-}
-[InventarioController] PATCH /inventario/item/cmp7t70p5000xi2zg956xt90f/update UpdateOrderInventarioDto {
-  cantidad: 24,
-  precio: 2375,
-  precioActual: undefined
-}
-[InventarioController] PATCH /inventario/item/cmp7t7119000zi2zgxs2vtnqc/update UpdateOrderInventarioDto {
-  cantidad: undefined,
-  precio: 48625,
-  precioActual: undefined
-}
-[Nest] 19  - 05/17/2026, 11:52:13 PM     LOG [AppGateway] Client disconnected: NNzGMXO76NqkHAHBAAAJ (was in rooms: user_cmom4whz80000k0qnjs8qb3sc)
-[Nest] 19  - 05/17/2026, 11:52:20 PM     LOG [AppGateway] Client MjxGprGtzXi_PhRQAAAL mapped to user cmom4whz80000k0qnjs8qb3sc and joined user_cmom4whz80000k0qnjs8qb3sc
-[Nest] 19  - 05/17/2026, 11:56:56 PM     LOG [AppGateway] Client disconnected: MjxGprGtzXi_PhRQAAAL (was in rooms: user_cmom4whz80000k0qnjs8qb3sc)
-[Nest] 19  - 05/18/2026, 12:08:30 AM     LOG [AppGateway] Client di6h2GzC62q_3hmUAAAN mapped to user cmom4whz80000k0qnjs8qb3sc and joined user_cmom4whz80000k0qnjs8qb3sc
-[Nest] 19  - 05/18/2026, 12:08:36 AM     LOG [AppGateway] Client disconnected: di6h2GzC62q_3hmUAAAN (was in rooms: user_cmom4whz80000k0qnjs8qb3sc)
-[Nest] 19  - 05/18/2026, 12:27:29 AM     LOG [AppGateway] Client CtAwavw9raZvkiY5AAAP mapped to user cmom4whz80000k0qnjs8qb3sc and joined user_cmom4whz80000k0qnjs8qb3sc
-[Nest] 19  - 05/18/2026, 12:28:01 AM     LOG [AppGateway] Client disconnected: CtAwavw9raZvkiY5AAAP (was in rooms: user_cmom4whz80000k0qnjs8qb3sc)
-[Nest] 19  - 05/18/2026, 12:28:12 AM     LOG [AppGateway] Client zBDQmI6E_sylXSgGAAAR mapped to user cmom4whz80000k0qnjs8qb3sc and joined user_cmom4whz80000k0qnjs8qb3sc
-[Nest] 19  - 05/18/2026, 12:31:12 AM     LOG [AppGateway] Client disconnected: zBDQmI6E_sylXSgGAAAR (was in rooms: user_cmom4whz80000k0qnjs8qb3sc)
-[Nest] 19  - 05/18/2026, 12:31:19 AM     LOG [AppGateway] Client Ui9wENkxs42tVxYQAAAT mapped to user cmom4whz80000k0qnjs8qb3sc and joined user_cmom4whz80000k0qnjs8qb3sc
-[Nest] 19  - 05/18/2026, 12:36:43 AM     LOG [AppGateway] Client disconnected: Ui9wENkxs42tVxYQAAAT (was in rooms: user_cmom4whz80000k0qnjs8qb3sc)
-[Nest] 19  - 05/18/2026, 12:38:19 AM     LOG [AppGateway] Client ZA8Xf-EDDfNqLKd1AAAV mapped to user cmom4whz80000k0qnjs8qb3sc and joined user_cmom4whz80000k0qnjs8qb3sc
-[Nest] 19  - 05/18/2026, 12:39:23 AM     LOG [AppGateway] Client disconnected: ZA8Xf-EDDfNqLKd1AAAV (was in rooms: user_cmom4whz80000k0qnjs8qb3sc)
-[Nest] 19  - 05/18/2026, 12:43:56 AM     LOG [AppGateway] Client X9LQAB4gWVTcrLSXAAAX mapped to user cmom4whz80000k0qnjs8qb3sc and joined user_cmom4whz80000k0qnjs8qb3sc
-[Nest] 19  - 05/18/2026, 12:49:54 AM     LOG [AppGateway] Client disconnected: X9LQAB4gWVTcrLSXAAAX (was in rooms: user_cmom4whz80000k0qnjs8qb3sc)
-[Nest] 19  - 05/18/2026, 12:50:06 AM     LOG [AppGateway] Client vNmj0igGb5SZVfy9AAAZ mapped to user cmom4whz80000k0qnjs8qb3sc and joined user_cmom4whz80000k0qnjs8qb3sc
-[Nest] 19  - 05/18/2026, 12:50:32 AM     LOG [AppGateway] Client disconnected: vNmj0igGb5SZVfy9AAAZ (was in rooms: user_cmom4whz80000k0qnjs8qb3sc)
-[Nest] 19  - 05/18/2026, 12:56:17 AM     LOG [AppGateway] Client SeUqAW7mGxj1IR5LAAAb mapped to user cmom4whz80000k0qnjs8qb3sc and joined user_cmom4whz80000k0qnjs8qb3sc
-[Nest] 19  - 05/18/2026, 12:58:54 AM     LOG [AppGateway] Client disconnected: SeUqAW7mGxj1IR5LAAAb (was in rooms: user_cmom4whz80000k0qnjs8qb3sc)
-[Nest] 19  - 05/18/2026, 12:59:05 AM     LOG [AppGateway] Client 0QEwrnAbRytLc2tZAAAd mapped to user cmom4whz80000k0qnjs8qb3sc and joined user_cmom4whz80000k0qnjs8qb3sc
-[Nest] 19  - 05/18/2026, 1:07:13 AM     LOG [AppGateway] Client disconnected: 0QEwrnAbRytLc2tZAAAd (was in rooms: user_cmom4whz80000k0qnjs8qb3sc)
-[Nest] 19  - 05/18/2026, 1:07:19 AM     LOG [AppGateway] Client C0tKi2rIy2Esm3nTAAAf mapped to user cmom4whz80000k0qnjs8qb3sc and joined user_cmom4whz80000k0qnjs8qb3sc
-[Nest] 19  - 05/18/2026, 1:09:43 AM     LOG [AppGateway] Client disconnected: C0tKi2rIy2Esm3nTAAAf (was in rooms: user_cmom4whz80000k0qnjs8qb3sc)
-[Nest] 19  - 05/18/2026, 2:24:10 AM     LOG [AppGateway] Client B7c7hnujLYSciYA8AAAh mapped to user cmom4whz80000k0qnjs8qb3sc and joined user_cmom4whz80000k0qnjs8qb3sc
-[Nest] 19  - 05/18/2026, 2:42:06 AM     LOG [AppGateway] Client disconnected: B7c7hnujLYSciYA8AAAh (was in rooms: user_cmom4whz80000k0qnjs8qb3sc)
-[Nest] 19  - 05/18/2026, 1:13:26 PM     LOG [AppGateway] Client Mc2522Sded-dkRrVAAAj mapped to user cmom4whz80000k0qnjs8qb3sc and joined user_cmom4whz80000k0qnjs8qb3sc
-[Nest] 19  - 05/18/2026, 1:14:33 PM     LOG [AppGateway] Client disconnected: Mc2522Sded-dkRrVAAAj (was in rooms: user_cmom4whz80000k0qnjs8qb3sc)
-[Nest] 19  - 05/18/2026, 1:15:13 PM     LOG [AppGateway] Client PDavqLxnPXVbzQSzAAAl mapped to user cmom4whz80000k0qnjs8qb3sc and joined user_cmom4whz80000k0qnjs8qb3sc
-[Nest] 19  - 05/18/2026, 1:15:27 PM     LOG [AppGateway] Client disconnected: PDavqLxnPXVbzQSzAAAl (was in rooms: user_cmom4whz80000k0qnjs8qb3sc)
-[Nest] 19  - 05/18/2026, 1:16:14 PM     LOG [AppGateway] Client pr2pjGfvAKLbPOK3AAAn mapped to user cmom4whz80000k0qnjs8qb3sc and joined user_cmom4whz80000k0qnjs8qb3sc
-[Nest] 19  - 05/18/2026, 1:17:34 PM     LOG [AppGateway] Client disconnected: pr2pjGfvAKLbPOK3AAAn (was in rooms: user_cmom4whz80000k0qnjs8qb3sc)
-[Nest] 19  - 05/18/2026, 7:18:44 PM     LOG [AppGateway] Client 67a4iZk5kQQhGZYhAAAp mapped to user cmom4whz80000k0qnjs8qb3sc and joined user_cmom4whz80000k0qnjs8qb3sc
-[Nest] 19  - 05/18/2026, 7:18:49 PM     LOG [AppGateway] Client 67a4iZk5kQQhGZYhAAAp joined room: caja
-[Nest] 19  - 05/18/2026, 7:18:55 PM   ERROR [NotificationsService] Error enviando notificaciones push chunk: All push notification messages in the same request must be for the same project; check the details field to investigate conflicting tokens.
-[Nest] 19  - 05/18/2026, 7:18:55 PM   ERROR [NotificationsService] Detalles del conflicto de tokens: {"@jhonnierm/qhubomor-pos-app":["ExponentPushToken[6l19NsAkbPhN9md0Pkn377]","ExponentPushToken[jXCiowD2SeY6sVJR10IA0q]"],"@jhonnierm2/qhubomor-pos-app":["ExponentPushToken[GdlgtCAYnoMG2ypFXO7AFD]","ExponentPushToken[JNemAxFsQJCkbaYhKX0eWO]","ExponentPushToken[yaNRwtFhUgf3kOHK9kn-Dg]"]}
-
-[Nest] 19  - 05/18/2026, 7:18:55 PM     LOG [NotificationsService] Auto-Healing: Eliminando 2 tokens conflictivos del proyecto antiguo (ExponentPushToken[6l19NsAkbPhN9md0Pkn377], ExponentPushToken[jXCiowD2SeY6sVJR10IA0q])...
-[Nest] 19  - 05/18/2026, 7:18:55 PM     LOG [AppGateway] Nueva orden received: cmpbl7ut4003034dypfq7oajr
+[Nest] 19  - 05/19/2026, 9:44:25 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[GdlgtCAYnoMG2ypFXO7AFD]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 05/19/2026, 9:44:25 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[yaNRwtFhUgf3kOHK9kn-Dg]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 05/19/2026, 9:44:25 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[JNemAxFsQJCkbaYhKX0eWO]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 05/19/2026, 9:44:25 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[pmQRnHJWWrmmLovhcOWAT5]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.

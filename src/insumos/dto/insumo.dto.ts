@@ -97,6 +97,11 @@ export class CreateInsumoDto {
   @IsString()
   llevar_control_en_caja?: string;
 
+  @ApiPropertyOptional({ default: false })
+  @IsOptional()
+  @IsBoolean()
+  cuadrarInsumos?: boolean;
+
   @ApiPropertyOptional()
   @IsOptional()
   @IsNumber()
@@ -249,6 +254,11 @@ export class UpdateInsumoDto {
   @IsOptional()
   @IsString()
   llevar_control_en_caja?: string;
+
+  @ApiPropertyOptional({ default: false })
+  @IsOptional()
+  @IsBoolean()
+  cuadrarInsumos?: boolean;
 
   @ApiPropertyOptional()
   @IsOptional()
