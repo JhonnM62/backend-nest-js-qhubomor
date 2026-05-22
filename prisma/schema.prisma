@@ -145,8 +145,6 @@ model Insumos {
   llevarControlEnCaja   String?   @map("Llevar control en caja")
   contador2             Int?      @map("Contador 2")
   imagencard            String?   @map("imagencard")
-  cuadrarInsumos         Boolean   @default(false) @map("Cuadrar Insumos")
-  ultimosConteos         Json?     @map("Ultimos Conteos")
   createdAt             DateTime?
   updatedAt             DateTime?
 
@@ -362,11 +360,9 @@ model AperturaCierreInsumos {
   fechaYHora        DateTime? @map("Fecha y hora")
   fecha             DateTime? @map("Fecha") @db.Date
   cantDeCierre      Int?      @map("Cant de cierre")
-  seUtilizaron      Int?      @map("se utilizarse")
+  seUtilizaron      Int?      @map("se utilizaron")
   observacion       String?   @map("Observacion")
   agregarCant       Int?      @map("Agregar Cant")
-  ultimoConteoAt    DateTime? @map("Ultimo Conteo At")
-  conteoVerificadoHoy Boolean @default(false) @map("Conteo Verificado Hoy")
   createdAt         DateTime?
   updatedAt         DateTime?
 

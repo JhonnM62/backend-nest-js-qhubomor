@@ -37,7 +37,6 @@ export class InsumosService {
       contador: createInsumoDto.contador,
       contador2: createInsumoDto.contador2,
       imagencard: createInsumoDto.imagencard,
-      cuadrarInsumos: createInsumoDto.cuadrarInsumos ?? false,
       fecha: createInsumoDto.fecha ? new Date(createInsumoDto.fecha) : new Date(),
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -196,7 +195,6 @@ export class InsumosService {
     if (updateInsumoDto.contador !== undefined) data.contador = updateInsumoDto.contador;
     if (updateInsumoDto.contador2 !== undefined) data.contador2 = updateInsumoDto.contador2;
     if (updateInsumoDto.fecha !== undefined) data.fecha = new Date(updateInsumoDto.fecha);
-    if (updateInsumoDto.cuadrarInsumos !== undefined) data.cuadrarInsumos = updateInsumoDto.cuadrarInsumos;
     
     data.updatedAt = new Date();
 

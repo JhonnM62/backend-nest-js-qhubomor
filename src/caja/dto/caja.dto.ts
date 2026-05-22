@@ -253,26 +253,15 @@ export class CajaQueryDto {
 export class InsumoVerificacionDto {
   @ApiProperty()
   @IsString()
-  idcierreyapertura: string;
+  idInsumo: string;
 
   @ApiProperty()
   @IsNumber()
   cantContada: number;
 
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsBoolean()
-  diferenciaDetectada?: boolean;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  razonDiferencia?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  pinConfirmacion?: string;
+  @ApiProperty()
+  @IsNumber()
+  disponibleEnSistema: number;
 }
 
 export class RegistrarConteoDto {
