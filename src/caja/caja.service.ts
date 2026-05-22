@@ -892,4 +892,34 @@ export class CajaService {
       return { success: true, message: 'Conteo registrado correctamente' };
     });
   }
+
+  async eliminarConteo(cajaId: string, insumoId: string, conteoIndex: number) {
+    const insumo = await this.prisma.insumos.findUnique({
+      where: { IDalimentos: insumoId }
+    });
+
+    if (!insumo) {
+      throw new NotFoundException(`Insumo con ID ${insumoId} no encontrado`);
+    }
+
+    const conteos = (insumo.ultimosConteos as any[]) || [];
+    
+    if (conteoIndex < 0 || conteoIndex >= conteos.length) {
+      throw new BadRequestException('Índice de conteo inválido');
+    }
+
+    const conteosFiltrados = conteos.filter((_: any, i: number) => i !== conteoIndex);
+
+    await this.prisma.insumos.update({
+      where: { IDalimentos: insumoId },
+      data: { ultimosConteos: conteosFiltrados }
+    });
+
+    this.appGateway.emitToRoom('insumos', SocketEvent.REFRESH_INSUMOS, {
+      action: 'conteo_eliminado',
+      insumoId
+    });
+
+    return { success: true, message: 'Conteo eliminado correctamente' };
+  }
 }

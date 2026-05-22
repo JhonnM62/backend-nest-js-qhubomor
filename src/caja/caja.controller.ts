@@ -116,4 +116,16 @@ export class CajaController {
   posponerVerificacion(@Param('id') id: string) {
     return this.cajaService.posponerVerificacion(id);
   }
+
+  @Delete(':id/insumo/:insumoId/conteo/:conteoIndex')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Eliminar un conteo específico de un insumo' })
+  eliminarConteo(
+    @Param('id') id: string,
+    @Param('insumoId') insumoId: string,
+    @Param('conteoIndex') conteoIndex: number
+  ) {
+    return this.cajaService.eliminarConteo(id, insumoId, conteoIndex);
+  }
 }
