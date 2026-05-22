@@ -220,28 +220,6 @@ export class CajaService {
       throw new NotFoundException('Esta caja ya está cerrada');
     }
 
-    // Validar que todos los insumos cuadrarInsumos=true tengan conteo verificado hoy
-    const insumosCaja = await this.prisma.aperturaCierreInsumos.findMany({
-      where: { IDcaja: id },
-      include: { insumo: true }
-    });
-
-    const hoy = new Date();
-    hoy.setHours(5, 0, 0, 0);
-
-    const pendientesSinVerificar = insumosCaja
-      .filter(ic => ic.insumo?.cuadrarInsumos === true)
-      .filter(ic => !ic.conteoVerificadoHoy || !ic.ultimoConteoAt || new Date(ic.ultimoConteoAt) < hoy);
-
-    if (pendientesSinVerificar.length > 0) {
-      const nombres = pendientesSinVerificar
-        .map(p => p.insumo?.nombre || p.nombreInsumo || 'Sin nombre')
-        .join(', ');
-      throw new NotFoundException(
-        `No se puede cerrar la caja. Los siguientes insumos de alto riesgo no han sido verificados hoy: ${nombres}`
-      );
-    }
-
     const { insumos, ...cajaData } = updateCierreDto;
 
     return this.prisma.$transaction(async (tx) => {
