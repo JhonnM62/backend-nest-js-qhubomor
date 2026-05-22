@@ -52,9 +52,9 @@ jobs:
             ${{ secrets.ENV_FILE_CONTENT }}
             EOF
             
-            # 5. Construir la nueva imagen de Docker localmente en Contabo
+            # 5. Construir la nueva imagen de Docker localmente en Contabo (sin caché forzado)
             echo "Construyendo imagen Docker..."
-            docker build -t qhubomor-backend .
+            docker build --no-cache -t qhubomor-backend .
             
             # 5.5 Aplicar migraciones/push de Prisma a la base de datos remotamente (sin borrar data)
             # Como el contenedor tiene prisma instalado, podemos correrlo efímeramente

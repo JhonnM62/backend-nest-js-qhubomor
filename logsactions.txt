@@ -1,106 +1,104 @@
-2026-05-22T13:08:22.0355692Z Current runner version: '2.334.0'
-2026-05-22T13:08:22.0382712Z ##[group]Runner Image Provisioner
-2026-05-22T13:08:22.0383968Z Hosted Compute Agent
-2026-05-22T13:08:22.0384898Z Version: 20260213.493
-2026-05-22T13:08:22.0385897Z Commit: 5c115507f6dd24b8de37d8bbe0bb4509d0cc0fa3
-2026-05-22T13:08:22.0387011Z Build Date: 2026-02-13T00:28:41Z
-2026-05-22T13:08:22.0388034Z Worker ID: {323095da-d50a-48f0-bfd3-c031fbb1b180}
-2026-05-22T13:08:22.0389044Z Azure Region: westcentralus
-2026-05-22T13:08:22.0390231Z ##[endgroup]
-2026-05-22T13:08:22.0391865Z ##[group]Operating System
-2026-05-22T13:08:22.0392885Z Ubuntu
-2026-05-22T13:08:22.0393691Z 24.04.4
-2026-05-22T13:08:22.0394552Z LTS
-2026-05-22T13:08:22.0395357Z ##[endgroup]
-2026-05-22T13:08:22.0396211Z ##[group]Runner Image
-2026-05-22T13:08:22.0397095Z Image: ubuntu-24.04
-2026-05-22T13:08:22.0397958Z Version: 20260518.149.1
-2026-05-22T13:08:22.0399742Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260518.149/images/ubuntu/Ubuntu2404-Readme.md
-2026-05-22T13:08:22.0401615Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260518.149
-2026-05-22T13:08:22.0402932Z ##[endgroup]
-2026-05-22T13:08:22.0404479Z ##[group]GITHUB_TOKEN Permissions
-2026-05-22T13:08:22.0406661Z Contents: read
-2026-05-22T13:08:22.0407626Z Metadata: read
-2026-05-22T13:08:22.0408430Z Packages: read
-2026-05-22T13:08:22.0409299Z ##[endgroup]
-2026-05-22T13:08:22.0412177Z Secret source: Actions
-2026-05-22T13:08:22.0413276Z Prepare workflow directory
-2026-05-22T13:08:22.0762837Z Prepare all required actions
-2026-05-22T13:08:22.0800945Z Getting action download info
-2026-05-22T13:08:22.5472132Z Download action repository 'appleboy/ssh-action@v1.0.3' (SHA:029f5b4aeeeb58fdfe1410a5d17f967dacf36262)
-2026-05-22T13:08:23.2714566Z Complete job name: deploy
-2026-05-22T13:08:23.3228551Z ##[group]Build container for action use: '/home/runner/work/_actions/appleboy/ssh-action/v1.0.3/Dockerfile'.
-2026-05-22T13:08:23.3314952Z ##[command]/usr/bin/docker build -t 523738:95c3a6a4dc68484d9805220a0cfa47bd -f "/home/runner/work/_actions/appleboy/ssh-action/v1.0.3/Dockerfile" "/home/runner/work/_actions/appleboy/ssh-action/v1.0.3"
-2026-05-22T13:08:25.7721127Z #0 building with "default" instance using docker driver
-2026-05-22T13:08:25.7722000Z 
-2026-05-22T13:08:25.7722219Z #1 [internal] load build definition from Dockerfile
-2026-05-22T13:08:25.7722716Z #1 transferring dockerfile: 149B 0.0s done
-2026-05-22T13:08:25.7723159Z #1 DONE 0.0s
-2026-05-22T13:08:25.7723357Z 
-2026-05-22T13:08:25.7723619Z #2 [internal] load metadata for ghcr.io/appleboy/drone-ssh:1.7.3
-2026-05-22T13:08:26.7998863Z #2 DONE 1.2s
-2026-05-22T13:08:26.9246323Z 
-2026-05-22T13:08:26.9247052Z #3 [internal] load .dockerignore
-2026-05-22T13:08:26.9247745Z #3 transferring context: 2B done
-2026-05-22T13:08:26.9248425Z #3 DONE 0.0s
-2026-05-22T13:08:26.9248724Z 
-2026-05-22T13:08:26.9248955Z #4 [internal] load build context
-2026-05-22T13:08:26.9249857Z #4 transferring context: 108B done
-2026-05-22T13:08:26.9250361Z #4 DONE 0.0s
-2026-05-22T13:08:26.9250585Z 
-2026-05-22T13:08:26.9251093Z #5 [1/2] FROM ghcr.io/appleboy/drone-ssh:1.7.3@sha256:179cbd253771007f2ebcaf7a3860afe059207351de1f3378efafac93bd310158
-2026-05-22T13:08:26.9252037Z #5 resolve ghcr.io/appleboy/drone-ssh:1.7.3@sha256:179cbd253771007f2ebcaf7a3860afe059207351de1f3378efafac93bd310158 done
-2026-05-22T13:08:26.9252933Z #5 sha256:179cbd253771007f2ebcaf7a3860afe059207351de1f3378efafac93bd310158 2.38kB / 2.38kB done
-2026-05-22T13:08:26.9253730Z #5 sha256:1a52f94820e830bc9734623deb03bbafa6a248fba19cdc2e5605c70d90d91441 1.24kB / 1.24kB done
-2026-05-22T13:08:26.9254518Z #5 sha256:c4781b8d012b16b6c7468dc9104fad0a63f2a8815b2af8b7176bb544253ea8c7 3.86kB / 3.86kB done
-2026-05-22T13:08:26.9255288Z #5 sha256:1207c741d8c9b028d98c4006013f9de959da3c55f85b91ed5e4583438a0112ca 0B / 3.38MB 0.1s
-2026-05-22T13:08:26.9256058Z #5 sha256:654aaee5654be60f81172539ecd74485cf8bbe2e9137bab0d429862c31c676f6 0B / 284.83kB 0.1s
-2026-05-22T13:08:26.9256820Z #5 sha256:7e20f48a19643465f486f59127b8f4e0f4114bedc8bd5260fb4f92d5fda95f1c 0B / 1.20kB 0.1s
-2026-05-22T13:08:27.1268780Z #5 sha256:1207c741d8c9b028d98c4006013f9de959da3c55f85b91ed5e4583438a0112ca 3.38MB / 3.38MB 0.3s
-2026-05-22T13:08:27.1271541Z #5 sha256:7e20f48a19643465f486f59127b8f4e0f4114bedc8bd5260fb4f92d5fda95f1c 1.20kB / 1.20kB 0.3s done
-2026-05-22T13:08:27.1272924Z #5 sha256:066e5b821e26d8313055e0314c056e6c297847bcf963e5df10e7aa03107f2246 0B / 125B 0.3s
-2026-05-22T13:08:27.1274131Z #5 extracting sha256:1207c741d8c9b028d98c4006013f9de959da3c55f85b91ed5e4583438a0112ca
-2026-05-22T13:08:27.2695300Z #5 sha256:1207c741d8c9b028d98c4006013f9de959da3c55f85b91ed5e4583438a0112ca 3.38MB / 3.38MB 0.3s done
-2026-05-22T13:08:27.2696895Z #5 sha256:654aaee5654be60f81172539ecd74485cf8bbe2e9137bab0d429862c31c676f6 284.83kB / 284.83kB 0.3s done
-2026-05-22T13:08:27.2698295Z #5 extracting sha256:1207c741d8c9b028d98c4006013f9de959da3c55f85b91ed5e4583438a0112ca 0.1s done
-2026-05-22T13:08:27.2699939Z #5 sha256:47353a6f9201a145b687290e5ae0278ac269faf4bb61bee3e9246c37a8d74277 0B / 2.44MB 0.4s
-2026-05-22T13:08:27.2701198Z #5 extracting sha256:654aaee5654be60f81172539ecd74485cf8bbe2e9137bab0d429862c31c676f6 0.0s done
-2026-05-22T13:08:27.4163637Z #5 sha256:066e5b821e26d8313055e0314c056e6c297847bcf963e5df10e7aa03107f2246 125B / 125B 0.5s done
-2026-05-22T13:08:27.4164645Z #5 extracting sha256:7e20f48a19643465f486f59127b8f4e0f4114bedc8bd5260fb4f92d5fda95f1c done
-2026-05-22T13:08:27.4165405Z #5 extracting sha256:066e5b821e26d8313055e0314c056e6c297847bcf963e5df10e7aa03107f2246 done
-2026-05-22T13:08:27.4166066Z #5 extracting sha256:47353a6f9201a145b687290e5ae0278ac269faf4bb61bee3e9246c37a8d74277
-2026-05-22T13:08:27.6296533Z #5 sha256:47353a6f9201a145b687290e5ae0278ac269faf4bb61bee3e9246c37a8d74277 2.44MB / 2.44MB 0.6s done
-2026-05-22T13:08:27.6297904Z #5 extracting sha256:47353a6f9201a145b687290e5ae0278ac269faf4bb61bee3e9246c37a8d74277 0.0s done
-2026-05-22T13:08:27.6298467Z #5 DONE 0.6s
-2026-05-22T13:08:27.6298653Z 
-2026-05-22T13:08:27.6298822Z #6 [2/2] COPY entrypoint.sh /bin/entrypoint.sh
-2026-05-22T13:08:27.6299223Z #6 DONE 0.0s
-2026-05-22T13:08:27.6299420Z 
-2026-05-22T13:08:27.6299836Z #7 exporting to image
-2026-05-22T13:08:27.6300302Z #7 exporting layers
-2026-05-22T13:08:28.0041751Z #7 exporting layers 0.5s done
-2026-05-22T13:08:28.0204854Z #7 writing image sha256:6a5afcd5259052d3790667143dc54f341157f8eda291662341979b51e778ee25 done
-2026-05-22T13:08:28.0207173Z #7 naming to docker.io/library/523738:95c3a6a4dc68484d9805220a0cfa47bd done
-2026-05-22T13:08:28.0207892Z #7 DONE 0.5s
-2026-05-22T13:08:28.0348523Z ##[endgroup]
-2026-05-22T13:08:28.0586447Z ##[group]Run if [[ "$AUTH_SERVER" == *"@"* ]]; then
-2026-05-22T13:08:28.0586971Z [36;1mif [[ "$AUTH_SERVER" == *"@"* ]]; then[0m
-2026-05-22T13:08:28.0587508Z [36;1m  echo "username=$(echo $AUTH_SERVER | cut -d'@' -f1)" >> $GITHUB_OUTPUT[0m
-2026-05-22T13:08:28.0588098Z [36;1m  echo "host=$(echo $AUTH_SERVER | cut -d'@' -f2)" >> $GITHUB_OUTPUT[0m
-2026-05-22T13:08:28.0588541Z [36;1melse[0m
-2026-05-22T13:08:28.0588888Z [36;1m  echo "username=root" >> $GITHUB_OUTPUT[0m
-2026-05-22T13:08:28.0589376Z [36;1m  echo "host=$AUTH_SERVER" >> $GITHUB_OUTPUT[0m
-2026-05-22T13:08:28.0590068Z [36;1mfi[0m
-2026-05-22T13:08:28.0632051Z shell: /usr/bin/bash -e {0}
-2026-05-22T13:08:28.0632603Z env:
-2026-05-22T13:08:28.0633168Z   AUTH_SERVER: ***
-2026-05-22T13:08:28.0633464Z ##[endgroup]
-2026-05-22T13:08:28.0963557Z ##[group]Run appleboy/ssh-action@v1.0.3
-2026-05-22T13:08:28.0963971Z with:
-2026-05-22T13:08:28.0964286Z   host: 100.42.185.2
-2026-05-22T13:08:28.0964584Z   username: root
-2026-05-22T13:08:28.0965063Z   password: ***
-2026-05-22T13:08:28.0974257Z   script: set -e
+2026-05-22T13:41:57.6566400Z Current runner version: '2.334.0'
+2026-05-22T13:41:57.6591374Z ##[group]Runner Image Provisioner
+2026-05-22T13:41:57.6592610Z Hosted Compute Agent
+2026-05-22T13:41:57.6593617Z Version: 20260213.493
+2026-05-22T13:41:57.6594550Z Commit: 5c115507f6dd24b8de37d8bbe0bb4509d0cc0fa3
+2026-05-22T13:41:57.6595488Z Build Date: 2026-02-13T00:28:41Z
+2026-05-22T13:41:57.6596456Z Worker ID: {c1413ca9-9cb5-4e7b-adc7-bcc699c14278}
+2026-05-22T13:41:57.6597349Z Azure Region: westus
+2026-05-22T13:41:57.6598127Z ##[endgroup]
+2026-05-22T13:41:57.6599737Z ##[group]Operating System
+2026-05-22T13:41:57.6601070Z Ubuntu
+2026-05-22T13:41:57.6601817Z 24.04.4
+2026-05-22T13:41:57.6602559Z LTS
+2026-05-22T13:41:57.6603251Z ##[endgroup]
+2026-05-22T13:41:57.6604294Z ##[group]Runner Image
+2026-05-22T13:41:57.6605105Z Image: ubuntu-24.04
+2026-05-22T13:41:57.6605913Z Version: 20260518.149.1
+2026-05-22T13:41:57.6607411Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260518.149/images/ubuntu/Ubuntu2404-Readme.md
+2026-05-22T13:41:57.6609256Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260518.149
+2026-05-22T13:41:57.6610494Z ##[endgroup]
+2026-05-22T13:41:57.6611993Z ##[group]GITHUB_TOKEN Permissions
+2026-05-22T13:41:57.6614629Z Contents: read
+2026-05-22T13:41:57.6615418Z Metadata: read
+2026-05-22T13:41:57.6616247Z Packages: read
+2026-05-22T13:41:57.6616960Z ##[endgroup]
+2026-05-22T13:41:57.6619357Z Secret source: Actions
+2026-05-22T13:41:57.6620248Z Prepare workflow directory
+2026-05-22T13:41:57.6962341Z Prepare all required actions
+2026-05-22T13:41:57.7001991Z Getting action download info
+2026-05-22T13:41:58.2125289Z Download action repository 'appleboy/ssh-action@v1.0.3' (SHA:029f5b4aeeeb58fdfe1410a5d17f967dacf36262)
+2026-05-22T13:41:58.7229051Z Complete job name: deploy
+2026-05-22T13:41:58.7743237Z ##[group]Build container for action use: '/home/runner/work/_actions/appleboy/ssh-action/v1.0.3/Dockerfile'.
+2026-05-22T13:41:58.7822673Z ##[command]/usr/bin/docker build -t 1abfad:00cb4e274bf344c9bc76e320f615b004 -f "/home/runner/work/_actions/appleboy/ssh-action/v1.0.3/Dockerfile" "/home/runner/work/_actions/appleboy/ssh-action/v1.0.3"
+2026-05-22T13:41:59.4623910Z #0 building with "default" instance using docker driver
+2026-05-22T13:41:59.4624833Z 
+2026-05-22T13:41:59.4625296Z #1 [internal] load build definition from Dockerfile
+2026-05-22T13:41:59.4626324Z #1 transferring dockerfile: 149B 0.0s done
+2026-05-22T13:41:59.4627246Z #1 DONE 0.0s
+2026-05-22T13:41:59.4627618Z 
+2026-05-22T13:41:59.4628138Z #2 [internal] load metadata for ghcr.io/appleboy/drone-ssh:1.7.3
+2026-05-22T13:42:00.2851904Z #2 DONE 1.0s
+2026-05-22T13:42:00.4227705Z 
+2026-05-22T13:42:00.4229401Z #3 [internal] load .dockerignore
+2026-05-22T13:42:00.4230794Z #3 transferring context: 2B done
+2026-05-22T13:42:00.4232029Z #3 DONE 0.0s
+2026-05-22T13:42:00.4232630Z 
+2026-05-22T13:42:00.4233298Z #4 [internal] load build context
+2026-05-22T13:42:00.4234986Z #4 transferring context: 108B done
+2026-05-22T13:42:00.4236203Z #4 DONE 0.0s
+2026-05-22T13:42:00.4236699Z 
+2026-05-22T13:42:00.4237872Z #5 [1/2] FROM ghcr.io/appleboy/drone-ssh:1.7.3@sha256:179cbd253771007f2ebcaf7a3860afe059207351de1f3378efafac93bd310158
+2026-05-22T13:42:00.4240599Z #5 resolve ghcr.io/appleboy/drone-ssh:1.7.3@sha256:179cbd253771007f2ebcaf7a3860afe059207351de1f3378efafac93bd310158 done
+2026-05-22T13:42:00.4243307Z #5 sha256:1a52f94820e830bc9734623deb03bbafa6a248fba19cdc2e5605c70d90d91441 1.24kB / 1.24kB done
+2026-05-22T13:42:00.4246070Z #5 sha256:c4781b8d012b16b6c7468dc9104fad0a63f2a8815b2af8b7176bb544253ea8c7 3.86kB / 3.86kB done
+2026-05-22T13:42:00.4248583Z #5 sha256:1207c741d8c9b028d98c4006013f9de959da3c55f85b91ed5e4583438a0112ca 0B / 3.38MB 0.1s
+2026-05-22T13:42:00.4251147Z #5 sha256:654aaee5654be60f81172539ecd74485cf8bbe2e9137bab0d429862c31c676f6 0B / 284.83kB 0.1s
+2026-05-22T13:42:00.4253963Z #5 sha256:7e20f48a19643465f486f59127b8f4e0f4114bedc8bd5260fb4f92d5fda95f1c 0B / 1.20kB 0.1s
+2026-05-22T13:42:00.4256803Z #5 sha256:179cbd253771007f2ebcaf7a3860afe059207351de1f3378efafac93bd310158 2.38kB / 2.38kB done
+2026-05-22T13:42:00.5365204Z #5 sha256:1207c741d8c9b028d98c4006013f9de959da3c55f85b91ed5e4583438a0112ca 3.38MB / 3.38MB 0.1s done
+2026-05-22T13:42:00.5369609Z #5 sha256:7e20f48a19643465f486f59127b8f4e0f4114bedc8bd5260fb4f92d5fda95f1c 1.20kB / 1.20kB 0.2s done
+2026-05-22T13:42:00.5374398Z #5 extracting sha256:1207c741d8c9b028d98c4006013f9de959da3c55f85b91ed5e4583438a0112ca 0.1s done
+2026-05-22T13:42:00.5379466Z #5 sha256:066e5b821e26d8313055e0314c056e6c297847bcf963e5df10e7aa03107f2246 0B / 125B 0.2s
+2026-05-22T13:42:00.5384573Z #5 sha256:47353a6f9201a145b687290e5ae0278ac269faf4bb61bee3e9246c37a8d74277 0B / 2.44MB 0.2s
+2026-05-22T13:42:00.6758818Z #5 sha256:654aaee5654be60f81172539ecd74485cf8bbe2e9137bab0d429862c31c676f6 284.83kB / 284.83kB 0.2s done
+2026-05-22T13:42:00.6764569Z #5 sha256:066e5b821e26d8313055e0314c056e6c297847bcf963e5df10e7aa03107f2246 125B / 125B 0.2s done
+2026-05-22T13:42:00.6769953Z #5 extracting sha256:654aaee5654be60f81172539ecd74485cf8bbe2e9137bab0d429862c31c676f6 0.0s done
+2026-05-22T13:42:00.6773771Z #5 extracting sha256:7e20f48a19643465f486f59127b8f4e0f4114bedc8bd5260fb4f92d5fda95f1c
+2026-05-22T13:42:00.9222437Z #5 sha256:47353a6f9201a145b687290e5ae0278ac269faf4bb61bee3e9246c37a8d74277 2.44MB / 2.44MB 0.3s done
+2026-05-22T13:42:00.9225271Z #5 extracting sha256:7e20f48a19643465f486f59127b8f4e0f4114bedc8bd5260fb4f92d5fda95f1c done
+2026-05-22T13:42:00.9226459Z #5 extracting sha256:066e5b821e26d8313055e0314c056e6c297847bcf963e5df10e7aa03107f2246 done
+2026-05-22T13:42:00.9227508Z #5 extracting sha256:47353a6f9201a145b687290e5ae0278ac269faf4bb61bee3e9246c37a8d74277 0.0s done
+2026-05-22T13:42:00.9228275Z #5 DONE 0.4s
+2026-05-22T13:42:00.9228511Z 
+2026-05-22T13:42:00.9228744Z #6 [2/2] COPY entrypoint.sh /bin/entrypoint.sh
+2026-05-22T13:42:00.9229914Z #6 DONE 0.0s
+2026-05-22T13:42:00.9230146Z 
+2026-05-22T13:42:00.9230316Z #7 exporting to image
+2026-05-22T13:42:00.9230713Z #7 exporting layers
+2026-05-22T13:42:01.0043757Z #7 exporting layers 0.2s done
+2026-05-22T13:42:01.0282741Z #7 writing image sha256:c0d97c06cbed5e25090a06cd943fc11a861c0100d94ebffb9a44b3f76e5531ed done
+2026-05-22T13:42:01.0285261Z #7 naming to docker.io/library/1abfad:00cb4e274bf344c9bc76e320f615b004 done
+2026-05-22T13:42:01.0286188Z #7 DONE 0.2s
+2026-05-22T13:42:01.0425730Z ##[endgroup]
+2026-05-22T13:42:01.0683104Z ##[group]Run if [[ "$AUTH_SERVER" == *"@"* ]]; then
+2026-05-22T13:42:01.0683947Z [36;1mif [[ "$AUTH_SERVER" == *"@"* ]]; then[0m
+2026-05-22T13:42:01.0684512Z [36;1m  echo "username=$(echo $AUTH_SERVER | cut -d'@' -f1)" >> $GITHUB_OUTPUT[0m
+2026-05-22T13:42:01.0685133Z [36;1m  echo "host=$(echo $AUTH_SERVER | cut -d'@' -f2)" >> $GITHUB_OUTPUT[0m
+2026-05-22T13:42:01.0685626Z [36;1melse[0m
+2026-05-22T13:42:01.0685976Z [36;1m  echo "username=root" >> $GITHUB_OUTPUT[0m
+2026-05-22T13:42:01.0686422Z [36;1m  echo "host=$AUTH_SERVER" >> $GITHUB_OUTPUT[0m
+2026-05-22T13:42:01.0686819Z [36;1mfi[0m
+2026-05-22T13:42:01.0725631Z shell: /usr/bin/bash -e {0}
+2026-05-22T13:42:01.0726280Z env:
+2026-05-22T13:42:01.0726914Z   AUTH_SERVER: ***
+2026-05-22T13:42:01.0727232Z ##[endgroup]
+2026-05-22T13:42:01.1069673Z ##[group]Run appleboy/ssh-action@v1.0.3
+2026-05-22T13:42:01.1070157Z with:
+2026-05-22T13:42:01.1070473Z   host: 100.42.185.2
+2026-05-22T13:42:01.1070797Z   username: root
+2026-05-22T13:42:01.1071238Z   password: ***
+2026-05-22T13:42:01.1081579Z   script: set -e
 
 # 1. Crear directorio del proyecto si no existe
 mkdir -p /root/backend-qhubomor
@@ -159,228 +157,187 @@ docker run -d \
 
 echo "¡Despliegue completado exitosamente!"
 
-2026-05-22T13:08:28.0981703Z   port: 22
-2026-05-22T13:08:28.0981982Z   timeout: 30s
-2026-05-22T13:08:28.0982275Z   command_timeout: 10m
-2026-05-22T13:08:28.0982572Z   proxy_port: 22
-2026-05-22T13:08:28.0982856Z   proxy_timeout: 30s
-2026-05-22T13:08:28.0983184Z ##[endgroup]
-2026-05-22T13:08:28.1092290Z ##[command]/usr/bin/docker run --name c3a6a4dc68484d9805220a0cfa47bd_7562cd --label 523738 --workdir /github/workspace --rm -e "INPUT_HOST" -e "INPUT_USERNAME" -e "INPUT_PASSWORD" -e "INPUT_SCRIPT" -e "INPUT_PORT" -e "INPUT_PASSPHRASE" -e "INPUT_SYNC" -e "INPUT_USE_INSECURE_CIPHER" -e "INPUT_CIPHER" -e "INPUT_TIMEOUT" -e "INPUT_COMMAND_TIMEOUT" -e "INPUT_KEY" -e "INPUT_KEY_PATH" -e "INPUT_FINGERPRINT" -e "INPUT_PROXY_HOST" -e "INPUT_PROXY_PORT" -e "INPUT_PROXY_USERNAME" -e "INPUT_PROXY_PASSWORD" -e "INPUT_PROXY_PASSPHRASE" -e "INPUT_PROXY_TIMEOUT" -e "INPUT_PROXY_KEY" -e "INPUT_PROXY_KEY_PATH" -e "INPUT_PROXY_FINGERPRINT" -e "INPUT_PROXY_CIPHER" -e "INPUT_PROXY_USE_INSECURE_CIPHER" -e "INPUT_SCRIPT_STOP" -e "INPUT_ENVS" -e "INPUT_ENVS_FORMAT" -e "INPUT_DEBUG" -e "INPUT_ALLENVS" -e "INPUT_REQUEST_PTY" -e "HOME" -e "GITHUB_JOB" -e "GITHUB_REF" -e "GITHUB_SHA" -e "GITHUB_REPOSITORY" -e "GITHUB_REPOSITORY_OWNER" -e "GITHUB_REPOSITORY_OWNER_ID" -e "GITHUB_RUN_ID" -e "GITHUB_RUN_NUMBER" -e "GITHUB_RETENTION_DAYS" -e "GITHUB_RUN_ATTEMPT" -e "GITHUB_ACTOR_ID" -e "GITHUB_ACTOR" -e "GITHUB_WORKFLOW" -e "GITHUB_HEAD_REF" -e "GITHUB_BASE_REF" -e "GITHUB_EVENT_NAME" -e "GITHUB_SERVER_URL" -e "GITHUB_API_URL" -e "GITHUB_GRAPHQL_URL" -e "GITHUB_REF_NAME" -e "GITHUB_REF_PROTECTED" -e "GITHUB_REF_TYPE" -e "GITHUB_WORKFLOW_REF" -e "GITHUB_WORKFLOW_SHA" -e "GITHUB_REPOSITORY_ID" -e "GITHUB_TRIGGERING_ACTOR" -e "GITHUB_WORKSPACE" -e "GITHUB_ACTION" -e "GITHUB_EVENT_PATH" -e "GITHUB_ACTION_REPOSITORY" -e "GITHUB_ACTION_REF" -e "GITHUB_PATH" -e "GITHUB_ENV" -e "GITHUB_STEP_SUMMARY" -e "GITHUB_STATE" -e "GITHUB_OUTPUT" -e "RUNNER_OS" -e "RUNNER_ARCH" -e "RUNNER_NAME" -e "RUNNER_ENVIRONMENT" -e "RUNNER_TOOL_CACHE" -e "RUNNER_TEMP" -e "RUNNER_WORKSPACE" -e "ACTIONS_RUNTIME_URL" -e "ACTIONS_RUNTIME_TOKEN" -e "ACTIONS_CACHE_URL" -e "ACTIONS_RESULTS_URL" -e "ACTIONS_ORCHESTRATION_ID" -e GITHUB_ACTIONS=true -e CI=true -v "/var/run/docker.sock":"/var/run/docker.sock" -v "/home/runner/work/_temp":"/github/runner_temp" -v "/home/runner/work/_temp/_github_home":"/github/home" -v "/home/runner/work/_temp/_github_workflow":"/github/workflow" -v "/home/runner/work/_temp/_runner_file_commands":"/github/file_commands" -v "/home/runner/work/backend-nest-js-qhubomor/backend-nest-js-qhubomor":"/github/workspace" 523738:95c3a6a4dc68484d9805220a0cfa47bd
-2026-05-22T13:08:28.2948799Z ======CMD======
-2026-05-22T13:08:28.2949996Z set -e
-2026-05-22T13:08:28.2950349Z 
-2026-05-22T13:08:28.2950663Z # 1. Crear directorio del proyecto si no existe
-2026-05-22T13:08:28.2951615Z mkdir -p /root/backend-qhubomor
-2026-05-22T13:08:28.2952333Z cd /root/backend-qhubomor
-2026-05-22T13:08:28.2952629Z 
-2026-05-22T13:08:28.2952931Z # 2. Clonar el repositorio o actualizarlo si ya existe
-2026-05-22T13:08:28.2953554Z if [ ! -d ".git" ]; then
-2026-05-22T13:08:28.2954087Z   echo "Clonando repositorio por primera vez..."
-2026-05-22T13:08:28.2955496Z   git clone https://***@github.com/JhonnM62/backend-nest-js-qhubomor.git .
-2026-05-22T13:08:28.2956221Z else
-2026-05-22T13:08:28.2956696Z   echo "Actualizando repositorio existente..."
-2026-05-22T13:08:28.2957858Z   git remote set-url origin https://***@github.com/JhonnM62/backend-nest-js-qhubomor.git
-2026-05-22T13:08:28.2958758Z   git fetch --all
-2026-05-22T13:08:28.2959223Z   git reset --hard origin/main
-2026-05-22T13:08:28.2959918Z   git clean -fd
-2026-05-22T13:08:28.3027486Z fi
-2026-05-22T13:08:28.3027713Z 
-2026-05-22T13:08:28.3027997Z # 3. Inyectar las variables de entorno desde los secretos de GitHub
-2026-05-22T13:08:28.3028466Z cat << 'EOF' > .env
-2026-05-22T13:08:28.3029344Z ***
-2026-05-22T13:08:28.3029838Z ***
-2026-05-22T13:08:28.3030191Z ***
-2026-05-22T13:08:28.3030601Z ***
-2026-05-22T13:08:28.3030901Z ***
-2026-05-22T13:08:28.3031187Z ***
-2026-05-22T13:08:28.3031452Z ***
-2026-05-22T13:08:28.3031730Z ***
-2026-05-22T13:08:28.3032102Z ***
-2026-05-22T13:08:28.3032374Z ***
-2026-05-22T13:08:28.3032662Z ***
-2026-05-22T13:08:28.3032968Z ***
-2026-05-22T13:08:28.3033246Z ***
-2026-05-22T13:08:28.3033557Z ***
-2026-05-22T13:08:28.3033795Z EOF
-2026-05-22T13:08:28.3033937Z 
-2026-05-22T13:08:28.3034161Z # 5. Construir la nueva imagen de Docker localmente en Contabo
-2026-05-22T13:08:28.3034621Z echo "Construyendo imagen Docker..."
-2026-05-22T13:08:28.3035008Z docker build -t qhubomor-backend .
-2026-05-22T13:08:28.3035232Z 
-2026-05-22T13:08:28.3035549Z # 5.5 Aplicar migraciones/push de Prisma a la base de datos remotamente (sin borrar data)
-2026-05-22T13:08:28.3126349Z # Como el contenedor tiene prisma instalado, podemos correrlo efímeramente
-2026-05-22T13:08:28.3126940Z echo "Sincronizando esquema de base de datos..."
-2026-05-22T13:08:28.3127523Z docker run --rm --env-file .env qhubomor-backend npx prisma db push --accept-data-loss
-2026-05-22T13:08:28.3127926Z 
-2026-05-22T13:08:28.3128131Z # 6. Detener y eliminar el contenedor anterior si existe
-2026-05-22T13:08:28.3128570Z echo "Deteniendo contenedor anterior..."
-2026-05-22T13:08:28.3128945Z docker stop qhubomor-backend-app || true
-2026-05-22T13:08:28.3129335Z docker rm qhubomor-backend-app || true
-2026-05-22T13:08:28.3129702Z 
-2026-05-22T13:08:28.3129966Z # 5.1 Crear directorios de subidas persistentes fuera de la carpeta del repo
-2026-05-22T13:08:28.3130510Z mkdir -p /root/backend-data/uploads/insumos
-2026-05-22T13:08:28.3130914Z mkdir -p /root/backend-data/uploads/gastos
-2026-05-22T13:08:28.3131323Z mkdir -p /root/backend-data/uploads/productos
-2026-05-22T13:08:28.3131580Z 
-2026-05-22T13:08:28.3132177Z # Copiar archivos existentes si los hay en el repo clonado hacia el volumen persistente
-2026-05-22T13:08:28.3132764Z if [ -d "/root/backend-qhubomor/public/uploads" ]; then
-2026-05-22T13:08:28.3133375Z   cp -r /root/backend-qhubomor/public/uploads/* /root/backend-data/uploads/ 2>/dev/null || true
-2026-05-22T13:08:28.3133889Z fi
-2026-05-22T13:08:28.3134042Z 
-2026-05-22T13:08:28.3134318Z # 6. Levantar el nuevo contenedor mapeando el puerto y el volumen de persistencia
-2026-05-22T13:08:28.3134865Z echo "Levantando nuevo contenedor..."
-2026-05-22T13:08:28.3135223Z docker run -d \
-2026-05-22T13:08:28.3135544Z   --name qhubomor-backend-app \
-2026-05-22T13:08:28.3135906Z   -p 8061:3000 \
-2026-05-22T13:08:28.3136480Z   -v /root/backend-data/uploads:/app/public/uploads \
-2026-05-22T13:08:28.3136921Z   --restart unless-stopped \
-2026-05-22T13:08:28.3137255Z   --env-file .env \
-2026-05-22T13:08:28.3137579Z   qhubomor-backend
-2026-05-22T13:08:28.3137750Z 
-2026-05-22T13:08:28.3138001Z echo "¡Despliegue completado exitosamente!"
-2026-05-22T13:08:28.3138267Z 
-2026-05-22T13:08:28.3138403Z ======END======
-2026-05-22T13:08:29.7665771Z out: Actualizando repositorio existente...
-2026-05-22T13:08:29.7966491Z out: Fetching origin
-2026-05-22T13:08:30.3553741Z err: From https://github.com/JhonnM62/backend-nest-js-qhubomor
-2026-05-22T13:08:30.3554341Z err:    2347d6c..06babca  main       -> origin/main
-2026-05-22T13:08:30.3811944Z out: HEAD is now at 06babca fix(caja): update InsumoVerificacionDto to match frontend payload
-2026-05-22T13:08:30.3843587Z out: Construyendo imagen Docker...
-2026-05-22T13:08:31.1267444Z err: #0 building with "default" instance using docker driver
-2026-05-22T13:08:31.1268036Z err: #1 [internal] load build definition from Dockerfile
-2026-05-22T13:08:31.1268538Z err: #1 transferring dockerfile: 1.12kB done
-2026-05-22T13:08:31.1268929Z err: #1 DONE 0.0s
-2026-05-22T13:08:31.1269355Z err: #2 [internal] load metadata for docker.io/library/node:20-slim
-2026-05-22T13:08:31.6079088Z err: #2 DONE 0.6s
-2026-05-22T13:08:31.8219136Z err: #3 [internal] load .dockerignore
-2026-05-22T13:08:31.8219804Z err: #3 transferring context: 105B done
-2026-05-22T13:08:31.8220270Z err: #3 DONE 0.0s
-2026-05-22T13:08:31.8220923Z err: #4 [deps 1/6] FROM docker.io/library/node:20-slim@sha256:2cf067cfed83d5ea958367df9f966191a942351a2df77d6f0193e162b5febfc0
-2026-05-22T13:08:31.8221579Z err: #4 DONE 0.0s
-2026-05-22T13:08:31.8221937Z err: #5 [internal] load build context
-2026-05-22T13:08:31.8222353Z err: #5 transferring context: 63.04kB 0.0s done
-2026-05-22T13:08:31.8222750Z err: #5 DONE 0.0s
-2026-05-22T13:08:31.8223283Z err: #6 [deps 2/6] RUN apt-get update && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
-2026-05-22T13:08:31.8223841Z err: #6 CACHED
-2026-05-22T13:08:31.8224199Z err: #7 [deps 3/6] WORKDIR /app
-2026-05-22T13:08:31.8224552Z err: #7 CACHED
-2026-05-22T13:08:31.8224912Z err: #8 [deps 4/6] COPY package*.json ./
-2026-05-22T13:08:31.8225289Z err: #8 CACHED
-2026-05-22T13:08:31.8225628Z err: #9 [deps 5/6] COPY prisma ./prisma/
-2026-05-22T13:08:31.8226002Z err: #9 DONE 0.0s
-2026-05-22T13:08:31.8226340Z err: #10 [deps 6/6] RUN npm ci
-2026-05-22T13:08:36.2369433Z err: #10 4.565 npm warn deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
-2026-05-22T13:08:36.5568135Z err: #10 4.886 npm warn deprecated node-domexception@1.0.0: Use your platform's native DOMException instead
-2026-05-22T13:08:37.2123067Z err: #10 5.541 npm warn deprecated @types/bcryptjs@3.0.0: This is a stub types definition. bcryptjs provides its own type definitions, so you do not need this installed.
-2026-05-22T13:08:38.3330724Z err: #10 6.662 npm warn deprecated glob@7.2.3: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
-2026-05-22T13:08:39.3968770Z err: #10 7.725 npm warn deprecated glob@10.5.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
-2026-05-22T13:08:39.5198067Z err: #10 7.763 npm warn deprecated glob@10.5.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
-2026-05-22T13:08:39.5200231Z err: #10 7.801 npm warn deprecated glob@10.5.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
-2026-05-22T13:08:39.5202478Z err: #10 7.848 npm warn deprecated glob@10.5.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
-2026-05-22T13:08:46.3487449Z err: #10 14.68 
-2026-05-22T13:08:46.3487946Z err: #10 14.68 added 887 packages, and audited 889 packages in 14s
-2026-05-22T13:08:46.3488402Z err: #10 14.68 
-2026-05-22T13:08:46.5129400Z err: #10 14.68 173 packages are looking for funding
-2026-05-22T13:08:46.5130154Z err: #10 14.68   run `npm fund` for details
-2026-05-22T13:08:46.5130589Z err: #10 14.69 
-2026-05-22T13:08:46.5131242Z err: #10 14.69 7 vulnerabilities (6 moderate, 1 high)
-2026-05-22T13:08:46.5131974Z err: #10 14.69 
-2026-05-22T13:08:46.5132483Z err: #10 14.69 To address all issues, run:
-2026-05-22T13:08:46.5133114Z err: #10 14.69   npm audit fix
-2026-05-22T13:08:46.5133628Z err: #10 14.69 
-2026-05-22T13:08:46.5134109Z err: #10 14.69 Run `npm audit` for details.
-2026-05-22T13:08:46.5134583Z err: #10 14.69 npm notice
-2026-05-22T13:08:46.5135089Z err: #10 14.69 npm notice New major version of npm available! 10.8.2 -> 11.15.0
-2026-05-22T13:08:46.5135756Z err: #10 14.69 npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.15.0
-2026-05-22T13:08:46.5136459Z err: #10 14.69 npm notice To update run: npm install -g npm@11.15.0
-2026-05-22T13:08:46.5136960Z err: #10 14.69 npm notice
-2026-05-22T13:08:46.6236746Z err: #10 DONE 15.0s
-2026-05-22T13:08:48.5210747Z err: #11 [builder 4/7] COPY --from=deps /app/node_modules ./node_modules
-2026-05-22T13:08:48.5211327Z err: #11 CACHED
-2026-05-22T13:08:48.6717762Z err: #12 [builder 5/7] COPY . .
-2026-05-22T13:08:48.8457179Z err: #12 DONE 0.3s
-2026-05-22T13:08:48.9981266Z err: #13 [builder 6/7] RUN npx prisma generate
-2026-05-22T13:08:49.7748539Z err: #13 0.927 Prisma schema loaded from prisma/schema.prisma
-2026-05-22T13:08:50.3313667Z err: #13 1.484 
-2026-05-22T13:08:50.3314674Z err: #13 1.484 ✔ Generated Prisma Client (v5.22.0) to ./node_modules/@prisma/client in 271ms
-2026-05-22T13:08:50.3315231Z err: #13 1.484 
-2026-05-22T13:08:50.3315795Z err: #13 1.484 Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
-2026-05-22T13:08:50.3316506Z err: #13 1.484 
-2026-05-22T13:08:50.3316991Z err: #13 1.484 Tip: Want to turn off tips and other hints? https://pris.ly/tip-4-nohints
-2026-05-22T13:08:50.3317509Z err: #13 1.484 
-2026-05-22T13:08:50.5265616Z err: #13 1.679 npm notice
-2026-05-22T13:08:50.5266371Z err: #13 1.679 npm notice New major version of npm available! 10.8.2 -> 11.15.0
-2026-05-22T13:08:50.5267308Z err: #13 1.679 npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.15.0
-2026-05-22T13:08:50.5268210Z err: #13 1.679 npm notice To update run: npm install -g npm@11.15.0
-2026-05-22T13:08:50.5268838Z err: #13 1.679 npm notice
-2026-05-22T13:08:50.7182113Z err: #13 DONE 1.7s
-2026-05-22T13:08:50.7182561Z err: #14 [builder 7/7] RUN npm run build
-2026-05-22T13:08:50.8445347Z err: #14 0.277 
-2026-05-22T13:08:50.8446148Z err: #14 0.277 > puntodeventabackend@0.0.1 build
-2026-05-22T13:08:50.8446654Z err: #14 0.277 > nest build
-2026-05-22T13:08:50.8447002Z err: #14 0.277 
-2026-05-22T13:08:57.1073059Z err: #14 6.539 [96msrc/caja/caja.service.ts[0m:[93m233[0m:[93m32[0m - [91merror[0m[90m TS2339: [0mProperty 'cuadrarInsumos' does not exist on type '{ nombre: string; createdAt: Date | null; updatedAt: Date | null; estado: string | null; fecha: Date | null; total: Decimal | null; cantidad: number | null; ... 17 more ...; imagencard: string | null; }'.
-2026-05-22T13:08:57.1074440Z err: #14 6.539 
-2026-05-22T13:08:57.1074931Z err: #14 6.539 [7m233[0m       .filter(ic => ic.insumo?.cuadrarInsumos === true)
-2026-05-22T13:08:57.1075829Z err: #14 6.539 [7m   [0m [91m                               ~~~~~~~~~~~~~~[0m
-2026-05-22T13:08:57.1077495Z err: #14 6.539 [96msrc/caja/caja.service.ts[0m:[93m234[0m:[93m25[0m - [91merror[0m[90m TS2339: [0mProperty 'conteoVerificadoHoy' does not exist on type '{ insumo: { nombre: string; createdAt: Date | null; updatedAt: Date | null; estado: string | null; fecha: Date | null; total: Decimal | null; cantidad: number | null; ... 17 more ...; imagencard: string | null; } | null; } & { ...; }'.
-2026-05-22T13:08:57.1078838Z err: #14 6.539 
-2026-05-22T13:08:57.1079739Z err: #14 6.539 [7m234[0m       .filter(ic => !ic.conteoVerificadoHoy || !ic.ultimoConteoAt || new Date(ic.ultimoConteoAt) < hoy);
-2026-05-22T13:08:57.1080524Z err: #14 6.539 [7m   [0m [91m                        ~~~~~~~~~~~~~~~~~~~[0m
-2026-05-22T13:08:57.1082161Z err: #14 6.539 [96msrc/caja/caja.service.ts[0m:[93m234[0m:[93m52[0m - [91merror[0m[90m TS2339: [0mProperty 'ultimoConteoAt' does not exist on type '{ insumo: { nombre: string; createdAt: Date | null; updatedAt: Date | null; estado: string | null; fecha: Date | null; total: Decimal | null; cantidad: number | null; ... 17 more ...; imagencard: string | null; } | null; } & { ...; }'.
-2026-05-22T13:08:57.1083444Z err: #14 6.539 
-2026-05-22T13:08:57.1084088Z err: #14 6.539 [7m234[0m       .filter(ic => !ic.conteoVerificadoHoy || !ic.ultimoConteoAt || new Date(ic.ultimoConteoAt) < hoy);
-2026-05-22T13:08:57.1084839Z err: #14 6.539 [7m   [0m [91m                                                   ~~~~~~~~~~~~~~[0m
-2026-05-22T13:08:57.1086465Z err: #14 6.539 [96msrc/caja/caja.service.ts[0m:[93m234[0m:[93m82[0m - [91merror[0m[90m TS2339: [0mProperty 'ultimoConteoAt' does not exist on type '{ insumo: { nombre: string; createdAt: Date | null; updatedAt: Date | null; estado: string | null; fecha: Date | null; total: Decimal | null; cantidad: number | null; ... 17 more ...; imagencard: string | null; } | null; } & { ...; }'.
-2026-05-22T13:08:57.1087716Z err: #14 6.539 
-2026-05-22T13:08:57.1088328Z err: #14 6.539 [7m234[0m       .filter(ic => !ic.conteoVerificadoHoy || !ic.ultimoConteoAt || new Date(ic.ultimoConteoAt) < hoy);
-2026-05-22T13:08:57.1089096Z err: #14 6.539 [7m   [0m [91m                                                                                 ~~~~~~~~~~~~~~[0m
-2026-05-22T13:08:57.1090334Z err: #14 6.539 [96msrc/caja/caja.service.ts[0m:[93m756[0m:[93m16[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'cuadrarInsumos' does not exist in type 'InsumosWhereInput'.
-2026-05-22T13:08:57.1091164Z err: #14 6.539 
-2026-05-22T13:08:57.1091600Z err: #14 6.539 [7m756[0m       where: { cuadrarInsumos: true, estado: 'ACTIVO' }
-2026-05-22T13:08:57.1092139Z err: #14 6.539 [7m   [0m [91m               ~~~~~~~~~~~~~~[0m
-2026-05-22T13:08:57.1093608Z err: #14 6.539 [96msrc/caja/caja.service.ts[0m:[93m760[0m:[93m31[0m - [91merror[0m[90m TS2339: [0mProperty 'ultimosConteos' does not exist on type '{ nombre: string; createdAt: Date | null; updatedAt: Date | null; estado: string | null; fecha: Date | null; total: Decimal | null; cantidad: number | null; ... 17 more ...; imagencard: string | null; }'.
-2026-05-22T13:08:57.1094949Z err: #14 6.539 
-2026-05-22T13:08:57.1095714Z err: #14 6.539 [7m760[0m       const conteos = (insumo.ultimosConteos as any[]) || [];
-2026-05-22T13:08:57.1096312Z err: #14 6.539 [7m   [0m [91m                              ~~~~~~~~~~~~~~[0m
-2026-05-22T13:08:57.1097783Z err: #14 6.539 [96msrc/caja/caja.service.ts[0m:[93m812[0m:[93m41[0m - [91merror[0m[90m TS2339: [0mProperty 'ultimosConteos' does not exist on type '{ nombre: string; createdAt: Date | null; updatedAt: Date | null; estado: string | null; fecha: Date | null; total: Decimal | null; cantidad: number | null; ... 17 more ...; imagencard: string | null; }'.
-2026-05-22T13:08:57.1098963Z err: #14 6.539 
-2026-05-22T13:08:57.1099447Z err: #14 6.539 [7m812[0m         const conteosActuales = (insumo.ultimosConteos as any[]) || [];
-2026-05-22T13:08:57.1100320Z err: #14 6.539 [7m   [0m [91m                                        ~~~~~~~~~~~~~~[0m
-2026-05-22T13:08:57.1102039Z err: #14 6.539 [96msrc/caja/caja.service.ts[0m:[93m827[0m:[93m13[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'ultimosConteos' does not exist in type '(Without<InsumosUpdateInput, InsumosUncheckedUpdateInput> & InsumosUncheckedUpdateInput) | (Without<...> & InsumosUpdateInput)'.
-2026-05-22T13:08:57.1103262Z err: #14 6.539 
-2026-05-22T13:08:57.1103683Z err: #14 6.539 [7m827[0m             ultimosConteos: nuevosConteos
-2026-05-22T13:08:57.1104193Z err: #14 6.539 [7m   [0m [91m            ~~~~~~~~~~~~~~[0m
-2026-05-22T13:08:57.1104556Z err: #14 6.539 
-2026-05-22T13:08:57.1105055Z err: #14 6.539   [96mnode_modules/.prisma/client/index.d.ts[0m:[93m12030[0m:[93m5[0m
-2026-05-22T13:08:57.1105952Z err: #14 6.539     [7m12030[0m     data: XOR<InsumosUpdateInput, InsumosUncheckedUpdateInput>
-2026-05-22T13:08:57.1106822Z err: #14 6.539     [7m     [0m [96m    ~~~~[0m
-2026-05-22T13:08:57.1108246Z err: #14 6.539     The expected type comes from property 'data' which is declared here on type '{ select?: InsumosSelect<DefaultArgs> | null | undefined; include?: InsumosInclude<DefaultArgs> | null | undefined; data: (Without<...> & InsumosUncheckedUpdateInput) | (Without<...> & InsumosUpdateInput); where: InsumosWhereUniqueInput; }'
-2026-05-22T13:08:57.1109450Z err: #14 6.539 
-2026-05-22T13:08:57.1861419Z err: #14 6.540 Found 8 error(s).
-2026-05-22T13:08:57.1861953Z err: #14 6.540 
-2026-05-22T13:08:57.1862526Z err: #14 ERROR: process "/bin/sh -c npm run build" did not complete successfully: exit code: 1
-2026-05-22T13:08:57.2427079Z err: ------
-2026-05-22T13:08:57.2427616Z err:  > [builder 7/7] RUN npm run build:
-2026-05-22T13:08:57.2428593Z err: 6.539 [7m827[0m             ultimosConteos: nuevosConteos
-2026-05-22T13:08:57.2429406Z err: 6.539 [7m   [0m [91m            ~~~~~~~~~~~~~~[0m
-2026-05-22T13:08:57.2430200Z err: 6.539 
-2026-05-22T13:08:57.2430980Z err: 6.539   [96mnode_modules/.prisma/client/index.d.ts[0m:[93m12030[0m:[93m5[0m
-2026-05-22T13:08:57.2432112Z err: 6.539     [7m12030[0m     data: XOR<InsumosUpdateInput, InsumosUncheckedUpdateInput>
-2026-05-22T13:08:57.2433010Z err: 6.539     [7m     [0m [96m    ~~~~[0m
-2026-05-22T13:08:57.2434795Z err: 6.539     The expected type comes from property 'data' which is declared here on type '{ select?: InsumosSelect<DefaultArgs> | null | undefined; include?: InsumosInclude<DefaultArgs> | null | undefined; data: (Without<...> & InsumosUncheckedUpdateInput) | (Without<...> & InsumosUpdateInput); where: InsumosWhereUniqueInput; }'
-2026-05-22T13:08:57.2436060Z err: 6.539 
-2026-05-22T13:08:57.2436348Z err: 6.540 Found 8 error(s).
-2026-05-22T13:08:57.2436654Z err: 6.540 
-2026-05-22T13:08:57.2436934Z err: ------
-2026-05-22T13:08:57.2437315Z err: Dockerfile:17
-2026-05-22T13:08:57.2437803Z 2026/05/22 13:08:57 Process exited with status 1
-2026-05-22T13:08:57.2438349Z err: --------------------
-2026-05-22T13:08:57.2438882Z err:   15 |     # Generamos el cliente de Prisma antes de compilar
-2026-05-22T13:08:57.2439654Z err:   16 |     RUN npx prisma generate
-2026-05-22T13:08:57.2440170Z err:   17 | >>> RUN npm run build
-2026-05-22T13:08:57.2440881Z err:   18 |     
-2026-05-22T13:08:57.2441487Z err:   19 |     # Etapa 3: Producción (Imagen final ligera)
-2026-05-22T13:08:57.2442058Z err: --------------------
-2026-05-22T13:08:57.2442799Z err: ERROR: failed to solve: process "/bin/sh -c npm run build" did not complete successfully: exit code: 1
-2026-05-22T13:08:57.3204748Z Cleaning up orphan processes
+2026-05-22T13:42:01.1089907Z   port: 22
+2026-05-22T13:42:01.1090203Z   timeout: 30s
+2026-05-22T13:42:01.1090532Z   command_timeout: 10m
+2026-05-22T13:42:01.1090856Z   proxy_port: 22
+2026-05-22T13:42:01.1091161Z   proxy_timeout: 30s
+2026-05-22T13:42:01.1091474Z ##[endgroup]
+2026-05-22T13:42:01.1209608Z ##[command]/usr/bin/docker run --name abfad00cb4e274bf344c9bc76e320f615b004_a9b684 --label 1abfad --workdir /github/workspace --rm -e "INPUT_HOST" -e "INPUT_USERNAME" -e "INPUT_PASSWORD" -e "INPUT_SCRIPT" -e "INPUT_PORT" -e "INPUT_PASSPHRASE" -e "INPUT_SYNC" -e "INPUT_USE_INSECURE_CIPHER" -e "INPUT_CIPHER" -e "INPUT_TIMEOUT" -e "INPUT_COMMAND_TIMEOUT" -e "INPUT_KEY" -e "INPUT_KEY_PATH" -e "INPUT_FINGERPRINT" -e "INPUT_PROXY_HOST" -e "INPUT_PROXY_PORT" -e "INPUT_PROXY_USERNAME" -e "INPUT_PROXY_PASSWORD" -e "INPUT_PROXY_PASSPHRASE" -e "INPUT_PROXY_TIMEOUT" -e "INPUT_PROXY_KEY" -e "INPUT_PROXY_KEY_PATH" -e "INPUT_PROXY_FINGERPRINT" -e "INPUT_PROXY_CIPHER" -e "INPUT_PROXY_USE_INSECURE_CIPHER" -e "INPUT_SCRIPT_STOP" -e "INPUT_ENVS" -e "INPUT_ENVS_FORMAT" -e "INPUT_DEBUG" -e "INPUT_ALLENVS" -e "INPUT_REQUEST_PTY" -e "HOME" -e "GITHUB_JOB" -e "GITHUB_REF" -e "GITHUB_SHA" -e "GITHUB_REPOSITORY" -e "GITHUB_REPOSITORY_OWNER" -e "GITHUB_REPOSITORY_OWNER_ID" -e "GITHUB_RUN_ID" -e "GITHUB_RUN_NUMBER" -e "GITHUB_RETENTION_DAYS" -e "GITHUB_RUN_ATTEMPT" -e "GITHUB_ACTOR_ID" -e "GITHUB_ACTOR" -e "GITHUB_WORKFLOW" -e "GITHUB_HEAD_REF" -e "GITHUB_BASE_REF" -e "GITHUB_EVENT_NAME" -e "GITHUB_SERVER_URL" -e "GITHUB_API_URL" -e "GITHUB_GRAPHQL_URL" -e "GITHUB_REF_NAME" -e "GITHUB_REF_PROTECTED" -e "GITHUB_REF_TYPE" -e "GITHUB_WORKFLOW_REF" -e "GITHUB_WORKFLOW_SHA" -e "GITHUB_REPOSITORY_ID" -e "GITHUB_TRIGGERING_ACTOR" -e "GITHUB_WORKSPACE" -e "GITHUB_ACTION" -e "GITHUB_EVENT_PATH" -e "GITHUB_ACTION_REPOSITORY" -e "GITHUB_ACTION_REF" -e "GITHUB_PATH" -e "GITHUB_ENV" -e "GITHUB_STEP_SUMMARY" -e "GITHUB_STATE" -e "GITHUB_OUTPUT" -e "RUNNER_OS" -e "RUNNER_ARCH" -e "RUNNER_NAME" -e "RUNNER_ENVIRONMENT" -e "RUNNER_TOOL_CACHE" -e "RUNNER_TEMP" -e "RUNNER_WORKSPACE" -e "ACTIONS_RUNTIME_URL" -e "ACTIONS_RUNTIME_TOKEN" -e "ACTIONS_CACHE_URL" -e "ACTIONS_RESULTS_URL" -e "ACTIONS_ORCHESTRATION_ID" -e GITHUB_ACTIONS=true -e CI=true -v "/var/run/docker.sock":"/var/run/docker.sock" -v "/home/runner/work/_temp":"/github/runner_temp" -v "/home/runner/work/_temp/_github_home":"/github/home" -v "/home/runner/work/_temp/_github_workflow":"/github/workflow" -v "/home/runner/work/_temp/_runner_file_commands":"/github/file_commands" -v "/home/runner/work/backend-nest-js-qhubomor/backend-nest-js-qhubomor":"/github/workspace" 1abfad:00cb4e274bf344c9bc76e320f615b004
+2026-05-22T13:42:01.2985470Z ======CMD======
+2026-05-22T13:42:01.2985971Z set -e
+2026-05-22T13:42:01.2986173Z 
+2026-05-22T13:42:01.2986435Z # 1. Crear directorio del proyecto si no existe
+2026-05-22T13:42:01.2986904Z mkdir -p /root/backend-qhubomor
+2026-05-22T13:42:01.2987294Z cd /root/backend-qhubomor
+2026-05-22T13:42:01.2987507Z 
+2026-05-22T13:42:01.2987713Z # 2. Clonar el repositorio o actualizarlo si ya existe
+2026-05-22T13:42:01.2988141Z if [ ! -d ".git" ]; then
+2026-05-22T13:42:01.2988528Z   echo "Clonando repositorio por primera vez..."
+2026-05-22T13:42:01.2989493Z   git clone https://***@github.com/JhonnM62/backend-nest-js-qhubomor.git .
+2026-05-22T13:42:01.2990008Z else
+2026-05-22T13:42:01.2990353Z   echo "Actualizando repositorio existente..."
+2026-05-22T13:42:01.2991155Z   git remote set-url origin https://***@github.com/JhonnM62/backend-nest-js-qhubomor.git
+2026-05-22T13:42:01.2991717Z   git fetch --all
+2026-05-22T13:42:01.2992053Z   git reset --hard origin/main
+2026-05-22T13:42:01.2992405Z   git clean -fd
+2026-05-22T13:42:01.2992715Z fi
+2026-05-22T13:42:01.2992875Z 
+2026-05-22T13:42:01.2993131Z # 3. Inyectar las variables de entorno desde los secretos de GitHub
+2026-05-22T13:42:01.2994011Z cat << 'EOF' > .env
+2026-05-22T13:42:01.2994821Z ***
+2026-05-22T13:42:01.2995150Z ***
+2026-05-22T13:42:01.2995453Z ***
+2026-05-22T13:42:01.2995769Z ***
+2026-05-22T13:42:01.2996090Z ***
+2026-05-22T13:42:01.2996398Z ***
+2026-05-22T13:42:01.2996688Z ***
+2026-05-22T13:42:01.2996982Z ***
+2026-05-22T13:42:01.2997374Z ***
+2026-05-22T13:42:01.2997672Z ***
+2026-05-22T13:42:01.2997954Z ***
+2026-05-22T13:42:01.2998243Z ***
+2026-05-22T13:42:01.2998549Z ***
+2026-05-22T13:42:01.2998842Z ***
+2026-05-22T13:42:01.2999105Z EOF
+2026-05-22T13:42:01.2999274Z 
+2026-05-22T13:42:01.2999506Z # 5. Construir la nueva imagen de Docker localmente en Contabo
+2026-05-22T13:42:01.2999993Z echo "Construyendo imagen Docker..."
+2026-05-22T13:42:01.3000393Z docker build -t qhubomor-backend .
+2026-05-22T13:42:01.3000635Z 
+2026-05-22T13:42:01.3000944Z # 5.5 Aplicar migraciones/push de Prisma a la base de datos remotamente (sin borrar data)
+2026-05-22T13:42:01.3086837Z # Como el contenedor tiene prisma instalado, podemos correrlo efímeramente
+2026-05-22T13:42:01.3087477Z echo "Sincronizando esquema de base de datos..."
+2026-05-22T13:42:01.3088090Z docker run --rm --env-file .env qhubomor-backend npx prisma db push --accept-data-loss
+2026-05-22T13:42:01.3088529Z 
+2026-05-22T13:42:01.3088766Z # 6. Detener y eliminar el contenedor anterior si existe
+2026-05-22T13:42:01.3089248Z echo "Deteniendo contenedor anterior..."
+2026-05-22T13:42:01.3089682Z docker stop qhubomor-backend-app || true
+2026-05-22T13:42:01.3090095Z docker rm qhubomor-backend-app || true
+2026-05-22T13:42:01.3090349Z 
+2026-05-22T13:42:01.3090622Z # 5.1 Crear directorios de subidas persistentes fuera de la carpeta del repo
+2026-05-22T13:42:01.3091161Z mkdir -p /root/backend-data/uploads/insumos
+2026-05-22T13:42:01.3091583Z mkdir -p /root/backend-data/uploads/gastos
+2026-05-22T13:42:01.3092018Z mkdir -p /root/backend-data/uploads/productos
+2026-05-22T13:42:01.3092314Z 
+2026-05-22T13:42:01.3092875Z # Copiar archivos existentes si los hay en el repo clonado hacia el volumen persistente
+2026-05-22T13:42:01.3093683Z if [ -d "/root/backend-qhubomor/public/uploads" ]; then
+2026-05-22T13:42:01.3094326Z   cp -r /root/backend-qhubomor/public/uploads/* /root/backend-data/uploads/ 2>/dev/null || true
+2026-05-22T13:42:01.3094874Z fi
+2026-05-22T13:42:01.3095031Z 
+2026-05-22T13:42:01.3095309Z # 6. Levantar el nuevo contenedor mapeando el puerto y el volumen de persistencia
+2026-05-22T13:42:01.3095851Z echo "Levantando nuevo contenedor..."
+2026-05-22T13:42:01.3096217Z docker run -d \
+2026-05-22T13:42:01.3096545Z   --name qhubomor-backend-app \
+2026-05-22T13:42:01.3096918Z   -p 8061:3000 \
+2026-05-22T13:42:01.3097286Z   -v /root/backend-data/uploads:/app/public/uploads \
+2026-05-22T13:42:01.3097725Z   --restart unless-stopped \
+2026-05-22T13:42:01.3098067Z   --env-file .env \
+2026-05-22T13:42:01.3098377Z   qhubomor-backend
+2026-05-22T13:42:01.3098747Z 
+2026-05-22T13:42:01.3099008Z echo "¡Despliegue completado exitosamente!"
+2026-05-22T13:42:01.3099303Z 
+2026-05-22T13:42:01.3099432Z ======END======
+2026-05-22T13:42:02.8665972Z out: Actualizando repositorio existente...
+2026-05-22T13:42:02.8700816Z out: Fetching origin
+2026-05-22T13:42:03.2243211Z err: From https://github.com/JhonnM62/backend-nest-js-qhubomor
+2026-05-22T13:42:03.2244397Z err:    06babca..491595d  main       -> origin/main
+2026-05-22T13:42:03.2336891Z out: HEAD is now at 491595d fix(caja): remove aperturaCierreInsumos validation from cerrarCaja
+2026-05-22T13:42:03.2366666Z out: Construyendo imagen Docker...
+2026-05-22T13:42:03.5297902Z err: #0 building with "default" instance using docker driver
+2026-05-22T13:42:03.5298905Z err: #1 [internal] load build definition from Dockerfile
+2026-05-22T13:42:03.5299437Z err: #1 transferring dockerfile: 1.12kB done
+2026-05-22T13:42:03.5299864Z err: #1 DONE 0.0s
+2026-05-22T13:42:03.5300314Z err: #2 [internal] load metadata for docker.io/library/node:20-slim
+2026-05-22T13:42:04.0639412Z err: #2 DONE 0.7s
+2026-05-22T13:42:04.2962484Z err: #3 [internal] load .dockerignore
+2026-05-22T13:42:04.2963164Z err: #3 transferring context: 105B done
+2026-05-22T13:42:04.2964132Z err: #3 DONE 0.0s
+2026-05-22T13:42:04.2965440Z err: #4 [deps 1/6] FROM docker.io/library/node:20-slim@sha256:2cf067cfed83d5ea958367df9f966191a942351a2df77d6f0193e162b5febfc0
+2026-05-22T13:42:04.2966806Z err: #4 DONE 0.0s
+2026-05-22T13:42:04.2967426Z err: #5 [internal] load build context
+2026-05-22T13:42:04.2968175Z err: #5 transferring context: 77.80kB 0.0s done
+2026-05-22T13:42:04.2968951Z err: #5 DONE 0.0s
+2026-05-22T13:42:04.2969928Z err: #6 [deps 2/6] RUN apt-get update && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
+2026-05-22T13:42:04.2971083Z err: #6 CACHED
+2026-05-22T13:42:04.2971567Z err: #7 [deps 3/6] WORKDIR /app
+2026-05-22T13:42:04.2972139Z err: #7 CACHED
+2026-05-22T13:42:04.2972675Z err: #8 [deps 6/6] RUN npm ci
+2026-05-22T13:42:04.2973609Z err: #8 CACHED
+2026-05-22T13:42:04.2974170Z err: #9 [deps 4/6] COPY package*.json ./
+2026-05-22T13:42:04.2974759Z err: #9 CACHED
+2026-05-22T13:42:04.2975233Z err: #10 [deps 5/6] COPY prisma ./prisma/
+2026-05-22T13:42:04.2975827Z err: #10 CACHED
+2026-05-22T13:42:04.2976615Z err: #11 [builder 4/7] COPY --from=deps /app/node_modules ./node_modules
+2026-05-22T13:42:04.2977390Z err: #11 CACHED
+2026-05-22T13:42:04.2977808Z err: #12 [builder 5/7] COPY . .
+2026-05-22T13:42:04.2978320Z err: #12 DONE 0.0s
+2026-05-22T13:42:04.2978957Z err: #13 [builder 6/7] RUN npx prisma generate
+2026-05-22T13:42:04.9543645Z err: #13 0.809 Prisma schema loaded from prisma/schema.prisma
+2026-05-22T13:42:05.4864734Z err: #13 1.341 
+2026-05-22T13:42:05.4866337Z err: #13 1.341 ✔ Generated Prisma Client (v5.22.0) to ./node_modules/@prisma/client in 265ms
+2026-05-22T13:42:05.4867470Z err: #13 1.341 
+2026-05-22T13:42:05.4868619Z err: #13 1.341 Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+2026-05-22T13:42:05.4869716Z err: #13 1.341 
+2026-05-22T13:42:05.4871289Z err: #13 1.341 Tip: Need your database queries to be 1000x faster? Accelerate offers you that and more: https://pris.ly/tip-2-accelerate
+2026-05-22T13:42:05.4872273Z err: #13 1.341 
+2026-05-22T13:42:05.6809478Z err: #13 1.535 npm notice
+2026-05-22T13:42:05.6810338Z err: #13 1.535 npm notice New major version of npm available! 10.8.2 -> 11.15.0
+2026-05-22T13:42:05.6811466Z err: #13 1.535 npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.15.0
+2026-05-22T13:42:05.6812540Z err: #13 1.535 npm notice To update run: npm install -g npm@11.15.0
+2026-05-22T13:42:05.6813285Z err: #13 1.535 npm notice
+2026-05-22T13:42:05.8725755Z err: #13 DONE 1.6s
+2026-05-22T13:42:05.8726313Z err: #14 [builder 7/7] RUN npm run build
+2026-05-22T13:42:06.0013732Z err: #14 0.280 
+2026-05-22T13:42:06.0015098Z err: #14 0.280 > puntodeventabackend@0.0.1 build
+2026-05-22T13:42:06.0015686Z err: #14 0.280 > nest build
+2026-05-22T13:42:06.0016112Z err: #14 0.280 
+2026-05-22T13:42:11.8031894Z err: #14 6.081 [96msrc/caja/caja.service.ts[0m:[93m734[0m:[93m16[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'cuadrarInsumos' does not exist in type 'InsumosWhereInput'.
+2026-05-22T13:42:11.8034360Z err: #14 6.081 
+2026-05-22T13:42:11.8035209Z err: #14 6.081 [7m734[0m       where: { cuadrarInsumos: true, estado: 'ACTIVO' }
+2026-05-22T13:42:11.8036162Z err: #14 6.081 [7m   [0m [91m               ~~~~~~~~~~~~~~[0m
+2026-05-22T13:42:11.8039139Z err: #14 6.081 [96msrc/caja/caja.service.ts[0m:[93m738[0m:[93m31[0m - [91merror[0m[90m TS2339: [0mProperty 'ultimosConteos' does not exist on type '{ nombre: string; createdAt: Date | null; updatedAt: Date | null; estado: string | null; fecha: Date | null; total: Decimal | null; cantidad: number | null; ... 17 more ...; imagencard: string | null; }'.
+2026-05-22T13:42:11.8040980Z err: #14 6.081 
+2026-05-22T13:42:11.8041494Z err: #14 6.081 [7m738[0m       const conteos = (insumo.ultimosConteos as any[]) || [];
+2026-05-22T13:42:11.8042193Z err: #14 6.081 [7m   [0m [91m                              ~~~~~~~~~~~~~~[0m
+2026-05-22T13:42:11.8044502Z err: #14 6.081 [96msrc/caja/caja.service.ts[0m:[93m790[0m:[93m41[0m - [91merror[0m[90m TS2339: [0mProperty 'ultimosConteos' does not exist on type '{ nombre: string; createdAt: Date | null; updatedAt: Date | null; estado: string | null; fecha: Date | null; total: Decimal | null; cantidad: number | null; ... 17 more ...; imagencard: string | null; }'.
+2026-05-22T13:42:11.8045968Z err: #14 6.081 
+2026-05-22T13:42:11.8046483Z err: #14 6.081 [7m790[0m         const conteosActuales = (insumo.ultimosConteos as any[]) || [];
+2026-05-22T13:42:11.8047087Z err: #14 6.081 [7m   [0m [91m                                        ~~~~~~~~~~~~~~[0m
+2026-05-22T13:42:11.8048686Z err: #14 6.081 [96msrc/caja/caja.service.ts[0m:[93m805[0m:[93m13[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'ultimosConteos' does not exist in type '(Without<InsumosUpdateInput, InsumosUncheckedUpdateInput> & InsumosUncheckedUpdateInput) | (Without<...> & InsumosUpdateInput)'.
+2026-05-22T13:42:11.8049961Z err: #14 6.081 
+2026-05-22T13:42:11.8050527Z err: #14 6.081 [7m805[0m             ultimosConteos: nuevosConteos
+2026-05-22T13:42:11.8051174Z err: #14 6.081 [7m   [0m [91m            ~~~~~~~~~~~~~~[0m
+2026-05-22T13:42:11.8051499Z err: #14 6.081 
+2026-05-22T13:42:11.9096748Z err: #14 6.081   [96mnode_modules/.prisma/client/index.d.ts[0m:[93m12030[0m:[93m5[0m
+2026-05-22T13:42:11.9097855Z err: #14 6.081     [7m12030[0m     data: XOR<InsumosUpdateInput, InsumosUncheckedUpdateInput>
+2026-05-22T13:42:11.9098657Z err: #14 6.081     [7m     [0m [96m    ~~~~[0m
+2026-05-22T13:42:11.9101413Z err: #14 6.081     The expected type comes from property 'data' which is declared here on type '{ select?: InsumosSelect<DefaultArgs> | null | undefined; include?: InsumosInclude<DefaultArgs> | null | undefined; data: (Without<...> & InsumosUncheckedUpdateInput) | (Without<...> & InsumosUpdateInput); where: InsumosWhereUniqueInput; }'
+2026-05-22T13:42:11.9104190Z err: #14 6.081 
+2026-05-22T13:42:11.9104554Z err: #14 6.081 Found 4 error(s).
+2026-05-22T13:42:11.9104950Z err: #14 6.081 
+2026-05-22T13:42:11.9105545Z err: #14 ERROR: process "/bin/sh -c npm run build" did not complete successfully: exit code: 1
+2026-05-22T13:42:11.9106222Z err: ------
+2026-05-22T13:42:11.9106587Z err:  > [builder 7/7] RUN npm run build:
+2026-05-22T13:42:11.9107098Z err: 6.081 [7m805[0m             ultimosConteos: nuevosConteos
+2026-05-22T13:42:11.9107556Z err: 6.081 [7m   [0m [91m            ~~~~~~~~~~~~~~[0m
+2026-05-22T13:42:11.9107887Z err: 6.081 
+2026-05-22T13:42:11.9108329Z err: 6.081   [96mnode_modules/.prisma/client/index.d.ts[0m:[93m12030[0m:[93m5[0m
+2026-05-22T13:42:11.9108998Z err: 6.081     [7m12030[0m     data: XOR<InsumosUpdateInput, InsumosUncheckedUpdateInput>
+2026-05-22T13:42:11.9109528Z err: 6.081     [7m     [0m [96m    ~~~~[0m
+2026-05-22T13:42:11.9111022Z err: 6.081     The expected type comes from property 'data' which is declared here on type '{ select?: InsumosSelect<DefaultArgs> | null | undefined; include?: InsumosInclude<DefaultArgs> | null | undefined; data: (Without<...> & InsumosUncheckedUpdateInput) | (Without<...> & InsumosUpdateInput); where: InsumosWhereUniqueInput; }'
+2026-05-22T13:42:11.9112311Z err: 6.081 
+2026-05-22T13:42:11.9112544Z err: 6.081 Found 4 error(s).
+2026-05-22T13:42:11.9112805Z err: 6.081 
+2026-05-22T13:42:11.9113015Z err: ------
+2026-05-22T13:42:11.9113508Z err: Dockerfile:17
+2026-05-22T13:42:11.9113773Z err: --------------------
+2026-05-22T13:42:11.9114120Z err:   15 |     # Generamos el cliente de Prisma antes de compilar
+2026-05-22T13:42:11.9114514Z err:   16 |     RUN npx prisma generate
+2026-05-22T13:42:11.9114834Z err:   17 | >>> RUN npm run build
+2026-05-22T13:42:11.9115107Z err:   18 |     
+2026-05-22T13:42:11.9115480Z err:   19 |     # Etapa 3: Producción (Imagen final ligera)
+2026-05-22T13:42:11.9115877Z err: --------------------
+2026-05-22T13:42:11.9116379Z err: ERROR: failed to solve: process "/bin/sh -c npm run build" did not complete successfully: exit code: 1
+2026-05-22T13:42:11.9151495Z 2026/05/22 13:42:11 Process exited with status 1
+2026-05-22T13:42:11.9909404Z Cleaning up orphan processes
