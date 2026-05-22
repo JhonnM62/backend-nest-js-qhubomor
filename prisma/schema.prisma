@@ -145,6 +145,8 @@ model Insumos {
   llevarControlEnCaja   String?   @map("Llevar control en caja")
   contador2             Int?      @map("Contador 2")
   imagencard            String?   @map("imagencard")
+  cuadrarInsumos        Boolean   @default(false) @map("Cuadrar Insumos")
+  ultimosConteos        Json?     @map("Ultimos Conteos")
   createdAt             DateTime?
   updatedAt             DateTime?
 
