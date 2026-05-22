@@ -736,7 +736,8 @@ export class CajaService {
 
     const pendientes = insumos.map(insumo => {
       const conteos = (insumo.ultimosConteos as any[]) || [];
-      const ultimoConteo = conteos.length > 0 ? conteos[conteos.length - 1] : null;
+      const conteosDeEstaCaja = conteos.filter(c => c.cajaId === id);
+      const ultimoConteo = conteosDeEstaCaja.length > 0 ? conteosDeEstaCaja[conteosDeEstaCaja.length - 1] : null;
       
       let verificadoHoy = false;
       if (ultimoConteo?.fecha) {
