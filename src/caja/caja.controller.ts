@@ -108,4 +108,12 @@ export class CajaController {
   registrarConteo(@Param('id') id: string, @Body() dto: RegistrarConteoDto) {
     return this.cajaService.registrarConteo(id, dto);
   }
+
+  @Post(':id/posponer-verificacion')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Posponer la verificacion de insumos (max 3 veces)' })
+  posponerVerificacion(@Param('id') id: string) {
+    return this.cajaService.posponerVerificacion(id);
+  }
 }

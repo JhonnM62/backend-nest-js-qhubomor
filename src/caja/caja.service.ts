@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateAperturaCierreCajaDto, UpdateCierreCajaDto, CajaQueryDto } from './dto/caja.dto';
 import { Prisma } from '@prisma/client';
@@ -218,6 +218,14 @@ export class CajaService {
 
     if (caja.cierre === 'cerrada') {
       throw new NotFoundException('Esta caja ya está cerrada');
+    }
+
+    // Validar que no haya verificación pendiente sin posposiciones disponibles
+    const verificacion = await this.getVerificacionPendiente(id);
+    if (!verificacion.todasVerificadas && verificacion.posposicionesRestantes === 0) {
+      throw new BadRequestException(
+        `Hay ${verificacion.totalPendientes} insumos sin verificar y ya usaste tus 3 posposiciones. Debes hacer la verificación antes de cerrar.`
+      );
     }
 
     const { insumos, ...cajaData } = updateCierreDto;
@@ -756,12 +764,75 @@ export class CajaService {
     });
 
     const pendientesSinVerificar = pendientes.filter(p => !p.conteoVerificadoHoy);
+    const posposicionesRestantes = Math.max(0, 3 - (caja.contador || 0));
 
     return {
       pendientes,
       totalPendientes: pendientesSinVerificar.length,
       yaVerificadoHoy: pendientes.some(p => p.conteoVerificadoHoy),
-      todasVerificadas: pendientesSinVerificar.length === 0
+      todasVerificadas: pendientesSinVerificar.length === 0,
+      contadorPosposiciones: caja.contador || 0,
+      posposicionesRestantes,
+      puedePosponer: posposicionesRestantes > 0 && pendientesSinVerificar.length > 0
+    };
+  }
+
+  async posponerVerificacion(id: string) {
+    const caja = await this.prisma.aperturaCierreCaja.findUnique({
+      where: { IDcaja: id }
+    });
+
+    if (!caja) {
+      throw new NotFoundException(`Caja con ID ${id} no encontrada`);
+    }
+
+    if (caja.cierre === 'cerrada') {
+      throw new NotFoundException('No se puede posponer en una caja cerrada');
+    }
+
+    const contadorActual = caja.contador || 0;
+    if (contadorActual >= 3) {
+      throw new BadRequestException('Ya no puedes posponer más. Debes hacer la verificación.');
+    }
+
+    const insumos = await this.prisma.insumos.findMany({
+      where: { cuadrarInsumos: true, estado: 'ACTIVO' }
+    });
+
+    const hoy = new Date();
+    hoy.setHours(5, 0, 0, 0);
+
+    const pendientesSinVerificar = insumos.filter(insumo => {
+      const conteos = (insumo.ultimosConteos as any[]) || [];
+      const conteosDeEstaCaja = conteos.filter(c => c.cajaId === id);
+      const ultimoConteo = conteosDeEstaCaja.length > 0 ? conteosDeEstaCaja[conteosDeEstaCaja.length - 1] : null;
+      if (!ultimoConteo?.fecha) return true;
+      const fechaConteo = new Date(ultimoConteo.fecha);
+      return fechaConteo < hoy;
+    });
+
+    if (pendientesSinVerificar.length === 0) {
+      throw new BadRequestException('No hay insumos pendientes por verificar');
+    }
+
+    const nuevoContador = contadorActual + 1;
+
+    await this.prisma.aperturaCierreCaja.update({
+      where: { IDcaja: id },
+      data: { contador: nuevoContador }
+    });
+
+    this.appGateway.emitToCaja(SocketEvent.REFRESH_CAJA, {
+      action: 'verificacion_pospuesta',
+      cajaId: id,
+      contador: nuevoContador
+    });
+
+    return {
+      success: true,
+      message: `Verificación pospuesta. ${3 - nuevoContador} posposiciones restantes.`,
+      contadorPosposiciones: nuevoContador,
+      posposicionesRestantes: 3 - nuevoContador
     };
   }
 
