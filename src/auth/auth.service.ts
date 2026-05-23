@@ -50,6 +50,7 @@ export class AuthService {
         email: user.email || '',
         nombre: user.nombre || '',
         rol: user.rol || 'usuario',
+        permisos: user.permisos,
       },
     };
   }
@@ -89,6 +90,7 @@ export class AuthService {
         email: user.email || '',
         nombre: user.nombre || '',
         rol: user.rol || 'usuario',
+        permisos: user.permisos,
       },
     };
   }
