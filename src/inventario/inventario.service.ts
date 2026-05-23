@@ -475,6 +475,7 @@ export class InventarioService {
     });
 
     const stockMap = new Map<string, { cantidadHist: number; disponible: number }>();
+    const inventarioTotalesMap = new Map<string, number>();
 
     for (const orden of ordenes) {
       if (!orden.nombreDelAlimento || !orden.cantidad || orden.cantidad <= 0) continue;
@@ -491,6 +492,11 @@ export class InventarioService {
           const current = stockMap.get(insumoId)!;
           current.cantidadHist += orden.cantidad;
           current.disponible += orden.cantidad;
+        }
+        const ordenTotal = Number(orden.subtotal) || ((Number(orden.precioActual) || 0) * Number(orden.cantidad));
+        const invId = orden.IDinventario;
+        if (invId) {
+          inventarioTotalesMap.set(invId, (inventarioTotalesMap.get(invId) || 0) + ordenTotal);
         }
       } else {
         const current = stockMap.get(insumoId)!;
@@ -517,11 +523,19 @@ export class InventarioService {
       }
     }
 
+    for (const [invId, nuevoTotal] of inventarioTotalesMap) {
+      await this.prisma.inventario.update({
+        where: { IDinventario: invId },
+        data: { total: nuevoTotal }
+      }).catch(() => {});
+    }
+
     this.appGateway.emitToInsumos(SocketEvent.REFRESH_INSUMOS, { action: 'recalcular_stock' });
+    this.appGateway.emitToInventario(SocketEvent.REFRESH_INVENTARIO, { action: 'recalcular_total' });
 
     return {
       success: true,
-      message: `Stock recalculado para ${resultados.length} insumos`,
+      message: `Stock recalculado para ${resultados.length} insumos y ${inventarioTotalesMap.size} inventarios`,
       resultados
     };
   }
