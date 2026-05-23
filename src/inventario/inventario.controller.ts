@@ -130,4 +130,12 @@ export class InventarioController {
   marcarVariosComprado(@Body() body: { ids: string[] }) {
     return this.inventarioService.marcarVariosComprado(body.ids);
   }
+
+  @Post('recalcular-stock')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Recalcular stock de insumos basado en órdenes de inventario' })
+  recalcularStock() {
+    return this.inventarioService.recalcularStockInsumos();
+  }
 }

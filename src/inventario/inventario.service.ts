@@ -225,12 +225,47 @@ export class InventarioService {
   }
 
   async agregarItem(createOrderDto: CreateOrderInventarioDto) {
+    const { nombreDelAlimento, cantidad, precioActual } = createOrderDto;
+
+    let insumoActualizado: any = null;
+
+    if (nombreDelAlimento && cantidad && cantidad > 0) {
+      const insumo = await this.prisma.insumos.findFirst({
+        where: {
+          OR: [
+            { IDalimentos: nombreDelAlimento },
+            { nombre: nombreDelAlimento },
+          ],
+        },
+      });
+
+      if (insumo) {
+        const disponibleActual = Number(insumo.disponible) || 0;
+        const cantidadHist = insumo.cantidad || 0;
+
+        await this.prisma.insumos.update({
+          where: { IDalimentos: insumo.IDalimentos },
+          data: {
+            disponible: disponibleActual - cantidad,
+            cantidad: cantidadHist,
+          },
+        });
+
+        insumoActualizado = await this.prisma.insumos.findUnique({
+          where: { IDalimentos: insumo.IDalimentos }
+        });
+
+        this.appGateway.emitToInsumos(SocketEvent.REFRESH_INSUMOS, { action: 'update_stock' });
+      }
+    }
+
     const item = await this.prisma.orderinventario.create({
       data: {
         ...createOrderDto,
         fechaYHora: new Date(),
         disponible: 'si',
         seCompro: 'no',
+        cantInsumos: insumoActualizado ? Number(insumoActualizado.disponible) : 0,
         createdAt: new Date(),
         updatedAt: new Date(),
       },
@@ -285,29 +320,38 @@ export class InventarioService {
       throw new NotFoundException(`Item con ID ${id} no encontrado`);
     }
 
-    // Si el item ya había sido procesado y se pide restaurar el stock
-    if (restoreStock && item.seCompro?.toLowerCase() === 'si' && item.nombreDelAlimento) {
+    const isEntrada = item.inventario?.tipo?.toUpperCase().includes('ENTRADA');
+
+    if (item.nombreDelAlimento && item.cantidad && item.cantidad > 0) {
       const insumo = await this.prisma.insumos.findFirst({
         where: { OR: [{ IDalimentos: item.nombreDelAlimento }, { nombre: item.nombreDelAlimento }] },
       });
 
       if (insumo) {
-        const isEntrada = item.inventario?.tipo?.toUpperCase().includes('ENTRADA');
-        let nuevaCantidadHist = insumo.cantidad || 0;
-        let nuevoDisponible = Number(insumo.disponible) || 0;
+        const cantidadHist = insumo.cantidad || 0;
+        const disponibleActual = Number(insumo.disponible) || 0;
 
-        if (isEntrada) {
-          nuevaCantidadHist -= (item.cantidad || 0);
-          nuevoDisponible -= (item.cantidad || 0);
-          if (nuevaCantidadHist < 0) nuevaCantidadHist = 0;
-        } else {
-          nuevoDisponible += (item.cantidad || 0);
+        if (restoreStock) {
+          if (isEntrada) {
+            if (item.seCompro?.toLowerCase() === 'si') {
+              await this.prisma.insumos.update({
+                where: { IDalimentos: insumo.IDalimentos },
+                data: {
+                  cantidad: Math.max(0, cantidadHist - (item.cantidad || 0)),
+                  disponible: disponibleActual - (item.cantidad || 0),
+                },
+              });
+            }
+          } else {
+            await this.prisma.insumos.update({
+              where: { IDalimentos: insumo.IDalimentos },
+              data: {
+                cantidad: cantidadHist,
+                disponible: disponibleActual + (item.cantidad || 0),
+              },
+            });
+          }
         }
-
-        await this.prisma.insumos.update({
-          where: { IDalimentos: insumo.IDalimentos },
-          data: { cantidad: nuevaCantidadHist, disponible: nuevoDisponible },
-        });
       }
     }
 
@@ -315,7 +359,7 @@ export class InventarioService {
       where: { IDorderinventario: id },
     });
     this.appGateway.emitToInventario(SocketEvent.REFRESH_INVENTARIO, { action: 'eliminarItem', id });
-    if (restoreStock && item.seCompro?.toLowerCase() === 'si' && item.nombreDelAlimento) {
+    if (item.nombreDelAlimento) {
       this.appGateway.emitToInsumos(SocketEvent.REFRESH_INSUMOS, { action: 'update_stock' });
     }
     return deleted;
@@ -423,5 +467,62 @@ export class InventarioService {
     });
 
     return items.filter((item) => (item.cantidad ?? 0) < 10);
+  }
+
+  async recalcularStockInsumos() {
+    const ordenes = await this.prisma.orderinventario.findMany({
+      include: { inventario: true }
+    });
+
+    const stockMap = new Map<string, { cantidadHist: number; disponible: number }>();
+
+    for (const orden of ordenes) {
+      if (!orden.nombreDelAlimento || !orden.cantidad || orden.cantidad <= 0) continue;
+
+      const insumoId = orden.nombreDelAlimento;
+      if (!stockMap.has(insumoId)) {
+        stockMap.set(insumoId, { cantidadHist: 0, disponible: 0 });
+      }
+
+      const isEntrada = orden.inventario?.tipo?.toUpperCase().includes('ENTRADA');
+
+      if (isEntrada) {
+        if (orden.seCompro?.toLowerCase() === 'si') {
+          const current = stockMap.get(insumoId)!;
+          current.cantidadHist += orden.cantidad;
+          current.disponible += orden.cantidad;
+        }
+      } else {
+        const current = stockMap.get(insumoId)!;
+        current.disponible -= orden.cantidad;
+      }
+    }
+
+    const resultados = [];
+    for (const [insumoId, stock] of stockMap) {
+      const insumo = await this.prisma.insumos.findFirst({
+        where: { OR: [{ IDalimentos: insumoId }, { nombre: insumoId }] }
+      });
+
+      if (insumo) {
+        const disponibleFinal = Math.max(0, stock.disponible);
+        await this.prisma.insumos.update({
+          where: { IDalimentos: insumo.IDalimentos },
+          data: {
+            cantidad: stock.cantidadHist,
+            disponible: disponibleFinal
+          }
+        });
+        resultados.push({ id: insumo.IDalimentos, nombre: insumo.nombre, cantidadHist: stock.cantidadHist, disponible: disponibleFinal });
+      }
+    }
+
+    this.appGateway.emitToInsumos(SocketEvent.REFRESH_INSUMOS, { action: 'recalcular_stock' });
+
+    return {
+      success: true,
+      message: `Stock recalculado para ${resultados.length} insumos`,
+      resultados
+    };
   }
 }
