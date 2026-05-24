@@ -243,7 +243,7 @@ export class VentasService {
   }
 
   private async actualizarComprasCliente(prisma: any, clienteId: number, ventaId: string, productos: any[]) {
-    // Calcular cantidad total de productos en esta venta (para el histórico)
+    // Cantidad total de items en esta venta (para el histórico de 'compras')
     const cantidadVenta = productos.reduce((total, p) => total + (p.cantidad || 1), 0);
 
     const cliente = await prisma.clientes.findUnique({
@@ -256,21 +256,41 @@ export class VentasService {
       if (isNaN(comprasTotales)) comprasTotales = 0;
       comprasTotales += cantidadVenta;
 
-      // --- Lógica del contador de fidelidad (ciclo 1-10) ---
-      // Cada VENTA (pedido) suma +1 al contador, sin importar cuántos items traiga.
-      // Reglas:
-      // 1. Cada compra (venta) suma exactamente +1 al contador.
-      // 2. El contador NUNCA supera 10 (cap).
-      // 3. Si el contador YA estaba en 10 al iniciar esta compra, se reinicia el ciclo a 1.
-      const contadorActual = cliente.contador || 0;
+      // --- Lógica del contador de fidelidad con checkpoints en 5 y 10 ---
+      // El contador suma items de cada venta, pero tiene dos "topes" o hitos:
+      //
+      // REGLAS:
+      // 1. Si el contador está por debajo de 5 y la suma superaría 5 → se queda en 5.
+      //    (La próxima compra continúa desde 5 hacia el siguiente hito).
+      // 2. Si el contador ya está en 5 o más y la suma superaría 10 → se queda en 10.
+      // 3. Si el contador ya estaba en 10 → se REINICIA a 0 y se aplican las reglas
+      //    normales con la cantidad de esta compra (puede llegar a 5 máximo en esta compra).
+      //
+      // Ejemplos:
+      //   contador=3, compra 6  → 3+6=9 > 5, estaba <5 → queda en 5
+      //   contador=5, compra 3  → 5+3=8, no supera 10  → queda en 8
+      //   contador=5, compra 7  → 5+7=12 > 10           → queda en 10
+      //   contador=10, compra 4 → reset a 0, 0+4=4      → queda en 4
+      //   contador=10, compra 8 → reset a 0, 0+8=8 > 5  → queda en 5
+
+      let base = cliente.contador || 0;
       let nuevoContador: number;
 
-      if (contadorActual >= 10) {
-        // El ciclo anterior se completó → iniciar nuevo ciclo desde 1
-        nuevoContador = 1;
+      if (base >= 10) {
+        // Ciclo completado: reiniciar y aplicar reglas con la cantidad de esta compra
+        base = 0;
+      }
+
+      const suma = base + cantidadVenta;
+
+      if (base < 5 && suma > 5) {
+        // Primera barrera: no puede pasar de 5 si venía de menos de 5
+        nuevoContador = 5;
+      } else if (suma > 10) {
+        // Segunda barrera: no puede pasar de 10
+        nuevoContador = 10;
       } else {
-        // Sumar 1 por esta venta, sin pasar de 10
-        nuevoContador = Math.min(contadorActual + 1, 10);
+        nuevoContador = suma;
       }
 
       await prisma.clientes.update({
@@ -283,6 +303,7 @@ export class VentasService {
       });
     }
   }
+
 
   async createVentaCompleta(createVentaCompletaDto: CreateVentaCompletaDto & { fechaContableManual?: string }, usuarioId: string) {
     const { venta, productos, fechaContableManual } = createVentaCompletaDto;
