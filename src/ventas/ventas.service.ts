@@ -295,11 +295,11 @@ export class VentasService {
     );
 
     const ventaData = {
-      mesa: venta.mesa && venta.mesa !== 'V.R' ? venta.mesa : null, // Fix: Use 'V.R' logic for the DB relation
+      mesa: venta.mesa === 'V.R' ? null : (venta.mesa || null),
       medioDePago: venta.medioDePago,
       efectivoRecibido: venta.efectivoRecibido,
       devueltas: venta.devueltas,
-      banco: venta.medioDePago === 'EFECTIVO' ? null : venta.banco, // Fix: If EFECTIVO, Banco is null
+      banco: venta.medioDePago === 'EFECTIVO' ? null : venta.banco,
       totalInput: venta.totalInput,
       descuento: venta.descuento,
       porcentajeDeDescuento: venta.porcentajeDeDescuento,
@@ -308,17 +308,15 @@ export class VentasService {
     const ventaCreada = await this.prisma.ventas.create({
       data: {
         ...ventaData,
-        mesa: venta.mesa === 'V.R' ? null : venta.mesa,
         pedido: pedidoGenerado,
         estado: venta.estado || 'EN_EL_CARRITO',
         usuario: usuarioId,
         fechaYHora: fechaVenta,
-        fecha: fechaContable, // Use accounting date
+        fecha: fechaContable,
         hora: fechaVenta.toTimeString().split(' ')[0],
         registroDeTiempo: this.generateTiempoLog(venta.estado || 'EN_EL_CARRITO', (venta as any).cartStartTime),
-        // We can optionally connect the cliente explicitly if it exists
-        ...(venta.clienteId ? { clienteRelacion: { connect: { IDcliente: venta.clienteId } } } : {})
-      } as Prisma.VentasCreateInput,
+        clienteId: venta.clienteId || null
+      } as Prisma.VentasUncheckedCreateInput,
     });
 
     // Si hay un cliente asociado, actualizar sus compras y contador
@@ -394,7 +392,7 @@ export class VentasService {
       ventaExistente.fecha; // Maintain existing if not overridden
 
     const ventaData = {
-      mesa: venta.mesa && venta.mesa !== 'V.R' ? venta.mesa : null,
+      mesa: venta.mesa === 'V.R' ? null : (venta.mesa || null),
       medioDePago: venta.medioDePago,
       efectivoRecibido: venta.efectivoRecibido,
       devueltas: venta.devueltas,
@@ -403,16 +401,14 @@ export class VentasService {
       descuento: venta.descuento,
       porcentajeDeDescuento: venta.porcentajeDeDescuento,
       estado: venta.estado || ventaExistente.estado,
-      fecha: fechaContable, // Update accounting date
+      fecha: fechaContable,
+      clienteId: venta.clienteId || null
     };
 
     // Update Venta
     const ventaActualizada = await this.prisma.ventas.update({
       where: { IDventas: id },
-      data: {
-        ...ventaData,
-        ...(venta.clienteId ? { clienteRelacion: { connect: { IDcliente: venta.clienteId } } } : {})
-      } as Prisma.VentasUpdateInput,
+      data: ventaData as Prisma.VentasUncheckedUpdateInput,
     });
 
     // Replace all Orderventas
