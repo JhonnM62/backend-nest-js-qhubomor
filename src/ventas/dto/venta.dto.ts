@@ -284,4 +284,8 @@ export class VentaQueryDto extends PaginationDto {
   @IsOptional()
   @IsString()
   categoriaProducto?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  clienteId?: number | string;
 }

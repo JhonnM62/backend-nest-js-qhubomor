@@ -243,7 +243,7 @@ export class VentasService {
   }
 
   private async actualizarComprasCliente(prisma: any, clienteId: number, ventaId: string, productos: any[]) {
-    // Calcular cantidad total de productos en esta venta
+    // Calcular cantidad total de productos en esta venta (para el histórico)
     const cantidadVenta = productos.reduce((total, p) => total + (p.cantidad || 1), 0);
 
     const cliente = await prisma.clientes.findUnique({
@@ -251,34 +251,33 @@ export class VentasService {
     });
 
     if (cliente) {
-      // Intentamos extraer el valor actual de 'compras' como número (AppSheet guardaba enteros como string)
+      // Histórico total de items comprados (campo 'compras')
       let comprasTotales = parseInt(cliente.compras || '0', 10);
-      if (isNaN(comprasTotales)) comprasTotales = 0; // Por si acaso había CSV de IDs, lo reseteamos a 0 o manejamos diferente
-
+      if (isNaN(comprasTotales)) comprasTotales = 0;
       comprasTotales += cantidadVenta;
 
       // --- Lógica del contador de fidelidad (ciclo 1-10) ---
+      // Cada VENTA (pedido) suma +1 al contador, sin importar cuántos items traiga.
       // Reglas:
-      // 1. El contador suma los productos comprados en esta venta.
-      // 2. El contador NUNCA supera 10 dentro de una misma compra (cap).
-      // 3. Si el contador YA estaba en 10 al iniciar esta compra, se reinicia el ciclo:
-      //    el nuevo contador empieza desde 0 y suma los productos de esta compra (cap 10).
+      // 1. Cada compra (venta) suma exactamente +1 al contador.
+      // 2. El contador NUNCA supera 10 (cap).
+      // 3. Si el contador YA estaba en 10 al iniciar esta compra, se reinicia el ciclo a 1.
       const contadorActual = cliente.contador || 0;
       let nuevoContador: number;
 
       if (contadorActual >= 10) {
-        // El ciclo anterior se completó → iniciar nuevo ciclo con los productos de esta compra
-        nuevoContador = Math.min(cantidadVenta, 10);
+        // El ciclo anterior se completó → iniciar nuevo ciclo desde 1
+        nuevoContador = 1;
       } else {
-        // Seguir acumulando en el ciclo actual, sin pasar de 10
-        nuevoContador = Math.min(contadorActual + cantidadVenta, 10);
+        // Sumar 1 por esta venta, sin pasar de 10
+        nuevoContador = Math.min(contadorActual + 1, 10);
       }
 
       await prisma.clientes.update({
         where: { IDcliente: clienteId },
         data: {
           contador: nuevoContador,
-          compras: comprasTotales.toString(), // Guardamos el entero total en formato string para retrocompatibilidad
+          compras: comprasTotales.toString(),
           fecha_y_hora_actualizacion: new Date()
         }
       });
@@ -493,7 +492,8 @@ export class VentasService {
       totalMin,
       totalMax,
       productoId,
-      categoriaProducto
+      categoriaProducto,
+      clienteId
     } = query;
     const skip = (page - 1) * limit;
 
@@ -558,6 +558,10 @@ export class VentasService {
           ...(categoriaProducto ? { categoria: categoriaProducto } : {})
         }
       };
+    }
+
+    if (clienteId) {
+      where.clienteId = Number(clienteId);
     }
 
     const [data, total] = await Promise.all([
