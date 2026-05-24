@@ -12,8 +12,8 @@ RUN apt-get update && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-# Generamos el cliente de Prisma antes de compilar y verificamos el schema
-RUN npx prisma generate && npx prisma db push --accept-data-loss && echo "Schema pushed successfully"
+# Generamos el cliente de Prisma antes de compilar
+RUN npx prisma generate
 RUN npm run build
 
 # Etapa 3: Producción (Imagen final ligera)
