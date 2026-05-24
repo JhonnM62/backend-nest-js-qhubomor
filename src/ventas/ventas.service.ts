@@ -163,22 +163,31 @@ export class VentasService {
   }
 
   async create(createVentaDto: CreateVentaDto & { fechaContableManual?: string }) {
+    console.log('[DEBUG create] createVentaDto.mesa:', createVentaDto.mesa);
+    console.log('[DEBUG create] createVentaDto.clienteId:', createVentaDto.clienteId);
+    console.log('[DEBUG create] Full DTO:', JSON.stringify(createVentaDto));
+    
     const now = new Date();
     const fechaContable = await this.getFechaContable(now, createVentaDto.fechaContableManual);
     const pedido = await this.generatePedidoNumber(createVentaDto.mesa, undefined, fechaContable);
 
+    const ventaData: any = {
+      ...createVentaDto,
+      fechaContableManual: undefined,
+      mesa: createVentaDto.mesa === 'V.R' ? null : createVentaDto.mesa,
+      pedido,
+      fechaYHora: now,
+      fecha: fechaContable,
+      hora: now.toTimeString().split(' ')[0],
+      estado: createVentaDto.estado || 'iniciado',
+      registroDeTiempo: this.generateTiempoLog(createVentaDto.estado || 'iniciado', createVentaDto.cartStartTime),
+    };
+
+    console.log('[DEBUG create] ventaData.mesa:', ventaData.mesa);
+    console.log('[DEBUG create] ventaData.clienteId:', ventaData.clienteId);
+
     const venta = await this.prisma.ventas.create({
-      data: {
-        ...createVentaDto,
-        fechaContableManual: undefined, // ensure it's not saved directly
-        mesa: createVentaDto.mesa === 'V.R' ? null : createVentaDto.mesa,
-        pedido,
-        fechaYHora: now,
-        fecha: fechaContable,
-        hora: now.toTimeString().split(' ')[0],
-        estado: createVentaDto.estado || 'iniciado',
-        registroDeTiempo: this.generateTiempoLog(createVentaDto.estado || 'iniciado', createVentaDto.cartStartTime),
-      } as Prisma.VentasCreateInput,
+      data: ventaData,
     });
 
     this.appGateway.emitToVentas(SocketEvent.REFRESH_VENTAS, { action: 'create', venta });
