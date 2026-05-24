@@ -902,7 +902,12 @@ export class CajaService {
       throw new NotFoundException(`Insumo con ID ${insumoId} no encontrado`);
     }
 
-    const conteos = (insumo.ultimosConteos as any[]) || [];
+    let conteos = [];
+    if (typeof insumo.ultimosConteos === 'string') {
+      try { conteos = JSON.parse(insumo.ultimosConteos); } catch(e) { conteos = []; }
+    } else {
+      conteos = (insumo.ultimosConteos as any[]) || [];
+    }
     
     if (conteoIndex < 0 || conteoIndex >= conteos.length) {
       throw new BadRequestException('Índice de conteo inválido');
@@ -921,5 +926,53 @@ export class CajaService {
     });
 
     return { success: true, message: 'Conteo eliminado correctamente' };
+  }
+
+  async editarConteo(cajaId: string, insumoId: string, conteoIndex: number, nuevaCantContada: number) {
+    if (nuevaCantContada < 0) {
+      throw new BadRequestException('La cantidad no puede ser negativa');
+    }
+
+    const insumo = await this.prisma.insumos.findUnique({
+      where: { IDalimentos: insumoId }
+    });
+
+    if (!insumo) {
+      throw new NotFoundException(`Insumo con ID ${insumoId} no encontrado`);
+    }
+
+    let conteos = [];
+    if (typeof insumo.ultimosConteos === 'string') {
+      try { conteos = JSON.parse(insumo.ultimosConteos); } catch(e) { conteos = []; }
+    } else {
+      conteos = (insumo.ultimosConteos as any[]) || [];
+    }
+
+    if (conteoIndex < 0 || conteoIndex >= conteos.length) {
+      throw new BadRequestException('Índice de conteo inválido');
+    }
+
+    // Actualizar el conteo específico
+    const conteo = conteos[conteoIndex];
+    if (conteo.cajaId !== cajaId) {
+      throw new BadRequestException('El conteo no pertenece a la caja especificada');
+    }
+
+    conteo.cantContada = nuevaCantContada;
+    conteo.diferencia = nuevaCantContada - (conteo.disponibleEnSistema || 0);
+
+    conteos[conteoIndex] = conteo;
+
+    await this.prisma.insumos.update({
+      where: { IDalimentos: insumoId },
+      data: { ultimosConteos: conteos }
+    });
+
+    this.appGateway.emitToRoom('insumos', SocketEvent.REFRESH_INSUMOS, {
+      action: 'conteo_actualizado',
+      insumoId
+    });
+
+    return { success: true, message: 'Conteo actualizado correctamente', data: conteo };
   }
 }

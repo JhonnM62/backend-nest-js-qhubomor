@@ -314,20 +314,7 @@ export class InsumosService {
   }
 
   async getMovimientos(id: string, limit = 50) {
-    const insumo = await this.prisma.insumos.findUnique({
-      where: { IDalimentos: id }
-    });
-
     const movimientos = await this.prisma.orderinventario.findMany({
-      where: {
-        OR: [
-          { nombreDelAlimento: id },
-          { nombreDelAlimento: insumo?.nombre || id }
-        ]
-      },
-      include: {
-        inventario: true
-      },
       orderBy: { fechaYHora: 'desc' },
       take: limit,
     });

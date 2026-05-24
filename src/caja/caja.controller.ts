@@ -126,6 +126,19 @@ export class CajaController {
     @Param('insumoId') insumoId: string,
     @Param('conteoIndex') conteoIndex: number
   ) {
-    return this.cajaService.eliminarConteo(id, insumoId, conteoIndex);
+    return this.cajaService.eliminarConteo(id, insumoId, Number(conteoIndex));
+  }
+
+  @Patch(':id/insumo/:insumoId/conteo/:conteoIndex')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Editar un conteo específico de un insumo' })
+  editarConteo(
+    @Param('id') id: string,
+    @Param('insumoId') insumoId: string,
+    @Param('conteoIndex') conteoIndex: number,
+    @Body() body: { cantContada: number }
+  ) {
+    return this.cajaService.editarConteo(id, insumoId, Number(conteoIndex), body.cantContada);
   }
 }
