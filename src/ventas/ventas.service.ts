@@ -257,13 +257,21 @@ export class VentasService {
 
       comprasTotales += cantidadVenta;
 
-      // Actualizamos el contador modulo 10
-      let nuevoContador = (cliente.contador || parseInt(cliente.compras || '0', 10) || 0) + cantidadVenta;
-      
-      // La lógica del contador de 1 a 10 (se resetea después de 10)
-      if (nuevoContador > 10) {
-        nuevoContador = nuevoContador % 10;
-        if (nuevoContador === 0) nuevoContador = 10; // Si era exactamente múltiplo de 10
+      // --- Lógica del contador de fidelidad (ciclo 1-10) ---
+      // Reglas:
+      // 1. El contador suma los productos comprados en esta venta.
+      // 2. El contador NUNCA supera 10 dentro de una misma compra (cap).
+      // 3. Si el contador YA estaba en 10 al iniciar esta compra, se reinicia el ciclo:
+      //    el nuevo contador empieza desde 0 y suma los productos de esta compra (cap 10).
+      const contadorActual = cliente.contador || 0;
+      let nuevoContador: number;
+
+      if (contadorActual >= 10) {
+        // El ciclo anterior se completó → iniciar nuevo ciclo con los productos de esta compra
+        nuevoContador = Math.min(cantidadVenta, 10);
+      } else {
+        // Seguir acumulando en el ciclo actual, sin pasar de 10
+        nuevoContador = Math.min(contadorActual + cantidadVenta, 10);
       }
 
       await prisma.clientes.update({
