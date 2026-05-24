@@ -17,6 +17,7 @@ export enum SocketEvent {
   REFRESH_PRODUCTOS = 'refreshProductos',
   REFRESH_CATEGORIAS = 'refreshCategorias',
   REFRESH_GASTOS = 'refreshGastos',
+  REFRESH_VENTAS = 'refreshVentas',
   USER_PERMISSIONS_UPDATED = 'userPermissionsUpdated',
 }
 
@@ -28,6 +29,7 @@ export enum Room {
   PRODUCTOS = 'productos',
   CATEGORIAS = 'categorias',
   GASTOS = 'gastos',
+  VENTAS = 'ventas',
 }
 
 export enum ConnectionState {

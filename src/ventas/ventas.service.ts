@@ -4,13 +4,16 @@ import { CreateVentaDto, CreateOrderVentaDto, CreateVentaCompletaDto, VentaQuery
 import { Prisma } from '@prisma/client';
 import { NotificationsService } from '../notifications/notifications.service';
 import { InsumosService } from '../insumos/insumos.service';
+import { AppGateway } from '../websocket/app.gateway';
+import { SocketEvent } from '../websocket/types/socket.types';
 
 @Injectable()
 export class VentasService {
   constructor(
     private prisma: PrismaService,
     private notificationsService: NotificationsService,
-    private insumosService: InsumosService
+    private insumosService: InsumosService,
+    private appGateway: AppGateway,
   ) {}
 
   private formatDuration(diffMs: number): string {
@@ -164,7 +167,7 @@ export class VentasService {
     const fechaContable = await this.getFechaContable(now, createVentaDto.fechaContableManual);
     const pedido = await this.generatePedidoNumber(createVentaDto.mesa, undefined, fechaContable);
 
-    return this.prisma.ventas.create({
+    const venta = await this.prisma.ventas.create({
       data: {
         ...createVentaDto,
         fechaContableManual: undefined, // ensure it's not saved directly
@@ -177,6 +180,10 @@ export class VentasService {
         registroDeTiempo: this.generateTiempoLog(createVentaDto.estado || 'iniciado', createVentaDto.cartStartTime),
       } as Prisma.VentasCreateInput,
     });
+
+    this.appGateway.emitToVentas(SocketEvent.REFRESH_VENTAS, { action: 'create', venta });
+
+    return venta;
   }
 
   async generatePedidoNumber(mesaId: string | null | undefined, usuarioNombre: string | null | undefined, providedFechaContable?: Date): Promise<string> {
@@ -609,13 +616,17 @@ export class VentasService {
 
     const nuevoRegistro = this.appendTiempoLog(venta.registroDeTiempo, estado);
 
-    return this.prisma.ventas.update({
+    const updated = await this.prisma.ventas.update({
       where: { IDventas: id },
-      data: { 
+      data: {
         estado,
         registroDeTiempo: nuevoRegistro
       },
     });
+
+    this.appGateway.emitToVentas(SocketEvent.REFRESH_VENTAS, { action: 'updateEstado', venta: updated });
+
+    return updated;
   }
 
   async calcularTiempoTotal(id: string) {
@@ -793,6 +804,8 @@ export class VentasService {
       { ventaId: id }
     );
 
+    this.appGateway.emitToVentas(SocketEvent.REFRESH_VENTAS, { action: 'delete', ventaId: id, venta });
+
     return result;
   }
 
@@ -820,6 +833,8 @@ export class VentasService {
       },
     });
 
+    this.appGateway.emitToVentas(SocketEvent.REFRESH_VENTAS, { action: 'bulkDelete', ventaIds: ids, count: result.count });
+
     return { count: result.count };
   }
 
@@ -839,7 +854,7 @@ export class VentasService {
     // DEDUCCIÓN DE INVENTARIO (Vuelve a restar al restaurar)
     await this.applyRecipeDeductions(orderventas, 'salida', 'Descuento por restauración de venta');
 
-    return this.prisma.ventas.update({
+    const restored = await this.prisma.ventas.update({
       where: { IDventas: id },
       data: {
         deletedAt: null,
@@ -847,6 +862,10 @@ export class VentasService {
         deleteReason: null,
       },
     });
+
+    this.appGateway.emitToVentas(SocketEvent.REFRESH_VENTAS, { action: 'restore', venta: restored });
+
+    return restored;
   }
 
   async hardDelete(id: string) {

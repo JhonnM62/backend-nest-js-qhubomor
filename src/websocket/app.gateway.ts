@@ -245,6 +245,11 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.emitToAll(event, data);
   }
 
+  emitToVentas(event: string, data: any) {
+    this.emitToRoom(Room.VENTAS, event, data);
+    this.emitToAll(event, data);
+  }
+
   // ============================================================
   // UTILIDADES
   // ============================================================
