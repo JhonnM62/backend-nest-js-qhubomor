@@ -3,6 +3,8 @@ import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import type { Cache } from 'cache-manager';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateCategoriaDto, UpdateCategoriaDto } from './dto/categoria.dto';
+import { AppGateway } from '../websocket/app.gateway';
+import { SocketEvent } from '../websocket/types/socket.types';
 
 @Injectable()
 export class CategoriasService {
@@ -12,6 +14,7 @@ export class CategoriasService {
   constructor(
     private prisma: PrismaService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    private appGateway: AppGateway,
   ) {}
 
   async create(createCategoriaDto: CreateCategoriaDto) {
@@ -19,6 +22,7 @@ export class CategoriasService {
       data: createCategoriaDto,
     });
     await this.invalidateCache();
+    this.appGateway.emitToCategorias(SocketEvent.REFRESH_CATEGORIAS, { action: 'create', categoria });
     return categoria;
   }
 
@@ -76,6 +80,7 @@ export class CategoriasService {
     });
 
     await this.invalidateCache();
+    this.appGateway.emitToCategorias(SocketEvent.REFRESH_CATEGORIAS, { action: 'update', categoria: updated });
     return updated;
   }
 
@@ -89,9 +94,11 @@ export class CategoriasService {
     }
 
     await this.invalidateCache();
-    return this.prisma.categorias.delete({
+    const deleted = await this.prisma.categorias.delete({
       where: { IDcategoria: id },
     });
+    this.appGateway.emitToCategorias(SocketEvent.REFRESH_CATEGORIAS, { action: 'delete', categoriaId: id });
+    return deleted;
   }
 
   private async invalidateCache() {

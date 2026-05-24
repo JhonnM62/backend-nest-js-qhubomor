@@ -3,18 +3,21 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateProductoDto, UpdateProductoDto, ProductoQueryDto } from './dto/producto.dto';
 import { Prisma } from '@prisma/client';
 import { NotificationsService } from '../notifications/notifications.service';
+import { AppGateway } from '../websocket/app.gateway';
+import { SocketEvent } from '../websocket/types/socket.types';
 
 @Injectable()
 export class ProductosService {
   constructor(
     private prisma: PrismaService,
-    private notificationsService: NotificationsService
+    private notificationsService: NotificationsService,
+    private appGateway: AppGateway,
   ) {}
 
   async create(createProductoDto: CreateProductoDto) {
     const { recetaInsumos, ...productoData } = createProductoDto;
 
-    return this.prisma.productos.create({
+    const producto = await this.prisma.productos.create({
       data: {
         ...(productoData as Prisma.ProductosCreateInput),
         ...(recetaInsumos && recetaInsumos.length > 0
@@ -33,6 +36,10 @@ export class ProductosService {
         recetaInsumos: true,
       },
     });
+
+    this.appGateway.emitToProductos(SocketEvent.REFRESH_PRODUCTOS, { action: 'create', producto });
+
+    return producto;
   }
 
   async findAll(query: ProductoQueryDto) {
@@ -184,6 +191,8 @@ export class ProductosService {
       );
     }
 
+    this.appGateway.emitToProductos(SocketEvent.REFRESH_PRODUCTOS, { action: 'update', producto: updatedProducto });
+
     return updatedProducto;
   }
 
@@ -210,9 +219,13 @@ export class ProductosService {
       where: { IDproductos: id },
     });
 
-    return this.prisma.productos.delete({
+    const deletedProducto = await this.prisma.productos.delete({
       where: { IDproductos: id },
     });
+
+    this.appGateway.emitToProductos(SocketEvent.REFRESH_PRODUCTOS, { action: 'delete', productoId: id });
+
+    return deletedProducto;
   }
 
   async updateStock(id: string, cantidad: number) {

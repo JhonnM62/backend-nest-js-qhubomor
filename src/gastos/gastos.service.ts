@@ -3,12 +3,15 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateGastoDto, UpdateGastoDto, GastosQueryDto } from './dto/gasto.dto';
 import { Prisma } from '@prisma/client';
 import { NotificationsService } from '../notifications/notifications.service';
+import { AppGateway } from '../websocket/app.gateway';
+import { SocketEvent } from '../websocket/types/socket.types';
 
 @Injectable()
 export class GastosService {
   constructor(
     private prisma: PrismaService,
-    private notificationsService: NotificationsService
+    private notificationsService: NotificationsService,
+    private appGateway: AppGateway,
   ) {}
 
   async create(createGastoDto: CreateGastoDto) {
@@ -26,6 +29,8 @@ export class GastosService {
       `Se ha registrado un gasto por $${gasto.valor} (${gasto.concepto})`,
       { gastoId: gasto.IDgastos }
     );
+
+    this.appGateway.emitToGastos(SocketEvent.REFRESH_GASTOS, { action: 'create', gasto });
 
     return gasto;
   }
@@ -101,6 +106,9 @@ export class GastosService {
     return this.prisma.gastos.update({
       where: { IDgastos: id },
       data: updateGastoDto,
+    }).then(updated => {
+      this.appGateway.emitToGastos(SocketEvent.REFRESH_GASTOS, { action: 'update', gasto: updated });
+      return updated;
     });
   }
 
@@ -113,7 +121,7 @@ export class GastosService {
       throw new NotFoundException(`Gasto con ID ${id} no encontrado`);
     }
 
-    await this.prisma.gastos.delete({
+    const deleted = await this.prisma.gastos.delete({
       where: { IDgastos: id },
     });
 
@@ -124,7 +132,9 @@ export class GastosService {
       { gastoId: id }
     );
 
-    return gasto;
+    this.appGateway.emitToGastos(SocketEvent.REFRESH_GASTOS, { action: 'delete', gastoId: id });
+
+    return deleted;
   }
 
   async getTotalGastos(fechaDesde: Date, fechaHasta: Date) {

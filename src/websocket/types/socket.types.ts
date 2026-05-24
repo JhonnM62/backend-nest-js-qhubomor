@@ -14,6 +14,9 @@ export enum SocketEvent {
   REFRESH_INVENTARIO = 'refreshInventario',
   REFRESH_INSUMOS = 'refreshInsumos',
   REFRESH_CAJA = 'refreshCaja',
+  REFRESH_PRODUCTOS = 'refreshProductos',
+  REFRESH_CATEGORIAS = 'refreshCategorias',
+  REFRESH_GASTOS = 'refreshGastos',
   USER_PERMISSIONS_UPDATED = 'userPermissionsUpdated',
 }
 
@@ -22,6 +25,9 @@ export enum Room {
   CAJA = 'caja',
   INVENTARIO = 'inventario',
   INSUMOS = 'insumos',
+  PRODUCTOS = 'productos',
+  CATEGORIAS = 'categorias',
+  GASTOS = 'gastos',
 }
 
 export enum ConnectionState {
