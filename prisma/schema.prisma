@@ -352,7 +352,7 @@ model AperturaCierreCaja {
 model AperturaCierreInsumos {
   Idcierreyapertura String    @id @default(cuid()) @map("Idcierreyapertura")
   IDcaja            String?   @map("IDCaja")
-  paraQueProducto   String?   @map("Para que producto")
+  paraQueProducto   Json?     @map("Para que producto")
   nombreDelProducto String?   @map("Nombre del Producto")
   categoria         String?   @map("Categoria")
   insumos           String?   @map("Insumos")

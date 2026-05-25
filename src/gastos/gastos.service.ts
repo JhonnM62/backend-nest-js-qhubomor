@@ -35,6 +35,33 @@ export class GastosService {
     return gasto;
   }
 
+  async createBulk(dtos: CreateGastoDto[]) {
+    const now = new Date();
+    const dataToInsert = dtos.map(dto => ({
+      ...dto,
+      fechaYHora: now,
+      fecha: now,
+    }));
+
+    // Use transaction to ensure all or nothing
+    await this.prisma.$transaction(
+      dataToInsert.map(data => this.prisma.gastos.create({ data }))
+    );
+
+    const totalGastos = dtos.length;
+    const totalValor = dtos.reduce((sum, dto) => sum + (dto.valor || 0), 0);
+
+    this.notificationsService.sendNotification(
+      'GASTOS_BULK_CREATED',
+      'Carga Masiva de Gastos',
+      `Se han registrado ${totalGastos} gastos por un total de $${totalValor.toLocaleString('es-CO')}`
+    );
+
+    this.appGateway.emitToGastos(SocketEvent.REFRESH_GASTOS, { action: 'bulk_create', count: totalGastos });
+
+    return { created: totalGastos };
+  }
+
   async findAll(query: GastosQueryDto) {
     const { page = 1, limit = 20, fechaDesde, fechaHasta, medioDePago, tipo } = query;
     const skip = (page - 1) * limit;

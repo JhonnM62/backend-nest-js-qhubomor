@@ -1,5 +1,6 @@
-import { IsOptional, IsString, IsNumber } from 'class-validator';
-import { ApiPropertyOptional } from '@nestjs/swagger';
+import { IsOptional, IsString, IsNumber, IsArray, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
+import { ApiPropertyOptional, ApiProperty } from '@nestjs/swagger';
 import { PaginationDto } from '../../common/dto/pagination.dto';
 
 export class CreateGastoDto {
@@ -31,6 +32,14 @@ export class CreateGastoDto {
   @IsOptional()
   @IsString()
   tipo?: string;
+}
+
+export class CreateBulkGastoDto {
+  @ApiProperty({ type: [CreateGastoDto] })
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CreateGastoDto)
+  gastos: CreateGastoDto[];
 }
 
 export class UpdateGastoDto {

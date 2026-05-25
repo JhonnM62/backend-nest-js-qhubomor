@@ -190,6 +190,13 @@ export class VentasService {
       data: ventaData,
     });
 
+    if (ventaData.clienteId) {
+      await this.prisma.clientes.update({
+        where: { IDcliente: ventaData.clienteId },
+        data: { fecha_y_hora_actualizacion: new Date() }
+      });
+    }
+
     this.appGateway.emitToVentas(SocketEvent.REFRESH_VENTAS, { action: 'create', venta });
 
     return venta;

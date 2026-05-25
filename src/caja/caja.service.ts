@@ -606,24 +606,36 @@ export class CajaService {
 
     const insumosResumen = insumosCaja.map(ic => {
       const insumoId = ic.nombreInsumo || '';
-      const productoIdDestino = ic.paraQueProducto || null;
-      
-      const productoAsociado = productoIdDestino 
-        ? todosLosProductos.find(p => p.IDproductos === productoIdDestino || p.nombre === productoIdDestino)?.nombre 
-        : null;
+
+      // paraQueProducto can now be a JSON array of product IDs, or a legacy string
+      const rawParaQueProducto = ic.paraQueProducto;
+      let productosDestino: string[] = [];
+      if (Array.isArray(rawParaQueProducto)) {
+        productosDestino = rawParaQueProducto as string[];
+      } else if (typeof rawParaQueProducto === 'string' && rawParaQueProducto.trim()) {
+        productosDestino = [rawParaQueProducto.trim()];
+      }
+
+      // Map each product ID to its name
+      const productosAsociados = productosDestino.map(pid => {
+        const found = todosLosProductos.find(p => p.IDproductos === pid || p.nombre === pid);
+        return { id: pid, nombre: found?.nombre || pid };
+      });
 
       let ventasEnSistema = 0;
+      // Detail: how many units sold per product that uses this insumo
+      const ventasPorProducto: Record<string, number> = {};
 
       validVentas.forEach(v => {
         v.ordenVentas.forEach(ov => {
-          // Si este insumo en la caja está filtrado para un producto específico,
-          // saltar si la orden de venta no es de ese producto.
-          // Se verifica tanto ID como nombre por si hay inconsistencias heredadas.
-          if (productoIdDestino && 
-              ov.producto?.IDproductos !== productoIdDestino && 
-              ov.nombreProducto !== productoIdDestino && 
-              ov.nombre !== productoIdDestino) {
-            return;
+          // If filtered to specific products, skip orders for other products
+          if (productosDestino.length > 0) {
+            const ovProdId = ov.producto?.IDproductos || '';
+            const ovProdNombre = ov.nombreProducto || ov.nombre || '';
+            const matches = productosDestino.some(pid =>
+              pid === ovProdId || pid === ovProdNombre
+            );
+            if (!matches) return;
           }
 
           if (ov.producto && ov.producto.recetaInsumos) {
@@ -631,13 +643,15 @@ export class CajaService {
               if (receta.insumo === insumoId) {
                 const cant = (receta.cantidad || 1) * (ov.cantidad || 1);
                 ventasEnSistema += cant;
+                const pNombre = ov.producto?.nombre || ov.nombreProducto || 'N/A';
+                ventasPorProducto[pNombre] = (ventasPorProducto[pNombre] || 0) + (ov.cantidad || 1);
               }
             });
           } else {
-            // Fallback por si la receta no está populada pero el producto de la orden es el mismo insumo
-            // (algunos sistemas asocian el ID del producto directamente con el insumo)
             if (ov.producto?.IDproductos === insumoId || ov.nombreProducto === insumoId) {
               ventasEnSistema += (ov.cantidad || 1);
+              const pNombre = ov.producto?.nombre || ov.nombreProducto || 'N/A';
+              ventasPorProducto[pNombre] = (ventasPorProducto[pNombre] || 0) + (ov.cantidad || 1);
             }
           }
         });
@@ -645,16 +659,57 @@ export class CajaService {
 
       const gastadoFisico = ic.seUtilizaron || 0;
       const diferencia = gastadoFisico - ventasEnSistema;
-      
+
       return {
         ...ic,
         ventasEnSistema,
         diferencia,
-        // We pass the actual name for the UI from the relation if available
         nombreReal: ic.insumo?.nombre || insumoId,
-        nombreProductoReal: productoAsociado || productoIdDestino || 'N/A'
+        // List of all product names associated with this insumo
+        productosAsociados,
+        nombreProductoReal: productosAsociados.map(p => p.nombre).join(', ') || 'N/A',
+        // Detail of how many units sold per product (for restaurant report)
+        ventasPorProducto,
       };
     });
+
+    // --- Ventas por Categoría y por Producto (para el reporte de restaurante) ---
+    const ventasPorCategoriaMap: Record<string, { totalUnidades: number; totalIngresos: number; productos: Record<string, number> }> = {};
+    const ventasPorProductoMap: Record<string, { nombre: string; cantidad: number; totalIngresos: number }> = {};
+
+    validVentas.forEach(v => {
+      v.ordenVentas.forEach(ov => {
+        const cat = (ov.producto as any)?.categoria || 'Sin Categoría';
+        const prodNombre = (ov.producto as any)?.nombre || ov.nombreProducto || ov.nombre || 'Producto';
+        const prodId = ov.producto?.IDproductos || prodNombre;
+        const cant = ov.cantidad || 1;
+        const ingreso = Number(ov.precioTotal || 0);
+
+        if (!ventasPorCategoriaMap[cat]) {
+          ventasPorCategoriaMap[cat] = { totalUnidades: 0, totalIngresos: 0, productos: {} };
+        }
+        ventasPorCategoriaMap[cat].totalUnidades += cant;
+        ventasPorCategoriaMap[cat].totalIngresos += ingreso;
+        ventasPorCategoriaMap[cat].productos[prodNombre] = (ventasPorCategoriaMap[cat].productos[prodNombre] || 0) + cant;
+
+        if (!ventasPorProductoMap[prodId]) {
+          ventasPorProductoMap[prodId] = { nombre: prodNombre, cantidad: 0, totalIngresos: 0 };
+        }
+        ventasPorProductoMap[prodId].cantidad += cant;
+        ventasPorProductoMap[prodId].totalIngresos += ingreso;
+      });
+    });
+
+    const ventasPorCategoria = Object.entries(ventasPorCategoriaMap).map(([categoria, data]) => ({
+      categoria,
+      totalUnidades: data.totalUnidades,
+      totalIngresos: data.totalIngresos,
+      productos: Object.entries(data.productos).map(([nombre, cantidad]) => ({ nombre, cantidad }))
+        .sort((a, b) => b.cantidad - a.cantidad),
+    })).sort((a, b) => b.totalUnidades - a.totalUnidades);
+
+    const ventasPorProducto = Object.values(ventasPorProductoMap)
+      .sort((a, b) => b.cantidad - a.cantidad);
 
     const efectivoEsperado = Number(caja.efectivoDeApertura || 0) + totalEfectivo;
 
@@ -679,6 +734,8 @@ export class CajaService {
         valorExcedente: caja.valorExcedente,
       },
       insumos: insumosResumen,
+      ventasPorCategoria,
+      ventasPorProducto,
     };
   }
 

@@ -1,100 +1,100 @@
-[Nest] 19  - 05/20/2026, 3:06:01 AM     LOG [RouterExplorer] Mapped {/api/v1/inventario/bajo, GET} route +0ms
-[Nest] 19  - 05/20/2026, 3:06:01 AM     LOG [RouterExplorer] Mapped {/api/v1/inventario/item/:id/update, PATCH} route +1ms
-[Nest] 19  - 05/20/2026, 3:06:01 AM     LOG [RouterExplorer] Mapped {/api/v1/inventario/item/update/:id, PATCH} route +0ms
-[Nest] 19  - 05/20/2026, 3:06:01 AM     LOG [RouterExplorer] Mapped {/api/v1/inventario/item/update, PATCH} route +0ms
-[Nest] 19  - 05/20/2026, 3:06:01 AM     LOG [RouterExplorer] Mapped {/api/v1/inventario/:id, GET} route +0ms
-[Nest] 19  - 05/20/2026, 3:06:01 AM     LOG [RouterExplorer] Mapped {/api/v1/inventario/:id, PATCH} route +0ms
-[Nest] 19  - 05/20/2026, 3:06:01 AM     LOG [RouterExplorer] Mapped {/api/v1/inventario/:id, DELETE} route +0ms
-[Nest] 19  - 05/20/2026, 3:06:01 AM     LOG [RouterExplorer] Mapped {/api/v1/inventario/item, POST} route +1ms
-[Nest] 19  - 05/20/2026, 3:06:01 AM     LOG [RouterExplorer] Mapped {/api/v1/inventario/item/:id, DELETE} route +0ms
-[Nest] 19  - 05/20/2026, 3:06:01 AM     LOG [RouterExplorer] Mapped {/api/v1/inventario/item/:id/comprar, PATCH} route +0ms
-[Nest] 19  - 05/20/2026, 3:06:01 AM     LOG [RouterExplorer] Mapped {/api/v1/inventario/items/comprar, PATCH} route +0ms
-[Nest] 19  - 05/20/2026, 3:06:01 AM     LOG [RoutesResolver] ClientesController {/api/v1/clientes}: +0ms
-[Nest] 19  - 05/20/2026, 3:06:01 AM     LOG [RouterExplorer] Mapped {/api/v1/clientes, POST} route +0ms
-[Nest] 19  - 05/20/2026, 3:06:01 AM     LOG [RouterExplorer] Mapped {/api/v1/clientes, GET} route +0ms
-[Nest] 19  - 05/20/2026, 3:06:01 AM     LOG [RouterExplorer] Mapped {/api/v1/clientes/:id, GET} route +1ms
-[Nest] 19  - 05/20/2026, 3:06:01 AM     LOG [RouterExplorer] Mapped {/api/v1/clientes/:id, PATCH} route +0ms
-[Nest] 19  - 05/20/2026, 3:06:01 AM     LOG [RouterExplorer] Mapped {/api/v1/clientes/:id, DELETE} route +0ms
-[Nest] 19  - 05/20/2026, 3:06:01 AM     LOG [RoutesResolver] ProveedoresController {/api/v1/proveedores}: +0ms
-[Nest] 19  - 05/20/2026, 3:06:01 AM     LOG [RouterExplorer] Mapped {/api/v1/proveedores, POST} route +0ms
-[Nest] 19  - 05/20/2026, 3:06:01 AM     LOG [RouterExplorer] Mapped {/api/v1/proveedores, GET} route +0ms
-[Nest] 19  - 05/20/2026, 3:06:01 AM     LOG [RouterExplorer] Mapped {/api/v1/proveedores/:id, GET} route +1ms
-[Nest] 19  - 05/20/2026, 3:06:01 AM     LOG [RouterExplorer] Mapped {/api/v1/proveedores/:id, PATCH} route +0ms
-[Nest] 19  - 05/20/2026, 3:06:01 AM     LOG [RouterExplorer] Mapped {/api/v1/proveedores/:id, DELETE} route +0ms
-[Nest] 19  - 05/20/2026, 3:06:01 AM     LOG [RoutesResolver] CajaController {/api/v1/caja}: +0ms
-[Nest] 19  - 05/20/2026, 3:06:01 AM     LOG [RouterExplorer] Mapped {/api/v1/caja/abrir, POST} route +0ms
-[Nest] 19  - 05/20/2026, 3:06:01 AM     LOG [RouterExplorer] Mapped {/api/v1/caja/:id, PATCH} route +0ms
-[Nest] 19  - 05/20/2026, 3:06:01 AM     LOG [RouterExplorer] Mapped {/api/v1/caja/cerrar/:id, PATCH} route +0ms
-[Nest] 19  - 05/20/2026, 3:06:01 AM     LOG [RouterExplorer] Mapped {/api/v1/caja/activa, GET} route +1ms
-[Nest] 19  - 05/20/2026, 3:06:01 AM     LOG [RouterExplorer] Mapped {/api/v1/caja/resumen/:id, GET} route +0ms
-[Nest] 19  - 05/20/2026, 3:06:01 AM     LOG [RouterExplorer] Mapped {/api/v1/caja, GET} route +0ms
-[Nest] 19  - 05/20/2026, 3:06:01 AM     LOG [RouterExplorer] Mapped {/api/v1/caja/:id, GET} route +0ms
-[Nest] 19  - 05/20/2026, 3:06:01 AM     LOG [RouterExplorer] Mapped {/api/v1/caja/:id, DELETE} route +0ms
-[Nest] 19  - 05/20/2026, 3:06:01 AM     LOG [RouterExplorer] Mapped {/api/v1/caja/:id/verificacion-pendiente, GET} route +0ms
-[Nest] 19  - 05/20/2026, 3:06:01 AM     LOG [RouterExplorer] Mapped {/api/v1/caja/:id/registrar-conteo, POST} route +1ms
-[Nest] 19  - 05/20/2026, 3:06:01 AM     LOG [RoutesResolver] GastosController {/api/v1/gastos}: +0ms
-[Nest] 19  - 05/20/2026, 3:06:01 AM     LOG [RouterExplorer] Mapped {/api/v1/gastos/upload-image, POST} route +0ms
-[Nest] 19  - 05/20/2026, 3:06:01 AM     LOG [RouterExplorer] Mapped {/api/v1/gastos, POST} route +0ms
-[Nest] 19  - 05/20/2026, 3:06:01 AM     LOG [RouterExplorer] Mapped {/api/v1/gastos, GET} route +0ms
-[Nest] 19  - 05/20/2026, 3:06:01 AM     LOG [RouterExplorer] Mapped {/api/v1/gastos/total, GET} route +0ms
-[Nest] 19  - 05/20/2026, 3:06:01 AM     LOG [RouterExplorer] Mapped {/api/v1/gastos/:id, GET} route +0ms
-[Nest] 19  - 05/20/2026, 3:06:01 AM     LOG [RouterExplorer] Mapped {/api/v1/gastos/:id, PATCH} route +1ms
-[Nest] 19  - 05/20/2026, 3:06:01 AM     LOG [RouterExplorer] Mapped {/api/v1/gastos/:id, DELETE} route +0ms
-[Nest] 19  - 05/20/2026, 3:06:01 AM     LOG [RoutesResolver] MesasController {/api/v1/mesas}: +0ms
-[Nest] 19  - 05/20/2026, 3:06:01 AM     LOG [RouterExplorer] Mapped {/api/v1/mesas, GET} route +0ms
-[Nest] 19  - 05/20/2026, 3:06:01 AM     LOG [RouterExplorer] Mapped {/api/v1/mesas/:id, GET} route +0ms
-[Nest] 19  - 05/20/2026, 3:06:01 AM     LOG [RoutesResolver] ComentariosController {/api/v1/comentarios}: +1ms
-[Nest] 19  - 05/20/2026, 3:06:01 AM     LOG [RouterExplorer] Mapped {/api/v1/comentarios, POST} route +0ms
-[Nest] 19  - 05/20/2026, 3:06:01 AM     LOG [RouterExplorer] Mapped {/api/v1/comentarios, GET} route +0ms
-[Nest] 19  - 05/20/2026, 3:06:01 AM     LOG [RouterExplorer] Mapped {/api/v1/comentarios/:id, GET} route +0ms
-[Nest] 19  - 05/20/2026, 3:06:01 AM     LOG [RouterExplorer] Mapped {/api/v1/comentarios/:id, PATCH} route +0ms
-[Nest] 19  - 05/20/2026, 3:06:01 AM     LOG [RouterExplorer] Mapped {/api/v1/comentarios/:id, DELETE} route +1ms
-[Nest] 19  - 05/20/2026, 3:06:01 AM     LOG [RoutesResolver] PrinterConfigController {/api/v1/printer-config}: +0ms
-[Nest] 19  - 05/20/2026, 3:06:01 AM     LOG [RouterExplorer] Mapped {/api/v1/printer-config, GET} route +0ms
-[Nest] 19  - 05/20/2026, 3:06:01 AM     LOG [RouterExplorer] Mapped {/api/v1/printer-config, PUT} route +0ms
-[Nest] 19  - 05/20/2026, 3:06:01 AM     LOG [RoutesResolver] EstadisticasController {/api/v1/estadisticas}: +0ms
-[Nest] 19  - 05/20/2026, 3:06:01 AM     LOG [RouterExplorer] Mapped {/api/v1/estadisticas/generales, GET} route +0ms
-[Nest] 19  - 05/20/2026, 3:06:01 AM     LOG [RoutesResolver] ReportesController {/api/v1/reportes}: +1ms
-[Nest] 19  - 05/20/2026, 3:06:01 AM     LOG [RouterExplorer] Mapped {/api/v1/reportes/dinero-guardado, GET} route +0ms
-[Nest] 19  - 05/20/2026, 3:06:01 AM     LOG [RouterExplorer] Mapped {/api/v1/reportes/dinero-guardado, POST} route +0ms
-[Nest] 19  - 05/20/2026, 3:06:01 AM     LOG [RouterExplorer] Mapped {/api/v1/reportes/dinero-guardado/:filterId, DELETE} route +13ms
-[Nest] 19  - 05/20/2026, 3:06:01 AM     LOG [RouterExplorer] Mapped {/api/v1/reportes/dinero-guardado/:filterId, GET} route +0ms
-[Nest] 19  - 05/20/2026, 3:06:01 AM     LOG [RouterExplorer] Mapped {/api/v1/reportes/dinero-guardado/:filterId/retiros, POST} route +1ms
-[Nest] 19  - 05/20/2026, 3:06:01 AM     LOG [RouterExplorer] Mapped {/api/v1/reportes/dinero-guardado/retiros/:retiroId, DELETE} route +0ms
-[Nest] 19  - 05/20/2026, 3:06:01 AM     LOG [RoutesResolver] ConfiguracionController {/api/v1/configuracion}: +0ms
-[Nest] 19  - 05/20/2026, 3:06:01 AM     LOG [RouterExplorer] Mapped {/api/v1/configuracion, GET} route +1ms
-[Nest] 19  - 05/20/2026, 3:06:01 AM     LOG [RouterExplorer] Mapped {/api/v1/configuracion, PUT} route +0ms
-[Nest] 19  - 05/20/2026, 3:06:01 AM     LOG [RouterExplorer] Mapped {/api/v1/configuracion/ia, GET} route +0ms
-[Nest] 19  - 05/20/2026, 3:06:01 AM     LOG [RouterExplorer] Mapped {/api/v1/configuracion/ia, PUT} route +1ms
-[Nest] 19  - 05/20/2026, 3:06:01 AM     LOG [RoutesResolver] AiController {/api/v1/ai}: +0ms
-[Nest] 19  - 05/20/2026, 3:06:01 AM     LOG [RouterExplorer] Mapped {/api/v1/ai/extract-data, POST} route +0ms
-[Nest] 19  - 05/20/2026, 3:06:01 AM     LOG [RouterExplorer] Mapped {/api/v1/ai/voice-order, POST} route +0ms
-[Nest] 19  - 05/20/2026, 3:06:01 AM     LOG [NestApplication] Nest application successfully started +62ms
-[Nest] 19  - 05/20/2026, 3:06:01 AM     LOG [Bootstrap] Application is running on: http://0.0.0.0:3000
-[Nest] 19  - 05/20/2026, 3:06:01 AM     LOG [Bootstrap] Swagger documentation: http://0.0.0.0:3000/api/docs
-[Nest] 19  - 05/20/2026, 3:07:29 AM     LOG [AppGateway] Client urJO0N4cBe18BFz0AAAB mapped to user cmom4whz80000k0qnjs8qb3sc and joined user_cmom4whz80000k0qnjs8qb3sc
-[Nest] 19  - 05/20/2026, 3:07:33 AM     LOG [AppGateway] Client disconnected: urJO0N4cBe18BFz0AAAB (was in rooms: user_cmom4whz80000k0qnjs8qb3sc)
-[Nest] 19  - 05/20/2026, 3:07:43 AM     LOG [AppGateway] Client eI2TYwy_p99Lj5wgAAAD mapped to user cmom4whz80000k0qnjs8qb3sc and joined user_cmom4whz80000k0qnjs8qb3sc
-[Nest] 19  - 05/20/2026, 3:07:53 AM     LOG [AppGateway] Client eI2TYwy_p99Lj5wgAAAD joined room: caja
-[Nest] 19  - 05/20/2026, 3:07:55 AM     LOG [AppGateway] Client eI2TYwy_p99Lj5wgAAAD joined room: caja
-[getVerificacionPendiente] Caja: cmpdb67el0005kmmzt7tqnc8u, Insumos en caja: 9
-[getVerificacionPendiente] IC Id: cmpdb67ep0007kmmzwebl2trw, nombreInsumo: feb4c064, insumo exists: true, cuadrarInsumos: false, conteoVerificadoHoy: false, ultimoConteoAt: null
-[getVerificacionPendiente] IC Id: cmpdb67es0009kmmz6qzme7jx, nombreInsumo: a4190f21, insumo exists: true, cuadrarInsumos: false, conteoVerificadoHoy: false, ultimoConteoAt: null
-[getVerificacionPendiente] IC Id: cmpdb67ev000bkmmzrvg3xbwo, nombreInsumo: a4190f21, insumo exists: true, cuadrarInsumos: false, conteoVerificadoHoy: false, ultimoConteoAt: null
-[getVerificacionPendiente] IC Id: cmpdb67ew000dkmmzdzums1zx, nombreInsumo: f4e7a67f, insumo exists: true, cuadrarInsumos: false, conteoVerificadoHoy: false, ultimoConteoAt: null
-[getVerificacionPendiente] IC Id: cmpdb67ey000fkmmz567b3miy, nombreInsumo: 1f077d1a, insumo exists: true, cuadrarInsumos: false, conteoVerificadoHoy: false, ultimoConteoAt: null
-[getVerificacionPendiente] IC Id: cmpdb67ez000hkmmzkag2yry7, nombreInsumo: e114aa93, insumo exists: true, cuadrarInsumos: false, conteoVerificadoHoy: false, ultimoConteoAt: null
-[getVerificacionPendiente] IC Id: cmpdb67f1000jkmmztloiofx7, nombreInsumo: c6434dc7, insumo exists: true, cuadrarInsumos: false, conteoVerificadoHoy: false, ultimoConteoAt: null
-[getVerificacionPendiente] IC Id: cmpdb67f2000lkmmzkectvt62, nombreInsumo: bd785ddb, insumo exists: true, cuadrarInsumos: false, conteoVerificadoHoy: false, ultimoConteoAt: null
-[getVerificacionPendiente] IC Id: cmpdb67f3000nkmmzmj1w7mxi, nombreInsumo: c6434dc7, insumo exists: true, cuadrarInsumos: false, conteoVerificadoHoy: false, ultimoConteoAt: null
-[getVerificacionPendiente] Filter check for feb4c064: insumo=true, cuadrarInsumos=false, hasCuadrar=false
-[getVerificacionPendiente] Filter check for a4190f21: insumo=true, cuadrarInsumos=false, hasCuadrar=false
-[getVerificacionPendiente] Filter check for a4190f21: insumo=true, cuadrarInsumos=false, hasCuadrar=false
-[getVerificacionPendiente] Filter check for f4e7a67f: insumo=true, cuadrarInsumos=false, hasCuadrar=false
-[getVerificacionPendiente] Filter check for 1f077d1a: insumo=true, cuadrarInsumos=false, hasCuadrar=false
-[getVerificacionPendiente] Filter check for e114aa93: insumo=true, cuadrarInsumos=false, hasCuadrar=false
-[getVerificacionPendiente] Filter check for c6434dc7: insumo=true, cuadrarInsumos=false, hasCuadrar=false
-[getVerificacionPendiente] Filter check for bd785ddb: insumo=true, cuadrarInsumos=false, hasCuadrar=false
-[getVerificacionPendiente] Filter check for c6434dc7: insumo=true, cuadrarInsumos=false, hasCuadrar=false
-[getVerificacionPendiente] Insumos con cuadrarInsumos=true: 0
-[getVerificacionPendiente] Pendientes sin verificar: 0, TodasVerificadas: true
+[Nest] 20  - 05/24/2026, 10:38:29 PM     LOG [RouterExplorer] Mapped {/api/v1/inventario/items/comprar, PATCH} route +0ms
+[Nest] 20  - 05/24/2026, 10:38:29 PM     LOG [RouterExplorer] Mapped {/api/v1/inventario/recalcular-stock, POST} route +0ms
+[Nest] 20  - 05/24/2026, 10:38:29 PM     LOG [RoutesResolver] ClientesController {/api/v1/clientes}: +0ms
+[Nest] 20  - 05/24/2026, 10:38:29 PM     LOG [RouterExplorer] Mapped {/api/v1/clientes, POST} route +0ms
+[Nest] 20  - 05/24/2026, 10:38:29 PM     LOG [RouterExplorer] Mapped {/api/v1/clientes, GET} route +0ms
+[Nest] 20  - 05/24/2026, 10:38:29 PM     LOG [RouterExplorer] Mapped {/api/v1/clientes/:id, GET} route +0ms
+[Nest] 20  - 05/24/2026, 10:38:29 PM     LOG [RouterExplorer] Mapped {/api/v1/clientes/:id, PATCH} route +1ms
+[Nest] 20  - 05/24/2026, 10:38:29 PM     LOG [RouterExplorer] Mapped {/api/v1/clientes/:id, DELETE} route +0ms
+[Nest] 20  - 05/24/2026, 10:38:29 PM     LOG [RoutesResolver] ProveedoresController {/api/v1/proveedores}: +0ms
+[Nest] 20  - 05/24/2026, 10:38:29 PM     LOG [RouterExplorer] Mapped {/api/v1/proveedores, POST} route +0ms
+[Nest] 20  - 05/24/2026, 10:38:29 PM     LOG [RouterExplorer] Mapped {/api/v1/proveedores, GET} route +0ms
+[Nest] 20  - 05/24/2026, 10:38:29 PM     LOG [RouterExplorer] Mapped {/api/v1/proveedores/:id, GET} route +0ms
+[Nest] 20  - 05/24/2026, 10:38:29 PM     LOG [RouterExplorer] Mapped {/api/v1/proveedores/:id, PATCH} route +1ms
+[Nest] 20  - 05/24/2026, 10:38:29 PM     LOG [RouterExplorer] Mapped {/api/v1/proveedores/:id, DELETE} route +0ms
+[Nest] 20  - 05/24/2026, 10:38:29 PM     LOG [RoutesResolver] CajaController {/api/v1/caja}: +0ms
+[Nest] 20  - 05/24/2026, 10:38:29 PM     LOG [RouterExplorer] Mapped {/api/v1/caja/abrir, POST} route +0ms
+[Nest] 20  - 05/24/2026, 10:38:29 PM     LOG [RouterExplorer] Mapped {/api/v1/caja/:id, PATCH} route +0ms
+[Nest] 20  - 05/24/2026, 10:38:29 PM     LOG [RouterExplorer] Mapped {/api/v1/caja/cerrar/:id, PATCH} route +0ms
+[Nest] 20  - 05/24/2026, 10:38:29 PM     LOG [RouterExplorer] Mapped {/api/v1/caja/activa, GET} route +0ms
+[Nest] 20  - 05/24/2026, 10:38:29 PM     LOG [RouterExplorer] Mapped {/api/v1/caja/resumen/:id, GET} route +0ms
+[Nest] 20  - 05/24/2026, 10:38:29 PM     LOG [RouterExplorer] Mapped {/api/v1/caja, GET} route +0ms
+[Nest] 20  - 05/24/2026, 10:38:29 PM     LOG [RouterExplorer] Mapped {/api/v1/caja/:id, GET} route +0ms
+[Nest] 20  - 05/24/2026, 10:38:29 PM     LOG [RouterExplorer] Mapped {/api/v1/caja/:id, DELETE} route +1ms
+[Nest] 20  - 05/24/2026, 10:38:29 PM     LOG [RouterExplorer] Mapped {/api/v1/caja/:id/verificacion-pendiente, GET} route +0ms
+[Nest] 20  - 05/24/2026, 10:38:29 PM     LOG [RouterExplorer] Mapped {/api/v1/caja/:id/registrar-conteo, POST} route +0ms
+[Nest] 20  - 05/24/2026, 10:38:29 PM     LOG [RouterExplorer] Mapped {/api/v1/caja/:id/posponer-verificacion, POST} route +0ms
+[Nest] 20  - 05/24/2026, 10:38:29 PM     LOG [RouterExplorer] Mapped {/api/v1/caja/:id/insumo/:insumoId/conteo/:conteoIndex, DELETE} route +0ms
+[Nest] 20  - 05/24/2026, 10:38:29 PM     LOG [RouterExplorer] Mapped {/api/v1/caja/:id/insumo/:insumoId/conteo/:conteoIndex, PATCH} route +0ms
+[Nest] 20  - 05/24/2026, 10:38:29 PM     LOG [RoutesResolver] GastosController {/api/v1/gastos}: +0ms
+[Nest] 20  - 05/24/2026, 10:38:29 PM     LOG [RouterExplorer] Mapped {/api/v1/gastos/upload-image, POST} route +0ms
+[Nest] 20  - 05/24/2026, 10:38:29 PM     LOG [RouterExplorer] Mapped {/api/v1/gastos, POST} route +1ms
+[Nest] 20  - 05/24/2026, 10:38:29 PM     LOG [RouterExplorer] Mapped {/api/v1/gastos, GET} route +0ms
+[Nest] 20  - 05/24/2026, 10:38:29 PM     LOG [RouterExplorer] Mapped {/api/v1/gastos/total, GET} route +0ms
+[Nest] 20  - 05/24/2026, 10:38:29 PM     LOG [RouterExplorer] Mapped {/api/v1/gastos/:id, GET} route +0ms
+[Nest] 20  - 05/24/2026, 10:38:29 PM     LOG [RouterExplorer] Mapped {/api/v1/gastos/:id, PATCH} route +0ms
+[Nest] 20  - 05/24/2026, 10:38:29 PM     LOG [RouterExplorer] Mapped {/api/v1/gastos/:id, DELETE} route +0ms
+[Nest] 20  - 05/24/2026, 10:38:29 PM     LOG [RoutesResolver] MesasController {/api/v1/mesas}: +0ms
+[Nest] 20  - 05/24/2026, 10:38:29 PM     LOG [RouterExplorer] Mapped {/api/v1/mesas, GET} route +0ms
+[Nest] 20  - 05/24/2026, 10:38:29 PM     LOG [RouterExplorer] Mapped {/api/v1/mesas/:id, GET} route +0ms
+[Nest] 20  - 05/24/2026, 10:38:29 PM     LOG [RoutesResolver] ComentariosController {/api/v1/comentarios}: +0ms
+[Nest] 20  - 05/24/2026, 10:38:29 PM     LOG [RouterExplorer] Mapped {/api/v1/comentarios, POST} route +1ms
+[Nest] 20  - 05/24/2026, 10:38:29 PM     LOG [RouterExplorer] Mapped {/api/v1/comentarios, GET} route +0ms
+[Nest] 20  - 05/24/2026, 10:38:29 PM     LOG [RouterExplorer] Mapped {/api/v1/comentarios/:id, GET} route +0ms
+[Nest] 20  - 05/24/2026, 10:38:29 PM     LOG [RouterExplorer] Mapped {/api/v1/comentarios/:id, PATCH} route +0ms
+[Nest] 20  - 05/24/2026, 10:38:29 PM     LOG [RouterExplorer] Mapped {/api/v1/comentarios/:id, DELETE} route +0ms
+[Nest] 20  - 05/24/2026, 10:38:29 PM     LOG [RoutesResolver] PrinterConfigController {/api/v1/printer-config}: +0ms
+[Nest] 20  - 05/24/2026, 10:38:29 PM     LOG [RouterExplorer] Mapped {/api/v1/printer-config, GET} route +0ms
+[Nest] 20  - 05/24/2026, 10:38:29 PM     LOG [RouterExplorer] Mapped {/api/v1/printer-config, PUT} route +0ms
+[Nest] 20  - 05/24/2026, 10:38:29 PM     LOG [RoutesResolver] EstadisticasController {/api/v1/estadisticas}: +0ms
+[Nest] 20  - 05/24/2026, 10:38:29 PM     LOG [RouterExplorer] Mapped {/api/v1/estadisticas/generales, GET} route +0ms
+[Nest] 20  - 05/24/2026, 10:38:29 PM     LOG [RoutesResolver] ReportesController {/api/v1/reportes}: +0ms
+[Nest] 20  - 05/24/2026, 10:38:29 PM     LOG [RouterExplorer] Mapped {/api/v1/reportes/dinero-guardado, GET} route +1ms
+[Nest] 20  - 05/24/2026, 10:38:29 PM     LOG [RouterExplorer] Mapped {/api/v1/reportes/dinero-guardado, POST} route +0ms
+[Nest] 20  - 05/24/2026, 10:38:29 PM     LOG [RouterExplorer] Mapped {/api/v1/reportes/dinero-guardado/:filterId, DELETE} route +0ms
+[Nest] 20  - 05/24/2026, 10:38:29 PM     LOG [RouterExplorer] Mapped {/api/v1/reportes/dinero-guardado/:filterId, GET} route +0ms
+[Nest] 20  - 05/24/2026, 10:38:29 PM     LOG [RouterExplorer] Mapped {/api/v1/reportes/dinero-guardado/:filterId/retiros, POST} route +0ms
+[Nest] 20  - 05/24/2026, 10:38:29 PM     LOG [RouterExplorer] Mapped {/api/v1/reportes/dinero-guardado/retiros/:retiroId, DELETE} route +0ms
+[Nest] 20  - 05/24/2026, 10:38:29 PM     LOG [RoutesResolver] ConfiguracionController {/api/v1/configuracion}: +0ms
+[Nest] 20  - 05/24/2026, 10:38:29 PM     LOG [RouterExplorer] Mapped {/api/v1/configuracion, GET} route +0ms
+[Nest] 20  - 05/24/2026, 10:38:29 PM     LOG [RouterExplorer] Mapped {/api/v1/configuracion, PUT} route +0ms
+[Nest] 20  - 05/24/2026, 10:38:29 PM     LOG [RouterExplorer] Mapped {/api/v1/configuracion/ia, GET} route +1ms
+[Nest] 20  - 05/24/2026, 10:38:29 PM     LOG [RouterExplorer] Mapped {/api/v1/configuracion/ia, PUT} route +0ms
+[Nest] 20  - 05/24/2026, 10:38:29 PM     LOG [RoutesResolver] AiController {/api/v1/ai}: +0ms
+[Nest] 20  - 05/24/2026, 10:38:29 PM     LOG [RouterExplorer] Mapped {/api/v1/ai/extract-data, POST} route +0ms
+[Nest] 20  - 05/24/2026, 10:38:29 PM     LOG [RouterExplorer] Mapped {/api/v1/ai/voice-order, POST} route +0ms
+[Nest] 20  - 05/24/2026, 10:38:29 PM     LOG [NestApplication] Nest application successfully started +44ms
+[Nest] 20  - 05/24/2026, 10:38:29 PM     LOG [Bootstrap] Application is running on: http://0.0.0.0:3000
+[Nest] 20  - 05/24/2026, 10:38:29 PM     LOG [Bootstrap] Swagger documentation: http://0.0.0.0:3000/api/docs
+[Nest] 20  - 05/24/2026, 10:38:44 PM     LOG [AppGateway] Client kt1KihLpsLCpyVHnAAAB mapped to user cmom4whz80000k0qnjs8qb3sc and joined user_cmom4whz80000k0qnjs8qb3sc
+[Nest] 20  - 05/24/2026, 10:41:43 PM     LOG [AppGateway] Client disconnected: kt1KihLpsLCpyVHnAAAB (was in rooms: user_cmom4whz80000k0qnjs8qb3sc)
+[Nest] 20  - 05/24/2026, 10:43:19 PM     LOG [AppGateway] Client Xh8GkDd1RXuniQ8BAAAD mapped to user cmom4whz80000k0qnjs8qb3sc and joined user_cmom4whz80000k0qnjs8qb3sc
+[Nest] 20  - 05/24/2026, 10:43:24 PM     LOG [AppGateway] Client disconnected: Xh8GkDd1RXuniQ8BAAAD (was in rooms: user_cmom4whz80000k0qnjs8qb3sc)
+[Nest] 20  - 05/24/2026, 10:47:29 PM     LOG [AppGateway] Client u7yVPB946QxH5aNzAAAG mapped to user cmom4whz80000k0qnjs8qb3sc and joined user_cmom4whz80000k0qnjs8qb3sc
+[Nest] 20  - 05/24/2026, 10:47:37 PM     LOG [AppGateway] Client disconnected: u7yVPB946QxH5aNzAAAG (was in rooms: user_cmom4whz80000k0qnjs8qb3sc)
+[Nest] 20  - 05/25/2026, 12:12:01 AM     LOG [AppGateway] Client ATo3m_7asZ0GaisBAAAI mapped to user cmom4whz80000k0qnjs8qb3sc and joined user_cmom4whz80000k0qnjs8qb3sc
+[Nest] 20  - 05/25/2026, 12:12:17 AM     LOG [AppGateway] Client ATo3m_7asZ0GaisBAAAI joined room: caja
+[Nest] 20  - 05/25/2026, 12:12:54 AM     LOG [AppGateway] Client disconnected: ATo3m_7asZ0GaisBAAAI (was in rooms: user_cmom4whz80000k0qnjs8qb3sc, caja)
+[Nest] 20  - 05/25/2026, 12:14:58 AM     LOG [AppGateway] Client TF0mowMpIBvdVGDMAAAK mapped to user cmom4whz80000k0qnjs8qb3sc and joined user_cmom4whz80000k0qnjs8qb3sc
+[Nest] 20  - 05/25/2026, 12:14:59 AM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[pmQRnHJWWrmmLovhcOWAT5]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 20  - 05/25/2026, 12:14:59 AM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[GdlgtCAYnoMG2ypFXO7AFD]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 20  - 05/25/2026, 12:14:59 AM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[yaNRwtFhUgf3kOHK9kn-Dg]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 20  - 05/25/2026, 12:14:59 AM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[JNemAxFsQJCkbaYhKX0eWO]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 20  - 05/25/2026, 12:14:59 AM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[pmQRnHJWWrmmLovhcOWAT5]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 20  - 05/25/2026, 12:14:59 AM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[GdlgtCAYnoMG2ypFXO7AFD]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 20  - 05/25/2026, 12:14:59 AM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[yaNRwtFhUgf3kOHK9kn-Dg]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 20  - 05/25/2026, 12:14:59 AM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[JNemAxFsQJCkbaYhKX0eWO]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 20  - 05/25/2026, 12:14:59 AM     LOG [AppGateway] Nueva orden received: cmpkgfpsz0009q7p1uhe5lm48
+[Nest] 20  - 05/25/2026, 12:15:08 AM     LOG [AppGateway] Client TF0mowMpIBvdVGDMAAAK joined room: kitchen
+[Nest] 20  - 05/25/2026, 12:15:08 AM     LOG [AppGateway] Client TF0mowMpIBvdVGDMAAAK joined room: caja
+[Nest] 20  - 05/25/2026, 12:15:47 AM     LOG [AppGateway] Client TF0mowMpIBvdVGDMAAAK joined room: caja
+[Nest] 20  - 05/25/2026, 12:15:56 AM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[pmQRnHJWWrmmLovhcOWAT5]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 20  - 05/25/2026, 12:15:56 AM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[GdlgtCAYnoMG2ypFXO7AFD]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 20  - 05/25/2026, 12:15:56 AM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[yaNRwtFhUgf3kOHK9kn-Dg]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 20  - 05/25/2026, 12:15:56 AM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[JNemAxFsQJCkbaYhKX0eWO]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 20  - 05/25/2026, 12:15:56 AM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[pmQRnHJWWrmmLovhcOWAT5]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 20  - 05/25/2026, 12:15:56 AM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[GdlgtCAYnoMG2ypFXO7AFD]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 20  - 05/25/2026, 12:15:56 AM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[yaNRwtFhUgf3kOHK9kn-Dg]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 20  - 05/25/2026, 12:15:56 AM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[JNemAxFsQJCkbaYhKX0eWO]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 20  - 05/25/2026, 12:15:57 AM     LOG [AppGateway] Nueva orden received: cmpkggy6m000gq7p1lfvywtny
+[Nest] 20  - 05/25/2026, 12:16:31 AM     LOG [AppGateway] Client disconnected: TF0mowMpIBvdVGDMAAAK (was in rooms: user_cmom4whz80000k0qnjs8qb3sc, kitchen, caja)

@@ -19,7 +19,7 @@ import { extname, join } from 'path';
 import * as fs from 'fs';
 import sharp from 'sharp';
 import { GastosService } from './gastos.service';
-import { CreateGastoDto, UpdateGastoDto, GastosQueryDto } from './dto/gasto.dto';
+import { CreateGastoDto, UpdateGastoDto, GastosQueryDto, CreateBulkGastoDto } from './dto/gasto.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 
 @ApiTags('Gastos')
@@ -98,6 +98,14 @@ export class GastosController {
   @ApiOperation({ summary: 'Crear gasto' })
   create(@Body() createGastoDto: CreateGastoDto) {
     return this.gastosService.create(createGastoDto);
+  }
+
+  @Post('bulk')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Crear multiples gastos (carga masiva)' })
+  createBulk(@Body() createBulkGastoDto: CreateBulkGastoDto) {
+    return this.gastosService.createBulk(createBulkGastoDto.gastos);
   }
 
   @Get()

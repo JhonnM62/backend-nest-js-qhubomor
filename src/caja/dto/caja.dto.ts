@@ -23,8 +23,7 @@ export class InsumoAperturaDto {
 
   @ApiPropertyOptional()
   @IsOptional()
-  @IsString()
-  paraQueProducto?: string;
+  paraQueProducto?: string | string[];
 
   @ApiPropertyOptional()
   @IsOptional()
@@ -129,8 +128,7 @@ export class InsumoCierreDto {
 
   @ApiPropertyOptional()
   @IsOptional()
-  @IsString()
-  paraQueProducto?: string;
+  paraQueProducto?: string | string[];
 
   @ApiPropertyOptional()
   @IsOptional()
