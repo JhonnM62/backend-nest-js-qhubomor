@@ -13,25 +13,27 @@ export class ConfiguracionService {
     if (!config) {
       config = await this.prisma.configuracionNegocio.create({
         data: {
-          id: 1,
-          horaCorteDia: '00:00'
-        }
-      });
-    }
-
-    return config;
-  }
-
-  async updateConfiguracion(horaCorteDia: string) {
-    return this.prisma.configuracionNegocio.upsert({
-      where: { id: 1 },
-      update: { horaCorteDia },
-      create: {
         id: 1,
-        horaCorteDia
+        horaCorteDia: '00:00',
+        modoOperacion: 'GENERAL'
       }
     });
   }
+
+  return config;
+}
+
+async updateConfiguracion(data: { horaCorteDia?: string; modoOperacion?: string }) {
+  return this.prisma.configuracionNegocio.upsert({
+    where: { id: 1 },
+    update: data,
+    create: {
+      id: 1,
+      horaCorteDia: data.horaCorteDia || '00:00',
+      modoOperacion: data.modoOperacion || 'GENERAL'
+    }
+  });
+}
 
   // --- CONFIGURACION IA ---
   async getConfiguracionIA() {

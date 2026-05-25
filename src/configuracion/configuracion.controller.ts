@@ -16,8 +16,8 @@ export class ConfiguracionController {
 
   @Put()
   @Roles('Admin app', 'Admin negocio')
-  async updateConfiguracion(@Body('horaCorteDia') horaCorteDia: string) {
-    return this.configuracionService.updateConfiguracion(horaCorteDia);
+  async updateConfiguracion(@Body() data: { horaCorteDia?: string; modoOperacion?: string }) {
+    return this.configuracionService.updateConfiguracion(data);
   }
 
   // --- CONFIGURACION IA ---

@@ -140,7 +140,7 @@ export class VentasService {
 
     // Buscar configuración dinámica
     let config = await this.prisma.configuracionNegocio.findUnique({ where: { id: 1 } });
-    if (!config) config = { id: 1, horaCorteDia: '00:00', updatedAt: new Date() };
+    if (!config) config = { id: 1, horaCorteDia: '00:00', modoOperacion: 'GENERAL', updatedAt: new Date() };
     
     const [corteHours, corteMinutes] = config.horaCorteDia.split(':').map(Number);
 
