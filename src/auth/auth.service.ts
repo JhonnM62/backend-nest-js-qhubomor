@@ -3,6 +3,9 @@ import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcryptjs';
 import { RegisterDto, LoginDto, AuthResponseDto } from './dto/auth.dto';
+import { RefreshTokenResponseDto } from './dto/refresh.dto';
+
+const JWT_SECRET = process.env.JWT_SECRET || 'qhubomor_secret_key_2024_very_secure_random_string';
 
 @Injectable()
 export class AuthService {
@@ -99,5 +102,35 @@ export class AuthService {
     return this.prisma.usuarios.findUnique({
       where: { IDusuarios: userId },
     });
+  }
+
+  async refreshToken(oldToken: string): Promise<RefreshTokenResponseDto> {
+    let payload: { sub: string; email: string; rol: string };
+
+    try {
+      // ignoreExpiration = true so we can still read sub from an expired token
+      payload = this.jwtService.verify<{ sub: string; email: string; rol: string }>(oldToken, {
+        secret: JWT_SECRET,
+        ignoreExpiration: true,
+      });
+    } catch (e) {
+      this.logger.warn('refreshToken: invalid token signature');
+      throw new UnauthorizedException('Token inválido');
+    }
+
+    const user = await this.prisma.usuarios.findUnique({
+      where: { IDusuarios: payload.sub },
+    });
+
+    if (!user || !user.isActive) {
+      this.logger.warn(`refreshToken: user ${payload.sub} not found or inactive`);
+      throw new UnauthorizedException('Usuario no válido o inactivo');
+    }
+
+    const newPayload = { sub: user.IDusuarios, email: user.email || '', rol: user.rol || 'usuario' };
+    const accessToken = this.jwtService.sign(newPayload, { secret: JWT_SECRET });
+    this.logger.log(`Token refreshed for user: ${user.email}`);
+
+    return { accessToken };
   }
 }

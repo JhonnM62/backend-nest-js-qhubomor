@@ -2,6 +2,7 @@ import { Controller, Post, Body, HttpCode, HttpStatus, Logger } from '@nestjs/co
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { RegisterDto, LoginDto, AuthResponseDto } from './dto/auth.dto';
+import { RefreshTokenDto, RefreshTokenResponseDto } from './dto/refresh.dto';
 import { Public } from '../common/decorators/public.decorator';
 
 @ApiTags('Auth')
@@ -30,5 +31,15 @@ export class AuthController {
   async login(@Body() loginDto: LoginDto): Promise<AuthResponseDto> {
     this.logger.log(`Request to login user: ${loginDto.email}`);
     return this.authService.login(loginDto);
+  }
+
+  @Public()
+  @Post('refresh')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Renovar access token usando token vencido' })
+  @ApiResponse({ status: 200, description: 'Token renovado', type: RefreshTokenResponseDto })
+  @ApiResponse({ status: 401, description: 'Token inválido o usuario inactivo' })
+  async refresh(@Body() body: RefreshTokenDto): Promise<RefreshTokenResponseDto> {
+    return this.authService.refreshToken(body.token);
   }
 }
