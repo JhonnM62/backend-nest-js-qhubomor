@@ -613,7 +613,12 @@ export class CajaService {
       if (Array.isArray(rawParaQueProducto)) {
         productosDestino = rawParaQueProducto as string[];
       } else if (typeof rawParaQueProducto === 'string' && rawParaQueProducto.trim()) {
-        productosDestino = [rawParaQueProducto.trim()];
+        try {
+          const parsed = JSON.parse(rawParaQueProducto);
+          productosDestino = Array.isArray(parsed) ? parsed : [rawParaQueProducto.trim()];
+        } catch (e) {
+          productosDestino = [rawParaQueProducto.trim()];
+        }
       }
 
       // Map each product ID to its name
