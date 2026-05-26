@@ -608,7 +608,7 @@ export class CajaService {
       const insumoId = ic.nombreInsumo || '';
 
       // paraQueProducto can now be a JSON array of product IDs, or a legacy string
-      const rawParaQueProducto = ic.paraQueProducto;
+      const rawParaQueProducto = ic.paraQueProducto || ic.nombreDelProducto;
       let productosDestino: string[] = [];
       if (Array.isArray(rawParaQueProducto)) {
         productosDestino = rawParaQueProducto as string[];
