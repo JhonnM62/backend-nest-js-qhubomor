@@ -220,11 +220,11 @@ export class CajaService {
       throw new NotFoundException('Esta caja ya está cerrada');
     }
 
-    // Validar que no haya verificación pendiente sin posposiciones disponibles
+    // Validar que no haya verificación pendiente sin completar
     const verificacion = await this.getVerificacionPendiente(id);
-    if (!verificacion.todasVerificadas && verificacion.posposicionesRestantes === 0) {
+    if (!verificacion.todasVerificadas) {
       throw new BadRequestException(
-        `Hay ${verificacion.totalPendientes} insumos sin verificar y ya usaste tus 3 posposiciones. Debes hacer la verificación antes de cerrar.`
+        `Hay ${verificacion.totalPendientes} insumos sin verificar. Debes hacer la verificación antes de cerrar definitivamente la caja.`
       );
     }
 
