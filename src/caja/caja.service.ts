@@ -44,6 +44,7 @@ export class CajaService {
           fechaDeApertura: new Date(),
           horaDeApertura: new Date().toLocaleTimeString('en-US', { timeZone: 'America/Bogota', hour12: true }),
           cierre: 'abierta',
+          cuadroCaja: 'NO SE HA REVISADO',
         },
       });
 
@@ -685,7 +686,7 @@ export class CajaService {
 
     validVentas.forEach(v => {
       v.ordenVentas.forEach(ov => {
-        const cat = (ov.producto as any)?.categoria || 'Sin Categoría';
+        const cat = (ov.producto as any)?.categoriaNombre || (ov.producto as any)?.categoria || 'Sin Categoría';
         const prodNombre = (ov.producto as any)?.nombre || ov.nombreProducto || ov.nombre || 'Producto';
         const prodId = ov.producto?.IDproductos || prodNombre;
         const cant = ov.cantidad || 1;
