@@ -42,7 +42,7 @@ export class CajaService {
         data: {
           ...parsedData,
           fechaDeApertura: new Date(),
-          horaDeApertura: new Date().toTimeString().split(' ')[0],
+          horaDeApertura: new Date().toLocaleTimeString('en-US', { timeZone: 'America/Bogota', hour12: true }),
           cierre: 'abierta',
         },
       });
@@ -325,7 +325,7 @@ export class CajaService {
           fechaDeCierre: new Date(),
           cierre: 'cerrada',
           horaEnLaQueSeActualizo: new Date(),
-          horaDeCierre: new Date().toTimeString().split(' ')[0],
+          horaDeCierre: parsedCierreData.horaDeCierre || new Date().toLocaleTimeString('en-US', { timeZone: 'America/Bogota', hour12: true }),
         },
       });
 
