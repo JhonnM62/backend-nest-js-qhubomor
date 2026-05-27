@@ -162,7 +162,8 @@ export class CajaService {
         // Whitelist: only pass fields that exist in the Prisma schema
         const allowedFields = [
             'nombre', 'apertura', 'fechaDeApertura', 'horaDeApertura',
-            'efectivoDeApertura', 'resumen', 'pdf', 'pdfcount', 'observaciones',
+            'efectivoDeApertura', 'fechaDeCierre', 'horaDeCierre', 'efectivoDeCierre', 
+            'resumen', 'pdf', 'pdfcount', 'observaciones',
             'cierre', 'total12Onz', 'total24Onz', 'productos', 'tipoDeVaso',
             'cantAAgregar', 'plataGuardada', 'cuadroCaja', 'valorFaltante',
             'valorExcedente', 'transferenciasContadas', 'horaCongelada', 'horaEnLaQueSeActualizo', 'contador', 'contador2'
@@ -172,7 +173,7 @@ export class CajaService {
           if (key in cajaData && cajaData[key as keyof typeof cajaData] !== undefined) {
             let value = (cajaData as any)[key];
             // Parse date strings to Date objects
-            if ((key === 'fechaDeApertura') && typeof value === 'string') {
+            if ((key === 'fechaDeApertura' || key === 'fechaDeCierre') && typeof value === 'string') {
               value = new Date(value + 'T12:00:00.000Z');
             }
             parsedData[key] = value;
@@ -322,7 +323,7 @@ export class CajaService {
         where: { IDcaja: id },
         data: {
           ...parsedCierreData,
-          fechaDeCierre: new Date(),
+          fechaDeCierre: parsedCierreData.fechaDeCierre || new Date(),
           cierre: 'cerrada',
           horaEnLaQueSeActualizo: new Date(),
           horaDeCierre: parsedCierreData.horaDeCierre || new Date().toLocaleTimeString('en-US', { timeZone: 'America/Bogota', hour12: true }),
