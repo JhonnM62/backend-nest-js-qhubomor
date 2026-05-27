@@ -50,6 +50,13 @@ export class CajaController {
     return this.cajaService.cerrarCaja(id, updateCierreDto);
   }
 
+  @Patch('reabrir/:id')
+  @ApiOperation({ summary: 'Reabrir una caja cerrada por error (Solo Admin)' })
+  @ApiResponse({ status: 200, description: 'Caja reabierta exitosamente.' })
+  reabrirCaja(@Param('id') id: string) {
+    return this.cajaService.reabrirCaja(id);
+  }
+
   @Get('activa')
   @ApiOperation({ summary: 'Obtener caja activa' })
   @ApiResponse({ status: 200, description: 'Caja activa' })

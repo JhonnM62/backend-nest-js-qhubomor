@@ -1037,4 +1037,40 @@ export class CajaService {
 
     return { success: true, message: 'Conteo actualizado correctamente', data: conteo };
   }
+
+  async reabrirCaja(id: string) {
+    const caja = await this.prisma.aperturaCierreCaja.findUnique({
+      where: { IDcaja: id }
+    });
+
+    if (!caja) {
+      throw new NotFoundException(`Caja con ID ${id} no encontrada`);
+    }
+
+    if (caja.cierre === 'en curso') {
+      throw new BadRequestException('Esta caja ya está en curso');
+    }
+
+    const updatedCaja = await this.prisma.aperturaCierreCaja.update({
+      where: { IDcaja: id },
+      data: {
+        cierre: 'en curso',
+        fechaDeCierre: null,
+        horaDeCierre: null,
+        efectivoDeCierre: null,
+      }
+    });
+
+    this.appGateway.emitToRoom('caja', SocketEvent.REFRESH_CAJA, {
+      action: 'reabierta',
+      cajaId: id
+    });
+
+    return {
+      success: true,
+      message: 'Caja reabierta correctamente',
+      data: updatedCaja
+    };
+  }
 }
+
