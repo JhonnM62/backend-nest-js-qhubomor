@@ -1047,14 +1047,14 @@ export class CajaService {
       throw new NotFoundException(`Caja con ID ${id} no encontrada`);
     }
 
-    if (caja.cierre === 'en curso') {
-      throw new BadRequestException('Esta caja ya está en curso');
+    if (caja.cierre === 'abierta') {
+      throw new BadRequestException('Esta caja ya está abierta');
     }
 
     const updatedCaja = await this.prisma.aperturaCierreCaja.update({
       where: { IDcaja: id },
       data: {
-        cierre: 'en curso',
+        cierre: 'abierta',
         fechaDeCierre: null,
         horaDeCierre: null,
         efectivoDeCierre: null,
