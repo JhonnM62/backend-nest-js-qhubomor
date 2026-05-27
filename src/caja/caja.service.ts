@@ -163,7 +163,7 @@ export class CajaService {
         const allowedFields = [
             'nombre', 'apertura', 'fechaDeApertura', 'horaDeApertura',
             'efectivoDeApertura', 'resumen', 'pdf', 'pdfcount', 'observaciones',
-            'total12Onz', 'total24Onz', 'productos', 'tipoDeVaso',
+            'cierre', 'total12Onz', 'total24Onz', 'productos', 'tipoDeVaso',
             'cantAAgregar', 'plataGuardada', 'cuadroCaja', 'valorFaltante',
             'valorExcedente', 'transferenciasContadas', 'horaCongelada', 'horaEnLaQueSeActualizo', 'contador', 'contador2'
           ];
