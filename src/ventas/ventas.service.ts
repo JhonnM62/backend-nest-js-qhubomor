@@ -178,7 +178,7 @@ export class VentasService {
       pedido,
       fechaYHora: now,
       fecha: fechaContable,
-      hora: now.toTimeString().split(' ')[0],
+      hora: now.toLocaleTimeString('en-US', { timeZone: 'America/Bogota', hour12: false }),
       estado: createVentaDto.estado || 'iniciado',
       registroDeTiempo: this.generateTiempoLog(createVentaDto.estado || 'iniciado', createVentaDto.cartStartTime),
     };
@@ -366,7 +366,7 @@ export class VentasService {
         usuario: usuarioId,
         fechaYHora: fechaVenta,
         fecha: fechaContable,
-        hora: fechaVenta.toTimeString().split(' ')[0],
+        hora: fechaVenta.toLocaleTimeString('en-US', { timeZone: 'America/Bogota', hour12: false }),
         registroDeTiempo: this.generateTiempoLog(venta.estado || 'EN_EL_CARRITO', (venta as any).cartStartTime),
         clienteId: venta.clienteId || null,
         cliente: clienteNombre,  // Columna "Clente" – nombre en texto
