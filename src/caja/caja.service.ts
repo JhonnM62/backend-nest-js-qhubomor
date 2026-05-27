@@ -799,6 +799,9 @@ export class CajaService {
 
     const hoy = new Date();
     hoy.setHours(5, 0, 0, 0);
+    if (new Date() < hoy) {
+      hoy.setDate(hoy.getDate() - 1);
+    }
 
     const insumos = await this.prisma.insumos.findMany({
       where: { cuadrarInsumos: true, estado: 'ACTIVO' }
@@ -863,6 +866,9 @@ export class CajaService {
 
     const hoy = new Date();
     hoy.setHours(5, 0, 0, 0);
+    if (new Date() < hoy) {
+      hoy.setDate(hoy.getDate() - 1);
+    }
 
     const pendientesSinVerificar = insumos.filter(insumo => {
       const conteos = (insumo.ultimosConteos as any[]) || [];
