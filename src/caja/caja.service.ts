@@ -31,7 +31,7 @@ export class CajaService {
       if (key in cajaData && (cajaData as any)[key] !== undefined) {
         let value = (cajaData as any)[key];
         if ((key === 'fechaDeApertura' || key === 'fechaDeCierre') && typeof value === 'string') {
-          value = new Date(value + 'T00:00:00.000Z');
+          value = new Date(value + 'T12:00:00.000Z');
         }
         parsedData[key] = value;
       }
@@ -173,7 +173,7 @@ export class CajaService {
             let value = (cajaData as any)[key];
             // Parse date strings to Date objects
             if ((key === 'fechaDeApertura') && typeof value === 'string') {
-              value = new Date(value + 'T00:00:00.000Z');
+              value = new Date(value + 'T12:00:00.000Z');
             }
             parsedData[key] = value;
           }
@@ -312,7 +312,7 @@ export class CajaService {
         if (key in cajaData && (cajaData as any)[key] !== undefined) {
           let value = (cajaData as any)[key];
           if ((key === 'fechaDeApertura' || key === 'fechaDeCierre') && typeof value === 'string') {
-            value = new Date(value + 'T00:00:00.000Z');
+            value = new Date(value + 'T12:00:00.000Z');
           }
           parsedCierreData[key] = value;
         }
