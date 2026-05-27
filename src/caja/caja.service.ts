@@ -835,7 +835,7 @@ export class CajaService {
       todasVerificadas: pendientesSinVerificar.length === 0,
       contadorPosposiciones: caja.contador || 0,
       posposicionesRestantes,
-      puedePosponer: posposicionesRestantes > 0 && pendientesSinVerificar.length > 0
+      puedePosponer: posposicionesRestantes > 0 && pendientesSinVerificar.length > 0 && caja.cierre !== 'cerrada'
     };
   }
 
