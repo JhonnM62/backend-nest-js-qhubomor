@@ -558,21 +558,30 @@ export class CajaService {
     let efectivoRepartido = 0;
     let transferenciasRepartidas = 0;
 
+    let cantEfectivo = 0;
+    let cantTransferencia = 0;
+    let cantNequi = 0;
+    let cantTarjeta = 0;
+
     for (const v of validVentas) {
       // Remover guiones bajos, espacios extras y pasar a mayúsculas para normalizar
       const medioRaw = (v.medioDePago || '').toUpperCase().replace(/_/g, ' ').trim();
 
       if (medioRaw === 'EFECTIVO') {
         totalEfectivo += Number(v.totalInput || 0);
+        cantEfectivo++;
       }
       else if (medioRaw === 'NEQUI') {
         totalNequi += Number(v.totalInput || 0);
+        cantNequi++;
       }
       else if (medioRaw === 'TRANSFERENCIA' || medioRaw === 'TRASNFERENCIA' || medioRaw === 'DAVIPLATA') {
         totalTransferencia += Number(v.totalInput || 0);
+        cantTransferencia++;
       }
       else if (medioRaw === 'TARJETA') {
         totalTarjeta += Number(v.totalInput || 0);
+        cantTarjeta++;
       }
       else if (medioRaw === 'MIXTO' || medioRaw === 'EFECTIVO Y OTROS') {
         const efectivoR = Number((v as any).efectivoRecibido || 0);
@@ -733,6 +742,10 @@ export class CajaService {
         numeroOrdenesRepartidas,
         efectivoRepartido,
         transferenciasRepartidas,
+        cantEfectivo,
+        cantTransferencia,
+        cantNequi,
+        cantTarjeta,
         totalVentas: totalEfectivo + totalTransferencia + totalNequi + totalTarjeta,
         efectivoApertura: caja.efectivoDeApertura,
         efectivoCierre: caja.efectivoDeCierre,
