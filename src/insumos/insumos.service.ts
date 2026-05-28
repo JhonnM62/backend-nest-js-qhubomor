@@ -442,27 +442,42 @@ export class InsumosService {
     return ESTADO_STOCK.NORMAL;
   }
 
+  private pendingNotifications = new Map<string, NodeJS.Timeout>();
+
   private verificarAlertasStock(insumo: any) {
     const cantidad = Number(insumo.disponible) || 0;
     const stockMinimo = insumo.apartirDeCantidad || 10;
-    
+    const insumoId = insumo.IDalimentos;
+
+    if (this.pendingNotifications.has(insumoId)) {
+      clearTimeout(this.pendingNotifications.get(insumoId)!);
+      this.pendingNotifications.delete(insumoId);
+    }
+
     if (cantidad < 0) {
-      this.notificationsService.sendNotification(
-        'INSUMO_STOCK_NEGATIVE',
-        'Stock Negativo de Insumo',
-        `El insumo "${insumo.nombre}" tiene un stock negativo de ${cantidad}.`,
-        { insumoId: insumo.IDalimentos }
-      );
+      const timeout = setTimeout(() => {
+        this.notificationsService.sendNotification(
+          'INSUMO_STOCK_NEGATIVE',
+          'Stock Negativo de Insumo',
+          `El insumo "${insumo.nombre}" tiene un stock negativo de ${cantidad}.`,
+          { insumoId: insumo.IDalimentos }
+        );
+        this.pendingNotifications.delete(insumoId);
+      }, 5000);
+      this.pendingNotifications.set(insumoId, timeout);
     } else if (cantidad <= stockMinimo) {
-      this.notificationsService.sendNotification(
-        'INSUMO_STOCK_LOW',
-        'Stock Bajo de Insumo',
-        `El insumo "${insumo.nombre}" tiene un stock crítico de ${cantidad} (Mínimo: ${stockMinimo}).`,
-        { insumoId: insumo.IDalimentos }
-      );
+      const timeout = setTimeout(() => {
+        this.notificationsService.sendNotification(
+          'INSUMO_STOCK_LOW',
+          'Stock Bajo de Insumo',
+          `El insumo "${insumo.nombre}" tiene un stock crítico de ${cantidad} (Mínimo: ${stockMinimo}).`,
+          { insumoId: insumo.IDalimentos }
+        );
+        this.pendingNotifications.delete(insumoId);
+      }, 5000);
+      this.pendingNotifications.set(insumoId, timeout);
     } else {
-      // Si quieres notificar cuando vuelve a estar positivo, pero usualmente no es tan necesario, 
-      // o podrías mapearlo a INSUMO_STOCK_POSITIVE.
+      // Si quieres notificar cuando vuelve a estar positivo, pero usualmente no es tan necesario
     }
   }
 
