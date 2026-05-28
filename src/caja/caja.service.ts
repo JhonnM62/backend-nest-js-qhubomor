@@ -502,14 +502,15 @@ export class CajaService {
               
               // Normalizar las notas para que siempre tengan nombre y precio
               const normalizedNotas = parsed.map(n => {
-                if (typeof n === 'string') return { nombre: n, precio: 0 };
+                if (typeof n === 'string') return { nombre: n, precio: 0, cantidad: 1 };
                 if (typeof n === 'object' && n !== null) {
                   return {
                     nombre: n.name || n.nombre || n.Nombre || 'Nota',
-                    precio: Number(n.price || n.precio || n.Precio || 0)
+                    precio: Number(n.price || n.precio || n.Precio || 0),
+                    cantidad: Number(n.quantity || n.cantidad || 1)
                   };
                 }
-                return { nombre: String(n), precio: 0 };
+                return { nombre: String(n), precio: 0, cantidad: 1 };
               });
 
               ventaNotes.push({
@@ -522,7 +523,7 @@ export class CajaService {
               ventaNotes.push({
                 producto: (ov as any).nombreProducto || (ov as any).nombre || 'Producto',
                 cantidad: ov.cantidad || 1,
-                notas: [{ nombre: parsed.trim(), precio: 0 }]
+                notas: [{ nombre: parsed.trim(), precio: 0, cantidad: 1 }]
               });
             }
           } catch (e) {
@@ -531,7 +532,7 @@ export class CajaService {
               ventaNotes.push({
                 producto: (ov as any).nombreProducto || (ov as any).nombre || 'Producto',
                 cantidad: ov.cantidad || 1,
-                notas: [{ nombre: (ov as any).comentarios.trim(), precio: 0 }]
+                notas: [{ nombre: (ov as any).comentarios.trim(), precio: 0, cantidad: 1 }]
               });
             }
           }
