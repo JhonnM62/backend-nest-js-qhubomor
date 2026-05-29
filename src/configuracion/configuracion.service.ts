@@ -74,4 +74,88 @@ async updateConfiguracion(data: { horaCorteDia?: string; modoOperacion?: string 
       }
     });
   }
+
+  // --- CONFIGURACION WHATSAPP ---
+  async getConfiguracionWhatsapp() {
+    let configWhatsapp = await this.prisma.configuracionWhatsapp.findUnique({
+      where: { id: 1 }
+    });
+
+    if (!configWhatsapp) {
+      configWhatsapp = await this.prisma.configuracionWhatsapp.create({
+        data: {
+          id: 1,
+          enabled: false,
+          isGroup: false,
+        }
+      });
+    }
+
+    return configWhatsapp;
+  }
+
+  async updateConfiguracionWhatsapp(data: {
+    enabled?: boolean;
+    urlBase?: string;
+    sessionId?: string;
+    token?: string;
+    receiver?: string;
+    isGroup?: boolean;
+  }) {
+    return this.prisma.configuracionWhatsapp.upsert({
+      where: { id: 1 },
+      update: data,
+      create: {
+        id: 1,
+        ...data,
+      }
+    });
+  }
+
+  async sendReportToWhatsapp(urlPublica: string, fileName: string, caption: string) {
+    const config = await this.getConfiguracionWhatsapp();
+
+    if (!config.enabled) {
+      return { success: false, message: 'El envío por WhatsApp está deshabilitado en la configuración.' };
+    }
+
+    if (!config.urlBase || !config.sessionId || !config.token || !config.receiver) {
+      return { success: false, message: 'Faltan parámetros en la configuración de WhatsApp.' };
+    }
+
+    const endpoint = `${config.urlBase.replace(/\/$/, '')}/chats/send?id=${config.sessionId}`;
+
+    try {
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-access-token': config.token,
+        },
+        body: JSON.stringify({
+          receiver: config.receiver,
+          isGroup: config.isGroup,
+          message: {
+            document: {
+              url: urlPublica,
+            },
+            caption: caption,
+            mimetype: 'application/pdf',
+            fileName: fileName,
+          },
+        }),
+      });
+
+      const responseData = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        throw new Error(responseData?.message || 'Error en la respuesta de la API de WhatsApp');
+      }
+
+      return { success: true, data: responseData };
+    } catch (error: any) {
+      console.error('[WhatsAppService] Error enviando mensaje:', error.message);
+      throw new Error(`Error al enviar a WhatsApp: ${error.message}`);
+    }
+  }
 }

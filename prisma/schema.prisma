@@ -521,6 +521,19 @@ model ConfiguracionIA {
   @@map("CONFIGURACION_IA")
 }
 
+model ConfiguracionWhatsapp {
+  id               Int      @id @default(1)
+  enabled          Boolean  @default(false)
+  urlBase          String?  // Ej. url donde esta la API de Evolution
+  sessionId        String?  // Ej. 'default' o el ID de la sesion
+  token            String?  // El x-access-token
+  receiver         String?  // El numero telefónico destino
+  isGroup          Boolean  @default(false)
+  updatedAt        DateTime @updatedAt
+  
+  @@map("CONFIGURACION_WHATSAPP")
+}
+
 model PushToken {
   id         String   @id @default(cuid())
   userId     String   @map("UsuarioId")
