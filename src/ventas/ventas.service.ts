@@ -577,12 +577,34 @@ export class VentasService {
     }
 
     if (search) {
+      const parsedNum = parseFloat(search.replace(/[^\d]/g, ''));
+      const isNum = !isNaN(parsedNum) && parsedNum > 0 && search.replace(/[^\d.]/g, '').length > 0;
+
       where.OR = [
         { pedido: { contains: search, mode: 'insensitive' } },
         { cliente: { contains: search, mode: 'insensitive' } },
         // Also allow searching by order products names if they match
         { ordenVentas: { some: { nombre: { contains: search, mode: 'insensitive' } } } }
       ];
+
+      if (isNum) {
+        where.OR.push(
+          { totalInput: { equals: parsedNum } },
+          { numeroTelefono: { equals: parsedNum } },
+          { ordenVentas: { some: { precioTotal: { equals: parsedNum } } } },
+          { ordenVentas: { some: { precio: { equals: parsedNum } } } }
+        );
+      }
+    }
+
+    if (categoriaProducto) {
+      where.ordenVentas = {
+        ...((where.ordenVentas as any) || {}),
+        some: {
+          ...(((where.ordenVentas as any)?.some) || {}),
+          categoriaProducto: categoriaProducto
+        }
+      };
     }
 
     if (estado) {
