@@ -830,13 +830,12 @@ export class VentasService {
   }
 
   async findVentasHoy() {
-    const hoy = new Date();
-    hoy.setHours(0, 0, 0, 0);
+    const hoyContable = await this.getFechaContable(new Date());
 
     return this.prisma.ventas.findMany({
       where: {
-        fechaYHora: { gte: hoy },
-        estado: 'PAGADO',
+        fecha: hoyContable,
+        estado: { in: ['PAGADO', 'ENTREGADO'] },
         deletedAt: null,
       },
       include: {
