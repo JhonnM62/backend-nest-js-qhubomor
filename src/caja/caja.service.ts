@@ -5,6 +5,7 @@ import { Prisma } from '@prisma/client';
 import { AppGateway } from '../websocket/app.gateway';
 import { SocketEvent } from '../websocket/types/socket.types';
 import { NotificationsService } from '../notifications/notifications.service';
+import { AiService } from '../ai/ai.service';
 
 @Injectable()
 export class CajaService {
@@ -12,6 +13,7 @@ export class CajaService {
     private prisma: PrismaService,
     private appGateway: AppGateway,
     private notificationsService: NotificationsService,
+    private aiService: AiService,
   ) {}
 
   async abrirCaja(createCajaDto: CreateAperturaCierreCajaDto) {
@@ -801,6 +803,150 @@ export class CajaService {
       );
 
       return deletedCaja;
+    });
+  }
+
+  async getAutoCuadrePreview(cajaId: string) {
+    const caja = await this.prisma.aperturaCierreCaja.findUnique({ where: { IDcaja: cajaId } });
+    if (!caja) throw new NotFoundException('Caja no encontrada');
+
+    const resumenCompleto = await this.getResumenCaja(cajaId);
+
+    const insumosDescuadrados = resumenCompleto.insumos
+      .filter((i: any) => i.diferencia !== 0)
+      .map((i: any) => ({
+        nombre: i.insumoNombre,
+        diferencia: i.diferencia,
+      }));
+
+    if (insumosDescuadrados.length === 0 && Number(resumenCompleto.resumen.valorFaltante) === 0 && Number(resumenCompleto.resumen.valorExcedente) === 0) {
+      throw new BadRequestException('La caja ya está cuadrada. No hay diferencias físicas ni monetarias.');
+    }
+
+    let fechaInicio = new Date(caja.fechaDeApertura!);
+    if (caja.horaDeApertura) {
+      const [h, m] = caja.horaDeApertura.split(':');
+      fechaInicio.setUTCHours(Number(h) + 5, Number(m), 0, 0);
+    }
+    let fechaFin = new Date();
+    if (caja.fechaDeCierre) {
+      fechaFin = new Date(caja.fechaDeCierre);
+      fechaFin.setUTCHours(28, 59, 59, 999);
+    }
+
+    const ventasEfectivo = await this.prisma.ventas.findMany({
+      where: {
+        estado: { in: ['PAGADO', 'ENTREGADO'] },
+        deletedAt: null,
+        medioDePago: 'EFECTIVO',
+        fechaYHora: { gte: fechaInicio, lte: fechaFin }
+      },
+      include: {
+        ordenVentas: {
+          include: { producto: true }
+        }
+      }
+    });
+
+    const ventasEligibles = ventasEfectivo.filter(v => {
+      // Filtrar ventas que tengan comentarios (para no complicar los cálculos de precios)
+      return !v.ordenVentas.some(ov => ov.comentarios && ov.comentarios.trim().length > 0);
+    }).map(v => ({
+      ventaId: v.IDventas,
+      pedido: v.pedido,
+      total: Number(v.totalInput),
+      metodo: v.medioDePago,
+      productos: v.ordenVentas.map(ov => ({
+        ordenId: ov.IDorderventas,
+        productoId: ov.productoId || '',
+        nombre: ov.producto?.nombre || ov.nombreProducto,
+        cantidad: Number(ov.cantidad),
+        precioTotal: Number(ov.precioTotal)
+      }))
+    }));
+
+    const datosCaja = {
+      insumosDescuadrados,
+      descuadreMonetario: {
+        faltante: Number(resumenCompleto.resumen.valorFaltante),
+        excedente: Number(resumenCompleto.resumen.valorExcedente)
+      },
+      ventasEligibles
+    };
+
+    const plan = await this.aiService.autoCuadrePreview(datosCaja);
+    return plan;
+  }
+
+  async executeAutoCuadre(cajaId: string, planIA: any) {
+    const caja = await this.prisma.aperturaCierreCaja.findUnique({ where: { IDcaja: cajaId } });
+    if (!caja) throw new NotFoundException('Caja no encontrada');
+
+    if (!planIA || !planIA.acciones || !Array.isArray(planIA.acciones)) {
+      throw new BadRequestException('El plan de la IA no es válido.');
+    }
+
+    return this.prisma.$transaction(async (tx) => {
+      let observacionesNuevas = "\\n\\n--- AUTO-CUADRE IA ---\\n";
+      
+      for (const accion of planIA.acciones) {
+        if (accion.action === 'remove_product' && accion.ordenId) {
+          const orden = await tx.orderventas.findUnique({
+            where: { IDorderventas: accion.ordenId },
+            include: { venta: true, producto: true }
+          });
+
+          if (orden) {
+            const nuevaCantidad = Math.max(0, Number(orden.cantidad) - Number(accion.cantidadARemover));
+            
+            if (nuevaCantidad <= 0) {
+              await tx.orderventas.delete({ where: { IDorderventas: accion.ordenId } });
+              observacionesNuevas += `- Eliminado: ${orden.nombreProducto || 'Producto'} del Pedido #${orden.venta?.pedido}.\\n`;
+            } else {
+              const unitPrice = Number(orden.precioTotal) / Number(orden.cantidad);
+              const nuevoPrecioTotal = unitPrice * nuevaCantidad;
+              
+              await tx.orderventas.update({
+                where: { IDorderventas: accion.ordenId },
+                data: { 
+                  cantidad: nuevaCantidad,
+                  precioTotal: nuevoPrecioTotal
+                }
+              });
+              observacionesNuevas += `- Reducido: ${orden.nombreProducto || 'Producto'} (-${accion.cantidadARemover}) del Pedido #${orden.venta?.pedido}.\\n`;
+            }
+
+            // Recalculate totalInput of Venta
+            if (orden.IDventas) {
+              const restante = await tx.orderventas.findMany({ where: { IDventas: orden.IDventas } });
+              const nuevoTotal = restante.reduce((acc, curr) => acc + Number(curr.precioTotal), 0);
+              
+              await tx.ventas.update({
+                where: { IDventas: orden.IDventas },
+                data: { totalInput: nuevoTotal }
+              });
+            }
+          }
+        } else if (accion.action === 'change_payment' && accion.ventaId) {
+          const venta = await tx.ventas.findUnique({ where: { IDventas: accion.ventaId } });
+          if (venta) {
+            await tx.ventas.update({
+              where: { IDventas: accion.ventaId },
+              data: { medioDePago: accion.method }
+            });
+            observacionesNuevas += `- Pago Cambiado: Pedido #${venta.pedido} a ${accion.method}.\\n`;
+          }
+        }
+      }
+
+      await tx.aperturaCierreCaja.update({
+        where: { IDcaja: cajaId },
+        data: {
+          observaciones: (caja.observaciones || '') + observacionesNuevas
+        }
+      });
+
+      return { success: true, message: 'Plan de Auto-Cuadre ejecutado exitosamente.' };
     });
   }
 

@@ -277,5 +277,90 @@ Rules:
       if (error instanceof BadRequestException) throw error;
       throw new BadRequestException(`Error al procesar con IA: ${error.message}`);
     }
+  async autoCuadrePreview(datosRequeridos: any) {
+    const configIA = await this.configService.getConfiguracionIA();
+
+    if (!configIA.isActive) {
+      throw new BadRequestException('El módulo de IA está desactivado.');
+    }
+    if (!configIA.apiKey) {
+      throw new BadRequestException('No se ha configurado una API Key válida para Gemini.');
+    }
+
+    try {
+      const ai = new GoogleGenAI({ apiKey: configIA.apiKey });
+      const modelToUse = 'gemini-3.5-flash';
+
+      const systemInstruction = `Eres un sistema experto en auditoría matemática de cajas registradoras.
+Tu tarea es ajustar los pedidos existentes para cuadrar el inventario y el dinero exactamente.
+Se te proporciona:
+1. Insumos Descuadrados: cantidad exacta que sobra o falta en el sistema físico frente al sistema. Si falta (DIF < 0), significa que el sistema registró ventas que no ocurrieron físicamente, debes QUITAR productos de los pedidos. Si DIF > 0, debes AÑADIR. Pero por ahora, prioriza eliminar (DIF < 0).
+2. Ventas Elegibles: Una lista de pedidos (sólo EFECTIVO, sin comentarios) que puedes alterar.
+3. Descuadre Monetario actual: Cuánto Faltante o Excedente de efectivo hay.
+
+REGLAS:
+1. Debes devolver UNICAMENTE un JSON válido con las acciones a tomar.
+2. Usa la acción "remove_product" para eliminar unidades de un producto de un pedido.
+3. Usa la acción "change_payment" para cambiar el método de pago de EFECTIVO a TRANSFERENCIA si necesitas reducir el monto en efectivo, o viceversa, para que Faltante y Excedente queden lo más cercano a 0 posible.
+4. Explica brevemente el motivo en cada acción.`;
+
+      const responseSchema: Schema = {
+        type: Type.OBJECT,
+        properties: {
+          acciones: {
+            type: Type.ARRAY,
+            items: {
+              type: Type.OBJECT,
+              properties: {
+                action: { type: Type.STRING, description: "remove_product o change_payment" },
+                ventaId: { type: Type.STRING },
+                ordenId: { type: Type.STRING, description: "Solo aplicable para remove_product" },
+                productoId: { type: Type.STRING, description: "Solo aplicable para remove_product" },
+                cantidadARemover: { type: Type.INTEGER, description: "Cantidad a quitar. Positivo." },
+                method: { type: Type.STRING, description: "EFECTIVO o TRANSFERENCIA. Solo para change_payment." },
+                motivo: { type: Type.STRING, description: "Motivo por el que se escogió este cambio." },
+              },
+              required: ["action", "ventaId", "motivo"]
+            }
+          }
+        },
+        required: ["acciones"]
+      };
+
+      const promptData = JSON.stringify(datosRequeridos, null, 2);
+
+      const response = await ai.models.generateContent({
+        model: modelToUse,
+        contents: [
+          {
+            role: 'user',
+            parts: [
+              { text: `Genera el plan de cuadre matemático para los siguientes datos:\n${promptData}` }
+            ]
+          }
+        ],
+        config: {
+          systemInstruction: systemInstruction,
+          temperature: 0.1,
+          responseMimeType: "application/json",
+          responseSchema: responseSchema,
+          thinkingConfig: {
+            thinkingLevel: "HIGH" as any
+          }
+        }
+      });
+
+      if (!response.text) {
+        throw new BadRequestException('La IA no pudo procesar la solicitud o devolvió respuesta vacía.');
+      }
+
+      const parsedData = JSON.parse(response.text);
+      return parsedData;
+
+    } catch (error: any) {
+      this.logger.error(`Error en autoCuadrePreview: ${error.message}`);
+      if (error instanceof BadRequestException) throw error;
+      throw new BadRequestException(`Error al procesar Auto-Cuadre con IA: ${error.message}`);
+    }
   }
 }

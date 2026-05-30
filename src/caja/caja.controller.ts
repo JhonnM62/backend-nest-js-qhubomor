@@ -148,4 +148,20 @@ export class CajaController {
   ) {
     return this.cajaService.editarConteo(id, insumoId, Number(conteoIndex), body.cantContada);
   }
+
+  @Post(':id/auto-cuadre/preview')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Obtener un plan de auto-cuadre con IA' })
+  getAutoCuadrePreview(@Param('id') id: string) {
+    return this.cajaService.getAutoCuadrePreview(id);
+  }
+
+  @Post(':id/auto-cuadre/execute')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Ejecutar un plan de auto-cuadre con IA' })
+  executeAutoCuadre(@Param('id') id: string, @Body() planIA: any) {
+    return this.cajaService.executeAutoCuadre(id, planIA);
+  }
 }
