@@ -280,7 +280,13 @@ Rules:
   }
 
   async autoCuadrePreview(datosRequeridos: any) {
+    console.log('[AiService] Solicitando configuración de IA a DB...');
     const configIA = await this.configService.getConfiguracionIA();
+    console.log('[AiService] Configuración de IA obtenida:', { 
+      isActive: configIA.isActive, 
+      hasApiKey: !!configIA.apiKey, 
+      apiKeyPreview: configIA.apiKey ? `${configIA.apiKey.substring(0, 5)}...` : 'N/A' 
+    });
 
     if (!configIA.isActive) {
       throw new BadRequestException('El módulo de IA está desactivado.');
