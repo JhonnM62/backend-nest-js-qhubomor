@@ -310,11 +310,14 @@ REGLAS:
 1. Debes devolver UNICAMENTE un JSON válido con las acciones a tomar.
 2. Usa la acción "remove_product" para eliminar unidades de un producto de un pedido.
 3. Usa la acción "change_payment" para cambiar el método de pago de EFECTIVO a TRANSFERENCIA si necesitas reducir el monto en efectivo, o viceversa, para que Faltante y Excedente queden lo más cercano a 0 posible.
-4. Explica brevemente el motivo en cada acción.`;
+4. Explica brevemente el motivo en cada acción (campo "motivo").
+5. OBLIGATORIO: Debes incluir el campo "justificacionGeneral" en la raíz del JSON con un resumen de lo que vas a hacer.
+6. OBLIGATORIO: Para "remove_product", incluye "nombreProducto" con el nombre del producto que vas a remover.`;
 
       const responseSchema: Schema = {
         type: Type.OBJECT,
         properties: {
+          justificacionGeneral: { type: Type.STRING, description: "Resumen general de las acciones tomadas y por qué." },
           acciones: {
             type: Type.ARRAY,
             items: {
@@ -324,6 +327,7 @@ REGLAS:
                 ventaId: { type: Type.STRING },
                 ordenId: { type: Type.STRING, description: "Solo aplicable para remove_product" },
                 productoId: { type: Type.STRING, description: "Solo aplicable para remove_product" },
+                nombreProducto: { type: Type.STRING, description: "Nombre del producto (solo para remove_product)" },
                 cantidadARemover: { type: Type.INTEGER, description: "Cantidad a quitar. Positivo." },
                 method: { type: Type.STRING, description: "EFECTIVO o TRANSFERENCIA. Solo para change_payment." },
                 motivo: { type: Type.STRING, description: "Motivo por el que se escogió este cambio." },
@@ -332,7 +336,7 @@ REGLAS:
             }
           }
         },
-        required: ["acciones"]
+        required: ["acciones", "justificacionGeneral"]
       };
 
       const promptData = JSON.stringify(datosRequeridos, null, 2);
@@ -362,6 +366,7 @@ REGLAS:
         throw new BadRequestException('La IA no pudo procesar la solicitud o devolvió respuesta vacía.');
       }
 
+      console.log('[AiService] Respuesta RAW de Gemini:', response.text);
       const parsedData = JSON.parse(response.text);
       return parsedData;
 
