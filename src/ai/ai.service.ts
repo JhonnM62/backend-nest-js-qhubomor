@@ -277,6 +277,8 @@ Rules:
       if (error instanceof BadRequestException) throw error;
       throw new BadRequestException(`Error al procesar con IA: ${error.message}`);
     }
+  }
+
   async autoCuadrePreview(datosRequeridos: any) {
     const configIA = await this.configService.getConfiguracionIA();
 
@@ -288,7 +290,7 @@ Rules:
     }
 
     try {
-      const ai = new GoogleGenAI({ apiKey: configIA.apiKey });
+      const ai = new GoogleGenAI({ apiKey: configIA.apiKey as string });
       const modelToUse = 'gemini-3.5-flash';
 
       const systemInstruction = `Eres un sistema experto en auditoría matemática de cajas registradoras.
