@@ -928,6 +928,49 @@ export class CajaService {
               });
             }
           }
+        } else if (accion.action === 'add_product' && accion.ventaId && accion.productoId) {
+          // Verify if there is already an orderventas for this product in this sale
+          const ordenExistente = await tx.orderventas.findFirst({
+            where: { IDventas: accion.ventaId, productoId: accion.productoId }
+          });
+
+          if (ordenExistente) {
+            const unitPrice = Number(ordenExistente.precioTotal) / Number(ordenExistente.cantidad);
+            const nuevaCantidad = Number(ordenExistente.cantidad) + Number(accion.cantidadAAnadir);
+            const nuevoPrecioTotal = unitPrice * nuevaCantidad;
+            
+            await tx.orderventas.update({
+              where: { IDorderventas: ordenExistente.IDorderventas },
+              data: { cantidad: nuevaCantidad, precioTotal: nuevoPrecioTotal }
+            });
+            observacionesNuevas += `- Añadido: ${accion.nombreProducto} (+${accion.cantidadAAnadir}) al Pedido de la venta ID ${accion.ventaId}.\\n`;
+          } else {
+            // Find the product to get its price
+            const prod = await tx.productos.findUnique({ where: { IDproductos: accion.productoId } });
+            if (prod) {
+              const unitPrice = Number(prod.precio);
+              const total = unitPrice * Number(accion.cantidadAAnadir);
+              await tx.orderventas.create({
+                data: {
+                  IDventas: accion.ventaId,
+                  productoId: accion.productoId,
+                  nombreProducto: prod.nombre,
+                  cantidad: Number(accion.cantidadAAnadir),
+                  precioTotal: total,
+                  IDorderventas: crypto.randomUUID().substring(0, 8)
+                }
+              });
+              observacionesNuevas += `- Creado: ${accion.nombreProducto} (+${accion.cantidadAAnadir}) en el Pedido de la venta ID ${accion.ventaId}.\\n`;
+            }
+          }
+
+          // Recalculate Venta total
+          const restante = await tx.orderventas.findMany({ where: { IDventas: accion.ventaId } });
+          const nuevoTotal = restante.reduce((acc, curr) => acc + Number(curr.precioTotal), 0);
+          await tx.ventas.update({
+            where: { IDventas: accion.ventaId },
+            data: { totalInput: nuevoTotal }
+          });
         } else if (accion.action === 'change_payment' && accion.ventaId) {
           const venta = await tx.ventas.findUnique({ where: { IDventas: accion.ventaId } });
           if (venta) {
