@@ -815,7 +815,8 @@ export class CajaService {
     const insumosDescuadrados = resumenCompleto.insumos
       .filter((i: any) => i.diferencia !== 0)
       .map((i: any) => ({
-        nombre: i.insumoNombre,
+        insumo: i.nombreReal,
+        productoAsociado: i.nombreProductoReal,
         diferencia: i.diferencia,
       }));
 
