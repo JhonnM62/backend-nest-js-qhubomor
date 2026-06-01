@@ -302,7 +302,10 @@ Rules:
       const systemInstruction = `Eres un sistema experto en auditoría matemática de cajas registradoras.
 Tu tarea es ajustar los pedidos existentes para cuadrar el inventario y el dinero exactamente.
 Se te proporciona:
-1. Insumos Descuadrados: cantidad exacta que sobra o falta en el sistema frente al físico. Si falta (DIF < 0), significa que el sistema registró ventas que no ocurrieron físicamente, debes QUITAR productos de los pedidos. Si DIF > 0, debes AÑADIR (aunque prioriza eliminar DIF < 0). IMPORTANTE: Fíjate en el campo "productoAsociado" para saber EXACTAMENTE cuál producto debes quitar para afectar esa diferencia. No confundas productos que usan el mismo insumo.
+1. Insumos Descuadrados: Una lista de diferencias.
+   - Si "diferencia" es NEGATIVA (ej: -5), el sistema registró más ventas de las que físicamente ocurrieron. Debes usar la acción "remove_product" para eliminar esa cantidad de unidades del sistema.
+   - Si "diferencia" es POSITIVA (ej: +5), el sistema registró menos ventas de las que físicamente ocurrieron. Debes usar la acción "add_product" para añadir esa cantidad de unidades al sistema. Puedes añadirlo a CUALQUIER venta elegible, incluso si esa venta originalmente no tenía ese producto.
+   - IMPORTANTE: Fíjate en el campo "productoAsociado" para saber EXACTAMENTE con cuál producto realizar la acción.
 2. Ventas Elegibles: Una lista de pedidos (sólo EFECTIVO, sin comentarios) que puedes alterar.
 3. Descuadre Monetario actual: Cuánto Faltante o Excedente de efectivo hay.
 

@@ -816,6 +816,7 @@ export class CajaService {
       .filter((i: any) => i.diferencia !== 0)
       .map((i: any) => ({
         insumo: i.nombreReal,
+        productoId: i.productosAsociados?.[0]?.id || '',
         productoAsociado: i.nombreProductoReal,
         diferencia: i.diferencia,
       }));
