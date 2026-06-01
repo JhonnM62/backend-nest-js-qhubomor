@@ -23,14 +23,25 @@ export class ConfiguracionService {
   return config;
 }
 
-async updateConfiguracion(data: { horaCorteDia?: string; modoOperacion?: string }) {
+async updateConfiguracion(data: { 
+  horaCorteDia?: string; 
+  modoOperacion?: string;
+  nombreComercial?: string;
+  nit?: string;
+  direccion?: string;
+  telefono?: string;
+}) {
   return this.prisma.configuracionNegocio.upsert({
     where: { id: 1 },
     update: data,
     create: {
       id: 1,
       horaCorteDia: data.horaCorteDia || '00:00',
-      modoOperacion: data.modoOperacion || 'GENERAL'
+      modoOperacion: data.modoOperacion || 'GENERAL',
+      nombreComercial: data.nombreComercial || 'Q HUBO MOR',
+      nit: data.nit,
+      direccion: data.direccion,
+      telefono: data.telefono,
     }
   });
 }

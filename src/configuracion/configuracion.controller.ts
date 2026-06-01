@@ -20,7 +20,14 @@ export class ConfiguracionController {
 
   @Put()
   @Roles('Admin app', 'Admin negocio')
-  async updateConfiguracion(@Body() data: { horaCorteDia?: string; modoOperacion?: string }) {
+  async updateConfiguracion(@Body() data: { 
+    horaCorteDia?: string; 
+    modoOperacion?: string;
+    nombreComercial?: string;
+    nit?: string;
+    direccion?: string;
+    telefono?: string;
+  }) {
     return this.configuracionService.updateConfiguracion(data);
   }
 

@@ -502,10 +502,14 @@ model ConfiguracionImpresora {
 }
 
 model ConfiguracionNegocio {
-  id            Int      @id @default(1)
-  horaCorteDia  String   @default("00:00") // Formato "HH:mm" (ej. "04:00")
-  modoOperacion String   @default("GENERAL") // "GENERAL" o "RESTAURANTE"
-  updatedAt     DateTime @updatedAt
+  id              Int      @id @default(1)
+  nombreComercial String?  @default("Q HUBO MOR")
+  nit             String?
+  direccion       String?
+  telefono        String?
+  horaCorteDia    String   @default("00:00") // Formato "HH:mm" (ej. "04:00")
+  modoOperacion   String   @default("GENERAL") // "GENERAL" o "RESTAURANTE"
+  updatedAt       DateTime @updatedAt
 }
 
 model ConfiguracionIA {

@@ -999,6 +999,18 @@ export class CajaService {
       }
     }
 
+    // Mapear pedido para la vista UI
+    correctedAcciones.forEach(acc => {
+      if (acc.ventaId) {
+        const found = ventasEligibles.find(v => v.ventaId === acc.ventaId);
+        if (found) {
+          acc.pedidoDisplay = found.pedido;
+        } else {
+          acc.pedidoDisplay = acc.ventaId;
+        }
+      }
+    });
+
     const correctedPlan = {
       justificacionGeneral: plan.justificacionGeneral || 'Plan de cuadre generado y validado.',
       acciones: correctedAcciones,
