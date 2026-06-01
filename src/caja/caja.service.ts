@@ -1056,7 +1056,7 @@ export class CajaService {
               
               await tx.ventas.update({
                 where: { IDventas: orden.IDventas },
-                data: { totalInput: nuevoTotal }
+                data: { totalInput: nuevoTotal, mensaje: '🤖 Modificado por Auto-Cuadre IA' }
               });
               console.log(`[ExecuteAutoCuadre] → Venta recalculada: $${nuevoTotal}`);
             }
@@ -1131,7 +1131,7 @@ export class CajaService {
           const nuevoTotal = restante.reduce((acc, curr) => acc + Number(curr.precioTotal), 0);
           await tx.ventas.update({
             where: { IDventas: accion.ventaId },
-            data: { totalInput: nuevoTotal }
+            data: { totalInput: nuevoTotal, mensaje: '🤖 Modificado por Auto-Cuadre IA' }
           });
           console.log(`[ExecuteAutoCuadre] → Venta total recalculada: $${nuevoTotal}`);
           accionesEjecutadas++;
@@ -1140,7 +1140,7 @@ export class CajaService {
           if (venta) {
             await tx.ventas.update({
               where: { IDventas: accion.ventaId },
-              data: { medioDePago: accion.method }
+              data: { medioDePago: accion.method, mensaje: '🤖 Modificado por Auto-Cuadre IA' }
             });
             observacionesNuevas += `- Pago Cambiado: Pedido #${venta.pedido} a ${accion.method}.\n`;
             accionesEjecutadas++;
