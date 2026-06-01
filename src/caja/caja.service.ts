@@ -1003,22 +1003,32 @@ export class CajaService {
       throw new BadRequestException('El plan de la IA no es válido.');
     }
 
+    console.log('[ExecuteAutoCuadre] Iniciando ejecución con', planIA.acciones.length, 'acciones');
+    console.log('[ExecuteAutoCuadre] Acciones recibidas:', JSON.stringify(planIA.acciones, null, 2));
+
     return this.prisma.$transaction(async (tx) => {
-      let observacionesNuevas = "\\n\\n--- AUTO-CUADRE IA ---\\n";
+      let observacionesNuevas = "\n\n--- AUTO-CUADRE IA ---\n";
+      let accionesEjecutadas = 0;
       
-      for (const accion of planIA.acciones) {
+      for (let i = 0; i < planIA.acciones.length; i++) {
+        const accion = planIA.acciones[i];
+        console.log(`[ExecuteAutoCuadre] Acción ${i + 1}:`, JSON.stringify(accion));
+
         if (accion.action === 'remove_product' && accion.ordenId) {
+          console.log(`[ExecuteAutoCuadre] → Buscando orden ${accion.ordenId}...`);
           const orden = await tx.orderventas.findUnique({
             where: { IDorderventas: accion.ordenId },
             include: { venta: true, producto: true }
           });
 
           if (orden) {
+            console.log(`[ExecuteAutoCuadre] → Orden encontrada: ${orden.nombreProducto}, cant: ${orden.cantidad}`);
             const nuevaCantidad = Math.max(0, Number(orden.cantidad) - Number(accion.cantidadARemover));
             
             if (nuevaCantidad <= 0) {
               await tx.orderventas.delete({ where: { IDorderventas: accion.ordenId } });
-              observacionesNuevas += `- Eliminado: ${orden.nombreProducto || 'Producto'} del Pedido #${orden.venta?.pedido}.\\n`;
+              observacionesNuevas += `- Eliminado: ${orden.nombreProducto || 'Producto'} del Pedido #${orden.venta?.pedido}.\n`;
+              console.log(`[ExecuteAutoCuadre] → Orden eliminada completamente`);
             } else {
               const unitPrice = Number(orden.precioTotal) / Number(orden.cantidad);
               const nuevoPrecioTotal = unitPrice * nuevaCantidad;
@@ -1030,7 +1040,8 @@ export class CajaService {
                   precioTotal: nuevoPrecioTotal
                 }
               });
-              observacionesNuevas += `- Reducido: ${orden.nombreProducto || 'Producto'} (-${accion.cantidadARemover}) del Pedido #${orden.venta?.pedido}.\\n`;
+              observacionesNuevas += `- Reducido: ${orden.nombreProducto || 'Producto'} (-${accion.cantidadARemover}) del Pedido #${orden.venta?.pedido}.\n`;
+              console.log(`[ExecuteAutoCuadre] → Cantidad reducida a ${nuevaCantidad}`);
             }
 
             // Recalculate totalInput of Venta
@@ -1042,15 +1053,30 @@ export class CajaService {
                 where: { IDventas: orden.IDventas },
                 data: { totalInput: nuevoTotal }
               });
+              console.log(`[ExecuteAutoCuadre] → Venta recalculada: $${nuevoTotal}`);
             }
+            accionesEjecutadas++;
+          } else {
+            console.log(`[ExecuteAutoCuadre] → ⚠ Orden NO encontrada con ID: ${accion.ordenId}`);
           }
         } else if (accion.action === 'add_product' && accion.ventaId && accion.productoId) {
+          console.log(`[ExecuteAutoCuadre] → ADD_PRODUCT: ventaId=${accion.ventaId}, productoId=${accion.productoId}, cantidad=${accion.cantidadAAnadir}`);
+          
+          // Verify the venta exists first
+          const ventaExiste = await tx.ventas.findUnique({ where: { IDventas: accion.ventaId } });
+          if (!ventaExiste) {
+            console.log(`[ExecuteAutoCuadre] → ⚠ Venta NO encontrada con ID: ${accion.ventaId}`);
+            continue;
+          }
+          console.log(`[ExecuteAutoCuadre] → Venta encontrada: pedido=${ventaExiste.pedido}, fecha=${ventaExiste.fechaYHora}`);
+
           // Verify if there is already an orderventas for this product in this sale
           const ordenExistente = await tx.orderventas.findFirst({
             where: { IDventas: accion.ventaId, productoId: accion.productoId }
           });
 
           if (ordenExistente) {
+            console.log(`[ExecuteAutoCuadre] → Orden existente encontrada, cant actual: ${ordenExistente.cantidad}`);
             const unitPrice = Number(ordenExistente.precioTotal) / Number(ordenExistente.cantidad);
             const nuevaCantidad = Number(ordenExistente.cantidad) + Number(accion.cantidadAAnadir);
             const nuevoPrecioTotal = unitPrice * nuevaCantidad;
@@ -1059,13 +1085,17 @@ export class CajaService {
               where: { IDorderventas: ordenExistente.IDorderventas },
               data: { cantidad: nuevaCantidad, precioTotal: nuevoPrecioTotal }
             });
-            observacionesNuevas += `- Añadido: ${accion.nombreProducto} (+${accion.cantidadAAnadir}) al Pedido de la venta ID ${accion.ventaId}.\\n`;
+            observacionesNuevas += `- Añadido: ${accion.nombreProducto} (+${accion.cantidadAAnadir}) al Pedido #${ventaExiste.pedido}.\n`;
+            console.log(`[ExecuteAutoCuadre] → Cantidad actualizada a ${nuevaCantidad}, precio: $${nuevoPrecioTotal}`);
           } else {
+            console.log(`[ExecuteAutoCuadre] → Producto NO existe en esta venta, creando nueva línea...`);
             // Find the product to get its price
             const prod = await tx.productos.findUnique({ where: { IDproductos: accion.productoId } });
             if (prod) {
               const unitPrice = Number(prod.precioUnitario || 0);
               const total = unitPrice * Number(accion.cantidadAAnadir);
+              console.log(`[ExecuteAutoCuadre] → Producto encontrado: ${prod.nombre}, precio unitario: $${unitPrice}, total: $${total}`);
+              const newId = `ac-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
               await tx.orderventas.create({
                 data: {
                   IDventas: accion.ventaId,
@@ -1073,10 +1103,13 @@ export class CajaService {
                   nombreProducto: prod.nombre,
                   cantidad: Number(accion.cantidadAAnadir),
                   precioTotal: total,
-                  IDorderventas: crypto.randomUUID().substring(0, 8)
+                  IDorderventas: newId
                 }
               });
-              observacionesNuevas += `- Creado: ${accion.nombreProducto} (+${accion.cantidadAAnadir}) en el Pedido de la venta ID ${accion.ventaId}.\\n`;
+              observacionesNuevas += `- Creado: ${accion.nombreProducto} (+${accion.cantidadAAnadir}) en Pedido #${ventaExiste.pedido}.\n`;
+              console.log(`[ExecuteAutoCuadre] → Nueva línea creada con ID: ${newId}`);
+            } else {
+              console.log(`[ExecuteAutoCuadre] → ⚠ Producto NO encontrado con ID: ${accion.productoId}`);
             }
           }
 
@@ -1087,6 +1120,8 @@ export class CajaService {
             where: { IDventas: accion.ventaId },
             data: { totalInput: nuevoTotal }
           });
+          console.log(`[ExecuteAutoCuadre] → Venta total recalculada: $${nuevoTotal}`);
+          accionesEjecutadas++;
         } else if (accion.action === 'change_payment' && accion.ventaId) {
           const venta = await tx.ventas.findUnique({ where: { IDventas: accion.ventaId } });
           if (venta) {
@@ -1094,10 +1129,15 @@ export class CajaService {
               where: { IDventas: accion.ventaId },
               data: { medioDePago: accion.method }
             });
-            observacionesNuevas += `- Pago Cambiado: Pedido #${venta.pedido} a ${accion.method}.\\n`;
+            observacionesNuevas += `- Pago Cambiado: Pedido #${venta.pedido} a ${accion.method}.\n`;
+            accionesEjecutadas++;
           }
+        } else {
+          console.log(`[ExecuteAutoCuadre] → ⚠ ACCIÓN SALTADA: action=${accion.action}, ventaId=${accion.ventaId || 'FALTA'}, productoId=${accion.productoId || 'FALTA'}, ordenId=${accion.ordenId || 'FALTA'}`);
         }
       }
+
+      console.log(`[ExecuteAutoCuadre] Total acciones ejecutadas: ${accionesEjecutadas} de ${planIA.acciones.length}`);
 
       await tx.aperturaCierreCaja.update({
         where: { IDcaja: cajaId },
@@ -1106,7 +1146,7 @@ export class CajaService {
         }
       });
 
-      return { success: true, message: 'Plan de Auto-Cuadre ejecutado exitosamente.' };
+      return { success: true, message: `Plan de Auto-Cuadre ejecutado: ${accionesEjecutadas} acciones aplicadas.` };
     });
   }
 
