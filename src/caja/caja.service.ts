@@ -877,7 +877,122 @@ export class CajaService {
     };
 
     const plan = await this.aiService.autoCuadrePreview(datosCaja);
-    return plan;
+
+    // ========================================================================
+    // DEFENSE-IN-DEPTH: Post-process AI response deterministically.
+    // The AI is unreliable at choosing remove vs add based on sign.
+    // We force-correct every action based on math, and fill gaps.
+    // ========================================================================
+    console.log('[AutoCuadre] Plan RAW de IA:', JSON.stringify(plan, null, 2));
+
+    const correctedAcciones: any[] = [];
+    const addressedProducts = new Set<string>();
+
+    // Step 1: Validate and correct each AI-generated action
+    if (plan.acciones && Array.isArray(plan.acciones)) {
+      for (const accion of plan.acciones) {
+        // Find which descuadre this action addresses
+        const matchingDescuadre = insumosDescuadrados.find(d => {
+          const prodId = d.productoId;
+          const prodName = d.productoAsociado;
+          return (
+            accion.productoId === prodId ||
+            accion.nombreProducto === prodName ||
+            (accion.nombreProducto && prodName.includes(accion.nombreProducto)) ||
+            (accion.nombreProducto && accion.nombreProducto.includes(prodName))
+          );
+        });
+
+        if (accion.action === 'change_payment') {
+          // Payment changes are fine as-is
+          correctedAcciones.push(accion);
+          continue;
+        }
+
+        if (matchingDescuadre) {
+          addressedProducts.add(matchingDescuadre.productoAsociado);
+          const diff = matchingDescuadre.diferencia;
+          const absDiff = Math.abs(diff);
+
+          if (diff > 0) {
+            // PHYSICAL > SYSTEM → must ADD products to system
+            correctedAcciones.push({
+              ...accion,
+              action: 'add_product',
+              cantidadAAnadir: absDiff,
+              cantidadARemover: undefined,
+              productoId: matchingDescuadre.productoId || accion.productoId,
+              nombreProducto: matchingDescuadre.productoAsociado || accion.nombreProducto,
+              motivo: accion.motivo || `Se detectó un faltante de ${absDiff} unidades en el sistema para ${matchingDescuadre.productoAsociado}. Se añaden al sistema para igualar el conteo físico.`,
+            });
+          } else if (diff < 0) {
+            // SYSTEM > PHYSICAL → must REMOVE products from system
+            correctedAcciones.push({
+              ...accion,
+              action: 'remove_product',
+              cantidadARemover: absDiff,
+              cantidadAAnadir: undefined,
+              productoId: matchingDescuadre.productoId || accion.productoId,
+              nombreProducto: matchingDescuadre.productoAsociado || accion.nombreProducto,
+              motivo: accion.motivo || `Se detectó un excedente de ${absDiff} unidades en el sistema para ${matchingDescuadre.productoAsociado}. Se remueven del sistema para igualar el conteo físico.`,
+            });
+          }
+        } else {
+          // Action doesn't match any descuadre - keep as-is (could be a payment change)
+          correctedAcciones.push(accion);
+        }
+      }
+    }
+
+    // Step 2: Fill in missing actions for descuadres the AI didn't address
+    for (const desc of insumosDescuadrados) {
+      if (addressedProducts.has(desc.productoAsociado)) continue;
+
+      const absDiff = Math.abs(desc.diferencia);
+      if (absDiff === 0) continue;
+
+      if (desc.diferencia > 0) {
+        // Need to ADD — pick first eligible sale
+        const targetSale = ventasEligibles[0];
+        if (targetSale) {
+          correctedAcciones.push({
+            action: 'add_product',
+            ventaId: targetSale.ventaId,
+            productoId: desc.productoId,
+            nombreProducto: desc.productoAsociado,
+            cantidadAAnadir: absDiff,
+            motivo: `El sistema registró ${absDiff} unidades menos que el consumo físico de ${desc.productoAsociado}. Se añade al pedido ${targetSale.pedido || targetSale.ventaId} para cuadrar.`,
+          });
+        }
+      } else {
+        // Need to REMOVE — find a sale that contains this product
+        const targetSale = ventasEligibles.find(v =>
+          v.productos.some((p: any) => p.productoId === desc.productoId || p.nombre === desc.productoAsociado)
+        );
+        if (targetSale) {
+          const targetProduct = targetSale.productos.find(
+            (p: any) => p.productoId === desc.productoId || p.nombre === desc.productoAsociado
+          );
+          correctedAcciones.push({
+            action: 'remove_product',
+            ventaId: targetSale.ventaId,
+            ordenId: targetProduct?.ordenId,
+            productoId: desc.productoId,
+            nombreProducto: desc.productoAsociado,
+            cantidadARemover: absDiff,
+            motivo: `El sistema registró ${absDiff} unidades más que el consumo físico de ${desc.productoAsociado}. Se remueve del pedido ${targetSale.pedido || targetSale.ventaId} para cuadrar.`,
+          });
+        }
+      }
+    }
+
+    const correctedPlan = {
+      justificacionGeneral: plan.justificacionGeneral || 'Plan de cuadre generado y validado.',
+      acciones: correctedAcciones,
+    };
+
+    console.log('[AutoCuadre] Plan CORREGIDO:', JSON.stringify(correctedPlan, null, 2));
+    return correctedPlan;
   }
 
   async executeAutoCuadre(cajaId: string, planIA: any) {
@@ -949,7 +1064,7 @@ export class CajaService {
             // Find the product to get its price
             const prod = await tx.productos.findUnique({ where: { IDproductos: accion.productoId } });
             if (prod) {
-              const unitPrice = Number(prod.precio);
+              const unitPrice = Number(prod.precioUnitario || 0);
               const total = unitPrice * Number(accion.cantidadAAnadir);
               await tx.orderventas.create({
                 data: {
