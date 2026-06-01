@@ -846,26 +846,34 @@ export class CajaService {
       include: {
         ordenVentas: {
           include: { producto: true }
-        }
+        },
+        usuarioRelacion: true,
+        mesaRelacion: true
       }
     });
 
     const ventasEligibles = ventasEfectivo.filter(v => {
       // Filtrar ventas que tengan comentarios (para no complicar los cálculos de precios)
       return !v.ordenVentas.some(ov => ov.comentarios && ov.comentarios.trim().length > 0);
-    }).map(v => ({
-      ventaId: v.IDventas,
-      pedido: v.pedido,
-      total: Number(v.totalInput),
-      metodo: v.medioDePago,
-      productos: v.ordenVentas.map(ov => ({
-        ordenId: ov.IDorderventas,
-        productoId: ov.productoId || '',
-        nombre: ov.producto?.nombre || ov.nombreProducto,
-        cantidad: Number(ov.cantidad),
-        precioTotal: Number(ov.precioTotal)
-      }))
-    }));
+    }).map(v => {
+      const mesaStr = v.mesaRelacion?.nombre || v.mesa || 'Sin Mesa';
+      const usuarioStr = v.usuarioRelacion?.nombre || v.usuario || 'Sin Usuario';
+      const pedidoStr = v.pedido || 'Sin Pedido';
+
+      return {
+        ventaId: v.IDventas,
+        pedido: `${mesaStr} - ${usuarioStr} - ${pedidoStr}`,
+        total: Number(v.totalInput),
+        metodo: v.medioDePago,
+        productos: v.ordenVentas.map(ov => ({
+          ordenId: ov.IDorderventas,
+          productoId: ov.productoId || '',
+          nombre: ov.producto?.nombre || ov.nombreProducto,
+          cantidad: Number(ov.cantidad),
+          precioTotal: Number(ov.precioTotal)
+        }))
+      };
+    });
 
     const datosCaja = {
       insumosDescuadrados,
