@@ -21,11 +21,11 @@ export class ReportesService {
 
   // 2. Crear un nuevo reporte en la tabla Filter
   async crearReporteDineroGuardado(startDate: string, endDate: string) {
-    const desde = new Date(startDate);
-    desde.setUTCHours(0, 0, 0, 0);
+    const desde = new Date(`${startDate}T00:00:00Z`);
+    desde.setUTCHours(5, 0, 0, 0);
     
-    const hasta = new Date(endDate);
-    hasta.setUTCHours(23, 59, 59, 999);
+    const hasta = new Date(`${endDate}T00:00:00Z`);
+    hasta.setUTCHours(28, 59, 59, 999);
 
     // Encontrar si ya existe este reporte
     const reporteExistente = await this.prisma.filter.findFirst({
@@ -215,5 +215,32 @@ export class ReportesService {
     });
 
     return { message: 'Registro reseteado exitosamente' };
+  }
+
+  // 7. Crear una base manual
+  async crearBaseManual(filterId: string, valor: number, observacion: string) {
+    const reporte = await this.prisma.filter.findUnique({ where: { FilterID: filterId } });
+    if (!reporte) throw new NotFoundException('Reporte no encontrado');
+
+    const retiro = await this.prisma.dineroRetirado.create({
+      data: {
+        filterID: filterId,
+        valor: valor,
+        retiro: 0,
+        sobrante: valor,
+        total: valor,
+        fechaYHora: new Date(),
+        observacion: observacion || 'Base ingresada manualmente'
+      }
+    });
+
+    await this.prisma.filter.update({
+      where: { FilterID: filterId },
+      data: {
+        totalDePlataGuardada: Number(reporte.totalDePlataGuardada || 0) + valor
+      }
+    });
+
+    return retiro;
   }
 }

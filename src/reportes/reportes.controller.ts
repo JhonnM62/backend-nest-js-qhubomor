@@ -60,4 +60,13 @@ export class ReportesController {
   eliminarRetiro(@Param('retiroId') retiroId: string) {
     return this.reportesService.eliminarRetiro(retiroId);
   }
+
+  @Post('dinero-guardado/:filterId/base')
+  @ApiOperation({ summary: 'Agregar base manual' })
+  crearBaseManual(
+    @Param('filterId') filterId: string,
+    @Body() body: { valor: number; observacion?: string }
+  ) {
+    return this.reportesService.crearBaseManual(filterId, body.valor, body.observacion || '');
+  }
 }
