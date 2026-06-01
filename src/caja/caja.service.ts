@@ -1089,8 +1089,16 @@ export class CajaService {
             console.log(`[ExecuteAutoCuadre] → Cantidad actualizada a ${nuevaCantidad}, precio: $${nuevoPrecioTotal}`);
           } else {
             console.log(`[ExecuteAutoCuadre] → Producto NO existe en esta venta, creando nueva línea...`);
-            // Find the product to get its price
-            const prod = await tx.productos.findUnique({ where: { IDproductos: accion.productoId } });
+            // Find the product to get its price (productoId might be the product name if legacy configuration)
+            const prod = await tx.productos.findFirst({
+              where: {
+                OR: [
+                  { IDproductos: accion.productoId },
+                  { nombre: accion.productoId },
+                  { nombre: accion.nombreProducto }
+                ]
+              }
+            });
             if (prod) {
               const unitPrice = Number(prod.precioUnitario || 0);
               const total = unitPrice * Number(accion.cantidadAAnadir);
@@ -1099,7 +1107,7 @@ export class CajaService {
               await tx.orderventas.create({
                 data: {
                   IDventas: accion.ventaId,
-                  productoId: accion.productoId,
+                  productoId: prod.IDproductos,
                   nombreProducto: prod.nombre,
                   cantidad: Number(accion.cantidadAAnadir),
                   precioTotal: total,
