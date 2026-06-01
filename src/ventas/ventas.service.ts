@@ -140,9 +140,20 @@ export class VentasService {
 
     // Buscar configuración dinámica
     let config = await this.prisma.configuracionNegocio.findUnique({ where: { id: 1 } });
-    if (!config) config = { id: 1, horaCorteDia: '00:00', modoOperacion: 'GENERAL', updatedAt: new Date() };
+    if (!config) {
+      config = { 
+        id: 1, 
+        nombreComercial: 'Q HUBO MOR',
+        nit: null,
+        direccion: null,
+        telefono: null,
+        horaCorteDia: '00:00', 
+        modoOperacion: 'GENERAL', 
+        updatedAt: new Date() 
+      };
+    }
     
-    const [corteHours, corteMinutes] = config.horaCorteDia.split(':').map(Number);
+    const [corteHours, corteMinutes] = config!.horaCorteDia.split(':').map(Number);
 
     // FIX: Los servidores Docker están en UTC. 
     // Forzamos el cálculo basado en la zona horaria local (UTC-5 Colombia)
