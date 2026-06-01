@@ -1180,12 +1180,6 @@ export class CajaService {
       throw new NotFoundException(`Caja con ID ${id} no encontrada`);
     }
 
-    const hoy = new Date();
-    hoy.setHours(5, 0, 0, 0);
-    if (new Date() < hoy) {
-      hoy.setDate(hoy.getDate() - 1);
-    }
-
     const insumos = await this.prisma.insumos.findMany({
       where: { cuadrarInsumos: true, estado: 'ACTIVO' }
     });
@@ -1195,10 +1189,9 @@ export class CajaService {
       const conteosDeEstaCaja = conteos.filter(c => c.cajaId === id);
       const ultimoConteo = conteosDeEstaCaja.length > 0 ? conteosDeEstaCaja[conteosDeEstaCaja.length - 1] : null;
       
-      let verificadoHoy = false;
-      if (ultimoConteo?.fecha) {
-        const fechaConteo = new Date(ultimoConteo.fecha);
-        verificadoHoy = fechaConteo >= hoy;
+      let verificado = false;
+      if (ultimoConteo) {
+        verificado = true;
       }
 
       return {
@@ -1207,17 +1200,17 @@ export class CajaService {
         unidadDeMedida: insumo.unidades || 'und',
         disponibleEnSistema: Number(insumo.disponible) || 0,
         ultimoConteoAt: ultimoConteo?.fecha || null,
-        conteoVerificadoHoy: verificadoHoy
+        conteoVerificado: verificado
       };
     });
 
-    const pendientesSinVerificar = pendientes.filter(p => !p.conteoVerificadoHoy);
+    const pendientesSinVerificar = pendientes.filter(p => !p.conteoVerificado);
     const posposicionesRestantes = Math.max(0, 3 - (caja.contador || 0));
 
     return {
       pendientes,
       totalPendientes: pendientesSinVerificar.length,
-      yaVerificadoHoy: pendientes.some(p => p.conteoVerificadoHoy),
+      yaVerificado: pendientes.some(p => p.conteoVerificado),
       todasVerificadas: pendientesSinVerificar.length === 0,
       contadorPosposiciones: caja.contador || 0,
       posposicionesRestantes,
