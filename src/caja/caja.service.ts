@@ -886,7 +886,10 @@ export class CajaService {
     console.log('[AutoCuadre] Plan RAW de IA:', JSON.stringify(plan, null, 2));
 
     const correctedAcciones: any[] = [];
-    const addressedProducts = new Set<string>();
+    const differenceTracker = new Map<string, number>();
+    for (const d of insumosDescuadrados) {
+      differenceTracker.set(d.productoAsociado, Math.abs(d.diferencia));
+    }
 
     // Step 1: Validate and correct each AI-generated action
     if (plan.acciones && Array.isArray(plan.acciones)) {
@@ -910,31 +913,35 @@ export class CajaService {
         }
 
         if (matchingDescuadre) {
-          addressedProducts.add(matchingDescuadre.productoAsociado);
           const diff = matchingDescuadre.diferencia;
-          const absDiff = Math.abs(diff);
+          const remaining = differenceTracker.get(matchingDescuadre.productoAsociado) || 0;
+          if (remaining <= 0) continue; // Already addressed fully
+
+          const suggestedQuantity = Number(accion.cantidadAAnadir || accion.cantidadARemover || 1);
+          const applyQuantity = Math.min(suggestedQuantity, remaining);
+          differenceTracker.set(matchingDescuadre.productoAsociado, remaining - applyQuantity);
 
           if (diff > 0) {
             // PHYSICAL > SYSTEM → must ADD products to system
             correctedAcciones.push({
               ...accion,
               action: 'add_product',
-              cantidadAAnadir: absDiff,
+              cantidadAAnadir: applyQuantity,
               cantidadARemover: undefined,
               productoId: matchingDescuadre.productoId || accion.productoId,
               nombreProducto: matchingDescuadre.productoAsociado || accion.nombreProducto,
-              motivo: accion.motivo || `Se detectó un faltante de ${absDiff} unidades en el sistema para ${matchingDescuadre.productoAsociado}. Se añaden al sistema para igualar el conteo físico.`,
+              motivo: accion.motivo || `Se detectó un faltante en el sistema para ${matchingDescuadre.productoAsociado}. Se añaden al sistema para igualar el conteo físico.`,
             });
           } else if (diff < 0) {
             // SYSTEM > PHYSICAL → must REMOVE products from system
             correctedAcciones.push({
               ...accion,
               action: 'remove_product',
-              cantidadARemover: absDiff,
+              cantidadARemover: applyQuantity,
               cantidadAAnadir: undefined,
               productoId: matchingDescuadre.productoId || accion.productoId,
               nombreProducto: matchingDescuadre.productoAsociado || accion.nombreProducto,
-              motivo: accion.motivo || `Se detectó un excedente de ${absDiff} unidades en el sistema para ${matchingDescuadre.productoAsociado}. Se remueven del sistema para igualar el conteo físico.`,
+              motivo: accion.motivo || `Se detectó un excedente en el sistema para ${matchingDescuadre.productoAsociado}. Se remueven del sistema para igualar el conteo físico.`,
             });
           }
         } else {
@@ -944,12 +951,10 @@ export class CajaService {
       }
     }
 
-    // Step 2: Fill in missing actions for descuadres the AI didn't address
+    // Step 2: Fill in missing actions for descuadres the AI didn't address or didn't fully address
     for (const desc of insumosDescuadrados) {
-      if (addressedProducts.has(desc.productoAsociado)) continue;
-
-      const absDiff = Math.abs(desc.diferencia);
-      if (absDiff === 0) continue;
+      const remaining = differenceTracker.get(desc.productoAsociado) || 0;
+      if (remaining <= 0) continue;
 
       if (desc.diferencia > 0) {
         // Need to ADD — pick first eligible sale
@@ -960,8 +965,8 @@ export class CajaService {
             ventaId: targetSale.ventaId,
             productoId: desc.productoId,
             nombreProducto: desc.productoAsociado,
-            cantidadAAnadir: absDiff,
-            motivo: `El sistema registró ${absDiff} unidades menos que el consumo físico de ${desc.productoAsociado}. Se añade al pedido ${targetSale.pedido || targetSale.ventaId} para cuadrar.`,
+            cantidadAAnadir: remaining,
+            motivo: `El sistema registró unidades menos que el consumo físico de ${desc.productoAsociado}. Se añade al pedido ${targetSale.pedido || targetSale.ventaId} para cuadrar.`,
           });
         }
       } else {
@@ -979,8 +984,8 @@ export class CajaService {
             ordenId: targetProduct?.ordenId,
             productoId: desc.productoId,
             nombreProducto: desc.productoAsociado,
-            cantidadARemover: absDiff,
-            motivo: `El sistema registró ${absDiff} unidades más que el consumo físico de ${desc.productoAsociado}. Se remueve del pedido ${targetSale.pedido || targetSale.ventaId} para cuadrar.`,
+            cantidadARemover: remaining,
+            motivo: `El sistema registró ${remaining} unidades más que el consumo físico de ${desc.productoAsociado}. Se remueve del pedido ${targetSale.pedido || targetSale.ventaId} para cuadrar.`,
           });
         }
       }
