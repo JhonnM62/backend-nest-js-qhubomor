@@ -693,8 +693,11 @@ export class VentasService {
       where.OR = [
         { pedido: { contains: search, mode: 'insensitive' } },
         { cliente: { contains: search, mode: 'insensitive' } },
+        { mensaje: { contains: search, mode: 'insensitive' } },
         // Also allow searching by order products names if they match
-        { ordenVentas: { some: { nombre: { contains: search, mode: 'insensitive' } } } }
+        { ordenVentas: { some: { nombre: { contains: search, mode: 'insensitive' } } } },
+        // Also allow searching by comments on the products
+        { ordenVentas: { some: { comentarios: { contains: search, mode: 'insensitive' } } } }
       ];
 
       if (isNum) {
