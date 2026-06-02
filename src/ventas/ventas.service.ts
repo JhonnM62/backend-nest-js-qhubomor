@@ -917,8 +917,8 @@ export class VentasService {
             IDventas: id,
             nombre: producto.nombre,
             nombreProducto: producto.nombreProducto || producto.nombre,
-            categoria: producto.categoria,
-            categoriaProducto: producto.categoriaProducto || producto.categoria,
+            categoria: producto.categoria || 'LO MAS VENDIDO',
+            categoriaProducto: producto.categoriaProducto || producto.categoria || 'LO MAS VENDIDO',
             cantidad: producto.cantidad,
             precio: producto.precio,
             precioTotal: producto.precioTotal,
@@ -971,7 +971,13 @@ export class VentasService {
         deletedAt: null,
       },
       include: {
-        ordenVentas: true,
+        ordenVentas: {
+          include: {
+            producto: {
+              select: { IDproductos: true, nombre: true, categoriaNombre: true, categoria: true, imagenUrl: true, image: true },
+            },
+          },
+        },
       },
     });
   }
