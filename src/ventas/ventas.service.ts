@@ -438,10 +438,14 @@ export class VentasService {
     // DEDUCCIÓN DE INVENTARIO
     await this.applyRecipeDeductions(productos, 'salida', 'Descuento por venta');
 
-    return {
+    const resultVenta = {
       ...ventaCreada,
       ordenVentas: ordenesVentas,
     };
+
+    this.appGateway.emitToVentas(SocketEvent.REFRESH_VENTAS, { action: 'create', venta: resultVenta });
+
+    return resultVenta;
   }
 
   async updateVentaCompleta(id: string, updateVentaCompletaDto: CreateVentaCompletaDto & { fechaContableManual?: string }, usuarioId: string) {
@@ -552,10 +556,16 @@ export class VentasService {
       await this.applyRecipeDeductions(productos, 'salida', 'Descuento por venta editada');
     }
 
-    return this.prisma.ventas.findUnique({
+    const updatedVentaWithOrders = await this.prisma.ventas.findUnique({
       where: { IDventas: id },
       include: { ordenVentas: true },
     });
+
+    if (updatedVentaWithOrders) {
+      this.appGateway.emitToVentas(SocketEvent.REFRESH_VENTAS, { action: 'updateEstado', venta: updatedVentaWithOrders });
+    }
+
+    return updatedVentaWithOrders;
   }
 
   async findAll(query: VentaQueryDto) {
