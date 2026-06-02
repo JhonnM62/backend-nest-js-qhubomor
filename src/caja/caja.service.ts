@@ -543,6 +543,7 @@ export class CajaService {
 
       if (ventaHasNotes) {
         notasAnalysis.push({
+          ventaId: v.IDventas,
           pedido: (v as any).pedido || 'Sin Pedido',
           hora: (v as any).hora,
           fecha: v.fecha,

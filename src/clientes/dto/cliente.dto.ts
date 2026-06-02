@@ -25,12 +25,17 @@ export class CreateClienteDto {
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
-  direccion?: string;
+  observaciones?: string;
 
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
-  observaciones?: string;
+  compras?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  contador?: number;
 }
 
 export class UpdateClienteDto {
@@ -53,6 +58,16 @@ export class UpdateClienteDto {
   @IsOptional()
   @IsString()
   observaciones?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  compras?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  contador?: number;
 }
 
 export class ClienteQueryDto extends PaginationDto {

@@ -32,9 +32,12 @@ export class ClientesService {
       }
     }
 
+    const { cedula, ...rest } = createClienteDto;
+
     return this.prisma.clientes.create({
       data: {
-        ...createClienteDto,
+        ...rest,
+        cedula: cedula ? BigInt(cedula) : null,
         IDcliente: finalId,
         fecha_y_hora_creacion: new Date(),
       },
@@ -115,10 +118,13 @@ export class ClientesService {
       throw new NotFoundException(`Cliente con ID ${id} no encontrado`);
     }
 
+    const { cedula, ...rest } = updateClienteDto;
+
     const updated = await this.prisma.clientes.update({
       where: { IDcliente: id },
       data: {
-        ...updateClienteDto,
+        ...rest,
+        ...(cedula !== undefined ? { cedula: cedula ? BigInt(cedula) : null } : {}),
         fecha_y_hora_actualizacion: new Date(),
       },
     });
