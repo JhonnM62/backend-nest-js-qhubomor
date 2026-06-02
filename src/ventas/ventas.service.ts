@@ -359,7 +359,7 @@ export class VentasService {
     }
 
     const ventaData = {
-      mesa: venta.mesa === 'V.R' ? null : (venta.mesa || null),
+      mesa: (venta.mesa === 'V.R' || venta.mesa === 'CAJA') ? null : (venta.mesa || null),
       medioDePago: venta.medioDePago,
       efectivoRecibido: venta.efectivoRecibido,
       devueltas: venta.devueltas,
@@ -474,7 +474,7 @@ export class VentasService {
     }
 
     const ventaData = {
-      mesa: venta.mesa === 'V.R' ? null : (venta.mesa || null),
+      mesa: (venta.mesa === 'V.R' || venta.mesa === 'CAJA') ? null : (venta.mesa || null),
       medioDePago: venta.medioDePago,
       efectivoRecibido: venta.efectivoRecibido,
       devueltas: venta.devueltas,
@@ -687,27 +687,63 @@ export class VentasService {
     }
 
     if (search) {
-      const parsedNum = parseFloat(search.replace(/[^\d]/g, ''));
-      const isNum = !isNaN(parsedNum) && parsedNum > 0 && search.replace(/[^\d.]/g, '').length > 0;
+      const orConditions: Prisma.VentasWhereInput[] = [];
 
-      where.OR = [
+      // 1. Search for the exact phrase in major fields
+      orConditions.push(
         { pedido: { contains: search, mode: 'insensitive' } },
         { cliente: { contains: search, mode: 'insensitive' } },
         { mensaje: { contains: search, mode: 'insensitive' } },
-        // Also allow searching by order products names if they match
         { ordenVentas: { some: { nombre: { contains: search, mode: 'insensitive' } } } },
-        // Also allow searching by comments on the products
         { ordenVentas: { some: { comentarios: { contains: search, mode: 'insensitive' } } } }
-      ];
+      );
 
-      if (isNum) {
-        where.OR.push(
-          { totalInput: { equals: parsedNum } },
-          { numeroTelefono: { equals: parsedNum } },
-          { ordenVentas: { some: { precioTotal: { equals: parsedNum } } } },
-          { ordenVentas: { some: { precio: { equals: parsedNum } } } }
+      // 2. Search for individual words (length > 2) to be very thorough
+      const words = search.split(/\s+/).map(w => w.trim()).filter(w => w.length > 2);
+      for (const word of words) {
+        orConditions.push(
+          { pedido: { contains: word, mode: 'insensitive' } },
+          { cliente: { contains: word, mode: 'insensitive' } },
+          { mensaje: { contains: word, mode: 'insensitive' } },
+          { ordenVentas: { some: { nombre: { contains: word, mode: 'insensitive' } } } },
+          { ordenVentas: { some: { comentarios: { contains: word, mode: 'insensitive' } } } }
         );
       }
+
+      // 3. Search for numbers (e.g. totalInput, precioTotal, or strings in comentarios)
+      const numberMatches = search.match(/-?\d+([.,]\d+)?/g) || [];
+      for (const numStr of numberMatches) {
+        let cleanedNumStr = numStr;
+        if (/([.,]\d{3})$/.test(numStr)) {
+          cleanedNumStr = numStr.replace(/[.]/g, ''); // Remove thousand dot separator
+        } else {
+          cleanedNumStr = numStr.replace(/,/g, '.'); // Normalize decimal comma to dot
+        }
+        const parsedNum = parseFloat(cleanedNumStr);
+        if (!isNaN(parsedNum)) {
+          orConditions.push(
+            { totalInput: { equals: parsedNum } },
+            { totalInput: { equals: Math.abs(parsedNum) } },
+            { ordenVentas: { some: { precioTotal: { equals: parsedNum } } } },
+            { ordenVentas: { some: { precioTotal: { equals: Math.abs(parsedNum) } } } },
+            { ordenVentas: { some: { precio: { equals: parsedNum } } } },
+            { ordenVentas: { some: { precio: { equals: Math.abs(parsedNum) } } } },
+            { ordenVentas: { some: { comentarios: { contains: cleanedNumStr, mode: 'insensitive' } } } },
+            { ordenVentas: { some: { comentarios: { contains: Math.abs(parsedNum).toString(), mode: 'insensitive' } } } }
+          );
+        }
+      }
+
+      // 4. Special cases: "nota", "notas", "con nota", "con notas"
+      const searchLower = search.toLowerCase().trim();
+      if (['nota', 'notas', 'con nota', 'con notas', 'comentario', 'comentarios', 'mensaje', 'mensajes'].includes(searchLower)) {
+        orConditions.push(
+          { AND: [ { mensaje: { not: null } }, { mensaje: { not: "" } } ] },
+          { ordenVentas: { some: { AND: [ { comentarios: { not: null } }, { comentarios: { not: "" } } ] } } }
+        );
+      }
+
+      where.OR = orConditions;
     }
 
     if (categoriaProducto) {
