@@ -568,6 +568,95 @@ export class VentasService {
     return updatedVentaWithOrders;
   }
 
+  async ajustarProductoEnVenta(ventaId: string, orderVentaId: string, nuevaCantidad: number, usuarioId: string) {
+    const venta = await this.prisma.ventas.findUnique({
+      where: { IDventas: ventaId },
+      include: { ordenVentas: true },
+    });
+
+    if (!venta) {
+      throw new NotFoundException(`Venta con ID ${ventaId} no encontrada`);
+    }
+
+    const orderVenta = venta.ordenVentas.find((ov) => ov.IDorderventas === orderVentaId);
+    if (!orderVenta) {
+      throw new NotFoundException(`Producto de venta con ID ${orderVentaId} no encontrado en la venta ${ventaId}`);
+    }
+
+    const cantidadAnterior = Number(orderVenta.cantidad) || 0;
+    const diff = nuevaCantidad - cantidadAnterior;
+
+    if (diff === 0) {
+      return venta; // No changes
+    }
+
+    // Actualizar o eliminar OrderVenta
+    if (nuevaCantidad <= 0) {
+      await this.prisma.orderventas.delete({
+        where: { IDorderventas: orderVentaId },
+      });
+    } else {
+      const nuevoPrecioTotal = Number(orderVenta.precio || 0) * nuevaCantidad;
+      await this.prisma.orderventas.update({
+        where: { IDorderventas: orderVentaId },
+        data: {
+          cantidad: nuevaCantidad,
+          precioTotal: nuevoPrecioTotal,
+        },
+      });
+    }
+
+    // Recalcular totalInput de la Venta
+    const remainingOrders = await this.prisma.orderventas.findMany({
+      where: { IDventas: ventaId },
+    });
+    
+    let totalModifiers = 0;
+    remainingOrders.forEach(order => {
+      try {
+        if ((order as any).modificadores) {
+          const parsedModifiers = typeof (order as any).modificadores === 'string' ? JSON.parse((order as any).modificadores) : (order as any).modificadores;
+          if (Array.isArray(parsedModifiers)) {
+            parsedModifiers.forEach((m: any) => {
+              totalModifiers += (Number(m.precio || m.Precio || m.price || 0)) * (Number(m.cantidad || 1));
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Error parseando modificadores', error);
+      }
+    });
+
+    const nuevoTotalInput = remainingOrders.reduce((acc, order) => acc + (Number(order.precioTotal) || 0), 0);
+    const totalDescuento = Number(venta.descuento || 0);
+
+    const finalTotalInput = Math.max(0, nuevoTotalInput + totalModifiers - totalDescuento);
+
+    const ventaActualizada = await this.prisma.ventas.update({
+      where: { IDventas: ventaId },
+      data: {
+        totalInput: finalTotalInput,
+      },
+      include: { ordenVentas: true },
+    });
+
+    // Actualizar inventario
+    const absDiff = Math.abs(diff);
+    const tipoMovimiento = diff < 0 ? 'entrada' : 'salida';
+    const motivo = diff < 0 ? 'Reverso por cuadre de caja' : 'Adición por cuadre de caja';
+
+    await this.applyRecipeDeductions(
+      [{ ...orderVenta, cantidad: absDiff } as any],
+      tipoMovimiento,
+      motivo
+    );
+
+    // Emit event
+    this.appGateway.emitToVentas(SocketEvent.REFRESH_VENTAS, { action: 'updateEstado', venta: ventaActualizada });
+
+    return ventaActualizada;
+  }
+
   async findAll(query: VentaQueryDto) {
     const { 
       page = 1, 

@@ -120,6 +120,20 @@ export class VentasController {
     return this.ventasService.addProductosToVenta(id, addProductosDto.productos);
   }
 
+  @Patch(':ventaId/producto/:orderVentaId')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Ajustar cantidad de un producto en una venta (cuadre de caja)' })
+  @ApiResponse({ status: 200, description: 'Producto ajustado y totales recalculados' })
+  ajustarProductoEnVenta(
+    @Param('ventaId') ventaId: string,
+    @Param('orderVentaId') orderVentaId: string,
+    @Body('cantidad') cantidad: number,
+    @CurrentUser('id') usuarioId: string,
+  ) {
+    return this.ventasService.ajustarProductoEnVenta(ventaId, orderVentaId, cantidad, usuarioId);
+  }
+
   @Delete('bulk')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('Admin app')
