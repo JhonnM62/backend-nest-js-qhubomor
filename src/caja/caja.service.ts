@@ -822,7 +822,18 @@ export class CajaService {
         diferencia: i.diferencia,
       }));
 
-    if (insumosDescuadrados.length === 0 && Number(resumenCompleto.resumen.valorFaltante) === 0 && Number(resumenCompleto.resumen.valorExcedente) === 0) {
+    const efectivoEsperado = Number(resumenCompleto.resumen.efectivoEsperado || 0);
+    const efectivoContado = Number(resumenCompleto.caja.efectivoDeCierre || 0);
+    const diferenciaEfectivo = efectivoContado - efectivoEsperado;
+
+    const transferenciasEsperadas = Number(resumenCompleto.resumen.totalTransferencia || 0) + Number(resumenCompleto.resumen.totalNequi || 0);
+    const transferenciasContadas = Number(resumenCompleto.caja.transferenciasContadas || 0);
+    const diferenciaTransferencia = transferenciasContadas - transferenciasEsperadas;
+
+    const hasInsumosDescuadre = insumosDescuadrados.length > 0;
+    const hasMonetaryDescuadre = diferenciaEfectivo !== 0 || diferenciaTransferencia !== 0;
+
+    if (!hasInsumosDescuadre && !hasMonetaryDescuadre) {
       throw new BadRequestException('La caja ya está cuadrada. No hay diferencias físicas ni monetarias.');
     }
 
@@ -841,7 +852,7 @@ export class CajaService {
       where: {
         estado: { in: ['PAGADO', 'ENTREGADO'] },
         deletedAt: null,
-        medioDePago: 'EFECTIVO',
+        medioDePago: { in: ['EFECTIVO', 'TRANSFERENCIA', 'NEQUI', 'TRASNFERENCIA', 'DAVIPLATA'] },
         fechaYHora: { gte: fechaInicio, lte: fechaFin }
       },
       include: {
@@ -880,7 +891,13 @@ export class CajaService {
       insumosDescuadrados,
       descuadreMonetario: {
         faltante: Number(resumenCompleto.resumen.valorFaltante),
-        excedente: Number(resumenCompleto.resumen.valorExcedente)
+        excedente: Number(resumenCompleto.resumen.valorExcedente),
+        diferenciaEfectivo,
+        diferenciaTransferencia,
+        efectivoEsperado,
+        efectivoContado,
+        transferenciasEsperadas,
+        transferenciasContadas
       },
       ventasEligibles
     };
