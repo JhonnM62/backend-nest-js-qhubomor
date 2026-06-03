@@ -487,6 +487,7 @@ export class CajaService {
         }
       },
       include: {
+        clienteRelacion: true,
         ordenVentas: {
           include: {
             producto: {
@@ -572,13 +573,19 @@ export class CajaService {
         }
       });
 
-      if (ventaHasNotes) {
+      if (ventaHasNotes || Number(v.descuento) > 0 || v.clienteRelacion) {
         notasAnalysis.push({
           ventaId: v.IDventas,
           pedido: (v as any).pedido || 'Sin Pedido',
           hora: (v as any).hora,
           fecha: v.fecha,
           total: v.totalInput,
+          descuento: Number(v.descuento || 0),
+          porcentajeDeDescuento: v.porcentajeDeDescuento || null,
+          cliente: v.clienteRelacion ? {
+            nombre: v.clienteRelacion.nombre,
+            telefono: v.clienteRelacion.whatsapp
+          } : null,
           productosConNotas: ventaNotes
         });
       }
