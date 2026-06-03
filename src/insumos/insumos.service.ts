@@ -14,10 +14,37 @@ export class InsumosService {
     private notificationsService: NotificationsService
   ) {}
 
+  private async resolverCategoria(categoria: string | undefined, nombreCategoria: string | undefined): Promise<string | null> {
+    const term = categoria || nombreCategoria;
+    if (!term || term.trim() === '') return null;
+    
+    // Verificar si es un CUID (suele tener 25 caracteres, empezamos a checar si es ID)
+    if (term.length >= 20) {
+      const existeId = await this.prisma.categoriasInsumos.findUnique({
+        where: { IDcategoriainsumos: term }
+      });
+      if (existeId) return existeId.IDcategoriainsumos;
+    }
+
+    // Buscar por nombre (insensible a mayúsculas si es posible, pero usaremos findFirst)
+    const existeNombre = await this.prisma.categoriasInsumos.findFirst({
+      where: { nombre: { equals: term, mode: 'insensitive' } }
+    });
+    if (existeNombre) return existeNombre.IDcategoriainsumos;
+
+    // Si no existe, crearla
+    const nueva = await this.prisma.categoriasInsumos.create({
+      data: { nombre: term }
+    });
+    return nueva.IDcategoriainsumos;
+  }
+
   async create(createInsumoDto: CreateInsumoDto) {
+    const categoriaId = await this.resolverCategoria(createInsumoDto.categoria, createInsumoDto.nombreCategoria);
+
     const data: Prisma.InsumosUncheckedCreateInput = {
       nombre: createInsumoDto.nombre,
-      categoria: createInsumoDto.categoria,
+      categoria: categoriaId,
       nombreCategoria: createInsumoDto.nombreCategoria,
       unidades: createInsumoDto.unidades,
       cantidad: createInsumoDto.cantidad || 0,
@@ -173,7 +200,10 @@ export class InsumosService {
     const data: Prisma.InsumosUncheckedUpdateInput = {};
 
     if (updateInsumoDto.nombre !== undefined) data.nombre = updateInsumoDto.nombre;
-    if (updateInsumoDto.categoria !== undefined) data.categoria = updateInsumoDto.categoria;
+    if (updateInsumoDto.categoria !== undefined || updateInsumoDto.nombreCategoria !== undefined) {
+       const categoriaId = await this.resolverCategoria(updateInsumoDto.categoria, updateInsumoDto.nombreCategoria);
+       if (categoriaId) data.categoria = categoriaId;
+    }
     if (updateInsumoDto.nombreCategoria !== undefined) data.nombreCategoria = updateInsumoDto.nombreCategoria;
     if (updateInsumoDto.unidades !== undefined) data.unidades = updateInsumoDto.unidades;
     if (updateInsumoDto.cantidad !== undefined) data.cantidad = updateInsumoDto.cantidad;
@@ -369,10 +399,12 @@ export class InsumosService {
           continue;
         }
 
+        const categoriaId = await this.resolverCategoria(insumoDto.categoria, insumoDto.nombreCategoria);
+
         const nuevo = await this.prisma.insumos.create({
           data: {
             nombre: insumoDto.nombre,
-            categoria: insumoDto.categoria,
+            categoria: categoriaId,
             nombreCategoria: insumoDto.nombreCategoria,
             unidades: insumoDto.unidades,
             cantidad: insumoDto.cantidad || 0,
