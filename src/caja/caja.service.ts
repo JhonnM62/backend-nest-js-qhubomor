@@ -99,6 +99,13 @@ export class CajaService {
 
     const { insumos, insumosAEliminar, ...cajaData } = updateDto;
 
+    // Usar la fecha de la caja (no hoy) para nuevos insumos que se agreguen a cajas históricas
+    const cajaFecha = caja.fechaDeApertura
+      ? new Date(caja.fechaDeApertura)
+      : new Date();
+    // Normalizar a mediodia Colombia para evitar desfases de timezone
+    cajaFecha.setUTCHours(17, 0, 0, 0); // 17:00 UTC = 12:00 Colombia (UTC-5)
+
     return this.prisma.$transaction(async (tx) => {
       if (insumosAEliminar && insumosAEliminar.length > 0) {
         await tx.aperturaCierreInsumos.deleteMany({
@@ -160,8 +167,8 @@ export class CajaService {
                 unidadDeMedida: insumo.unidadDeMedida,
                 categoria: insumo.categoria,
                 observacion: insumo.observacion,
-                fechaYHora: new Date(),
-                fecha: new Date(),
+                fechaYHora: cajaFecha,
+                fecha: cajaFecha,
                 paraQueProducto: insumo.paraQueProducto,
               },
             });
