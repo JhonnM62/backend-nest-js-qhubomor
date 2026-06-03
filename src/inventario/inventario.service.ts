@@ -469,6 +469,92 @@ export class InventarioService {
     return items.filter((item) => (item.cantidad ?? 0) < 10);
   }
 
+  /**
+   * Calcula el stock teórico de un insumo basándose en el historial completo
+   * de orderinventario (entradas marcadas como compradas - salidas registradas).
+   * Útil para verificar el stock correcto después de un ajuste manual o pérdida de datos.
+   * NO modifica ningún valor en la base de datos.
+   */
+  async calcularStockHistoricoInsumo(insumoId: string) {
+    const insumo = await this.prisma.insumos.findUnique({
+      where: { IDalimentos: insumoId },
+    });
+
+    if (!insumo) {
+      throw new Error(`Insumo con ID ${insumoId} no encontrado`);
+    }
+
+    // Buscar todas las órdenes relacionadas por ID o nombre del insumo
+    const ordenes = await this.prisma.orderinventario.findMany({
+      where: {
+        OR: [
+          { nombreDelAlimento: insumoId },
+          { nombreDelAlimento: insumo.nombre },
+        ],
+      },
+      include: { inventario: true },
+      orderBy: { fechaYHora: 'asc' },
+    });
+
+    let totalEntradas = 0;
+    let totalSalidas = 0;
+    const movimientos: Array<{
+      fecha: Date | null;
+      tipo: string;
+      cantidad: number;
+      observacion: string | null;
+    }> = [];
+
+    for (const orden of ordenes) {
+      if (!orden.cantidad || orden.cantidad <= 0) continue;
+
+      const isEntrada = orden.inventario?.tipo?.toUpperCase().includes('ENTRADA');
+
+      if (isEntrada) {
+        if (orden.seCompro?.toLowerCase() === 'si') {
+          totalEntradas += orden.cantidad;
+          movimientos.push({
+            fecha: orden.fechaYHora,
+            tipo: 'entrada',
+            cantidad: orden.cantidad,
+            observacion: orden.observacion || 'Entrada de inventario',
+          });
+        }
+        // Entradas no marcadas como compradas no cuentan
+      } else {
+        totalSalidas += orden.cantidad;
+        movimientos.push({
+          fecha: orden.fechaYHora,
+          tipo: 'salida',
+          cantidad: orden.cantidad,
+          observacion: orden.observacion || 'Salida de inventario',
+        });
+      }
+    }
+
+    const stockCalculado = Math.max(0, totalEntradas - totalSalidas);
+    const stockActual = Number(insumo.disponible) || 0;
+    const diferencia = stockActual - stockCalculado;
+
+    return {
+      success: true,
+      data: {
+        insumoId: insumo.IDalimentos,
+        nombre: insumo.nombre,
+        stockActual,
+        stockCalculado,
+        diferencia,
+        alerta: Math.abs(diferencia) > 0,
+        resumen: {
+          totalEntradas,
+          totalSalidas,
+          totalMovimientos: movimientos.length,
+        },
+        movimientos,
+      },
+    };
+  }
+
   async recalcularStockInsumos() {
     // IMPORTANTE: Esta funcion SOLO recalcula totales de inventario.
     // NO modifica el stock de insumos para evitar perdida de datos.

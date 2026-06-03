@@ -131,10 +131,21 @@ export class InventarioController {
     return this.inventarioService.marcarVariosComprado(body.ids);
   }
 
+  @Get('insumo/:insumoId/stock-calculado')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Calcular stock histórico de un insumo',
+    description: 'Calcula el stock teórico basado en el historial de entradas y salidas. Solo lectura — no modifica datos.',
+  })
+  calcularStockHistorico(@Param('insumoId') insumoId: string) {
+    return this.inventarioService.calcularStockHistoricoInsumo(insumoId);
+  }
+
   @Post('recalcular-stock')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Recalcular stock de insumos basado en órdenes de inventario' })
+  @ApiOperation({ summary: 'Recalcular totales de inventario (NO modifica stocks de insumos)' })
   recalcularStock() {
     return this.inventarioService.recalcularStockInsumos();
   }
