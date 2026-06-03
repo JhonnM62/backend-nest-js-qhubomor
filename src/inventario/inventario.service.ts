@@ -229,6 +229,12 @@ export class InventarioService {
 
     let insumoActualizado: any = null;
 
+    // Obtener el inventario padre para saber si es ENTRADA o SALIDA
+    const inventarioPadre = await this.prisma.inventario.findUnique({
+      where: { IDinventario: createOrderDto.IDinventario }
+    });
+    const isEntrada = inventarioPadre?.tipo?.toUpperCase().includes('ENTRADA');
+
     if (nombreDelAlimento && cantidad && cantidad > 0) {
       const insumo = await this.prisma.insumos.findFirst({
         where: {
@@ -243,19 +249,24 @@ export class InventarioService {
         const disponibleActual = Number(insumo.disponible) || 0;
         const cantidadHist = insumo.cantidad || 0;
 
-        await this.prisma.insumos.update({
-          where: { IDalimentos: insumo.IDalimentos },
-          data: {
-            disponible: disponibleActual - cantidad,
-            cantidad: cantidadHist,
-          },
-        });
+        // SOLO descontar si es SALIDA
+        if (!isEntrada) {
+          await this.prisma.insumos.update({
+            where: { IDalimentos: insumo.IDalimentos },
+            data: {
+              disponible: disponibleActual - cantidad,
+              cantidad: cantidadHist,
+            },
+          });
+        }
 
         insumoActualizado = await this.prisma.insumos.findUnique({
           where: { IDalimentos: insumo.IDalimentos }
         });
 
-        this.appGateway.emitToInsumos(SocketEvent.REFRESH_INSUMOS, { action: 'update_stock' });
+        if (!isEntrada) {
+          this.appGateway.emitToInsumos(SocketEvent.REFRESH_INSUMOS, { action: 'update_stock' });
+        }
       }
     }
 
