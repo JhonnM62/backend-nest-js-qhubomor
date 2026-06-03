@@ -28,12 +28,20 @@ export class CajaService {
         'cantAAgregar', 'plataGuardada', 'cuadroCaja', 'valorFaltante',
         'valorExcedente', 'transferenciasContadas', 'horaCongelada', 'contador', 'contador2'
       ];
+    const decimalFieldsSet = new Set([
+      'plataGuardada', 'valorFaltante', 'valorExcedente',
+      'efectivoDeCierre', 'efectivoDeApertura', 'transferenciasContadas', 'cantAAgregar'
+    ]);
     const parsedData: any = {};
     for (const key of allowedFields) {
       if (key in cajaData && (cajaData as any)[key] !== undefined) {
         let value = (cajaData as any)[key];
         if ((key === 'fechaDeApertura' || key === 'fechaDeCierre') && typeof value === 'string') {
           value = new Date(value + 'T12:00:00.000Z');
+        }
+        // Guard: Prisma rejects empty strings for Decimal columns
+        if (decimalFieldsSet.has(key) && (value === '' || value === null)) {
+          continue;
         }
         parsedData[key] = value;
       }
@@ -171,6 +179,10 @@ export class CajaService {
             'cantAAgregar', 'plataGuardada', 'cuadroCaja', 'valorFaltante',
             'valorExcedente', 'transferenciasContadas', 'horaCongelada', 'horaEnLaQueSeActualizo', 'contador', 'contador2'
           ];
+        const decimalFields = new Set([
+          'plataGuardada', 'valorFaltante', 'valorExcedente',
+          'efectivoDeCierre', 'efectivoDeApertura', 'transferenciasContadas', 'cantAAgregar'
+        ]);
         const parsedData: any = {};
         for (const key of allowedFields) {
           if (key in cajaData && cajaData[key as keyof typeof cajaData] !== undefined) {
@@ -178,6 +190,10 @@ export class CajaService {
             // Parse date strings to Date objects
             if ((key === 'fechaDeApertura' || key === 'fechaDeCierre') && typeof value === 'string') {
               value = new Date(value + 'T12:00:00.000Z');
+            }
+            // Guard: Prisma rejects empty strings for Decimal columns
+            if (decimalFields.has(key) && (value === '' || value === null)) {
+              continue;
             }
             parsedData[key] = value;
           }
@@ -311,12 +327,20 @@ export class CajaService {
           'cantAAgregar', 'plataGuardada', 'cuadroCaja', 'valorFaltante',
           'valorExcedente', 'transferenciasContadas', 'horaCongelada', 'horaEnLaQueSeActualizo', 'contador', 'contador2'
         ];
+      const decimalCierreFields = new Set([
+        'plataGuardada', 'valorFaltante', 'valorExcedente',
+        'efectivoDeCierre', 'efectivoDeApertura', 'transferenciasContadas', 'cantAAgregar'
+      ]);
       const parsedCierreData: any = {};
       for (const key of allowedFields) {
         if (key in cajaData && (cajaData as any)[key] !== undefined) {
           let value = (cajaData as any)[key];
           if ((key === 'fechaDeApertura' || key === 'fechaDeCierre') && typeof value === 'string') {
             value = new Date(value + 'T12:00:00.000Z');
+          }
+          // Guard: Prisma rejects empty strings for Decimal columns
+          if (decimalCierreFields.has(key) && (value === '' || value === null)) {
+            continue;
           }
           parsedCierreData[key] = value;
         }
