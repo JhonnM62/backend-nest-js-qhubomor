@@ -470,56 +470,22 @@ export class InventarioService {
   }
 
   async recalcularStockInsumos() {
+    // IMPORTANTE: Esta funcion SOLO recalcula totales de inventario.
+    // NO modifica el stock de insumos para evitar perdida de datos.
+    // El stock de insumos se gestiona en tiempo real con cada operacion individual.
+    const inventarioTotalesMap = new Map<string, number>();
+
     const ordenes = await this.prisma.orderinventario.findMany({
       include: { inventario: true }
     });
 
-    const stockMap = new Map<string, { cantidadHist: number; disponible: number }>();
-    const inventarioTotalesMap = new Map<string, number>();
-
     for (const orden of ordenes) {
-      if (!orden.nombreDelAlimento || !orden.cantidad || orden.cantidad <= 0) continue;
-
-      const insumoId = orden.nombreDelAlimento;
-      if (!stockMap.has(insumoId)) {
-        stockMap.set(insumoId, { cantidadHist: 0, disponible: 0 });
-      }
+      if (!orden.IDinventario || !orden.cantidad || orden.cantidad <= 0) continue;
 
       const isEntrada = orden.inventario?.tipo?.toUpperCase().includes('ENTRADA');
-
       if (isEntrada) {
-        if (orden.seCompro?.toLowerCase() === 'si') {
-          const current = stockMap.get(insumoId)!;
-          current.cantidadHist += orden.cantidad;
-          current.disponible += orden.cantidad;
-        }
         const ordenTotal = Number(orden.subtotal) || ((Number(orden.precioActual) || 0) * Number(orden.cantidad));
-        const invId = orden.IDinventario;
-        if (invId) {
-          inventarioTotalesMap.set(invId, (inventarioTotalesMap.get(invId) || 0) + ordenTotal);
-        }
-      } else {
-        const current = stockMap.get(insumoId)!;
-        current.disponible -= orden.cantidad;
-      }
-    }
-
-    const resultados = [];
-    for (const [insumoId, stock] of stockMap) {
-      const insumo = await this.prisma.insumos.findFirst({
-        where: { OR: [{ IDalimentos: insumoId }, { nombre: insumoId }] }
-      });
-
-      if (insumo) {
-        const disponibleFinal = Math.max(0, stock.disponible);
-        await this.prisma.insumos.update({
-          where: { IDalimentos: insumo.IDalimentos },
-          data: {
-            cantidad: stock.cantidadHist,
-            disponible: disponibleFinal
-          }
-        });
-        resultados.push({ id: insumo.IDalimentos, nombre: insumo.nombre, cantidadHist: stock.cantidadHist, disponible: disponibleFinal });
+        inventarioTotalesMap.set(orden.IDinventario, (inventarioTotalesMap.get(orden.IDinventario) || 0) + ordenTotal);
       }
     }
 
@@ -530,13 +496,12 @@ export class InventarioService {
       }).catch(() => {});
     }
 
-    this.appGateway.emitToInsumos(SocketEvent.REFRESH_INSUMOS, { action: 'recalcular_stock' });
     this.appGateway.emitToInventario(SocketEvent.REFRESH_INVENTARIO, { action: 'recalcular_total' });
 
     return {
       success: true,
-      message: `Stock recalculado para ${resultados.length} insumos y ${inventarioTotalesMap.size} inventarios`,
-      resultados
+      message: `Totales de inventario actualizados para ${inventarioTotalesMap.size} registros`,
     };
   }
 }
+
