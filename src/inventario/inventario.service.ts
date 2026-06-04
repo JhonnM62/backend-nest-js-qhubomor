@@ -317,6 +317,22 @@ export class InventarioService {
       data: dataToUpdate,
     });
 
+    if (item.IDinventario) {
+      const inventario = await this.prisma.inventario.findUnique({
+        where: { IDinventario: item.IDinventario },
+        include: { ordenInventario: true }
+      });
+      if (inventario && inventario.tipo?.toUpperCase().includes('ENTRADA')) {
+        const nuevoTotal = inventario.ordenInventario.reduce((sum, o) => {
+          return sum + (Number(o.subtotal) || ((Number(o.precioActual) || Number(o.precio) || 0) * (Number(o.cantidad) || 0)));
+        }, 0);
+        await this.prisma.inventario.update({
+          where: { IDinventario: item.IDinventario },
+          data: { total: nuevoTotal }
+        });
+      }
+    }
+
     this.appGateway.emitToInventario(SocketEvent.REFRESH_INVENTARIO, { action: 'updateItem', id });
     return updated;
   }
@@ -369,6 +385,23 @@ export class InventarioService {
     const deleted = await this.prisma.orderinventario.delete({
       where: { IDorderinventario: id },
     });
+
+    if (item.IDinventario) {
+      const inventario = await this.prisma.inventario.findUnique({
+        where: { IDinventario: item.IDinventario },
+        include: { ordenInventario: true }
+      });
+      if (inventario && inventario.tipo?.toUpperCase().includes('ENTRADA')) {
+        const nuevoTotal = inventario.ordenInventario.reduce((sum, o) => {
+          return sum + (Number(o.subtotal) || ((Number(o.precioActual) || Number(o.precio) || 0) * (Number(o.cantidad) || 0)));
+        }, 0);
+        await this.prisma.inventario.update({
+          where: { IDinventario: item.IDinventario },
+          data: { total: nuevoTotal }
+        });
+      }
+    }
+
     this.appGateway.emitToInventario(SocketEvent.REFRESH_INVENTARIO, { action: 'eliminarItem', id });
     if (item.nombreDelAlimento) {
       this.appGateway.emitToInsumos(SocketEvent.REFRESH_INSUMOS, { action: 'update_stock' });
