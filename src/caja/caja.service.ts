@@ -1239,7 +1239,7 @@ export class CajaService {
     });
   }
 
-  async getVerificacionPendiente(id: string) {
+  async getVerificacionPendiente(id: string, user?: any) {
     const caja = await this.prisma.aperturaCierreCaja.findUnique({
       where: { IDcaja: id }
     });
@@ -1273,7 +1273,10 @@ export class CajaService {
     });
 
     const pendientesSinVerificar = pendientes.filter(p => !p.conteoVerificado);
-    const posposicionesRestantes = Math.max(0, 3 - (caja.contador || 0));
+    
+    const isAdmin = user?.rol === 'Admin app' || user?.rol === 'Admin negocio';
+    const maxPosposiciones = isAdmin ? -1 : 5;
+    const posposicionesRestantes = isAdmin ? -1 : Math.max(0, maxPosposiciones - (caja.contador || 0));
 
     return {
       pendientes,
@@ -1282,11 +1285,11 @@ export class CajaService {
       todasVerificadas: pendientesSinVerificar.length === 0,
       contadorPosposiciones: caja.contador || 0,
       posposicionesRestantes,
-      puedePosponer: posposicionesRestantes > 0 && pendientesSinVerificar.length > 0 && caja.cierre !== 'cerrada'
+      puedePosponer: isAdmin || (posposicionesRestantes > 0 && pendientesSinVerificar.length > 0 && caja.cierre !== 'cerrada')
     };
   }
 
-  async posponerVerificacion(id: string) {
+  async posponerVerificacion(id: string, user?: any) {
     const caja = await this.prisma.aperturaCierreCaja.findUnique({
       where: { IDcaja: id }
     });
@@ -1299,9 +1302,12 @@ export class CajaService {
       throw new NotFoundException('No se puede posponer en una caja cerrada');
     }
 
+    const isAdmin = user?.rol === 'Admin app' || user?.rol === 'Admin negocio';
+    const maxPosposiciones = isAdmin ? -1 : 5;
     const contadorActual = caja.contador || 0;
-    if (contadorActual >= 3) {
-      throw new BadRequestException('Ya no puedes posponer más. Debes hacer la verificación.');
+    
+    if (!isAdmin && contadorActual >= maxPosposiciones) {
+      throw new BadRequestException(`Ya no puedes posponer más. Has alcanzado el límite de ${maxPosposiciones} veces. Debes hacer la verificación.`);
     }
 
     const insumos = await this.prisma.insumos.findMany({
@@ -1340,11 +1346,13 @@ export class CajaService {
       contador: nuevoContador
     });
 
+    const restantes = isAdmin ? -1 : (maxPosposiciones - nuevoContador);
+
     return {
       success: true,
-      message: `Verificación pospuesta. ${3 - nuevoContador} posposiciones restantes.`,
+      message: `Verificación pospuesta. ${isAdmin ? 'Intentos ilimitados.' : restantes + ' posposiciones restantes.'}`,
       contadorPosposiciones: nuevoContador,
-      posposicionesRestantes: 3 - nuevoContador
+      posposicionesRestantes: restantes
     };
   }
 

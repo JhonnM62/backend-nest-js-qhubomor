@@ -18,6 +18,7 @@ import {
   RegistrarConteoDto
 } from './dto/caja.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { CurrentUser } from '../common/decorators/current-user.decorator';
 
 @ApiTags('Caja')
 @Controller('caja')
@@ -104,8 +105,8 @@ export class CajaController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Obtener insumos pendientes de verificacion en una caja' })
-  getVerificacionPendiente(@Param('id') id: string) {
-    return this.cajaService.getVerificacionPendiente(id);
+  getVerificacionPendiente(@Param('id') id: string, @CurrentUser() user: any) {
+    return this.cajaService.getVerificacionPendiente(id, user);
   }
 
   @Post(':id/registrar-conteo')
@@ -119,9 +120,9 @@ export class CajaController {
   @Post(':id/posponer-verificacion')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Posponer la verificacion de insumos (max 3 veces)' })
-  posponerVerificacion(@Param('id') id: string) {
-    return this.cajaService.posponerVerificacion(id);
+  @ApiOperation({ summary: 'Posponer la verificacion de insumos' })
+  posponerVerificacion(@Param('id') id: string, @CurrentUser() user: any) {
+    return this.cajaService.posponerVerificacion(id, user);
   }
 
   @Delete(':id/insumo/:insumoId/conteo/:conteoIndex')
