@@ -308,6 +308,9 @@ Se te proporciona:
    - IMPORTANTE: Fíjate en el campo "productoAsociado".
 2. Ventas Elegibles: Una lista de pedidos que puedes alterar.
 3. Descuadre Monetario actual: Cuánto Faltante o Excedente de Efectivo y Transferencias hay.
+4. Observaciones (campo "observaciones"): Notas manuales dejadas por el cajero (ej: "vasos dañados", "sacamos 10000").
+   - REGLA DE ORO: Si una observación explica clara y directamente un faltante físico de inventario (ej. "vasos dañados", "botamos", "regalamos") o una diferencia de dinero (ej. "prestamos a caja", "pago a proveedor"), **JUSTIFICA** ese descuadre.
+   - Si el descuadre está justificado, usa la acción "ignore" para esa cantidad específica (ej. cantidadAIgnorar = 2). NO intentes ajustar el sistema si la diferencia es legítima según la observación.
 
 REGLAS CRÍTICAS DE CUADRE DE DINERO:
 A. El monto contado de TRANSFERENCIAS (banco) es ABSOLUTAMENTE FIJO Y SEGURO. Tu PRIMER paso es usar "change_payment" para cambiar métodos de pago de EFECTIVO a TRANSFERENCIA (o viceversa) hasta que el monto esperado de Transferencias cuadre EXACTAMENTE con el monto de Transferencias contado en la app del banco.
@@ -319,9 +322,10 @@ REGLAS DE FORMATO:
 2. Usa la acción "remove_product" para eliminar unidades de un producto de un pedido existente.
 3. Usa la acción "add_product" para añadir unidades de un producto a un pedido existente. Toma en cuenta que esto aumentará el valor total de la venta.
 4. Usa la acción "change_payment" para cambiar el método de pago de EFECTIVO a TRANSFERENCIA o viceversa.
-5. Explica brevemente el motivo en cada acción (campo "motivo").
-6. OBLIGATORIO: Debes incluir el campo "justificacionGeneral" en la raíz del JSON.
-7. OBLIGATORIO: Para "remove_product" y "add_product", incluye "nombreProducto" con el nombre del producto.`;
+5. Usa la acción "ignore" si una diferencia física o monetaria está justificada por las observaciones.
+6. Explica brevemente el motivo en cada acción (campo "motivo").
+7. OBLIGATORIO: Debes incluir el campo "justificacionGeneral" en la raíz del JSON.
+8. OBLIGATORIO: Para "remove_product", "add_product", y "ignore", incluye "nombreProducto" con el nombre del producto.`;
 
       const responseSchema: Schema = {
         type: Type.OBJECT,
@@ -332,17 +336,18 @@ REGLAS DE FORMATO:
             items: {
               type: Type.OBJECT,
               properties: {
-                action: { type: Type.STRING, description: "remove_product, add_product o change_payment" },
+                action: { type: Type.STRING, description: "remove_product, add_product, change_payment, o ignore" },
                 ventaId: { type: Type.STRING },
                 ordenId: { type: Type.STRING, description: "Solo aplicable para remove_product" },
-                productoId: { type: Type.STRING, description: "Aplicable para remove_product y add_product" },
+                productoId: { type: Type.STRING, description: "Aplicable para remove_product, add_product y ignore" },
                 nombreProducto: { type: Type.STRING, description: "Nombre del producto" },
                 cantidadARemover: { type: Type.INTEGER, description: "Cantidad a quitar (solo remove_product)" },
                 cantidadAAnadir: { type: Type.INTEGER, description: "Cantidad a añadir (solo add_product)" },
+                cantidadAIgnorar: { type: Type.INTEGER, description: "Cantidad que se ignora por estar justificada (solo ignore)" },
                 method: { type: Type.STRING, description: "EFECTIVO o TRANSFERENCIA. Solo para change_payment." },
-                motivo: { type: Type.STRING, description: "Motivo por el que se escogió este cambio." },
+                motivo: { type: Type.STRING, description: "Motivo por el que se escogió este cambio o se ignoró la diferencia." },
               },
-              required: ["action", "ventaId", "motivo"]
+              required: ["action", "motivo"]
             }
           }
         },

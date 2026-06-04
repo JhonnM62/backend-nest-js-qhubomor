@@ -937,7 +937,8 @@ export class CajaService {
         transferenciasEsperadas,
         transferenciasContadas
       },
-      ventasEligibles
+      ventasEligibles,
+      observaciones: caja.observaciones || ''
     };
 
     const plan = await this.aiService.autoCuadrePreview(datosCaja);
@@ -980,6 +981,19 @@ export class CajaService {
           const diff = matchingDescuadre.diferencia;
           const remaining = differenceTracker.get(matchingDescuadre.productoAsociado) || 0;
           if (remaining <= 0) continue; // Already addressed fully
+
+          // Si la IA decidió ignorar basado en las observaciones (ej. vasos dañados)
+          if (accion.action === 'ignore') {
+            const ignoredQuantity = Number(accion.cantidadAIgnorar || remaining);
+            const applyQuantity = Math.min(ignoredQuantity, remaining);
+            differenceTracker.set(matchingDescuadre.productoAsociado, remaining - applyQuantity);
+            correctedAcciones.push({
+              ...accion,
+              action: 'ignore',
+              motivo: accion.motivo || `Diferencia ignorada según observaciones (justificada).`,
+            });
+            continue;
+          }
 
           const suggestedQuantity = Number(accion.cantidadAAnadir || accion.cantidadARemover || 1);
           const applyQuantity = Math.min(suggestedQuantity, remaining);
