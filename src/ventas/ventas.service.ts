@@ -473,6 +473,9 @@ export class VentasService {
       clienteNombre = clienteData?.nombre ?? null;
     }
 
+    const estadoToSave = venta.estado || ventaExistente.estado || 'iniciado';
+    const nuevoRegistro = this.appendTiempoLog(ventaExistente.registroDeTiempo, estadoToSave);
+
     const ventaData = {
       mesa: (venta.mesa === 'V.R' || venta.mesa === 'CAJA') ? null : (venta.mesa || null),
       medioDePago: venta.medioDePago,
@@ -482,10 +485,11 @@ export class VentasService {
       totalInput: venta.totalInput,
       descuento: venta.descuento,
       porcentajeDeDescuento: venta.porcentajeDeDescuento,
-      estado: venta.estado || ventaExistente.estado,
+      estado: estadoToSave,
       fecha: fechaContable,
       clienteId: venta.clienteId || null,
       cliente: clienteNombre,  // Columna "Clente" – nombre en texto
+      registroDeTiempo: nuevoRegistro,
     };
 
     // Update Venta
