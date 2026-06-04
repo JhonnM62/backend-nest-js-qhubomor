@@ -16,7 +16,13 @@ export class ReportesService {
         desde: 'desc'
       }
     });
-    return reportes;
+    
+    // Fix timezone issues for frontend display
+    return reportes.map(r => {
+      if (r.desde) r.desde = new Date(r.desde.getTime() + 12 * 60 * 60 * 1000);
+      if (r.hasta) r.hasta = new Date(r.hasta.getTime() - 12 * 60 * 60 * 1000);
+      return r;
+    });
   }
 
   // 2. Crear un nuevo reporte en la tabla Filter
@@ -56,6 +62,12 @@ export class ReportesService {
           totalDePlataGuardada: totalDePlataGuardada
         }
       });
+    } else {
+      // Update the total just in case
+      reporte = await this.prisma.filter.update({
+        where: { FilterID: reporte.FilterID },
+        data: { totalDePlataGuardada }
+      });
     }
 
     // Verificar si el reporte tiene retiros asociados (por si falló en un intento anterior o es nuevo)
@@ -82,6 +94,10 @@ export class ReportesService {
         }
       }
     }
+
+    // Adjust dates before returning so the frontend displays them correctly
+    if (reporte.desde) reporte.desde = new Date(reporte.desde.getTime() + 12 * 60 * 60 * 1000);
+    if (reporte.hasta) reporte.hasta = new Date(reporte.hasta.getTime() - 12 * 60 * 60 * 1000);
 
     return reporte;
   }
@@ -111,12 +127,20 @@ export class ReportesService {
 
     if (!reporte) throw new NotFoundException(`Reporte con ID ${filterId} no encontrado`);
 
+    // Reconstruir las fechas exactas para la consulta de cajas
+    // Prisma nos devuelve Date objects truncados a las 00:00:00Z porque la columna es @db.Date
+    const queryDesde = reporte.desde ? new Date(reporte.desde) : new Date(0);
+    if (reporte.desde) queryDesde.setUTCHours(5, 0, 0, 0); // 05:00:00Z = 00:00:00 local UTC-5
+
+    const queryHasta = reporte.hasta ? new Date(reporte.hasta) : new Date();
+    if (reporte.hasta) queryHasta.setUTCHours(4, 59, 59, 999); // 04:59:59Z = 23:59:59 local UTC-5
+
     // Obtener las cajas en ese rango
     const cajas = await this.prisma.aperturaCierreCaja.findMany({
       where: {
         fechaDeApertura: {
-          gte: reporte.desde || new Date(0),
-          lte: reporte.hasta || new Date()
+          gte: queryDesde,
+          lte: queryHasta
         }
       },
       select: {
@@ -151,6 +175,10 @@ export class ReportesService {
     const plataGuardadaInicial = cajas.reduce((sum, c) => sum + Number(c.plataGuardada || 0), 0);
     const totalRetirado = retiros.reduce((sum, r) => sum + Number(r.valor || 0), 0); // Usamos "valor" como indicó el usuario
     const sobranteActual = plataGuardadaInicial - totalRetirado;
+
+    // Shift dates for the frontend so they don't break due to local time offset parsing
+    if (reporte.desde) reporte.desde = new Date(reporte.desde.getTime() + 12 * 60 * 60 * 1000);
+    if (reporte.hasta) reporte.hasta = new Date(reporte.hasta.getTime() - 12 * 60 * 60 * 1000);
 
     return {
       reporte,
