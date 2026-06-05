@@ -927,7 +927,7 @@ export class VentasService {
 
     const nuevoRegistro = this.appendTiempoLog(venta.registroDeTiempo, updateData.estado || 'PAGADO');
 
-    return this.prisma.ventas.update({
+    const updated = await this.prisma.ventas.update({
       where: { IDventas: id },
       data: {
         estado: updateData.estado || 'PAGADO',
@@ -941,6 +941,9 @@ export class VentasService {
         registroDeTiempo: nuevoRegistro,
       },
     });
+
+    this.appGateway.emitToVentas(SocketEvent.REFRESH_VENTAS, { action: 'updateEstado', venta: updated });
+    return updated;
   }
 
   async addProductosToVenta(id: string, productos: CreateOrderVentaDto[]) {
@@ -987,6 +990,7 @@ export class VentasService {
       include: { ordenVentas: true },
     });
 
+    this.appGateway.emitToVentas(SocketEvent.REFRESH_VENTAS, { action: 'updateEstado', venta: updatedVenta });
     return updatedVenta;
   }
 
