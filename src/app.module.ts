@@ -29,7 +29,7 @@ import { ConfiguracionModule } from './configuracion/configuracion.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { AiModule } from './ai/ai.module'; // IMPORT AI MODULE
-
+import { CategoriasInsumosModule } from './categorias-insumos/categorias-insumos.module';
 @Module({
   imports: [
     AppConfigModule,
@@ -77,6 +77,7 @@ import { AiModule } from './ai/ai.module'; // IMPORT AI MODULE
     NotificationsModule,
     ConfiguracionModule,
     AiModule, // ADD TO IMPORTS
+    CategoriasInsumosModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: AllExceptionsFilter },
