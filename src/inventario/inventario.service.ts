@@ -288,6 +288,7 @@ export class InventarioService {
   async updateItem(id: string, updateOrderDto: any) {
     const item = await this.prisma.orderinventario.findUnique({
       where: { IDorderinventario: id },
+      include: { inventario: true }
     });
 
     if (!item) {
@@ -295,9 +296,12 @@ export class InventarioService {
     }
 
     const dataToUpdate: any = {};
+    const isEntrada = item.inventario?.tipo?.toUpperCase().includes('ENTRADA');
+    let diferenciaCantidad = 0;
 
     if (updateOrderDto.cantidad !== undefined) {
       dataToUpdate.cantidad = updateOrderDto.cantidad;
+      diferenciaCantidad = updateOrderDto.cantidad - (item.cantidad || 0);
     }
     if (updateOrderDto.precio !== undefined) {
       dataToUpdate.precio = updateOrderDto.precio;
@@ -305,6 +309,15 @@ export class InventarioService {
     } else if (updateOrderDto.precioActual !== undefined) {
       dataToUpdate.precioActual = updateOrderDto.precioActual;
       dataToUpdate.precio = updateOrderDto.precioActual;
+    }
+
+    // Ajustar el stock final guardado en el tiempo (cantInsumos)
+    if (diferenciaCantidad !== 0 && item.cantInsumos !== undefined && item.cantInsumos !== null) {
+      if (isEntrada) {
+        dataToUpdate.cantInsumos = Number(item.cantInsumos) + diferenciaCantidad;
+      } else {
+        dataToUpdate.cantInsumos = Number(item.cantInsumos) - diferenciaCantidad;
+      }
     }
 
     // Recalcular subtotal
@@ -316,6 +329,40 @@ export class InventarioService {
       where: { IDorderinventario: id },
       data: dataToUpdate,
     });
+
+    // Actualizar el stock real del insumo
+    if (diferenciaCantidad !== 0 && item.nombreDelAlimento) {
+      const insumo = await this.prisma.insumos.findFirst({
+        where: { OR: [{ IDalimentos: item.nombreDelAlimento }, { nombre: item.nombreDelAlimento }] },
+      });
+
+      if (insumo) {
+        const disponibleActual = Number(insumo.disponible) || 0;
+        const cantidadHistActual = insumo.cantidad || 0;
+
+        let nuevoDisponible = disponibleActual;
+        let nuevaCantidadHist = cantidadHistActual;
+
+        if (isEntrada) {
+          if (item.seCompro?.toLowerCase() === 'si') {
+            nuevoDisponible += diferenciaCantidad;
+            nuevaCantidadHist += diferenciaCantidad;
+          }
+        } else {
+          nuevoDisponible -= diferenciaCantidad;
+        }
+
+        await this.prisma.insumos.update({
+          where: { IDalimentos: insumo.IDalimentos },
+          data: {
+            disponible: nuevoDisponible,
+            cantidad: nuevaCantidadHist
+          }
+        });
+        
+        this.appGateway.emitToInsumos(SocketEvent.REFRESH_INSUMOS, { action: 'update_stock' });
+      }
+    }
 
     if (item.IDinventario) {
       const inventario = await this.prisma.inventario.findUnique({
