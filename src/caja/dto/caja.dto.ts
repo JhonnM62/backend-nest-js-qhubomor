@@ -178,6 +178,11 @@ export class UpdateCierreCajaDto {
 
   @ApiPropertyOptional()
   @IsOptional()
+  @IsString()
+  updaterName?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
   @IsArray()
   @IsString({ each: true })
   insumosAEliminar?: string[];
