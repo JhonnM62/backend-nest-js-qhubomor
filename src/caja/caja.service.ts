@@ -474,6 +474,8 @@ export class CajaService {
     let fechaFin = new Date();
     if (horaCorteSnapshot) {
       fechaFin = new Date(horaCorteSnapshot);
+    } else if (caja.horaCongelada) {
+      fechaFin = new Date(caja.horaCongelada);
     } else if (caja.fechaDeCierre) {
       fechaFin = new Date(caja.fechaDeCierre);
       fechaFin.setUTCHours(28, 59, 59, 999); // 23:59:59 local -> +5 = 28 (se ajusta al día siguiente automáticamente)
