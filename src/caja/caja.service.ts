@@ -97,7 +97,7 @@ export class CajaService {
     });
     if (!caja) throw new NotFoundException(`Caja con ID ${id} no encontrada`);
 
-    const { insumos, insumosAEliminar, ...cajaData } = updateDto;
+    const { insumos, insumosAEliminar, updaterName, ...cajaData } = updateDto;
 
     // Usar la fecha de la caja (no hoy) para nuevos insumos que se agreguen a cajas históricas
     const cajaFecha = caja.fechaDeApertura
@@ -215,7 +215,8 @@ export class CajaService {
       
       this.appGateway.emitToCaja(SocketEvent.REFRESH_CAJA, { 
         action: 'update', 
-        cajaId: id 
+        cajaId: id,
+        updaterName
       });
 
       if (insumos && insumos.length > 0) {
@@ -255,7 +256,7 @@ export class CajaService {
       );
     }
 
-    const { insumos, ...cajaData } = updateCierreDto;
+      const { insumos, updaterName, ...cajaData } = updateCierreDto as any;
 
     return this.prisma.$transaction(async (tx) => {
       // 0. Eliminar insumos si es necesario (para que no quede rastro en la base de datos si el usuario los quitó del UI)
@@ -366,7 +367,8 @@ export class CajaService {
 
       this.appGateway.emitToCaja(SocketEvent.REFRESH_CAJA, { 
         action: 'cerrar', 
-        cajaId: id 
+        cajaId: id,
+        updaterName
       });
 
       const hasMismatch = Number(result.valorFaltante || 0) > 0 || Number(result.valorExcedente || 0) > 0;
