@@ -16,6 +16,31 @@ export class CajaService {
     private aiService: AiService,
   ) {}
 
+  private async getFechaContable(date: Date = new Date(), manualDate?: string): Promise<Date> {
+    if (manualDate) {
+      const parts = manualDate.split('-');
+      if (parts.length === 3) {
+        return new Date(Date.UTC(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2])));
+      }
+    }
+
+    let config = await this.prisma.configuracionNegocio.findUnique({ where: { id: 1 } });
+    if (!config) {
+      config = { id: 1, nombreComercial: 'Q HUBO MOR', nit: null, direccion: null, telefono: null, horaCorteDia: '00:00', modoOperacion: 'GENERAL', updatedAt: new Date() };
+    }
+    
+    const [corteHours, corteMinutes] = config.horaCorteDia.split(':').map(Number);
+    const localDate = new Date(date.getTime() - (5 * 60 * 60 * 1000));
+    const currentMinutes = (localDate.getUTCHours() * 60) + localDate.getUTCMinutes();
+    const corteTotalMinutes = (corteHours * 60) + corteMinutes;
+
+    if (currentMinutes < corteTotalMinutes) {
+      localDate.setUTCDate(localDate.getUTCDate() - 1);
+    }
+    localDate.setUTCHours(0, 0, 0, 0);
+    return localDate;
+  }
+
   async abrirCaja(createCajaDto: CreateAperturaCierreCajaDto) {
     const { insumos, ...cajaData } = createCajaDto;
 
@@ -47,11 +72,15 @@ export class CajaService {
       }
     }
 
+    const fechaContableFinal = parsedData.fechaDeApertura 
+      ? parsedData.fechaDeApertura 
+      : await this.getFechaContable();
+
     const cajaCreada = await this.prisma.$transaction(async (tx) => {
       const caja = await tx.aperturaCierreCaja.create({
         data: {
           ...parsedData,
-          fechaDeApertura: new Date(),
+          fechaDeApertura: fechaContableFinal,
           horaDeApertura: new Date().toLocaleTimeString('en-US', { timeZone: 'America/Bogota', hour12: true }),
           cierre: 'abierta',
           cuadroCaja: 'NO SE HA REVISADO',
@@ -468,14 +497,6 @@ export class CajaService {
       throw new NotFoundException('La caja no tiene fecha de apertura');
     }
 
-    // Ventas relacionadas con la caja (si no hay relación explícita por ID, usamos las fechas de la caja)
-    // Asumimos que las ventas del turno son las que ocurrieron entre la apertura y el cierre (o ahora si no ha cerrado)
-    // Asegurar que fechaInicio toma desde el inicio del día en hora local (UTC-5 Colombia)
-    let fechaInicio = new Date(caja.fechaDeApertura);
-    // Si la fecha viene como UTC midnight (ej. 2026-05-05T00:00:00.000Z), representa las 7PM del día anterior en Colombia.
-    // Para que sea las 00:00:00 de Colombia, necesitamos sumar 5 horas.
-    fechaInicio.setUTCHours(5, 0, 0, 0);
-
     // Asegurar que fechaFin toma hasta el final del día en hora local (UTC-5) o usar el Snapshot
     let fechaFin = new Date();
     if (horaCorteSnapshot) {
@@ -491,9 +512,9 @@ export class CajaService {
       where: { 
         estado: { in: ['PAGADO', 'ENTREGADO'] }, // SOLO COBRADOS O CERRADOS
         deletedAt: null, // IGNORAR LAS VENTAS ELIMINADAS (SOFT DELETE)
+        fecha: caja.fechaDeApertura, // Utilizar el día contable exacto (horaCorteDia)
         fechaYHora: {
-          gte: fechaInicio,
-          lte: fechaFin,
+          lte: fechaFin, // Limitar a la hora en que se cerró/congeló la caja
         }
       },
       include: {
@@ -885,23 +906,19 @@ export class CajaService {
       throw new BadRequestException('La caja ya está cuadrada. No hay diferencias físicas ni monetarias.');
     }
 
-    let fechaInicio = new Date(caja.fechaDeApertura!);
-    if (caja.horaDeApertura) {
-      const [h, m] = caja.horaDeApertura.split(':');
-      fechaInicio.setUTCHours(Number(h) + 5, Number(m), 0, 0);
-    }
     let fechaFin = new Date();
     if (caja.fechaDeCierre) {
       fechaFin = new Date(caja.fechaDeCierre);
       fechaFin.setUTCHours(28, 59, 59, 999);
     }
-
+    
     const ventasEfectivo = await this.prisma.ventas.findMany({
       where: {
         estado: { in: ['PAGADO', 'ENTREGADO'] },
         deletedAt: null,
         medioDePago: { in: ['EFECTIVO', 'TRANSFERENCIA', 'NEQUI', 'TRASNFERENCIA', 'DAVIPLATA'] },
-        fechaYHora: { gte: fechaInicio, lte: fechaFin }
+        fecha: caja.fechaDeApertura, // Matchear con el día contable exacto (horaCorteDia)
+        fechaYHora: { lte: fechaFin }
       },
       include: {
         ordenVentas: {
