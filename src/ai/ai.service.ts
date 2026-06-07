@@ -41,67 +41,66 @@ export class AiService {
 
   // Función robusta para reparar y parsear JSON devuelto por Gemini
   private repairAndParseJSON(text: string) {
-    // 1. Extraer solo la parte JSON (ignorar saludos o texto extra de Gemini)
-    let startIndex = text.indexOf('{');
-    const startBracket = text.indexOf('[');
+    // 1. Limpiar wrappers de markdown si existen dentro del bloque
+    let cleanedText = text.replace(/```json\n?/gi, '').replace(/```\n?/g, '').trim();
+
+    // Intentar un parseo limpio inmediato antes de aplicar regex destructivos
+    try {
+      return JSON.parse(cleanedText);
+    } catch (cleanParseError) {
+      this.logger.warn(`Parseo limpio falló. Intentando reparación agresiva...`);
+    }
+
+    // 2. Extraer solo la parte JSON (ignorar saludos o texto extra de Gemini)
+    let startIndex = cleanedText.indexOf('{');
+    const startBracket = cleanedText.indexOf('[');
     if (startIndex === -1 || (startBracket !== -1 && startBracket < startIndex)) {
       startIndex = startBracket;
     }
 
-    let endIndex = text.lastIndexOf('}');
-    const endBracket = text.lastIndexOf(']');
+    let endIndex = cleanedText.lastIndexOf('}');
+    const endBracket = cleanedText.lastIndexOf(']');
     if (endIndex === -1 || (endBracket !== -1 && endBracket > endIndex)) {
       endIndex = endBracket;
     }
 
-    let cleaned = text;
+    let cleaned = cleanedText;
     if (startIndex !== -1 && endIndex !== -1 && endIndex >= startIndex) {
-      cleaned = text.substring(startIndex, endIndex + 1);
+      cleaned = cleanedText.substring(startIndex, endIndex + 1);
     }
-
-    // 2. Limpiar wrappers de markdown si existen dentro del bloque
-    cleaned = cleaned.replace(/```json\n?/gi, '').replace(/```\n?/g, '').trim();
     
     // 3. Reemplazar saltos de línea y tabulaciones problemáticas
+    // PRECAUCIÓN: Esto puede romper strings con espacios si no se hace bien
     cleaned = cleaned.replace(/\n/g, ' ').replace(/\r/g, '').replace(/\t/g, ' ');
 
     // 4. Intentar limpiar comillas dobles no escapadas dentro de strings
-    // Heurística: Si hay una comilla doble que no está precedida por : o { o [, y no está seguida por , o } o ], la escapamos.
-    // Aunque es arriesgado, ayuda a corregir el error "Expected ',' or '}'".
     cleaned = cleaned.replace(/(?<![:\{\[\s,])"(?![\s,\}\]:])/g, '\\"');
 
     try {
       return JSON.parse(cleaned);
     } catch (e) {
-      // 3. Intento de reparación por truncamiento (si la IA se corta por límite de tokens)
+      // 5. Intento de reparación por truncamiento
       let repaired = cleaned;
       
-      // Si el último caracter es una coma, la quitamos
-      if (repaired.endsWith(',')) {
-        repaired = repaired.slice(0, -1);
-      }
+      if (repaired.endsWith(',')) repaired = repaired.slice(0, -1);
       
-      // Contar llaves y corchetes
       const openBraces = (repaired.match(/{/g) || []).length;
       const closeBraces = (repaired.match(/}/g) || []).length;
       const openBrackets = (repaired.match(/\[/g) || []).length;
       const closeBrackets = (repaired.match(/\]/g) || []).length;
       
-      // Si hay un número impar de comillas, cerrar el string actual
       const quoteCount = (repaired.match(/(?<!\\)"/g) || []).length;
-      if (quoteCount % 2 !== 0) {
-        repaired += '"';
-      }
+      if (quoteCount % 2 !== 0) repaired += '"';
       
-      // Cerrar corchetes y llaves pendientes
-      for (let i = 0; i < (openBrackets - closeBrackets); i++) {
-        repaired += ']';
-      }
-      for (let i = 0; i < (openBraces - closeBraces); i++) {
-        repaired += '}';
-      }
+      for (let i = 0; i < (openBrackets - closeBrackets); i++) repaired += ']';
+      for (let i = 0; i < (openBraces - closeBraces); i++) repaired += '}';
       
-      return JSON.parse(repaired);
+      try {
+        return JSON.parse(repaired);
+      } catch (finalError: any) {
+         this.logger.error(`Error final de parseo: ${finalError.message}. Texto reparado: ${repaired}`);
+         throw finalError; // Rethrow to let the caller handle it
+      }
     }
   }
 
@@ -411,6 +410,7 @@ Rules:
         throw new BadRequestException('La IA no devolvió respuesta.');
       }
 
+      console.log('[AiService] Respuesta RAW de Gemini (Text):', response.text);
       return this.repairAndParseJSON(response.text);
 
     } catch (error: any) {
