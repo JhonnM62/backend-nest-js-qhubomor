@@ -41,12 +41,34 @@ export class AiService {
 
   // Función robusta para reparar y parsear JSON devuelto por Gemini
   private repairAndParseJSON(text: string) {
-    // 1. Limpiar wrappers de markdown
-    let cleaned = text.replace(/```json\n?/gi, '').replace(/```\n?/g, '').trim();
+    // 1. Extraer solo la parte JSON (ignorar saludos o texto extra de Gemini)
+    let startIndex = text.indexOf('{');
+    const startBracket = text.indexOf('[');
+    if (startIndex === -1 || (startBracket !== -1 && startBracket < startIndex)) {
+      startIndex = startBracket;
+    }
+
+    let endIndex = text.lastIndexOf('}');
+    const endBracket = text.lastIndexOf(']');
+    if (endIndex === -1 || (endBracket !== -1 && endBracket > endIndex)) {
+      endIndex = endBracket;
+    }
+
+    let cleaned = text;
+    if (startIndex !== -1 && endIndex !== -1 && endIndex >= startIndex) {
+      cleaned = text.substring(startIndex, endIndex + 1);
+    }
+
+    // 2. Limpiar wrappers de markdown si existen dentro del bloque
+    cleaned = cleaned.replace(/```json\n?/gi, '').replace(/```\n?/g, '').trim();
     
-    // 2. Reemplazar saltos de línea reales (ASCII 10) por espacios. 
-    // Esto soluciona el error "Unterminated string in JSON" si Gemini incluye saltos de línea literales dentro de un string.
-    cleaned = cleaned.replace(/\n/g, ' ').replace(/\r/g, '');
+    // 3. Reemplazar saltos de línea y tabulaciones problemáticas
+    cleaned = cleaned.replace(/\n/g, ' ').replace(/\r/g, '').replace(/\t/g, ' ');
+
+    // 4. Intentar limpiar comillas dobles no escapadas dentro de strings
+    // Heurística: Si hay una comilla doble que no está precedida por : o { o [, y no está seguida por , o } o ], la escapamos.
+    // Aunque es arriesgado, ayuda a corregir el error "Expected ',' or '}'".
+    cleaned = cleaned.replace(/(?<![:\{\[\s,])"(?![\s,\}\]:])/g, '\\"');
 
     try {
       return JSON.parse(cleaned);
@@ -344,10 +366,11 @@ Rules:
           Reglas:
           1. Para cada ítem en el texto, intenta encontrar el 'insumoId' correspondiente en la BASE DE DATOS LOCAL comparando los nombres.
           2. Si no estás 100% seguro del mapeo, deja 'insumoId' como null.
-          3. 'nombreExtraido' debe ser el nombre literal que aparece en el texto.
+          3. 'nombreExtraido' debe ser el nombre literal que aparece en el texto. IMPORTANTE: No uses comillas dobles (") dentro del nombre.
           4. 'cantidad' es un número (ej. 5). Extrae bien las cantidades (ej. 'una docena' = 12).
           5. 'precioUnitario' es el precio por unidad como número (sin símbolos de moneda).
-          6. 'observacion' puede estar vacío, o contener notas relevantes.
+          6. 'observacion' puede estar vacío, o contener notas relevantes. Evita usar comillas dobles (").
+          7. RESPONDE ÚNICA Y EXCLUSIVAMENTE CON EL JSON VÁLIDO. No agregues texto antes ni después.
         `;
 
         responseSchema = {
