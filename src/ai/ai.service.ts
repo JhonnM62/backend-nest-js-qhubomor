@@ -231,6 +231,40 @@ Rules:
           },
           required: ["concepto", "valor", "tipo", "medioDePago"],
         };
+      } else if (context === 'inventario') {
+        const insumosDb = await this.prisma.insumos.findMany({
+          select: { IDalimentos: true, nombre: true, unidades: true }
+        });
+        
+        systemInstruction = `
+          Eres un asistente experto en inventario. Tu tarea es extraer la lista de productos de una factura o texto, y mapearlos con la base de datos local.
+          
+          BASE DE DATOS DE INSUMOS LOCALES:
+          ${JSON.stringify(insumosDb)}
+          
+          Reglas:
+          1. Para cada ítem en la factura, intenta encontrar el 'insumoId' correspondiente en la BASE DE DATOS LOCAL comparando los nombres.
+          2. Si no estás 100% seguro del mapeo, deja 'insumoId' como null.
+          3. 'nombreExtraido' debe ser el nombre literal que aparece en la factura.
+          4. 'cantidad' es un número (ej. 5).
+          5. 'precioUnitario' es el precio por unidad como número (sin símbolos de moneda). Si solo hay precio total, calcula el unitario si puedes.
+          6. 'observacion' puede estar vacío, o contener información relevante como la unidad de medida original si no cuadra.
+        `;
+
+        responseSchema = {
+          type: Type.ARRAY,
+          items: {
+            type: Type.OBJECT,
+            properties: {
+              insumoId: { type: Type.STRING, nullable: true, description: "El IDalimentos de la base de datos, o null si no se encuentra coincidencia clara." },
+              nombreExtraido: { type: Type.STRING, description: "El nombre del producto tal como aparece en la imagen/texto." },
+              cantidad: { type: Type.NUMBER },
+              precioUnitario: { type: Type.NUMBER },
+              observacion: { type: Type.STRING }
+            },
+            required: ["nombreExtraido", "cantidad", "precioUnitario"]
+          }
+        };
       } else {
         throw new BadRequestException(`Contexto de extracción '${context}' no soportado.`);
       }
@@ -276,6 +310,173 @@ Rules:
       this.logger.error(`Error en extractDataFromImage: ${error.message}`);
       if (error instanceof BadRequestException) throw error;
       throw new BadRequestException(`Error al procesar con IA: ${error.message}`);
+    }
+  }
+
+  async extractDataFromText(text: string, context: string) {
+    const configIA = await this.configService.getConfiguracionIA();
+
+    if (!configIA.isActive) {
+      throw new BadRequestException('El módulo de IA está desactivado en la configuración del sistema.');
+    }
+
+    if (!configIA.apiKey) {
+      throw new BadRequestException('No se ha configurado una API Key válida para Gemini.');
+    }
+
+    try {
+      const ai = new GoogleGenAI({ apiKey: configIA.apiKey });
+
+      let systemInstruction = '';
+      let responseSchema: Schema | undefined = undefined;
+
+      if (context === 'inventario') {
+        const insumosDb = await this.prisma.insumos.findMany({
+          select: { IDalimentos: true, nombre: true, unidades: true }
+        });
+        
+        systemInstruction = `
+          Eres un asistente experto en inventario. Tu tarea es extraer la lista de productos de un mensaje de texto (ej. un chat de WhatsApp con el proveedor), y mapearlos con la base de datos local.
+          
+          BASE DE DATOS DE INSUMOS LOCALES:
+          ${JSON.stringify(insumosDb)}
+          
+          Reglas:
+          1. Para cada ítem en el texto, intenta encontrar el 'insumoId' correspondiente en la BASE DE DATOS LOCAL comparando los nombres.
+          2. Si no estás 100% seguro del mapeo, deja 'insumoId' como null.
+          3. 'nombreExtraido' debe ser el nombre literal que aparece en el texto.
+          4. 'cantidad' es un número (ej. 5). Extrae bien las cantidades (ej. 'una docena' = 12).
+          5. 'precioUnitario' es el precio por unidad como número (sin símbolos de moneda).
+          6. 'observacion' puede estar vacío, o contener notas relevantes.
+        `;
+
+        responseSchema = {
+          type: Type.ARRAY,
+          items: {
+            type: Type.OBJECT,
+            properties: {
+              insumoId: { type: Type.STRING, nullable: true, description: "El IDalimentos de la base de datos, o null si no se encuentra coincidencia clara." },
+              nombreExtraido: { type: Type.STRING, description: "El nombre del producto tal como aparece en el texto." },
+              cantidad: { type: Type.NUMBER },
+              precioUnitario: { type: Type.NUMBER },
+              observacion: { type: Type.STRING }
+            },
+            required: ["nombreExtraido", "cantidad", "precioUnitario"]
+          }
+        };
+      } else {
+        throw new BadRequestException(`Contexto de extracción '${context}' no soportado para texto.`);
+      }
+
+      const response = await ai.models.generateContent({
+        model: configIA.modeloDefecto,
+        contents: [
+          { role: 'user', parts: [{ text: `Extrae los datos de este texto:\n\n${text}` }] }
+        ],
+        config: {
+          systemInstruction: systemInstruction,
+          temperature: configIA.temperatura,
+          topP: configIA.topP,
+          maxOutputTokens: configIA.maxTokens,
+          responseMimeType: "application/json",
+          responseSchema: responseSchema,
+        }
+      });
+
+      if (!response.text) {
+        throw new BadRequestException('La IA no devolvió respuesta.');
+      }
+
+      return JSON.parse(response.text);
+
+    } catch (error: any) {
+      this.logger.error(`Error en extractDataFromText: ${error.message}`);
+      if (error instanceof BadRequestException) throw error;
+      throw new BadRequestException(`Error al procesar con IA: ${error.message}`);
+    }
+  }
+
+  async refineExtraction(previousData: any, correctionPrompt: string, context: string) {
+    const configIA = await this.configService.getConfiguracionIA();
+
+    if (!configIA.isActive || !configIA.apiKey) {
+      throw new BadRequestException('El módulo de IA no está configurado.');
+    }
+
+    try {
+      const ai = new GoogleGenAI({ apiKey: configIA.apiKey });
+      let systemInstruction = '';
+      let responseSchema: Schema | undefined = undefined;
+
+      if (context === 'inventario') {
+        const insumosDb = await this.prisma.insumos.findMany({
+          select: { IDalimentos: true, nombre: true, unidades: true }
+        });
+        
+        systemInstruction = `
+          Eres un asistente experto en inventario. El usuario previamente extrajo una lista de insumos de una factura, pero encontró errores y te ha enviado una instrucción de corrección.
+          
+          BASE DE DATOS DE INSUMOS LOCALES:
+          ${JSON.stringify(insumosDb)}
+          
+          Tu tarea:
+          Lee la lista "Datos Anteriores" y aplica las correciones solicitadas en "Instrucción de Corrección".
+          Devuelve la lista final de insumos corregida, manteniendo el esquema.
+          Asegúrate de re-mapear correctamente el 'insumoId' si el usuario corrigió un nombre o indicó un nuevo mapeo.
+        `;
+
+        responseSchema = {
+          type: Type.ARRAY,
+          items: {
+            type: Type.OBJECT,
+            properties: {
+              insumoId: { type: Type.STRING, nullable: true },
+              nombreExtraido: { type: Type.STRING },
+              cantidad: { type: Type.NUMBER },
+              precioUnitario: { type: Type.NUMBER },
+              observacion: { type: Type.STRING }
+            },
+            required: ["nombreExtraido", "cantidad", "precioUnitario"]
+          }
+        };
+      } else {
+        throw new BadRequestException(`Contexto de refinamiento '${context}' no soportado.`);
+      }
+
+      const promptData = `
+      Datos Anteriores (JSON):
+      ${JSON.stringify(previousData, null, 2)}
+      
+      Instrucción de Corrección del Usuario:
+      "${correctionPrompt}"
+      
+      Genera el JSON corregido.
+      `;
+
+      const response = await ai.models.generateContent({
+        model: configIA.modeloDefecto,
+        contents: [
+          { role: 'user', parts: [{ text: promptData }] }
+        ],
+        config: {
+          systemInstruction: systemInstruction,
+          temperature: 0.2, // Un poco más creativo para interpretar la corrección
+          maxOutputTokens: configIA.maxTokens,
+          responseMimeType: "application/json",
+          responseSchema: responseSchema,
+        }
+      });
+
+      if (!response.text) {
+        throw new BadRequestException('La IA no devolvió respuesta de corrección.');
+      }
+
+      return JSON.parse(response.text);
+
+    } catch (error: any) {
+      this.logger.error(`Error en refineExtraction: ${error.message}`);
+      if (error instanceof BadRequestException) throw error;
+      throw new BadRequestException(`Error al refinar extracción con IA: ${error.message}`);
     }
   }
 

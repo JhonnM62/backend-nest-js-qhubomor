@@ -285,6 +285,19 @@ export class InventarioService {
     return item;
   }
 
+  async agregarItemsBulk(createOrderDtos: CreateOrderInventarioDto[]) {
+    const resultados = [];
+    for (const dto of createOrderDtos) {
+      try {
+        const item = await this.agregarItem(dto);
+        resultados.push({ success: true, data: item });
+      } catch (error: any) {
+        resultados.push({ success: false, error: error.message, data: dto });
+      }
+    }
+    return resultados;
+  }
+
   async updateItem(id: string, updateOrderDto: any) {
     const item = await this.prisma.orderinventario.findUnique({
       where: { IDorderinventario: id },

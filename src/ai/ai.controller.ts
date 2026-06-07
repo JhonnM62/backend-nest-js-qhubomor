@@ -80,4 +80,63 @@ export class AiController {
 
     return this.aiService.processVoiceOrder(file.buffer, file.mimetype);
   }
+
+  @Post('extract-text')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Extrae información de un texto usando IA' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        text: { type: 'string', description: 'Texto a procesar' },
+        context: { type: 'string', description: 'Contexto de la extracción (ej. inventario)' },
+      },
+    },
+  })
+  @Roles('Admin app', 'Admin negocio', 'Empleado')
+  async extractDataFromText(
+    @Body('text') text: string,
+    @Body('context') context: string
+  ) {
+    if (!text) {
+      throw new BadRequestException('No se proporcionó ningún texto.');
+    }
+    if (!context) {
+      throw new BadRequestException('Se debe especificar un context (ej. "inventario").');
+    }
+
+    return this.aiService.extractDataFromText(text, context);
+  }
+
+  @Post('refine-extraction')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Refina una extracción previa usando instrucciones adicionales' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        previousData: { type: 'object', description: 'Datos extraídos previamente' },
+        correctionPrompt: { type: 'string', description: 'Instrucción de corrección del usuario' },
+        context: { type: 'string', description: 'Contexto de la extracción (ej. inventario)' },
+      },
+    },
+  })
+  @Roles('Admin app', 'Admin negocio', 'Empleado')
+  async refineExtraction(
+    @Body('previousData') previousData: any,
+    @Body('correctionPrompt') correctionPrompt: string,
+    @Body('context') context: string
+  ) {
+    if (!previousData) {
+      throw new BadRequestException('No se proporcionaron los datos previos.');
+    }
+    if (!correctionPrompt) {
+      throw new BadRequestException('No se proporcionó la instrucción de corrección.');
+    }
+    if (!context) {
+      throw new BadRequestException('Se debe especificar un context (ej. "inventario").');
+    }
+
+    return this.aiService.refineExtraction(previousData, correctionPrompt, context);
+  }
 }

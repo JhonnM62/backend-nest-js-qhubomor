@@ -9,7 +9,7 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
 import { InventarioService } from './inventario.service';
 import { CreateInventarioDto, UpdateInventarioDto, CreateOrderInventarioDto, UpdateOrderInventarioDto, InventarioQueryDto, OrderInventarioQueryDto } from './dto/inventario.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
@@ -104,6 +104,15 @@ export class InventarioController {
   @ApiOperation({ summary: 'Agregar item al inventario' })
   agregarItem(@Body() createOrderDto: CreateOrderInventarioDto) {
     return this.inventarioService.agregarItem(createOrderDto);
+  }
+
+  @Post('items/bulk')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Agregar múltiples items al inventario en lote' })
+  @ApiBody({ type: [CreateOrderInventarioDto] })
+  agregarItemsBulk(@Body() createOrderDtos: CreateOrderInventarioDto[]) {
+    return this.inventarioService.agregarItemsBulk(createOrderDtos);
   }
 
   @Delete('item/:id')
