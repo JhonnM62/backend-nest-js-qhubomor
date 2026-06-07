@@ -358,19 +358,20 @@ Rules:
         });
         
         systemInstruction = `
-          Eres un asistente experto en inventario. Tu tarea es extraer la lista de productos de un mensaje de texto (ej. un chat de WhatsApp con el proveedor), y mapearlos con la base de datos local.
+          Eres un asistente experto en inventario. Tu tarea es extraer la lista COMPLETA de productos de un mensaje de texto (ej. un chat de WhatsApp con el proveedor) y mapearlos con la base de datos local.
           
           BASE DE DATOS DE INSUMOS LOCALES:
           ${JSON.stringify(insumosDb)}
           
-          Reglas:
-          1. Para cada ítem en el texto, intenta encontrar el 'insumoId' correspondiente en la BASE DE DATOS LOCAL comparando los nombres.
-          2. Si no estás 100% seguro del mapeo, deja 'insumoId' como null.
-          3. 'nombreExtraido' debe ser el nombre literal que aparece en el texto. IMPORTANTE: No uses comillas dobles (") dentro del nombre.
-          4. 'cantidad' es un número (ej. 5). Extrae bien las cantidades (ej. 'una docena' = 12).
-          5. 'precioUnitario' es el precio por unidad como número (sin símbolos de moneda).
-          6. 'observacion' puede estar vacío, o contener notas relevantes. Evita usar comillas dobles (").
-          7. RESPONDE ÚNICA Y EXCLUSIVAMENTE CON EL JSON VÁLIDO. No agregues texto antes ni después.
+          Reglas CRÍTICAS:
+          1. OBLIGATORIO: Debes extraer ABSOLUTAMENTE TODOS LOS ÍTEMS presentes en el texto, sin importar cuán larga sea la lista. Si hay 50 ítems, el array resultante debe tener 50 ítems. ¡No te detengas después del primer ítem! Esto es muy importante.
+          2. Para cada ítem en el texto, intenta encontrar el 'insumoId' correspondiente en la BASE DE DATOS LOCAL comparando los nombres.
+          3. Si no estás 100% seguro del mapeo, deja 'insumoId' como null.
+          4. 'nombreExtraido' debe ser el nombre literal completo que aparece en el texto. IMPORTANTE: No uses comillas dobles (") dentro del nombre.
+          5. 'cantidad' es un número (ej. 5). Extrae bien las cantidades numéricas (ej. 'X36' -> 36, 'x20' -> 20).
+          6. 'precioUnitario' es el precio por unidad como número entero (sin símbolos de moneda ni decimales extra). OJO: Si el texto da un precio total enorme y una cantidad, divide el precio total entre la cantidad para obtener el 'precioUnitario' real. (ej: 36 unidades a $1.152.000 -> precioUnitario = 32000).
+          7. 'observacion' puede estar vacío, o contener notas relevantes. Evita usar comillas dobles (").
+          8. RESPONDE ÚNICA Y EXCLUSIVAMENTE CON EL JSON VÁLIDO.
         `;
 
         responseSchema = {
