@@ -47,7 +47,7 @@ export class CajaService {
       }
     }
 
-    return this.prisma.$transaction(async (tx) => {
+    const cajaCreada = await this.prisma.$transaction(async (tx) => {
       const caja = await tx.aperturaCierreCaja.create({
         data: {
           ...parsedData,
@@ -75,20 +75,22 @@ export class CajaService {
         }
       }
 
-      this.appGateway.emitToCaja(SocketEvent.REFRESH_CAJA, { 
-        action: 'abrir', 
-        cajaId: caja.IDcaja 
-      });
-
-      this.notificationsService.sendNotification(
-        'CAJA_OPENED',
-        'Caja Abierta',
-        `Se ha abierto una nueva caja: ${caja.nombre}`,
-        { cajaId: caja.IDcaja }
-      );
-
       return caja;
     });
+
+    this.appGateway.emitToCaja(SocketEvent.REFRESH_CAJA, { 
+      action: 'abrir', 
+      cajaId: cajaCreada.IDcaja 
+    });
+
+    this.notificationsService.sendNotification(
+      'CAJA_OPENED',
+      'Caja Abierta',
+      `Se ha abierto una nueva caja: ${cajaCreada.nombre}`,
+      { cajaId: cajaCreada.IDcaja }
+    );
+
+    return cajaCreada;
   }
 
   async updateCaja(id: string, updateDto: any) {
@@ -106,7 +108,7 @@ export class CajaService {
     // Normalizar a mediodia Colombia para evitar desfases de timezone
     cajaFecha.setUTCHours(17, 0, 0, 0); // 17:00 UTC = 12:00 Colombia (UTC-5)
 
-    return this.prisma.$transaction(async (tx) => {
+    const updatedCaja = await this.prisma.$transaction(async (tx) => {
       if (insumosAEliminar && insumosAEliminar.length > 0) {
         await tx.aperturaCierreInsumos.deleteMany({
           where: { Idcierreyapertura: { in: insumosAEliminar } }
@@ -213,23 +215,25 @@ export class CajaService {
         });
       }
       
-      this.appGateway.emitToCaja(SocketEvent.REFRESH_CAJA, { 
-        action: 'update', 
-        cajaId: id,
-        updaterName
-      });
-
-      if (insumos && insumos.length > 0) {
-        this.notificationsService.sendNotification(
-          'ORDER_INVENTARIO_UPDATED',
-          'Ajuste de Insumos en Caja',
-          `Se han modificado los insumos físicos en la caja: ${caja.nombre || 'Desconocida'}`,
-          { cajaId: id }
-        );
-      }
-
       return tx.aperturaCierreCaja.findUnique({ where: { IDcaja: id } });
     }, { timeout: 30000 }); // 30 seconds timeout
+
+    this.appGateway.emitToCaja(SocketEvent.REFRESH_CAJA, { 
+      action: 'update', 
+      cajaId: id,
+      updaterName
+    });
+
+    if (insumos && insumos.length > 0) {
+      this.notificationsService.sendNotification(
+        'ORDER_INVENTARIO_UPDATED',
+        'Ajuste de Insumos en Caja',
+        `Se han modificado los insumos físicos en la caja: ${caja.nombre || 'Desconocida'}`,
+        { cajaId: id }
+      );
+    }
+
+    return updatedCaja;
   }
 
   async cerrarCaja(id: string, updateCierreDto: UpdateCierreCajaDto) {
@@ -258,7 +262,7 @@ export class CajaService {
 
       const { insumos, updaterName, ...cajaData } = updateCierreDto as any;
 
-    return this.prisma.$transaction(async (tx) => {
+    const closedCaja = await this.prisma.$transaction(async (tx) => {
       // 0. Eliminar insumos si es necesario (para que no quede rastro en la base de datos si el usuario los quitó del UI)
       if ((updateCierreDto as any).insumosAEliminar && (updateCierreDto as any).insumosAEliminar.length > 0) {
         await tx.aperturaCierreInsumos.deleteMany({
@@ -365,32 +369,34 @@ export class CajaService {
         },
       });
 
-      this.appGateway.emitToCaja(SocketEvent.REFRESH_CAJA, { 
-        action: 'cerrar', 
-        cajaId: id,
-        updaterName
-      });
-
-      const hasMismatch = Number(result.valorFaltante || 0) > 0 || Number(result.valorExcedente || 0) > 0;
-      
-      if (hasMismatch) {
-        this.notificationsService.sendNotification(
-          'CAJA_CLOSED_MISMATCH',
-          'Descuadre de Caja (Crítico)',
-          `La caja ${result.nombre} cerró con descuadre. Faltante: $${result.valorFaltante || 0}, Excedente: $${result.valorExcedente || 0}`,
-          { cajaId: id }
-        );
-      } else {
-        this.notificationsService.sendNotification(
-          'CAJA_CLOSED_PERFECT',
-          'Caja Cuadrada Perfectamente',
-          `La caja ${result.nombre} cerró cuadrada perfectamente.`,
-          { cajaId: id }
-        );
-      }
-
       return result;
     }, { timeout: 30000 });
+
+    this.appGateway.emitToCaja(SocketEvent.REFRESH_CAJA, { 
+      action: 'cerrar', 
+      cajaId: id,
+      updaterName
+    });
+
+    const hasMismatch = Number(closedCaja.valorFaltante || 0) > 0 || Number(closedCaja.valorExcedente || 0) > 0;
+    
+    if (hasMismatch) {
+      this.notificationsService.sendNotification(
+        'CAJA_CLOSED_MISMATCH',
+        'Descuadre de Caja (Crítico)',
+        `La caja ${closedCaja.nombre} cerró con descuadre. Faltante: $${closedCaja.valorFaltante || 0}, Excedente: $${closedCaja.valorExcedente || 0}`,
+        { cajaId: id }
+      );
+    } else {
+      this.notificationsService.sendNotification(
+        'CAJA_CLOSED_PERFECT',
+        'Caja Cuadrada Perfectamente',
+        `La caja ${closedCaja.nombre} cerró cuadrada perfectamente.`,
+        { cajaId: id }
+      );
+    }
+
+    return closedCaja;
   }
 
   async findAll(query: CajaQueryDto) {

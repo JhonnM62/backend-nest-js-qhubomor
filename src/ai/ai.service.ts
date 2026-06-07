@@ -263,13 +263,15 @@ Rules:
           BASE DE DATOS DE INSUMOS LOCALES:
           ${JSON.stringify(insumosDb)}
           
-          Reglas:
-          1. Para cada ítem en la factura, intenta encontrar el 'insumoId' correspondiente en la BASE DE DATOS LOCAL comparando los nombres.
-          2. Si no estás 100% seguro del mapeo, deja 'insumoId' como null.
-          3. 'nombreExtraido' debe ser el nombre literal que aparece en la factura.
-          4. 'cantidad' es un número (ej. 5).
-          5. 'precioUnitario' es el precio por unidad como número (sin símbolos de moneda). Si solo hay precio total, calcula el unitario si puedes.
-          6. 'observacion' puede estar vacío, o contener información relevante como la unidad de medida original si no cuadra.
+          Reglas CRÍTICAS:
+          1. OBLIGATORIO: Debes extraer ABSOLUTAMENTE TODOS LOS ÍTEMS presentes en la factura. No agrupes, no resumas, no omitas ninguno.
+          2. Para cada ítem en la factura, intenta encontrar el 'insumoId' correspondiente en la BASE DE DATOS LOCAL comparando los nombres.
+          3. Si no estás 100% seguro del mapeo, deja 'insumoId' como null.
+          4. 'nombreExtraido' debe ser el nombre literal que aparece en la factura.
+          5. 'cantidad' es un número (ej. 5).
+          6. 'precioUnitario' es el precio por unidad como número (sin símbolos de moneda). Si solo hay precio total, calcula el unitario si puedes.
+          7. 'observacion' puede estar vacío, o contener información relevante.
+          8. RESPONDE ÚNICA Y EXCLUSIVAMENTE CON EL JSON VÁLIDO. Tu tarea no termina hasta procesar el último ítem de la imagen.
         `;
 
         responseSchema = {
@@ -313,7 +315,7 @@ Rules:
           systemInstruction: systemInstruction,
           temperature: configIA.temperatura,
           topP: configIA.topP,
-          maxOutputTokens: configIA.maxTokens,
+          maxOutputTokens: 8192, // FORZADO a 8192 para evitar cortes
           responseMimeType: "application/json",
           responseSchema: responseSchema,
         }
@@ -363,14 +365,14 @@ Rules:
           ${JSON.stringify(insumosDb)}
           
           Reglas CRÍTICAS:
-          1. OBLIGATORIO: Debes extraer ABSOLUTAMENTE TODOS LOS ÍTEMS presentes en el texto, sin importar cuán larga sea la lista. Si hay 50 ítems, el array resultante debe tener 50 ítems. ¡No te detengas después del primer ítem! Esto es muy importante.
+          1. OBLIGATORIO: Debes extraer ABSOLUTAMENTE TODOS LOS ÍTEMS presentes en el texto, línea por línea. No agrupes, no resumas, no omitas ninguno. Si el texto tiene 50 líneas de productos, el array resultante DEBE tener 50 objetos.
           2. Para cada ítem en el texto, intenta encontrar el 'insumoId' correspondiente en la BASE DE DATOS LOCAL comparando los nombres.
           3. Si no estás 100% seguro del mapeo, deja 'insumoId' como null.
           4. 'nombreExtraido' debe ser el nombre literal completo que aparece en el texto. IMPORTANTE: No uses comillas dobles (") dentro del nombre.
           5. 'cantidad' es un número (ej. 5). Extrae bien las cantidades numéricas (ej. 'X36' -> 36, 'x20' -> 20).
-          6. 'precioUnitario' es el precio por unidad como número entero (sin símbolos de moneda ni decimales extra). OJO: Si el texto da un precio total enorme y una cantidad, divide el precio total entre la cantidad para obtener el 'precioUnitario' real. (ej: 36 unidades a $1.152.000 -> precioUnitario = 32000).
+          6. 'precioUnitario' es el precio por unidad como número entero (sin símbolos de moneda ni decimales extra). OJO: Si el texto da un precio total enorme y una cantidad, divide el precio total entre la cantidad para obtener el 'precioUnitario' real.
           7. 'observacion' puede estar vacío, o contener notas relevantes. Evita usar comillas dobles (").
-          8. RESPONDE ÚNICA Y EXCLUSIVAMENTE CON EL JSON VÁLIDO.
+          8. RESPONDE ÚNICA Y EXCLUSIVAMENTE CON EL JSON VÁLIDO. Tu tarea no termina hasta procesar la última letra del texto.
         `;
 
         responseSchema = {
@@ -400,7 +402,7 @@ Rules:
           systemInstruction: systemInstruction,
           temperature: configIA.temperatura,
           topP: configIA.topP,
-          maxOutputTokens: configIA.maxTokens,
+          maxOutputTokens: 8192, // FORZADO a 8192 para evitar que se corte la lista de JSON
           responseMimeType: "application/json",
           responseSchema: responseSchema,
         }
