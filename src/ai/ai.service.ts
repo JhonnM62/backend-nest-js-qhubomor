@@ -254,7 +254,7 @@ Rules:
         };
       } else if (context === 'inventario') {
         const insumosDb = await this.prisma.insumos.findMany({
-          select: { IDalimentos: true, nombre: true, unidades: true }
+          select: { IDalimentos: true, nombre: true, unidades: true, precio: true, nombreCategoria: true }
         });
         
         systemInstruction = `
@@ -265,8 +265,8 @@ Rules:
           
           Reglas CRÍTICAS:
           1. OBLIGATORIO: Debes extraer ABSOLUTAMENTE TODOS LOS ÍTEMS presentes en la factura. No agrupes, no resumas, no omitas ninguno.
-          2. Para cada ítem en la factura, intenta encontrar el 'insumoId' correspondiente en la BASE DE DATOS LOCAL comparando los nombres.
-          3. Si no estás 100% seguro del mapeo, deja 'insumoId' como null.
+          2. MAPEO INTELIGENTE: Para cada ítem, encuentra el 'insumoId' en la BASE DE DATOS LOCAL. Sé MUY flexible con los nombres (las facturas usan abreviaturas o marcas como 'Mix Premium'). Si una o dos palabras clave coinciden (ej. 'Ojo de diablo' con 'Ojo de diablo alcohol') y el 'precio' es igual o muy cercano, considéralo un match válido y asígnale el ID. Usa tu razonamiento avanzado para deducir el insumo correcto.
+          3. Solo si es un ítem completamente irreconocible que no se parece a nada en la base de datos, deja 'insumoId' como null.
           4. 'nombreExtraido' debe ser el nombre literal que aparece en la factura.
           5. 'cantidad' es un número (ej. 5).
           6. 'precioUnitario' es el precio por unidad como número (sin símbolos de moneda). Si solo hay precio total, calcula el unitario si puedes.
@@ -355,7 +355,7 @@ Rules:
 
       if (context === 'inventario') {
         const insumosDb = await this.prisma.insumos.findMany({
-          select: { IDalimentos: true, nombre: true, unidades: true }
+          select: { IDalimentos: true, nombre: true, unidades: true, precio: true, nombreCategoria: true }
         });
         
         systemInstruction = `
@@ -366,8 +366,8 @@ Rules:
           
           Reglas CRÍTICAS:
           1. OBLIGATORIO: Debes extraer ABSOLUTAMENTE TODOS LOS ÍTEMS presentes en el texto, línea por línea. No agrupes, no resumas, no omitas ninguno. Si el texto tiene 50 líneas de productos, el array resultante DEBE tener 50 objetos.
-          2. Para cada ítem en el texto, intenta encontrar el 'insumoId' correspondiente en la BASE DE DATOS LOCAL comparando los nombres.
-          3. Si no estás 100% seguro del mapeo, deja 'insumoId' como null.
+          2. MAPEO INTELIGENTE: Para cada ítem, encuentra el 'insumoId' en la BASE DE DATOS LOCAL. Sé MUY flexible con los nombres (las facturas usan abreviaturas o marcas como 'Mix Premium'). Si una o dos palabras clave coinciden (ej. 'Ojo de diablo' con 'Ojo de diablo alcohol') y el 'precio' es igual o muy cercano, considéralo un match válido y asígnale el ID. Usa tu razonamiento avanzado para deducir el insumo correcto.
+          3. Solo si es un ítem completamente irreconocible que no se parece a nada en la base de datos, deja 'insumoId' como null.
           4. 'nombreExtraido' debe ser el nombre literal completo que aparece en el texto. IMPORTANTE: No uses comillas dobles (") dentro del nombre.
           5. 'cantidad' es un número (ej. 5). Extrae bien las cantidades numéricas (ej. 'X36' -> 36, 'x20' -> 20).
           6. 'precioUnitario' es el precio por unidad como número entero (sin símbolos de moneda ni decimales extra). OJO: Si el texto da un precio total enorme y una cantidad, divide el precio total entre la cantidad para obtener el 'precioUnitario' real.
@@ -436,7 +436,7 @@ Rules:
 
       if (context === 'inventario') {
         const insumosDb = await this.prisma.insumos.findMany({
-          select: { IDalimentos: true, nombre: true, unidades: true }
+          select: { IDalimentos: true, nombre: true, unidades: true, precio: true }
         });
         
         systemInstruction = `
