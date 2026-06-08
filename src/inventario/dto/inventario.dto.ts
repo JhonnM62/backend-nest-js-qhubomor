@@ -135,6 +135,26 @@ export class UpdateOrderInventarioDto {
   @IsOptional()
   @IsNumber()
   precioActual?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  nombreDelAlimento?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  observacion?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  subtotal?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  precioAnterior?: number;
 }
 
 export class InventarioQueryDto extends PaginationDto {

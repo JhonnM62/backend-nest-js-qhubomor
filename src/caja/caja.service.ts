@@ -490,14 +490,29 @@ export class CajaService {
     });
   }
 
-  async getResumenCaja(id: string, horaCorteSnapshot?: string) {
-    const caja = await this.findOne(id);
+  private async getCajaTimeBounds(caja: any, horaCorteSnapshot?: string) {
+    let fechaInicio: Date | undefined = undefined;
 
-    if (!caja.fechaDeApertura) {
-      throw new NotFoundException('La caja no tiene fecha de apertura');
+    // Buscar si hubo una caja anterior el mismo día contable
+    const cajaAnterior = await this.prisma.aperturaCierreCaja.findFirst({
+      where: {
+        fechaDeApertura: caja.fechaDeApertura,
+        createdAt: { lt: caja.createdAt },
+        cierre: 'cerrada'
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    if (cajaAnterior) {
+      if (cajaAnterior.horaCongelada) {
+        fechaInicio = new Date(cajaAnterior.horaCongelada);
+      } else if (cajaAnterior.updatedAt) {
+        fechaInicio = cajaAnterior.updatedAt;
+      } else if (cajaAnterior.createdAt) {
+        fechaInicio = cajaAnterior.createdAt;
+      }
     }
 
-    // Asegurar que fechaFin toma hasta el final del día en hora local (UTC-5) o usar el Snapshot
     let fechaFin = new Date();
     if (horaCorteSnapshot) {
       fechaFin = new Date(horaCorteSnapshot);
@@ -505,8 +520,24 @@ export class CajaService {
       fechaFin = new Date(caja.horaCongelada);
     } else if (caja.fechaDeCierre) {
       fechaFin = new Date(caja.fechaDeCierre);
-      fechaFin.setUTCHours(28, 59, 59, 999); // 23:59:59 local -> +5 = 28 (se ajusta al día siguiente automáticamente)
+      fechaFin.setUTCHours(28, 59, 59, 999);
     }
+
+    if (fechaInicio && fechaFin && fechaInicio.getTime() > fechaFin.getTime()) {
+      fechaInicio = undefined;
+    }
+
+    return { fechaInicio, fechaFin };
+  }
+
+  async getResumenCaja(id: string, horaCorteSnapshot?: string) {
+    const caja = await this.findOne(id);
+
+    if (!caja.fechaDeApertura) {
+      throw new NotFoundException('La caja no tiene fecha de apertura');
+    }
+
+    const { fechaInicio, fechaFin } = await this.getCajaTimeBounds(caja, horaCorteSnapshot);
 
     const allVentas = await this.prisma.ventas.findMany({
       where: { 
@@ -514,6 +545,7 @@ export class CajaService {
         deletedAt: null, // IGNORAR LAS VENTAS ELIMINADAS (SOFT DELETE)
         fecha: caja.fechaDeApertura, // Utilizar el día contable exacto (horaCorteDia)
         fechaYHora: {
+          gte: fechaInicio,
           lte: fechaFin, // Limitar a la hora en que se cerró/congeló la caja
         }
       },
@@ -906,11 +938,7 @@ export class CajaService {
       throw new BadRequestException('La caja ya está cuadrada. No hay diferencias físicas ni monetarias.');
     }
 
-    let fechaFin = new Date();
-    if (caja.fechaDeCierre) {
-      fechaFin = new Date(caja.fechaDeCierre);
-      fechaFin.setUTCHours(28, 59, 59, 999);
-    }
+    const { fechaInicio, fechaFin } = await this.getCajaTimeBounds(caja);
     
     const ventasEfectivo = await this.prisma.ventas.findMany({
       where: {
@@ -918,7 +946,10 @@ export class CajaService {
         deletedAt: null,
         medioDePago: { in: ['EFECTIVO', 'TRANSFERENCIA', 'NEQUI', 'TRASNFERENCIA', 'DAVIPLATA'] },
         fecha: caja.fechaDeApertura, // Matchear con el día contable exacto (horaCorteDia)
-        fechaYHora: { lte: fechaFin }
+        fechaYHora: { 
+          gte: fechaInicio,
+          lte: fechaFin 
+        }
       },
       include: {
         ordenVentas: {
