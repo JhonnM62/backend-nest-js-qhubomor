@@ -65,11 +65,14 @@ export class EstadisticasService {
     const utilidadNeta = utilidadNegocio - gastosPersonales;
 
     // 3. Obtener Total Inventario (compras en el periodo)
-    const inventarioRaw = await this.prisma.orderinventario.findMany({
-      where: { fechaYHora: { gte: start, lte: end } },
-      select: { subtotal: true }
+    const inventarioRaw = await this.prisma.inventario.findMany({
+      where: { 
+        fechaYHora: { gte: start, lte: end },
+        tipo: { contains: 'ENTRADA', mode: 'insensitive' }
+      },
+      select: { total: true, descuento: true }
     });
-    const inventarioTotal = inventarioRaw.reduce((sum, i) => sum + Number(i.subtotal || 0), 0);
+    const inventarioTotal = inventarioRaw.reduce((sum, i) => sum + (Number(i.total || 0) - Number(i.descuento || 0)), 0);
 
     // 4. Datos para los gráficos de barras (Diario, Semanal, Mensual)
     const ventasPorDiaMap = new Map<string, number>();
