@@ -50,7 +50,7 @@ export class EstadisticasService {
 
     // 2. Obtener Gastos
     const gastosRaw = await this.prisma.gastos.findMany({
-      where: { fecha: { gte: start, lte: end } },
+      where: { fechaYHora: { gte: start, lte: end } },
       select: { valor: true, tipo: true }
     });
 
@@ -66,7 +66,7 @@ export class EstadisticasService {
 
     // 3. Obtener Total Inventario (compras en el periodo)
     const inventarioRaw = await this.prisma.orderinventario.findMany({
-      where: { fecha: { gte: start, lte: end } },
+      where: { fechaYHora: { gte: start, lte: end } },
       select: { subtotal: true }
     });
     const inventarioTotal = inventarioRaw.reduce((sum, i) => sum + Number(i.subtotal || 0), 0);
