@@ -312,6 +312,14 @@ export class InventarioService {
     const isEntrada = item.inventario?.tipo?.toUpperCase().includes('ENTRADA');
     let diferenciaCantidad = 0;
 
+    let changedInsumo = false;
+    let oldInsumoId: string | null = null;
+    if (updateOrderDto.nombreDelAlimento !== undefined && updateOrderDto.nombreDelAlimento !== item.nombreDelAlimento) {
+      dataToUpdate.nombreDelAlimento = updateOrderDto.nombreDelAlimento;
+      changedInsumo = true;
+      oldInsumoId = item.nombreDelAlimento;
+    }
+
     if (updateOrderDto.cantidad !== undefined) {
       dataToUpdate.cantidad = updateOrderDto.cantidad;
       diferenciaCantidad = updateOrderDto.cantidad - (item.cantidad || 0);
@@ -325,7 +333,7 @@ export class InventarioService {
     }
 
     // Ajustar el stock final guardado en el tiempo (cantInsumos)
-    if (diferenciaCantidad !== 0 && item.cantInsumos !== undefined && item.cantInsumos !== null) {
+    if (diferenciaCantidad !== 0 && item.cantInsumos !== undefined && item.cantInsumos !== null && !changedInsumo) {
       if (isEntrada) {
         dataToUpdate.cantInsumos = Number(item.cantInsumos) + diferenciaCantidad;
       } else {
@@ -344,7 +352,68 @@ export class InventarioService {
     });
 
     // Actualizar el stock real del insumo
-    if (diferenciaCantidad !== 0 && item.nombreDelAlimento) {
+    if (changedInsumo) {
+      // Revertir el insumo anterior
+      if (oldInsumoId) {
+        const oldInsumo = await this.prisma.insumos.findFirst({
+          where: { OR: [{ IDalimentos: oldInsumoId }, { nombre: oldInsumoId }] },
+        });
+
+        if (oldInsumo) {
+          let nuevoDisponibleOld = Number(oldInsumo.disponible) || 0;
+          let nuevaCantidadHistOld = oldInsumo.cantidad || 0;
+
+          if (isEntrada) {
+            if (item.seCompro?.toLowerCase() === 'si') {
+              nuevoDisponibleOld -= (item.cantidad || 0);
+              nuevaCantidadHistOld -= (item.cantidad || 0);
+            }
+          } else {
+            nuevoDisponibleOld += (item.cantidad || 0);
+          }
+
+          await this.prisma.insumos.update({
+            where: { IDalimentos: oldInsumo.IDalimentos },
+            data: { disponible: nuevoDisponibleOld, cantidad: Math.max(0, nuevaCantidadHistOld) }
+          });
+        }
+      }
+
+      // Aplicar al nuevo insumo
+      if (dataToUpdate.nombreDelAlimento) {
+        const newInsumo = await this.prisma.insumos.findFirst({
+          where: { OR: [{ IDalimentos: dataToUpdate.nombreDelAlimento }, { nombre: dataToUpdate.nombreDelAlimento }] },
+        });
+
+        if (newInsumo) {
+          let nuevoDisponibleNew = Number(newInsumo.disponible) || 0;
+          let nuevaCantidadHistNew = newInsumo.cantidad || 0;
+
+          if (isEntrada) {
+            if (item.seCompro?.toLowerCase() === 'si') {
+              nuevoDisponibleNew += cant;
+              nuevaCantidadHistNew += cant;
+            }
+          } else {
+            nuevoDisponibleNew -= cant;
+          }
+
+          await this.prisma.insumos.update({
+            where: { IDalimentos: newInsumo.IDalimentos },
+            data: { disponible: nuevoDisponibleNew, cantidad: nuevaCantidadHistNew }
+          });
+
+          // Actualizar cantInsumos del orderinventario al nuevo stock disponible
+          await this.prisma.orderinventario.update({
+            where: { IDorderinventario: id },
+            data: { cantInsumos: nuevoDisponibleNew }
+          });
+        }
+      }
+
+      this.appGateway.emitToInsumos(SocketEvent.REFRESH_INSUMOS, { action: 'update_stock' });
+
+    } else if (diferenciaCantidad !== 0 && item.nombreDelAlimento) {
       const insumo = await this.prisma.insumos.findFirst({
         where: { OR: [{ IDalimentos: item.nombreDelAlimento }, { nombre: item.nombreDelAlimento }] },
       });
