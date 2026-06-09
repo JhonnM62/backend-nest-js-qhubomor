@@ -493,13 +493,19 @@ export class CajaService {
   private async getCajaTimeBounds(caja: any, horaCorteSnapshot?: string) {
     let fechaInicio: Date | undefined = undefined;
 
+    const whereAnterior: Prisma.AperturaCierreCajaWhereInput = {
+      fechaDeApertura: caja.fechaDeApertura,
+      cierre: 'cerrada',
+      IDcaja: { not: caja.IDcaja } // Asegurar que no traiga la caja actual
+    };
+
+    if (caja.createdAt) {
+      whereAnterior.createdAt = { lt: caja.createdAt };
+    }
+
     // Buscar si hubo una caja anterior el mismo día contable
     const cajaAnterior = await this.prisma.aperturaCierreCaja.findFirst({
-      where: {
-        fechaDeApertura: caja.fechaDeApertura,
-        createdAt: { lt: caja.createdAt },
-        cierre: 'cerrada'
-      },
+      where: whereAnterior,
       orderBy: { createdAt: 'desc' }
     });
 
