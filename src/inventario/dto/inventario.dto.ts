@@ -38,6 +38,11 @@ export class UpdateInventarioDto {
   @IsOptional()
   @IsNumber()
   total?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  descuento?: number;
 }
 
 export class CreateOrderInventarioDto {
