@@ -73,13 +73,42 @@ export class NominaController {
 
   @Patch('turno/:id/salida')
   @ApiOperation({ summary: 'Registrar salida del turno. Campo "ceno" es OBLIGATORIO.' })
+  @UseInterceptors(FileInterceptor('foto', {
+    fileFilter: (req, file, cb) => {
+      if (!file.mimetype.match(/\/(jpg|jpeg|png|webp)$/)) {
+        return cb(new BadRequestException('Solo se permiten imágenes JPG, PNG o WebP'), false);
+      }
+      cb(null, true);
+    },
+    limits: { fileSize: 15 * 1024 * 1024 },
+  }))
   async registrarSalida(
     @Param('id') id: string,
     @Body() dto: RegistrarSalidaDto,
     @Request() req: any,
+    @UploadedFile() foto?: Express.Multer.File,
   ) {
+    let fotoPath: string | undefined;
+
+    if (foto) {
+      const isProd = process.env.NODE_ENV === 'production';
+      const destFolder = isProd ? '/app/public/uploads/asistencia' : './public/uploads/asistencia';
+      if (!fs.existsSync(destFolder)) fs.mkdirSync(destFolder, { recursive: true });
+
+      const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+      const finalFilename = `${uniqueSuffix}_out.jpg`;
+      const filePath = join(destFolder, finalFilename);
+
+      await sharp(foto.buffer)
+        .resize({ width: 600, withoutEnlargement: true })
+        .jpeg({ quality: 75 })
+        .toFile(filePath);
+
+      fotoPath = `/uploads/asistencia/${finalFilename}`;
+    }
+
     const esAdmin = ROLES_ADMIN.includes(req.user.rol);
-    return this.nominaService.registrarSalida(id, dto, req.user.id, esAdmin);
+    return this.nominaService.registrarSalida(id, dto, req.user.id, esAdmin, fotoPath);
   }
 
   @Get('turno/activo-hoy')

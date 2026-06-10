@@ -111,7 +111,7 @@ export class NominaService {
     };
   }
 
-  async registrarSalida(turnoId: string, dto: RegistrarSalidaDto, usuarioSolicitanteId: string, esAdmin: boolean) {
+  async registrarSalida(turnoId: string, dto: RegistrarSalidaDto, usuarioSolicitanteId: string, esAdmin: boolean, fotoPath?: string) {
     const turno = await this.prisma.turnos.findUnique({
       where: { IDturno: turnoId },
       include: { usuario: { include: { cargo: true } } },
@@ -127,6 +127,21 @@ export class NominaService {
       throw new ForbiddenException('Solo puedes cerrar tu propio turno');
     }
 
+    // Calcular geocerca para salida
+    let distanciaMetrosSalida: number | undefined;
+    let dentroGeocercaSalida: boolean | undefined;
+    
+    if (dto.latitud && dto.longitud) {
+      const config = await this.prisma.configuracionNegocio.findFirst();
+      if (config?.latitudNegocio && config?.longitudNegocio) {
+        distanciaMetrosSalida = calcularDistancia(
+          dto.latitud, dto.longitud,
+          config.latitudNegocio, config.longitudNegocio
+        );
+        dentroGeocercaSalida = distanciaMetrosSalida <= (config.radioGeocercaM || 100);
+      }
+    }
+
     // Actualizar el turno con la salida y el campo cenó
     const turnoActualizado = await this.prisma.turnos.update({
       where: { IDturno: turnoId },
@@ -135,6 +150,11 @@ export class NominaService {
         ceno: dto.ceno,
         estado: 'COMPLETADO',
         observacion: dto.observacion || null,
+        fotoSalida: fotoPath || null,
+        latitudSalida: dto.latitud || null,
+        longitudSalida: dto.longitud || null,
+        distanciaMetrosSalida: distanciaMetrosSalida || null,
+        dentroGeocercaSalida: dentroGeocercaSalida ?? null,
       },
     });
 
@@ -158,12 +178,17 @@ export class NominaService {
       }
     }
 
+    let mensajeRespuesta = dto.ceno
+      ? 'Turno cerrado. Se registró la cena y se aplicó el descuento correspondiente.'
+      : 'Turno cerrado correctamente.';
+
     return {
       success: true,
       data: turnoActualizado,
-      mensaje: dto.ceno
-        ? 'Turno cerrado. Se registró la cena y se aplicó el descuento correspondiente.'
-        : 'Turno cerrado correctamente.',
+      mensaje: mensajeRespuesta,
+      alertaGeocerca: dentroGeocercaSalida === false && dto.latitud 
+        ? `Atención: el turno fue cerrado a ${Math.round(distanciaMetrosSalida || 0)}m del negocio (fuera del radio permitido).` 
+        : null,
     };
   }
 

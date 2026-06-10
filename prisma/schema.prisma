@@ -659,6 +659,14 @@ model Turnos {
   longitud         Float?     @map("Longitud")
   distanciaMetros  Float?     @map("DistanciaMetros")  // distancia al negocio al check-in
   dentroGeocerca   Boolean    @default(false) @map("DentroGeocerca")
+  
+  // --- Check-Out ---
+  fotoSalida           String?    @map("FotoSalida")
+  latitudSalida        Float?     @map("LatitudSalida")
+  longitudSalida       Float?     @map("LongitudSalida")
+  distanciaMetrosSalida Float?    @map("DistanciaMetrosSalida")
+  dentroGeocercaSalida  Boolean?  @map("DentroGeocercaSalida")
+
   ceno             Boolean?   @map("Ceno")             // NULL = turno activo, true/false = cerrado
   valorTurno       Decimal    @default(0) @map("ValorTurno") @db.Money
   estado           String     @default("ACTIVO") @map("Estado") // ACTIVO | COMPLETADO | ANULADO

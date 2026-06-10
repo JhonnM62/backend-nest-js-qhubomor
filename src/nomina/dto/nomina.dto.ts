@@ -3,7 +3,7 @@ import {
   IsDateString, IsIn, IsArray, Min, ArrayMinSize
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
+import { Type, Transform } from 'class-transformer';
 
 // ─── TURNOS ───────────────────────────────────────────────────────────────────
 
@@ -22,6 +22,7 @@ export class RegistrarEntradaDto {
 export class RegistrarSalidaDto {
   @ApiProperty({ description: '¿Cenó el empleado durante este turno? (OBLIGATORIO)' })
   @IsNotEmpty({ message: 'Debes indicar si el empleado cenó o no. Este campo es obligatorio.' })
+  @Transform(({ value }) => value === 'true' || value === true)
   @IsBoolean({ message: 'El campo "ceno" debe ser true o false' })
   ceno: boolean;
 
@@ -29,6 +30,18 @@ export class RegistrarSalidaDto {
   @IsOptional()
   @IsString()
   observacion?: string;
+
+  @ApiPropertyOptional({ description: 'Latitud GPS al hacer check-out' })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  latitud?: number;
+
+  @ApiPropertyOptional({ description: 'Longitud GPS al hacer check-out' })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  longitud?: number;
 }
 
 export class UpdateTurnoAdminDto {
