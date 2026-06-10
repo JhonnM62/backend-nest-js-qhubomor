@@ -9,16 +9,20 @@ export class PrinterConfigService {
     return this.prisma.configuracionImpresora.findMany();
   }
 
-  async updateBulk(configs: { estadoOrden: string; imprimir: boolean }[]) {
+  async updateBulk(configs: { estadoOrden: string; imprimirComanda: boolean; imprimirFactura: boolean }[]) {
     // Usamos una transacción para actualizar múltiples estados a la vez
     const results = await this.prisma.$transaction(
       configs.map((config) =>
         this.prisma.configuracionImpresora.upsert({
           where: { estadoOrden: config.estadoOrden },
-          update: { imprimir: config.imprimir },
+          update: { 
+            imprimirComanda: config.imprimirComanda,
+            imprimirFactura: config.imprimirFactura
+          },
           create: {
             estadoOrden: config.estadoOrden,
-            imprimir: config.imprimir,
+            imprimirComanda: config.imprimirComanda,
+            imprimirFactura: config.imprimirFactura,
           },
         })
       )

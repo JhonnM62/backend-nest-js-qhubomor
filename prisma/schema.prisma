@@ -492,11 +492,12 @@ model Submenu {
 }
 
 model ConfiguracionImpresora {
-  id          String   @id @default(cuid())
-  estadoOrden String   @unique // "PAGADO", "TOMADO", "CARRITO", etc.
-  imprimir    Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id              String   @id @default(cuid())
+  estadoOrden     String   @unique // "PAGADO", "TOMADO", "CARRITO", etc.
+  imprimirComanda Boolean  @default(false)
+  imprimirFactura Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   @@map("CONFIGURACION_IMPRESORA")
 }

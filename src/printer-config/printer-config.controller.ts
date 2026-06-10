@@ -13,7 +13,7 @@ export class PrinterConfigController {
   }
 
   @Put()
-  updateBulk(@Body() configs: { estadoOrden: string; imprimir: boolean }[]) {
+  updateBulk(@Body() configs: { estadoOrden: string; imprimirComanda: boolean; imprimirFactura: boolean }[]) {
     return this.printerConfigService.updateBulk(configs);
   }
 }
