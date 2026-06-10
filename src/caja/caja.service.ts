@@ -26,7 +26,7 @@ export class CajaService {
 
     let config = await this.prisma.configuracionNegocio.findUnique({ where: { id: 1 } });
     if (!config) {
-      config = { id: 1, nombreComercial: 'Q HUBO MOR', nit: null, direccion: null, telefono: null, horaCorteDia: '00:00', modoOperacion: 'GENERAL', updatedAt: new Date() };
+      config = { id: 1, nombreComercial: 'Q HUBO MOR', nit: null, direccion: null, telefono: null, horaCorteDia: '00:00', modoOperacion: 'GENERAL', latitudNegocio: null, longitudNegocio: null, radioGeocercaM: 100, updatedAt: new Date() };
     }
     
     const [corteHours, corteMinutes] = config.horaCorteDia.split(':').map(Number);

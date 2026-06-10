@@ -1,4 +1,4 @@
-import { IsOptional, IsString, IsNumber, IsEmail, IsNotEmpty, MinLength, Matches } from 'class-validator';
+import { IsOptional, IsString, IsNumber, IsEmail, IsNotEmpty, MinLength, Matches, IsBoolean } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class PaginationDto {
@@ -60,6 +60,21 @@ export class CreateUsuarioDto {
   @ApiPropertyOptional()
   @IsOptional()
   permisos?: any;
+
+  @ApiPropertyOptional({ description: 'ID del cargo de nómina asignado' })
+  @IsOptional()
+  @IsString()
+  cargoId?: string;
+
+  @ApiPropertyOptional({ description: 'Tarifa diaria personalizada (sobreescribe la del cargo)' })
+  @IsOptional()
+  @IsNumber()
+  tarifaPersonalizada?: number;
+
+  @ApiPropertyOptional({ default: false, description: 'Indica si está en período de prueba' })
+  @IsOptional()
+  @IsBoolean()
+  esPersonalDePrueba?: boolean;
 }
 
 export class UpdateUsuarioDto {
@@ -115,6 +130,26 @@ export class UpdateUsuarioDto {
   @ApiPropertyOptional()
   @IsOptional()
   isActive?: boolean;
+
+  @ApiPropertyOptional({ description: 'ID del cargo de nómina asignado' })
+  @IsOptional()
+  @IsString()
+  cargoId?: string;
+
+  @ApiPropertyOptional({ description: 'Tarifa diaria personalizada (sobreescribe la del cargo)' })
+  @IsOptional()
+  @IsNumber()
+  tarifaPersonalizada?: number;
+
+  @ApiPropertyOptional({ default: true })
+  @IsOptional()
+  @IsBoolean()
+  geocercaActiva?: boolean;
+
+  @ApiPropertyOptional({ default: false })
+  @IsOptional()
+  @IsBoolean()
+  esPersonalDePrueba?: boolean;
 }
 
 export class UsuarioQueryDto extends PaginationDto {

@@ -30,6 +30,8 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { AiModule } from './ai/ai.module'; // IMPORT AI MODULE
 import { CategoriasInsumosModule } from './categorias-insumos/categorias-insumos.module';
+import { CargosModule } from './cargos/cargos.module';
+import { NominaModule } from './nomina/nomina.module';
 @Module({
   imports: [
     AppConfigModule,
@@ -78,6 +80,8 @@ import { CategoriasInsumosModule } from './categorias-insumos/categorias-insumos
     ConfiguracionModule,
     AiModule, // ADD TO IMPORTS
     CategoriasInsumosModule,
+    CargosModule,
+    NominaModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: AllExceptionsFilter },

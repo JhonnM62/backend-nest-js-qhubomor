@@ -30,6 +30,9 @@ async updateConfiguracion(data: {
   nit?: string;
   direccion?: string;
   telefono?: string;
+  latitudNegocio?: number;
+  longitudNegocio?: number;
+  radioGeocercaM?: number;
 }) {
   return this.prisma.configuracionNegocio.upsert({
     where: { id: 1 },
@@ -42,6 +45,9 @@ async updateConfiguracion(data: {
       nit: data.nit,
       direccion: data.direccion,
       telefono: data.telefono,
+      latitudNegocio: data.latitudNegocio,
+      longitudNegocio: data.longitudNegocio,
+      radioGeocercaM: data.radioGeocercaM ?? 100,
     }
   });
 }

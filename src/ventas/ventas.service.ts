@@ -149,6 +149,9 @@ export class VentasService {
         telefono: null,
         horaCorteDia: '00:00', 
         modoOperacion: 'GENERAL', 
+        latitudNegocio: null, 
+        longitudNegocio: null, 
+        radioGeocercaM: 100,
         updatedAt: new Date() 
       };
     }

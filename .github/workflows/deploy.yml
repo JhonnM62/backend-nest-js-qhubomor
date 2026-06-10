@@ -64,6 +64,7 @@ jobs:
             # 5.1 Crear directorios de subidas en el host para persistencia
             mkdir -p /root/backend-qhubomor/public/uploads/insumos
             mkdir -p /root/backend-qhubomor/public/uploads/gastos
+            mkdir -p /root/backend-qhubomor/public/uploads/asistencia
             
             # 5.5 Aplicar migraciones/push de Prisma a la base de datos remotamente (sin borrar data)
             echo "Sincronizando esquema de base de datos..."

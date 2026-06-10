@@ -8,21 +8,27 @@ datasource db {
 }
 
 model Usuarios {
-  IDusuarios String    @id @default(cuid()) @map("IDUsuarios")
-  nombre     String?   @map("Nombre")
-  email      String?   @map("email")
-  cedula     Int?      @map("Cedula")
-  telefono   String?   @map("Telefono")
-  direccion  String?   @map("Direccion")
-  propinas   Decimal?  @map("Propinas") @db.Money
-  rol        String?   @map("Rol")
-  foto       String?   @map("Foto")
-  salario    Decimal?  @map("Salario") @db.Money
-  password   String?
-  isActive   Boolean?
-  permisos   Json?     @map("Permisos")
-  createdAt  DateTime? @map("createdAt")
-  updatedAt  DateTime? @map("updatedAt")
+  IDusuarios           String    @id @default(cuid()) @map("IDUsuarios")
+  nombre               String?   @map("Nombre")
+  email                String?   @map("email")
+  cedula               Int?      @map("Cedula")
+  telefono             String?   @map("Telefono")
+  direccion            String?   @map("Direccion")
+  propinas             Decimal?  @map("Propinas") @db.Money
+  rol                  String?   @map("Rol")
+  foto                 String?   @map("Foto")
+  salario              Decimal?  @map("Salario") @db.Money
+  password             String?
+  isActive             Boolean?
+  permisos             Json?     @map("Permisos")
+  // --- Nómina ---
+  cargoId              String?   @map("CargoId")
+  tarifaPersonalizada  Decimal?  @map("TarifaPersonalizada") @db.Money
+  geocercaActiva       Boolean   @default(true) @map("GeocercaActiva")
+  esPersonalDePrueba   Boolean   @default(false) @map("EsPersonalDePrueba")
+  // ----------------
+  createdAt            DateTime? @map("createdAt")
+  updatedAt            DateTime? @map("updatedAt")
 
   ventas              Ventas[]
   ordenVentas         Orderventas[]
@@ -30,6 +36,10 @@ model Usuarios {
   pushTokens          PushToken[]
   notificationSetting NotificationSetting?
   notificationHistory NotificationHistory[]
+  cargo               CargosEmpleado?      @relation(fields: [cargoId], references: [IDcargo])
+  turnos              Turnos[]
+  descuentos          DescuentosEmpleado[]
+  liquidaciones       Liquidaciones[]
 
   @@map("USUARIOS")
 }
@@ -503,14 +513,19 @@ model ConfiguracionImpresora {
 }
 
 model ConfiguracionNegocio {
-  id              Int      @id @default(1)
-  nombreComercial String?  @default("Q HUBO MOR")
-  nit             String?
-  direccion       String?
-  telefono        String?
-  horaCorteDia    String   @default("00:00") // Formato "HH:mm" (ej. "04:00")
-  modoOperacion   String   @default("GENERAL") // "GENERAL" o "RESTAURANTE"
-  updatedAt       DateTime @updatedAt
+  id                Int      @id @default(1)
+  nombreComercial   String?  @default("Q HUBO MOR")
+  nit               String?
+  direccion         String?
+  telefono          String?
+  horaCorteDia      String   @default("00:00") // Formato "HH:mm" (ej. "04:00")
+  modoOperacion     String   @default("GENERAL") // "GENERAL" o "RESTAURANTE"
+  // --- Geocerca Nómina ---
+  latitudNegocio    Float?   // Latitud GPS del establecimiento
+  longitudNegocio   Float?   // Longitud GPS del establecimiento
+  radioGeocercaM    Int      @default(100) // Radio en metros para validar check-in
+  // -----------------------
+  updatedAt         DateTime @updatedAt
 }
 
 model ConfiguracionIA {
@@ -609,4 +624,95 @@ model NotificationHistory {
   usuario Usuarios @relation(fields: [userId], references: [IDusuarios], onDelete: Cascade)
 
   @@map("NOTIFICATION_HISTORY")
+}
+// ============================================================
+// MÓDULO DE NÓMINA Y ASISTENCIA
+// ============================================================
+
+model CargosEmpleado {
+  IDcargo          String     @id @default(cuid()) @map("IDcargo")
+  nombre           String     @map("Nombre")           // "Cocina", "Granizados", etc.
+  tarifaLunes      Decimal    @default(0) @map("TarifaLunes") @db.Money
+  tarifaMartes     Decimal    @default(0) @map("TarifaMartes") @db.Money
+  tarifaMiercoles  Decimal    @default(0) @map("TarifaMiercoles") @db.Money
+  tarifaJueves     Decimal    @default(0) @map("TarifaJueves") @db.Money
+  tarifaViernes    Decimal    @default(0) @map("TarifaViernes") @db.Money
+  tarifaSabado     Decimal    @default(0) @map("TarifaSabado") @db.Money
+  tarifaDomingo    Decimal    @default(0) @map("TarifaDomingo") @db.Money
+  descuentoCena    Decimal    @default(0) @map("DescuentoCena") @db.Money
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+
+  usuarios         Usuarios[]
+
+  @@map("CARGOS_EMPLEADO")
+}
+
+model Turnos {
+  IDturno          String     @id @default(cuid()) @map("IDturno")
+  usuarioId        String     @map("UsuarioId")
+  fecha            DateTime   @map("Fecha") @db.Date
+  horaEntrada      DateTime   @map("HoraEntrada")
+  horaSalida       DateTime?  @map("HoraSalida")
+  fotoEntrada      String?    @map("FotoEntrada")      // path relativo: /uploads/asistencia/file.jpg
+  latitud          Float?     @map("Latitud")
+  longitud         Float?     @map("Longitud")
+  distanciaMetros  Float?     @map("DistanciaMetros")  // distancia al negocio al check-in
+  dentroGeocerca   Boolean    @default(false) @map("DentroGeocerca")
+  ceno             Boolean?   @map("Ceno")             // NULL = turno activo, true/false = cerrado
+  valorTurno       Decimal    @default(0) @map("ValorTurno") @db.Money
+  estado           String     @default("ACTIVO") @map("Estado") // ACTIVO | COMPLETADO | ANULADO
+  observacion      String?    @map("Observacion")
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+
+  usuario          Usuarios   @relation(fields: [usuarioId], references: [IDusuarios], onDelete: Cascade)
+  descuentos       DescuentosEmpleado[]
+
+  @@map("TURNOS")
+}
+
+model DescuentosEmpleado {
+  IDdescuento      String     @id @default(cuid()) @map("IDdescuento")
+  usuarioId        String     @map("UsuarioId")
+  turnoId          String?    @map("TurnoId")          // Opcional: vinculado a un turno
+  loteId           String?    @map("LoteId")           // Agrupa descuentos de un reparto
+  fecha            DateTime   @map("Fecha")
+  // Concepto: DESCUADRE_CAJA | CENA | PERDIDA | ROBO | ADELANTO | OTRO
+  concepto         String     @map("Concepto")
+  descripcion      String     @map("Descripcion")
+  valor            Decimal    @map("Valor") @db.Money
+  // Estado: PENDIENTE (empleado no lo ha visto) | VISTO | APROBADO
+  estado           String     @default("PENDIENTE") @map("Estado")
+  creadoPor        String     @map("CreadoPor")
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+
+  usuario          Usuarios   @relation(fields: [usuarioId], references: [IDusuarios], onDelete: Cascade)
+  turno            Turnos?    @relation(fields: [turnoId], references: [IDturno])
+
+  @@map("DESCUENTOS_EMPLEADO")
+}
+
+model Liquidaciones {
+  IDliquidacion     String     @id @default(cuid()) @map("IDliquidacion")
+  usuarioId         String     @map("UsuarioId")
+  fechaInicio       DateTime   @map("FechaInicio") @db.Date
+  fechaFin          DateTime   @map("FechaFin") @db.Date
+  totalTurnos       Int        @default(0) @map("TotalTurnos")
+  totalBruto        Decimal    @default(0) @map("TotalBruto") @db.Money
+  totalDescuentos   Decimal    @default(0) @map("TotalDescuentos") @db.Money
+  totalNeto         Decimal    @default(0) @map("TotalNeto") @db.Money
+  estado            String     @default("PENDIENTE") @map("Estado") // PENDIENTE | PAGADA
+  observaciones     String?    @map("Observaciones")
+  pdfUrl            String?    @map("PdfUrl")
+  creadoPor         String     @map("CreadoPor")
+  turnosDetalle     Json?      @map("TurnosDetalle")   // snapshot de turnos al liquidar
+  descuentosDetalle Json?      @map("DescuentosDetalle") // snapshot de descuentos al liquidar
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+
+  usuario           Usuarios   @relation(fields: [usuarioId], references: [IDusuarios], onDelete: Cascade)
+
+  @@map("LIQUIDACIONES")
 }
