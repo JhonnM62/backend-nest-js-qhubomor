@@ -1019,6 +1019,7 @@ export class CajaService {
     for (const d of insumosDescuadrados) {
       differenceTracker.set(d.productoAsociado, Math.abs(d.diferencia));
     }
+    let remainingDiferenciaTransferencia = Math.abs(diferenciaTransferencia);
 
     // Step 1: Validate and correct each AI-generated action
     if (plan.acciones && Array.isArray(plan.acciones)) {
@@ -1036,7 +1037,33 @@ export class CajaService {
         });
 
         if (accion.action === 'change_payment') {
-          // Payment changes are fine as-is
+          // VALIDACIÓN ESTRICTA (OPCIÓN B): Enforzar matemática en 'EFECTIVO Y OTROS'
+          if (accion.method === 'EFECTIVO Y OTROS' && accion.ventaId) {
+            const targetSale = ventasEligibles.find(v => v.ventaId === accion.ventaId);
+            if (targetSale && remainingDiferenciaTransferencia > 0) {
+              const saleTotal = targetSale.total;
+              const adjustAmount = Math.min(remainingDiferenciaTransferencia, saleTotal);
+              
+              if (diferenciaTransferencia > 0) {
+                // Físico > Sistema: Necesitamos sumar transferencias al sistema
+                accion.transferenciaRecibida = adjustAmount;
+                accion.efectivoRecibido = saleTotal - adjustAmount;
+              } else {
+                // Físico < Sistema: Necesitamos restar transferencias del sistema
+                accion.transferenciaRecibida = saleTotal - adjustAmount;
+                accion.efectivoRecibido = adjustAmount;
+              }
+              remainingDiferenciaTransferencia -= adjustAmount;
+              accion.motivo = accion.motivo + ` (Cantidades exactas calculadas por Backend: Transf $${accion.transferenciaRecibida}, Efec $${accion.efectivoRecibido})`;
+            }
+          } else if (accion.ventaId) {
+            // Si el método no es mixto, descontamos la venta total del remanente si es que aplica
+            const targetSale = ventasEligibles.find(v => v.ventaId === accion.ventaId);
+            if (targetSale) {
+               remainingDiferenciaTransferencia -= targetSale.total;
+               if (remainingDiferenciaTransferencia < 0) remainingDiferenciaTransferencia = 0;
+            }
+          }
           correctedAcciones.push(accion);
           continue;
         }
