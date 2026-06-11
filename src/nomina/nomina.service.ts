@@ -250,6 +250,14 @@ export class NominaService {
     return { success: true, data: updated };
   }
 
+  async deleteTurno(turnoId: string) {
+    await this.getTurno(turnoId); // Check if it exists
+    await this.prisma.turnos.delete({
+      where: { IDturno: turnoId }
+    });
+    return { success: true, mensaje: 'Turno eliminado correctamente' };
+  }
+
   async getTurnoActivoDelDia(usuarioId: string) {
     const hoy = new Date();
     hoy.setHours(0, 0, 0, 0);

@@ -145,6 +145,14 @@ export class NominaController {
     return this.nominaService.updateTurnoAdmin(id, dto);
   }
 
+  @Delete('turno/:id')
+  @UseGuards(RolesGuard)
+  @Roles(...ROLES_ADMIN)
+  @ApiOperation({ summary: '(Admin) Eliminar un turno' })
+  deleteTurno(@Param('id') id: string) {
+    return this.nominaService.deleteTurno(id);
+  }
+
   // ─── DESCUENTOS ───────────────────────────────────────────────────────────
 
   @Post('descuento')
