@@ -548,7 +548,7 @@ REGLAS DE FORMATO:
 1. Debes devolver UNICAMENTE un JSON válido con las acciones a tomar.
 2. Usa la acción "remove_product" para eliminar unidades de un producto de un pedido existente.
 3. Usa la acción "add_product" para añadir unidades de un producto a un pedido existente. Toma en cuenta que esto aumentará el valor total de la venta.
-4. Usa la acción "change_payment" para cambiar el método de pago de EFECTIVO a TRANSFERENCIA o viceversa.
+4. Usa la acción "change_payment" para cambiar el método de pago de EFECTIVO a TRANSFERENCIA o viceversa. TAMBIÉN puedes cambiarlo a "EFECTIVO Y OTROS" si necesitas cuadrar faltantes parciales exactos (ej. 1000). Al usar "EFECTIVO Y OTROS", es OBLIGATORIO que envíes "efectivoRecibido" y "transferenciaRecibida" sumando exactamente el total de la venta original.
 5. Usa la acción "ignore" si una diferencia física o monetaria está justificada por las observaciones.
 6. Explica brevemente el motivo en cada acción (campo "motivo").
 7. OBLIGATORIO: Debes incluir el campo "justificacionGeneral" en la raíz del JSON.
@@ -571,7 +571,9 @@ REGLAS DE FORMATO:
                 cantidadARemover: { type: Type.INTEGER, description: "Cantidad a quitar (solo remove_product)" },
                 cantidadAAnadir: { type: Type.INTEGER, description: "Cantidad a añadir (solo add_product)" },
                 cantidadAIgnorar: { type: Type.INTEGER, description: "Cantidad que se ignora por estar justificada (solo ignore)" },
-                method: { type: Type.STRING, description: "EFECTIVO o TRANSFERENCIA. Solo para change_payment." },
+                method: { type: Type.STRING, description: "EFECTIVO, TRANSFERENCIA, o 'EFECTIVO Y OTROS'. Solo para change_payment." },
+                efectivoRecibido: { type: Type.NUMBER, description: "Monto a asignar a efectivo (solo si method es 'EFECTIVO Y OTROS')" },
+                transferenciaRecibida: { type: Type.NUMBER, description: "Monto a asignar a transferencia (solo si method es 'EFECTIVO Y OTROS')" },
                 motivo: { type: Type.STRING, description: "Motivo por el que se escogió este cambio o se ignoró la diferencia." },
               },
               required: ["action", "motivo"]

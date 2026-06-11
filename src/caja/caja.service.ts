@@ -1292,9 +1292,23 @@ export class CajaService {
         } else if (accion.action === 'change_payment' && accion.ventaId) {
           const venta = await tx.ventas.findUnique({ where: { IDventas: accion.ventaId } });
           if (venta) {
+            let updateData: any = { medioDePago: accion.method, mensaje: '🤖 Modificado por Auto-Cuadre IA' };
+            
+            if (accion.method === 'EFECTIVO Y OTROS') {
+              updateData.efectivoRecibido = Number(accion.efectivoRecibido || 0);
+              updateData.valorDeTransferencia = Number(accion.transferenciaRecibida || 0);
+              updateData.banco = 'TRANSFERENCIA';
+            } else if (accion.method === 'EFECTIVO') {
+              updateData.efectivoRecibido = Number(venta.totalInput || 0);
+              updateData.valorDeTransferencia = 0;
+            } else if (['TRANSFERENCIA', 'NEQUI', 'DAVIPLATA', 'BANCOLOMBIA'].includes(accion.method)) {
+              updateData.efectivoRecibido = 0;
+              updateData.valorDeTransferencia = Number(venta.totalInput || 0);
+            }
+            
             await tx.ventas.update({
               where: { IDventas: accion.ventaId },
-              data: { medioDePago: accion.method, mensaje: '🤖 Modificado por Auto-Cuadre IA' }
+              data: updateData
             });
             observacionesNuevas += `- Pago Cambiado: Pedido #${venta.pedido} a ${accion.method}.\n`;
             accionesEjecutadas++;
