@@ -46,12 +46,15 @@ export class AgentService implements OnModuleInit {
     const callModel = async (state: typeof AgentState.State) => {
       const configIA = await this.configuracionService.getConfiguracionIA();
       const apiKey = configIA?.apiKey || process.env.GEMINI_API_KEY;
-      const modeloDefecto = configIA?.modeloDefecto || 'gemini-1.5-pro';
+      const modeloDefecto = configIA?.modeloDefecto || 'gemini-3.5-flash';
 
       const llm = new ChatGoogleGenerativeAI({
         model: modeloDefecto,
         apiKey: apiKey,
         temperature: 0,
+        thinkingConfig: {
+          thinkingLevel: 'HIGH' // Equivalente a ThinkingLevel.HIGH de @google/genai
+        }
       });
       
       const llmWithTools = llm.bindTools(tools);
