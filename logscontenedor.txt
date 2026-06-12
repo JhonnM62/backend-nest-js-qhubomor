@@ -1,521 +1,278 @@
 > puntodeventabackend@0.0.1 start:prod
 > node dist/src/main
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [NestFactory] Starting Nest application...
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [InstanceLoader] PrismaModule dependencies initialized +22ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [InstanceLoader] PassportModule dependencies initialized +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [InstanceLoader] ConfigHostModule dependencies initialized +1ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [InstanceLoader] ThrottlerModule dependencies initialized +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [InstanceLoader] JwtModule dependencies initialized +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [InstanceLoader] ConfigModule dependencies initialized +1ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [InstanceLoader] CacheModule dependencies initialized +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [InstanceLoader] WebsocketModule dependencies initialized +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [InstanceLoader] ServeStaticModule dependencies initialized +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [InstanceLoader] MesasModule dependencies initialized +1ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [InstanceLoader] NotificationsModule dependencies initialized +1ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [InstanceLoader] ComentariosModule dependencies initialized +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [InstanceLoader] AppConfigModule dependencies initialized +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [InstanceLoader] AuthModule dependencies initialized +1ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [InstanceLoader] AppModule dependencies initialized +2ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [InstanceLoader] ConfiguracionModule dependencies initialized +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [InstanceLoader] PrinterConfigModule dependencies initialized +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [InstanceLoader] EstadisticasModule dependencies initialized +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [InstanceLoader] ReportesModule dependencies initialized +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [InstanceLoader] ClientesModule dependencies initialized +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [InstanceLoader] ProveedoresModule dependencies initialized +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [InstanceLoader] CategoriasInsumosModule dependencies initialized +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [NestFactory] Starting Nest application...
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [InstanceLoader] PrismaModule dependencies initialized +23ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [InstanceLoader] PassportModule dependencies initialized +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [InstanceLoader] ConfigHostModule dependencies initialized +1ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [InstanceLoader] ThrottlerModule dependencies initialized +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [InstanceLoader] JwtModule dependencies initialized +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [InstanceLoader] ConfigModule dependencies initialized +1ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [InstanceLoader] CacheModule dependencies initialized +1ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [InstanceLoader] WebsocketModule dependencies initialized +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [InstanceLoader] ServeStaticModule dependencies initialized +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [InstanceLoader] MesasModule dependencies initialized +1ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [InstanceLoader] NotificationsModule dependencies initialized +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [InstanceLoader] ComentariosModule dependencies initialized +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [InstanceLoader] AppConfigModule dependencies initialized +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [InstanceLoader] AuthModule dependencies initialized +1ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [InstanceLoader] ConfiguracionModule dependencies initialized +2ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [InstanceLoader] PrinterConfigModule dependencies initialized +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [InstanceLoader] EstadisticasModule dependencies initialized +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [InstanceLoader] ReportesModule dependencies initialized +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [InstanceLoader] CargosModule dependencies initialized +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [InstanceLoader] NominaModule dependencies initialized +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [InstanceLoader] AppModule dependencies initialized +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [InstanceLoader] ClientesModule dependencies initialized +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [InstanceLoader] ProveedoresModule dependencies initialized +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [InstanceLoader] CategoriasInsumosModule dependencies initialized +1ms
 ✅ InventarioController Inicializado - VERSIÓN CON RUTAS PATCH CORREGIDAS
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [InstanceLoader] AiModule dependencies initialized +2ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [InstanceLoader] InsumosModule dependencies initialized +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [InstanceLoader] InventarioModule dependencies initialized +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [InstanceLoader] UsuariosModule dependencies initialized +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [InstanceLoader] ProductosModule dependencies initialized +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [InstanceLoader] CategoriasModule dependencies initialized +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [InstanceLoader] GastosModule dependencies initialized +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [InstanceLoader] CajaModule dependencies initialized +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [InstanceLoader] VentasModule dependencies initialized +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [WebSocketsController] AppGateway subscribed to the "joinRoom" message +96ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [WebSocketsController] AppGateway subscribed to the "leaveRoom" message +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [WebSocketsController] AppGateway subscribed to the "nuevaOrden" message +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [WebSocketsController] AppGateway subscribed to the "ordenActualizada" message +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [WebSocketsController] AppGateway subscribed to the "ordenCompletada" message +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RoutesResolver] AuthController {/api/v1/auth}: +1ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/auth/register, POST} route +2ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/auth/login, POST} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/auth/refresh, POST} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RoutesResolver] UsuariosController {/api/v1/usuarios}: +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/usuarios/roles, GET} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/usuarios, POST} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/usuarios, GET} route +1ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/usuarios/:id, GET} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/usuarios/:id, PATCH} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/usuarios/:id, DELETE} route +1ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RoutesResolver] ProductosController {/api/v1/productos}: +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/productos, POST} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/productos, GET} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/productos/:id, GET} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/productos/:id, PATCH} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/productos/:id, DELETE} route +1ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RoutesResolver] CategoriasController {/api/v1/categorias}: +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/categorias, POST} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/categorias, GET} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/categorias/:id, GET} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/categorias/:id, PATCH} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/categorias/:id, DELETE} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RoutesResolver] VentasController {/api/v1/ventas}: +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/ventas, POST} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/ventas/completa, POST} route +1ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/ventas, GET} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/ventas/hoy, GET} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/ventas/mesa/:mesaId, GET} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/ventas/:id, GET} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/ventas/:id/tiempo-total, GET} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/ventas/:id, PUT} route +1ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/ventas/:id/estado, PATCH} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/ventas/:id/pago, PATCH} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/ventas/:id/productos, POST} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/ventas/:ventaId/producto/:orderVentaId, PATCH} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/ventas/bulk, DELETE} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/ventas/trash/empty, DELETE} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/ventas/bulk/hard, DELETE} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/ventas/:id, DELETE} route +1ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/ventas/:id/hard, DELETE} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/ventas/:id/restore, POST} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RoutesResolver] InsumosController {/api/v1/insumos}: +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/insumos/upload-image, POST} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/insumos, POST} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/insumos, GET} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/insumos/alertas, GET} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/insumos/estadisticas, GET} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/insumos/:id, GET} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/insumos/:id/movimientos, GET} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/insumos/:id, PATCH} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/insumos/:id, DELETE} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/insumos/:id/movimiento, POST} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/insumos/bulk, POST} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/insumos/:id/agregar, POST} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/insumos/:id/descontar, POST} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RoutesResolver] NotificationsController {/api/v1/notifications}: +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/notifications/token, POST} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/notifications/settings/:userId, GET} route +1ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/notifications/settings/:userId, PATCH} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/notifications/history/:userId, GET} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/notifications/history/:id/read, PATCH} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RoutesResolver] InventarioController {/api/v1/inventario}: +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/inventario, POST} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/inventario, GET} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/inventario/items, GET} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/inventario/bajo, GET} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/inventario/item/:id/update, PATCH} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/inventario/item/update/:id, PATCH} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/inventario/item/update, PATCH} route +1ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/inventario/:id, GET} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/inventario/:id, PATCH} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/inventario/:id, DELETE} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/inventario/item, POST} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/inventario/items/bulk, POST} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/inventario/item/:id, DELETE} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/inventario/item/:id/comprar, PATCH} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/inventario/items/comprar, PATCH} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/inventario/insumo/:insumoId/stock-calculado, GET} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/inventario/recalcular-stock, POST} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RoutesResolver] ClientesController {/api/v1/clientes}: +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/clientes, POST} route +1ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/clientes, GET} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/clientes/:id, GET} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/clientes/:id, PATCH} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/clientes/:id, DELETE} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RoutesResolver] ProveedoresController {/api/v1/proveedores}: +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/proveedores, POST} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/proveedores, GET} route +1ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/proveedores/:id, GET} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/proveedores/:id, PATCH} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/proveedores/:id, DELETE} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RoutesResolver] CajaController {/api/v1/caja}: +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/caja/abrir, POST} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/caja/:id, PATCH} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/caja/cerrar/:id, PATCH} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/caja/reabrir/:id, PATCH} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/caja/activa, GET} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/caja/resumen/:id, GET} route +1ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/caja, GET} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/caja/:id, GET} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/caja/:id, DELETE} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/caja/:id/verificacion-pendiente, GET} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/caja/:id/registrar-conteo, POST} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/caja/:id/posponer-verificacion, POST} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/caja/:id/insumo/:insumoId/conteo/:conteoIndex, DELETE} route +1ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/caja/:id/insumo/:insumoId/conteo/:conteoIndex, PATCH} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/caja/:id/auto-cuadre/preview, POST} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/caja/:id/auto-cuadre/execute, POST} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RoutesResolver] AiController {/api/v1/ai}: +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/ai/extract-data, POST} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/ai/voice-order, POST} route +1ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/ai/extract-text, POST} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/ai/refine-extraction, POST} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RoutesResolver] ConfiguracionController {/api/v1/configuracion}: +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/configuracion, GET} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/configuracion, PUT} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/configuracion/ia, GET} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/configuracion/ia, PUT} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/configuracion/whatsapp, GET} route +1ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/configuracion/whatsapp, PUT} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/configuracion/whatsapp/send-report, POST} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/configuracion/whatsapp/upload-and-send, POST} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RoutesResolver] GastosController {/api/v1/gastos}: +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/gastos/upload-image, POST} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/gastos, POST} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/gastos/bulk, POST} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/gastos, GET} route +3ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/gastos/total, GET} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/gastos/:id, GET} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/gastos/:id, PATCH} route +1ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/gastos/:id, DELETE} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RoutesResolver] MesasController {/api/v1/mesas}: +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/mesas, POST} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/mesas, GET} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/mesas/:id, GET} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/mesas/:id, PATCH} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/mesas/:id, DELETE} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RoutesResolver] ComentariosController {/api/v1/comentarios}: +1ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/comentarios, POST} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/comentarios, GET} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/comentarios/:id, GET} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/comentarios/:id, PATCH} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/comentarios/:id, DELETE} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RoutesResolver] PrinterConfigController {/api/v1/printer-config}: +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/printer-config, GET} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/printer-config, PUT} route +1ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RoutesResolver] EstadisticasController {/api/v1/estadisticas}: +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/estadisticas/generales, GET} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RoutesResolver] ReportesController {/api/v1/reportes}: +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/reportes/dinero-guardado, GET} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/reportes/dinero-guardado, POST} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/reportes/dinero-guardado/:filterId, DELETE} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/reportes/dinero-guardado/:filterId, GET} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/reportes/dinero-guardado/:filterId/retiros, POST} route +1ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/reportes/dinero-guardado/retiros/:retiroId, DELETE} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/reportes/dinero-guardado/:filterId/base, POST} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RoutesResolver] CategoriasInsumosController {/api/v1/categorias-insumos}: +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/categorias-insumos, POST} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/categorias-insumos, GET} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/categorias-insumos/:id, GET} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/categorias-insumos/:id, PATCH} route +1ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [RouterExplorer] Mapped {/api/v1/categorias-insumos/:id, DELETE} route +0ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [NestApplication] Nest application successfully started +44ms
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [Bootstrap] Application is running on: http://0.0.0.0:3000
-[Nest] 20  - 06/07/2026, 8:24:31 PM     LOG [Bootstrap] Swagger documentation: http://0.0.0.0:3000/api/docs
-[Nest] 20  - 06/07/2026, 8:25:43 PM     LOG [AppGateway] Client tNDM8ZxdceCluUTEAAAB mapped to user cmom4whz80000k0qnjs8qb3sc and joined user_cmom4whz80000k0qnjs8qb3sc
-[Nest] 20  - 06/07/2026, 8:25:43 PM     LOG [AppGateway] Client tNDM8ZxdceCluUTEAAAB joined room: kitchen
-[Nest] 20  - 06/07/2026, 8:25:43 PM     LOG [AppGateway] Client tNDM8ZxdceCluUTEAAAB joined room: kitchen
-[Nest] 20  - 06/07/2026, 8:25:44 PM     LOG [AppGateway] Client tNDM8ZxdceCluUTEAAAB joined room: caja
-[Nest] 20  - 06/07/2026, 8:25:46 PM     LOG [AppGateway] Client tNDM8ZxdceCluUTEAAAB joined room: caja
-[Nest] 20  - 06/07/2026, 8:26:20 PM     LOG [AppGateway] Client 0JWKjeGMPnl4oodGAAAD mapped to user cmp5oiyx8002o3sjumc803yml and joined user_cmp5oiyx8002o3sjumc803yml
-[Nest] 20  - 06/07/2026, 8:26:20 PM     LOG [AppGateway] Client 0JWKjeGMPnl4oodGAAAD joined room: kitchen
-[Nest] 20  - 06/07/2026, 8:26:21 PM     LOG [AppGateway] Client 0JWKjeGMPnl4oodGAAAD joined room: kitchen
-[Nest] 20  - 06/07/2026, 8:26:48 PM     LOG [AppGateway] Client 0JWKjeGMPnl4oodGAAAD joined room: caja
-[Nest] 20  - 06/07/2026, 8:26:54 PM     LOG [AppGateway] Client disconnected: tNDM8ZxdceCluUTEAAAB (was in rooms: user_cmom4whz80000k0qnjs8qb3sc, kitchen, caja)
-[Nest] 20  - 06/07/2026, 8:27:26 PM     LOG [AppGateway] Nueva orden received: cmq48h0gu0006z4b6vc6pfno6
-[Nest] 20  - 06/07/2026, 8:27:32 PM     LOG [AppGateway] Nueva orden received: cmq48h4yb000cz4b6ea5fsx8k
-[Nest] 20  - 06/07/2026, 8:28:45 PM     LOG [AppGateway] Nueva orden received: cmq48ip6b000iz4b685x49onv
-[Nest] 20  - 06/07/2026, 8:28:54 PM     LOG [AppGateway] Client KAxrHdWb320GaIlVAAAF mapped to user cmom4whz80000k0qnjs8qb3sc and joined user_cmom4whz80000k0qnjs8qb3sc
-[Nest] 20  - 06/07/2026, 8:28:54 PM     LOG [AppGateway] Client KAxrHdWb320GaIlVAAAF joined room: kitchen
-[Nest] 20  - 06/07/2026, 8:28:55 PM     LOG [AppGateway] Client KAxrHdWb320GaIlVAAAF joined room: kitchen
-[Nest] 20  - 06/07/2026, 8:31:16 PM     LOG [AppGateway] Client disconnected: KAxrHdWb320GaIlVAAAF (was in rooms: user_cmom4whz80000k0qnjs8qb3sc, kitchen)
-[Nest] 20  - 06/07/2026, 8:32:49 PM     LOG [AppGateway] Client disconnected: 0JWKjeGMPnl4oodGAAAD (was in rooms: user_cmp5oiyx8002o3sjumc803yml, kitchen, caja)
-[Nest] 20  - 06/07/2026, 8:33:05 PM     LOG [AppGateway] Client _k8z7kofiYNI3w5XAAAH mapped to user cmp5oiyx8002o3sjumc803yml and joined user_cmp5oiyx8002o3sjumc803yml
-[Nest] 20  - 06/07/2026, 8:33:05 PM     LOG [AppGateway] Client _k8z7kofiYNI3w5XAAAH joined room: kitchen
-[Nest] 20  - 06/07/2026, 8:33:05 PM     LOG [AppGateway] Client _k8z7kofiYNI3w5XAAAH joined room: kitchen
-[Nest] 20  - 06/07/2026, 8:33:42 PM     LOG [AppGateway] Nueva orden received: cmq48p2on000oz4b610o7utxf
-[Nest] 20  - 06/07/2026, 8:35:46 PM     LOG [AppGateway] Client disconnected: _k8z7kofiYNI3w5XAAAH (was in rooms: user_cmp5oiyx8002o3sjumc803yml, kitchen)
-[Nest] 20  - 06/07/2026, 8:35:56 PM     LOG [AppGateway] Client w8Ngfld6PqHfVU85AAAJ mapped to user cmp5oiyx8002o3sjumc803yml and joined user_cmp5oiyx8002o3sjumc803yml
-[Nest] 20  - 06/07/2026, 8:35:57 PM     LOG [AppGateway] Client w8Ngfld6PqHfVU85AAAJ joined room: kitchen
-[Nest] 20  - 06/07/2026, 8:35:57 PM     LOG [AppGateway] Client w8Ngfld6PqHfVU85AAAJ joined room: kitchen
-[Nest] 20  - 06/07/2026, 8:38:00 PM     LOG [AppGateway] Client disconnected: w8Ngfld6PqHfVU85AAAJ (was in rooms: user_cmp5oiyx8002o3sjumc803yml, kitchen)
-[Nest] 20  - 06/07/2026, 8:38:11 PM     LOG [AppGateway] Client ahdY6MSJCXRQeTNxAAAL mapped to user cmp5oiyx8002o3sjumc803yml and joined user_cmp5oiyx8002o3sjumc803yml
-[Nest] 20  - 06/07/2026, 8:38:11 PM     LOG [AppGateway] Client ahdY6MSJCXRQeTNxAAAL joined room: kitchen
-[Nest] 20  - 06/07/2026, 8:38:11 PM     LOG [AppGateway] Client ahdY6MSJCXRQeTNxAAAL joined room: kitchen
-[Nest] 20  - 06/07/2026, 8:38:23 PM     LOG [AppGateway] Nueva orden received: cmq48v3aw000uz4b687otnjij
-[Nest] 20  - 06/07/2026, 8:38:46 PM     LOG [AppGateway] Nueva orden received: cmq48vl810011z4b6hlmht5gj
-[Nest] 20  - 06/07/2026, 8:39:31 PM     LOG [AppGateway] Nueva orden received: cmq48wjzq0018z4b6sjnlznvb
-[Nest] 20  - 06/07/2026, 8:45:53 PM     LOG [AppGateway] Nueva orden received: cmq494qf9001fz4b6l8z9lg3q
-[Nest] 20  - 06/07/2026, 8:47:40 PM     LOG [AppGateway] Client CRS_liHUt1u74sGnAAAN mapped to user cmom4whz80000k0qnjs8qb3sc and joined user_cmom4whz80000k0qnjs8qb3sc
-[Nest] 20  - 06/07/2026, 8:47:41 PM     LOG [AppGateway] Client CRS_liHUt1u74sGnAAAN joined room: kitchen
-[Nest] 20  - 06/07/2026, 8:47:41 PM     LOG [AppGateway] Client CRS_liHUt1u74sGnAAAN joined room: kitchen
-[Nest] 20  - 06/07/2026, 8:48:03 PM     LOG [AppGateway] Client disconnected: CRS_liHUt1u74sGnAAAN (was in rooms: user_cmom4whz80000k0qnjs8qb3sc, kitchen)
-[Nest] 20  - 06/07/2026, 8:48:15 PM     LOG [AppGateway] Client disconnected: ahdY6MSJCXRQeTNxAAAL (was in rooms: user_cmp5oiyx8002o3sjumc803yml, kitchen)
-[Nest] 20  - 06/07/2026, 8:48:19 PM     LOG [AppGateway] Client Zm8jlPX_rTjteLCHAAAP mapped to user cmp5oiyx8002o3sjumc803yml and joined user_cmp5oiyx8002o3sjumc803yml
-[Nest] 20  - 06/07/2026, 8:48:19 PM     LOG [AppGateway] Client Zm8jlPX_rTjteLCHAAAP joined room: kitchen
-[Nest] 20  - 06/07/2026, 8:48:20 PM     LOG [AppGateway] Client Zm8jlPX_rTjteLCHAAAP joined room: kitchen
-[Nest] 20  - 06/07/2026, 8:48:22 PM     LOG [AppGateway] Nueva orden received: cmq497xxw001mz4b6g6zq4dr9
-[Nest] 20  - 06/07/2026, 8:53:00 PM     LOG [AppGateway] Nueva orden received: cmq49dvph001xz4b6u3awdshs
-[Nest] 20  - 06/07/2026, 8:53:46 PM     LOG [AppGateway] Nueva orden received: cmq49evl30024z4b6phcnjhio
-[Nest] 20  - 06/07/2026, 8:54:15 PM     LOG [AppGateway] Client Zm8jlPX_rTjteLCHAAAP joined room: caja
-[Nest] 20  - 06/07/2026, 8:54:15 PM     LOG [AppGateway] Orden actualizada received: cmq49evl30024z4b6phcnjhio
-[Nest] 20  - 06/07/2026, 8:54:58 PM     LOG [AppGateway] Orden actualizada received: cmq49evl30024z4b6phcnjhio
-[Nest] 20  - 06/07/2026, 8:56:12 PM     LOG [AppGateway] Client Zm8jlPX_rTjteLCHAAAP joined room: caja
-[Nest] 20  - 06/07/2026, 8:56:20 PM     LOG [AppGateway] Nueva orden received: cmq49i5lb002nz4b6mbow4h9q
-[Nest] 20  - 06/07/2026, 8:57:05 PM     LOG [AppGateway] Nueva orden received: cmq49j43b002uz4b6tus9sla5
-[Nest] 20  - 06/07/2026, 8:57:48 PM     LOG [AppGateway] Nueva orden received: cmq49k13b0031z4b6l0fit4uy
-[Nest] 20  - 06/07/2026, 9:00:14 PM     LOG [AppGateway] Nueva orden received: cmq49n6fy003bz4b6qyfleydj
-[Nest] 20  - 06/07/2026, 9:01:33 PM     LOG [AppGateway] Nueva orden received: cmq49ovdt003iz4b6x1yrg4mo
-[Nest] 20  - 06/07/2026, 9:02:50 PM     LOG [AppGateway] Nueva orden received: cmq49qisx003sz4b6p92nl4jj
-[Nest] 20  - 06/07/2026, 9:03:30 PM     LOG [AppGateway] Client JVlNHN_fOludrxYsAAAR mapped to user cmom4whz80000k0qnjs8qb3sc and joined user_cmom4whz80000k0qnjs8qb3sc
-[Nest] 20  - 06/07/2026, 9:03:31 PM     LOG [AppGateway] Client JVlNHN_fOludrxYsAAAR joined room: kitchen
-[Nest] 20  - 06/07/2026, 9:03:31 PM     LOG [AppGateway] Client JVlNHN_fOludrxYsAAAR joined room: kitchen
-[Nest] 20  - 06/07/2026, 9:03:34 PM     LOG [AppGateway] Nueva orden received: cmq49rgp8003zz4b65adtgdx5
-[DEBUG] Petición POST /insumos/:id/movimiento recibida. ID: 937c0fa5 Payload: MovimientoInsumoDto {
-  tipo: 'entrada',
-  cantidad: 450,
-  motivo: '',
-  observaciones: undefined
-}
-[Nest] 20  - 06/07/2026, 9:05:39 PM     LOG [AppGateway] Nueva orden received: cmq49u4ri0047z4b6j9n27doy
-[Nest] 20  - 06/07/2026, 9:06:34 PM     LOG [AppGateway] Client disconnected: JVlNHN_fOludrxYsAAAR (was in rooms: user_cmom4whz80000k0qnjs8qb3sc, kitchen)
-[Nest] 20  - 06/07/2026, 9:07:42 PM     LOG [AppGateway] Client disconnected: Zm8jlPX_rTjteLCHAAAP (was in rooms: user_cmp5oiyx8002o3sjumc803yml, kitchen, caja)
-[Nest] 20  - 06/07/2026, 9:08:59 PM     LOG [AppGateway] Client lHUxVgygUIMSDEo6AAAT mapped to user cmp5oiyx8002o3sjumc803yml and joined user_cmp5oiyx8002o3sjumc803yml
-[Nest] 20  - 06/07/2026, 9:08:59 PM     LOG [AppGateway] Client lHUxVgygUIMSDEo6AAAT joined room: kitchen
-[Nest] 20  - 06/07/2026, 9:09:00 PM     LOG [AppGateway] Client lHUxVgygUIMSDEo6AAAT joined room: kitchen
-[Nest] 20  - 06/07/2026, 9:09:15 PM     LOG [AppGateway] Nueva orden received: cmq49yrhc004dz4b6g2gjq02m
-[Nest] 20  - 06/07/2026, 9:10:47 PM     LOG [AppGateway] Nueva orden received: cmq4a0qis004jz4b6rm2cr41h
-[Nest] 20  - 06/07/2026, 9:11:54 PM     LOG [AppGateway] Nueva orden received: cmq4a26yx004pz4b6yfjwmo3t
-[Nest] 20  - 06/07/2026, 9:15:08 PM     LOG [AppGateway] Nueva orden received: cmq4a6c9k004yz4b64u553h59
-[Nest] 20  - 06/07/2026, 9:16:16 PM     LOG [AppGateway] Nueva orden received: cmq4a7s8v0054z4b6qbx5fo54
-[Nest] 20  - 06/07/2026, 9:17:53 PM     LOG [AppGateway] Nueva orden received: cmq4a9vl3005az4b6jdc568su
-[Nest] 20  - 06/07/2026, 9:19:09 PM     LOG [AppGateway] Nueva orden received: cmq4abiah005gz4b6iizvyxyk
-[Nest] 20  - 06/07/2026, 9:19:56 PM     LOG [AppGateway] Nueva orden received: cmq4aci3g005pz4b6pe2iqoji
-[Nest] 20  - 06/07/2026, 9:20:04 PM     LOG [AppGateway] Nueva orden received: cmq4acoql005vz4b6xyl4jhwk
-[Nest] 20  - 06/07/2026, 9:20:22 PM     LOG [AppGateway] Nueva orden received: cmq4ad34z0061z4b6dxyfdbo8
-[Nest] 20  - 06/07/2026, 9:22:22 PM     LOG [AppGateway] Nueva orden received: cmq4afmir006az4b6qav2ve6g
-[Nest] 20  - 06/07/2026, 9:22:52 PM     LOG [AppGateway] Nueva orden received: cmq4aga8c006jz4b69rihc6zr
-[Nest] 20  - 06/07/2026, 9:23:25 PM     LOG [AppGateway] Nueva orden received: cmq4agzgr006pz4b6uxucwc1a
-[Nest] 20  - 06/07/2026, 9:25:31 PM     LOG [AppGateway] Nueva orden received: cmq4ajopp006vz4b6axgjhdxt
-[Nest] 20  - 06/07/2026, 9:26:43 PM     LOG [AppGateway] Nueva orden received: cmq4al7x40071z4b6kecph3io
-[Nest] 20  - 06/07/2026, 9:29:15 PM     LOG [AppGateway] Nueva orden received: cmq4aohop0077z4b6mva516la
-[Nest] 20  - 06/07/2026, 9:30:10 PM     LOG [AppGateway] Nueva orden received: cmq4apoav007dz4b6m90wnsjp
-[Nest] 20  - 06/07/2026, 9:30:39 PM     LOG [AppGateway] Nueva orden received: cmq4aqa1g007jz4b6rwsvdqk9
-[Nest] 20  - 06/07/2026, 9:31:56 PM     LOG [AppGateway] Nueva orden received: cmq4arxt0007pz4b6w9z8pgs0
-[Nest] 20  - 06/07/2026, 9:32:41 PM     LOG [AppGateway] Nueva orden received: cmq4aswjc007zz4b6f5p9ck29
-[Nest] 20  - 06/07/2026, 9:34:11 PM     LOG [AppGateway] Nueva orden received: cmq4auubz0085z4b6ska1wsse
-[Nest] 20  - 06/07/2026, 9:34:52 PM     LOG [AppGateway] Nueva orden received: cmq4avp30008bz4b6v2ro8i2r
-[Nest] 20  - 06/07/2026, 9:35:42 PM     LOG [AppGateway] Nueva orden received: cmq4awsik008hz4b665di2fot
-[Nest] 20  - 06/07/2026, 9:37:16 PM     LOG [AppGateway] Nueva orden received: cmq4ayskv008nz4b6h32yowe7
-[Nest] 20  - 06/07/2026, 9:38:07 PM     LOG [AppGateway] Nueva orden received: cmq4azvr6008wz4b6uutg8q4u
-[Nest] 20  - 06/07/2026, 9:39:56 PM     LOG [AppGateway] Nueva orden received: cmq4b288v0092z4b66nhbxi36
-[Nest] 20  - 06/07/2026, 9:40:22 PM     LOG [AppGateway] Nueva orden received: cmq4b2rty009bz4b6k4e0lo8f
-[Nest] 20  - 06/07/2026, 9:41:26 PM     LOG [AppGateway] Nueva orden received: cmq4b45hf009kz4b652sar3kh
-[Nest] 20  - 06/07/2026, 9:43:29 PM     LOG [AppGateway] Client disconnected: lHUxVgygUIMSDEo6AAAT (was in rooms: user_cmp5oiyx8002o3sjumc803yml, kitchen)
-[Nest] 20  - 06/07/2026, 9:43:50 PM     LOG [AppGateway] Client M6bCBuyJh2GNHEt6AAAV mapped to user cmp5oiyx8002o3sjumc803yml and joined user_cmp5oiyx8002o3sjumc803yml
-[Nest] 20  - 06/07/2026, 9:43:51 PM     LOG [AppGateway] Client M6bCBuyJh2GNHEt6AAAV joined room: kitchen
-[Nest] 20  - 06/07/2026, 9:43:52 PM     LOG [AppGateway] Client M6bCBuyJh2GNHEt6AAAV joined room: kitchen
-[Nest] 20  - 06/07/2026, 9:44:12 PM     LOG [AppGateway] Nueva orden received: cmq4b7pgt009qz4b6u0vli6fo
-[Nest] 20  - 06/07/2026, 9:44:43 PM     LOG [AppGateway] Nueva orden received: cmq4b8du0009wz4b6ykz3u94l
-[Nest] 20  - 06/07/2026, 9:45:23 PM     LOG [AppGateway] Nueva orden received: cmq4b98dg00a2z4b6enpilqd0
-[Nest] 20  - 06/07/2026, 9:47:27 PM     LOG [AppGateway] Nueva orden received: cmq4bbwe600a8z4b6pm5ph2cg
-[Nest] 20  - 06/07/2026, 9:48:00 PM     LOG [AppGateway] Orden actualizada received: cmq4bbwe600a8z4b6pm5ph2cg
-[Nest] 20  - 06/07/2026, 9:48:05 PM     LOG [AppGateway] Client M6bCBuyJh2GNHEt6AAAV joined room: caja
-[Nest] 20  - 06/07/2026, 9:48:23 PM     LOG [AppGateway] Nueva orden received: cmq4bd4af00aez4b6w4az02yd
-[Nest] 20  - 06/07/2026, 9:48:35 PM     LOG [AppGateway] Nueva orden received: cmq4bdci200akz4b6305g9y37
-[Nest] 20  - 06/07/2026, 9:49:29 PM     LOG [AppGateway] Nueva orden received: cmq4beicy00aqz4b6z2s06eax
-[Nest] 20  - 06/07/2026, 9:49:54 PM     LOG [AppGateway] Nueva orden received: cmq4bf19k00awz4b6bm3qkhdi
-[Nest] 20  - 06/07/2026, 9:50:31 PM     LOG [AppGateway] Client disconnected: M6bCBuyJh2GNHEt6AAAV (was in rooms: user_cmp5oiyx8002o3sjumc803yml, kitchen, caja)
-[Nest] 20  - 06/07/2026, 9:56:48 PM     LOG [AppGateway] Client FU3YMU-5hbyw3bU2AAAX mapped to user cmp5oiyx8002o3sjumc803yml and joined user_cmp5oiyx8002o3sjumc803yml
-[Nest] 20  - 06/07/2026, 9:56:48 PM     LOG [AppGateway] Client FU3YMU-5hbyw3bU2AAAX joined room: kitchen
-[Nest] 20  - 06/07/2026, 9:56:49 PM     LOG [AppGateway] Client FU3YMU-5hbyw3bU2AAAX joined room: kitchen
-[Nest] 20  - 06/07/2026, 9:56:49 PM     LOG [AppGateway] Client FU3YMU-5hbyw3bU2AAAX joined room: caja
-[Nest] 20  - 06/07/2026, 9:57:03 PM     LOG [AppGateway] Nueva orden received: cmq4bo9c900b2z4b6wpooji04
-[Nest] 20  - 06/07/2026, 9:57:14 PM     LOG [AppGateway] Nueva orden received: cmq4bohgg00b8z4b64hxrm7cj
-[Nest] 20  - 06/07/2026, 9:57:28 PM     LOG [AppGateway] Nueva orden received: cmq4boqna00biz4b6yjxpxejr
-[Nest] 20  - 06/07/2026, 9:57:45 PM     LOG [AppGateway] Nueva orden received: cmq4bp62l00brz4b6qxdksuek
-[Nest] 20  - 06/07/2026, 9:59:19 PM     LOG [AppGateway] Nueva orden received: cmq4br6g000bxz4b6p2fdt8uy
-[Nest] 20  - 06/07/2026, 10:00:25 PM     LOG [AppGateway] Nueva orden received: cmq4bsl8z00c3z4b6x33x6e1s
-[Nest] 20  - 06/07/2026, 10:00:41 PM     LOG [AppGateway] Nueva orden received: cmq4bsxku00c9z4b6v2io39ub
-[Nest] 20  - 06/07/2026, 10:01:02 PM     LOG [AppGateway] Nueva orden received: cmq4btds500cfz4b63efos2su
-[Nest] 20  - 06/07/2026, 10:03:17 PM     LOG [AppGateway] Nueva orden received: cmq4bwa0100clz4b6wmqt4xny
-[Nest] 20  - 06/07/2026, 10:03:30 PM     LOG [AppGateway] Orden actualizada received: cmq4bsl8z00c3z4b6x33x6e1s
-[Nest] 20  - 06/07/2026, 10:03:33 PM     LOG [AppGateway] Client FU3YMU-5hbyw3bU2AAAX joined room: caja
-[Nest] 20  - 06/07/2026, 10:04:14 PM     LOG [AppGateway] Nueva orden received: cmq4bxhx200crz4b6y57bskcm
-[Nest] 20  - 06/07/2026, 10:05:09 PM     LOG [AppGateway] Nueva orden received: cmq4byohw00cxz4b6xdtvb021
-[Nest] 20  - 06/07/2026, 10:07:03 PM     LOG [AppGateway] Nueva orden received: cmq4c141w00d3z4b6bhbxdu8p
-[Nest] 20  - 06/07/2026, 10:07:37 PM     LOG [AppGateway] Nueva orden received: cmq4c1u3600d9z4b62pfz9ioy
-[Nest] 20  - 06/07/2026, 10:08:33 PM     LOG [AppGateway] Nueva orden received: cmq4c31ii00dfz4b6lmsjqmlm
-[Nest] 20  - 06/07/2026, 10:09:51 PM     LOG [AppGateway] Nueva orden received: cmq4c4q4a00dlz4b6hwu5a212
-[Nest] 20  - 06/07/2026, 10:10:51 PM     LOG [AppGateway] Nueva orden received: cmq4c5zs800drz4b6y8ups9mf
-[Nest] 20  - 06/07/2026, 10:12:55 PM     LOG [AppGateway] Client disconnected: FU3YMU-5hbyw3bU2AAAX (was in rooms: user_cmp5oiyx8002o3sjumc803yml, kitchen, caja)
-[Nest] 20  - 06/07/2026, 10:13:12 PM     LOG [AppGateway] Client -pPKs9k3T1YGZQL0AAAZ mapped to user cmp5oiyx8002o3sjumc803yml and joined user_cmp5oiyx8002o3sjumc803yml
-[Nest] 20  - 06/07/2026, 10:13:13 PM     LOG [AppGateway] Client -pPKs9k3T1YGZQL0AAAZ joined room: kitchen
-[Nest] 20  - 06/07/2026, 10:13:13 PM     LOG [AppGateway] Client -pPKs9k3T1YGZQL0AAAZ joined room: kitchen
-[Nest] 20  - 06/07/2026, 10:13:20 PM     LOG [AppGateway] Nueva orden received: cmq4c96tw00dxz4b63nsngfrk
-[Nest] 20  - 06/07/2026, 10:13:44 PM     LOG [AppGateway] Nueva orden received: cmq4c9pvr00e3z4b6okrs0655
-[Nest] 20  - 06/07/2026, 10:14:06 PM     LOG [AppGateway] Nueva orden received: cmq4ca6m500e9z4b6upn8y77u
-[Nest] 20  - 06/07/2026, 10:16:14 PM     LOG [AppGateway] Nueva orden received: cmq4ccx2r00efz4b6g2wvswd6
-[Nest] 20  - 06/07/2026, 10:18:18 PM     LOG [AppGateway] Client disconnected: -pPKs9k3T1YGZQL0AAAZ (was in rooms: user_cmp5oiyx8002o3sjumc803yml, kitchen)
-[Nest] 20  - 06/07/2026, 10:18:42 PM     LOG [AppGateway] Client W2_JqZIrjl8PzOsJAAAb mapped to user cmp5oiyx8002o3sjumc803yml and joined user_cmp5oiyx8002o3sjumc803yml
-[Nest] 20  - 06/07/2026, 10:18:43 PM     LOG [AppGateway] Client W2_JqZIrjl8PzOsJAAAb joined room: kitchen
-[Nest] 20  - 06/07/2026, 10:18:43 PM     LOG [AppGateway] Client W2_JqZIrjl8PzOsJAAAb joined room: kitchen
-[Nest] 20  - 06/07/2026, 10:19:24 PM     LOG [AppGateway] Nueva orden received: cmq4ch0a200erz4b6h4eke26r
-[Nest] 20  - 06/07/2026, 10:21:35 PM     LOG [AppGateway] Nueva orden received: cmq4cjt9l00exz4b6zgmcqajc
-[Nest] 20  - 06/07/2026, 10:21:59 PM     LOG [AppGateway] Nueva orden received: cmq4ckbca00f3z4b6sg1pnztt
-[Nest] 20  - 06/07/2026, 10:22:31 PM     LOG [AppGateway] Nueva orden received: cmq4cl0dz00f9z4b6ohnz4skk
-[Nest] 20  - 06/07/2026, 10:24:32 PM     LOG [AppGateway] Nueva orden received: cmq4cnlhi00ffz4b6pnbzz88a
-[Nest] 20  - 06/07/2026, 10:24:46 PM     LOG [AppGateway] Nueva orden received: cmq4cnwoz00flz4b61q1gf4xq
-[Nest] 20  - 06/07/2026, 10:25:12 PM     LOG [AppGateway] Nueva orden received: cmq4cogfq00frz4b64x4cw1eb
-[Nest] 20  - 06/07/2026, 10:27:16 PM     LOG [AppGateway] Client disconnected: W2_JqZIrjl8PzOsJAAAb (was in rooms: user_cmp5oiyx8002o3sjumc803yml, kitchen)
-[Nest] 20  - 06/07/2026, 10:28:01 PM     LOG [AppGateway] Client 9hkWcTScpdUIX165AAAd mapped to user cmp5oiyx8002o3sjumc803yml and joined user_cmp5oiyx8002o3sjumc803yml
-[Nest] 20  - 06/07/2026, 10:28:02 PM     LOG [AppGateway] Client 9hkWcTScpdUIX165AAAd joined room: kitchen
-[Nest] 20  - 06/07/2026, 10:28:02 PM     LOG [AppGateway] Client 9hkWcTScpdUIX165AAAd joined room: kitchen
-[Nest] 20  - 06/07/2026, 10:28:06 PM     LOG [AppGateway] Nueva orden received: cmq4cs6rm00fxz4b6rb2f82y9
-[Nest] 20  - 06/07/2026, 10:30:10 PM     LOG [AppGateway] Client disconnected: 9hkWcTScpdUIX165AAAd (was in rooms: user_cmp5oiyx8002o3sjumc803yml, kitchen)
-[Nest] 20  - 06/07/2026, 10:31:09 PM     LOG [AppGateway] Client 6gIqe5Ul4SMc1v51AAAf mapped to user cmp5oiyx8002o3sjumc803yml and joined user_cmp5oiyx8002o3sjumc803yml
-[Nest] 20  - 06/07/2026, 10:31:09 PM     LOG [AppGateway] Client 6gIqe5Ul4SMc1v51AAAf joined room: kitchen
-[Nest] 20  - 06/07/2026, 10:31:10 PM     LOG [AppGateway] Client 6gIqe5Ul4SMc1v51AAAf joined room: kitchen
-[Nest] 20  - 06/07/2026, 10:31:14 PM     LOG [AppGateway] Nueva orden received: cmq4cw7rr00g3z4b6y482q7p9
-[Nest] 20  - 06/07/2026, 10:32:11 PM     LOG [AppGateway] Nueva orden received: cmq4cxfxt00gdz4b61c27l6ww
-[Nest] 20  - 06/07/2026, 10:33:30 PM     LOG [AppGateway] Nueva orden received: cmq4cz4lk00gjz4b6l6f4ytmd
-[Nest] 20  - 06/07/2026, 10:34:21 PM     LOG [AppGateway] Nueva orden received: cmq4d080x00gpz4b6szx7wpm0
-[Nest] 20  - 06/07/2026, 10:35:02 PM     LOG [AppGateway] Nueva orden received: cmq4d143x00gvz4b6n0rxo289
-[Nest] 20  - 06/07/2026, 10:36:19 PM     LOG [AppGateway] Nueva orden received: cmq4d2rar00h1z4b6w24k74je
-[Nest] 20  - 06/07/2026, 10:37:29 PM     LOG [AppGateway] Nueva orden received: cmq4d48pk00h7z4b6k2dbkb4m
-[Nest] 20  - 06/07/2026, 10:37:38 PM     LOG [AppGateway] Nueva orden received: cmq4d4g7f00hdz4b6gxb8su69
-[Nest] 20  - 06/07/2026, 10:38:01 PM     LOG [AppGateway] Nueva orden received: cmq4d4xzc00hjz4b6rxrmw1rx
-[Nest] 20  - 06/07/2026, 10:40:05 PM     LOG [AppGateway] Client disconnected: 6gIqe5Ul4SMc1v51AAAf (was in rooms: user_cmp5oiyx8002o3sjumc803yml, kitchen)
-[Nest] 20  - 06/07/2026, 10:41:42 PM     LOG [AppGateway] Client E-hf2k3AZ1AbViiXAAAh mapped to user cmp5oiyx8002o3sjumc803yml and joined user_cmp5oiyx8002o3sjumc803yml
-[Nest] 20  - 06/07/2026, 10:41:42 PM     LOG [AppGateway] Client E-hf2k3AZ1AbViiXAAAh joined room: kitchen
-[Nest] 20  - 06/07/2026, 10:41:43 PM     LOG [AppGateway] Client E-hf2k3AZ1AbViiXAAAh joined room: kitchen
-[Nest] 20  - 06/07/2026, 10:41:53 PM     LOG [AppGateway] Orden actualizada received: cmq4c9pvr00e3z4b6okrs0655
-[Nest] 20  - 06/07/2026, 10:43:04 PM     LOG [AppGateway] Client E-hf2k3AZ1AbViiXAAAh joined room: caja
-[Nest] 20  - 06/07/2026, 10:43:11 PM     LOG [AppGateway] Nueva orden received: cmq4dbl6n00hpz4b6v2liym8d
-[Nest] 20  - 06/07/2026, 10:44:13 PM     LOG [AppGateway] Nueva orden received: cmq4dcxd900hvz4b63gjbase3
-[Nest] 20  - 06/07/2026, 10:46:08 PM     LOG [AppGateway] Nueva orden received: cmq4dfdma00i1z4b6te5zrt8b
-[Nest] 20  - 06/07/2026, 10:46:59 PM     LOG [AppGateway] Nueva orden received: cmq4dggzw00i7z4b6bchqzz46
-[Nest] 20  - 06/07/2026, 10:48:02 PM     LOG [AppGateway] Nueva orden received: cmq4dhtha00idz4b6o93f2cp8
-[Nest] 20  - 06/07/2026, 10:49:12 PM     LOG [AppGateway] Nueva orden received: cmq4djbrd00ijz4b6dqa388i5
-[Nest] 20  - 06/07/2026, 10:51:13 PM     LOG [AppGateway] Nueva orden received: cmq4dlwgn00ipz4b6d4jtnnj5
-[Nest] 20  - 06/07/2026, 10:51:48 PM     LOG [AppGateway] Nueva orden received: cmq4dmnmo00ivz4b6a7kkrbyz
-[Nest] 20  - 06/07/2026, 10:53:52 PM     LOG [AppGateway] Client disconnected: E-hf2k3AZ1AbViiXAAAh (was in rooms: user_cmp5oiyx8002o3sjumc803yml, kitchen, caja)
-[Nest] 20  - 06/07/2026, 10:55:13 PM     LOG [AppGateway] Client qhzVU4bFzuUeYKAmAAAj mapped to user cmp5oiyx8002o3sjumc803yml and joined user_cmp5oiyx8002o3sjumc803yml
-[Nest] 20  - 06/07/2026, 10:55:13 PM     LOG [AppGateway] Client qhzVU4bFzuUeYKAmAAAj joined room: kitchen
-[Nest] 20  - 06/07/2026, 10:55:13 PM     LOG [AppGateway] Client qhzVU4bFzuUeYKAmAAAj joined room: kitchen
-[Nest] 20  - 06/07/2026, 10:55:25 PM     LOG [AppGateway] Orden actualizada received: cmq4byohw00cxz4b6xdtvb021
-[Nest] 20  - 06/07/2026, 10:55:30 PM     LOG [AppGateway] Orden actualizada received: cmq4bsxku00c9z4b6v2io39ub
-[Nest] 20  - 06/07/2026, 10:56:29 PM     LOG [AppGateway] Client qhzVU4bFzuUeYKAmAAAj joined room: caja
-[Nest] 20  - 06/07/2026, 10:56:29 PM     LOG [AppGateway] Orden actualizada received: cmq4d48pk00h7z4b6k2dbkb4m
-[Nest] 20  - 06/07/2026, 10:56:36 PM     LOG [AppGateway] Orden actualizada received: cmq4d48pk00h7z4b6k2dbkb4m
-[Nest] 20  - 06/07/2026, 10:57:37 PM     LOG [AppGateway] Client qhzVU4bFzuUeYKAmAAAj joined room: caja
-[Nest] 20  - 06/07/2026, 10:57:42 PM     LOG [AppGateway] Nueva orden received: cmq4du8xt00j5z4b6ekmtlxn2
-[Nest] 20  - 06/07/2026, 10:59:14 PM     LOG [AppGateway] Nueva orden received: cmq4dw7yw00jbz4b6gzr3gjez
-[Nest] 20  - 06/07/2026, 11:00:12 PM     LOG [AppGateway] Nueva orden received: cmq4dxh0500jhz4b6d1tzl6ah
-[Nest] 20  - 06/07/2026, 11:00:23 PM     LOG [AppGateway] Client qhzVU4bFzuUeYKAmAAAj joined room: caja
-[Nest] 20  - 06/07/2026, 11:00:23 PM     LOG [AppGateway] Orden actualizada received: cmq4dw7yw00jbz4b6gzr3gjez
-[Nest] 20  - 06/07/2026, 11:00:31 PM     LOG [AppGateway] Orden actualizada received: cmq4dw7yw00jbz4b6gzr3gjez
-[Nest] 20  - 06/07/2026, 11:01:17 PM     LOG [AppGateway] Client qhzVU4bFzuUeYKAmAAAj joined room: caja
-[Nest] 20  - 06/07/2026, 11:01:22 PM     LOG [AppGateway] Nueva orden received: cmq4dyyyc00jvz4b6ky8oum4v
-[Nest] 20  - 06/07/2026, 11:02:40 PM     LOG [AppGateway] Nueva orden received: cmq4e0nk500k1z4b6sig3nb31
-[Nest] 20  - 06/07/2026, 11:04:00 PM     LOG [AppGateway] Nueva orden received: cmq4e2d1900kbz4b678pklfhm
-[Nest] 20  - 06/07/2026, 11:06:05 PM     LOG [AppGateway] Client disconnected: qhzVU4bFzuUeYKAmAAAj (was in rooms: user_cmp5oiyx8002o3sjumc803yml, kitchen, caja)
-[Nest] 20  - 06/07/2026, 11:06:49 PM     LOG [AppGateway] Client KqflxSWKmOAt2lG1AAAl mapped to user cmp5oiyx8002o3sjumc803yml and joined user_cmp5oiyx8002o3sjumc803yml
-[Nest] 20  - 06/07/2026, 11:06:51 PM     LOG [AppGateway] Client KqflxSWKmOAt2lG1AAAl joined room: kitchen
-[Nest] 20  - 06/07/2026, 11:06:51 PM     LOG [AppGateway] Client KqflxSWKmOAt2lG1AAAl joined room: kitchen
-[Nest] 20  - 06/07/2026, 11:07:23 PM     LOG [AppGateway] Nueva orden received: cmq4e6pck00knz4b6quhscvs6
-[Nest] 20  - 06/07/2026, 11:07:40 PM     LOG [AppGateway] Client disconnected: KqflxSWKmOAt2lG1AAAl (was in rooms: user_cmp5oiyx8002o3sjumc803yml, kitchen)
-[Nest] 20  - 06/07/2026, 11:11:05 PM     LOG [AppGateway] Client KjjCcc20MRSqcWxMAAAn mapped to user cmp5oiyx8002o3sjumc803yml and joined user_cmp5oiyx8002o3sjumc803yml
-[Nest] 20  - 06/07/2026, 11:11:05 PM     LOG [AppGateway] Client KjjCcc20MRSqcWxMAAAn joined room: kitchen
-[Nest] 20  - 06/07/2026, 11:11:05 PM     LOG [AppGateway] Client KjjCcc20MRSqcWxMAAAn joined room: kitchen
-[Nest] 20  - 06/07/2026, 11:11:50 PM     LOG [AppGateway] Nueva orden received: cmq4ecfnl00kxz4b6g5r2tbjz
-[Nest] 20  - 06/07/2026, 11:13:04 PM     LOG [AppGateway] Nueva orden received: cmq4ee09300l7z4b60ar8gnmc
-[Nest] 20  - 06/07/2026, 11:13:06 PM     LOG [AppGateway] Nueva orden received: cmq4ee2bs00ldz4b6acrx0ode
-[Nest] 20  - 06/07/2026, 11:16:14 PM     LOG [AppGateway] Nueva orden received: cmq4ei2py00ljz4b6x11wi492
-[Nest] 20  - 06/07/2026, 11:16:43 PM     LOG [AppGateway] Nueva orden received: cmq4eiphi00lpz4b6v59j9o82
-[Nest] 20  - 06/07/2026, 11:18:23 PM     LOG [AppGateway] Nueva orden received: cmq4ekutg00lvz4b693f5gwiu
-[Nest] 20  - 06/07/2026, 11:18:56 PM     LOG [AppGateway] Nueva orden received: cmq4elk9f00m1z4b65tui4pww
-[Nest] 20  - 06/07/2026, 11:20:38 PM     LOG [AppGateway] Nueva orden received: cmq4enqm900m7z4b6gpplm9n5
-[Nest] 20  - 06/07/2026, 11:20:48 PM     LOG [AppGateway] Nueva orden received: cmq4enyaj00mdz4b6m8px515h
-[Nest] 20  - 06/07/2026, 11:22:40 PM     LOG [AppGateway] Nueva orden received: cmq4eqctk00mjz4b6xs47caz6
-[Nest] 20  - 06/07/2026, 11:24:08 PM     LOG [AppGateway] Nueva orden received: cmq4es98j00mtz4b6w04wsmoo
-[Nest] 20  - 06/07/2026, 11:26:10 PM     LOG [AppGateway] Nueva orden received: cmq4euvfw00n2z4b6lfi286zn
-[Nest] 20  - 06/07/2026, 11:26:47 PM     LOG [AppGateway] Nueva orden received: cmq4evnla00n8z4b63it69643
-[Nest] 20  - 06/07/2026, 11:28:35 PM     LOG [AppGateway] Nueva orden received: cmq4exz7e00nhz4b65t26odj6
-[Nest] 20  - 06/07/2026, 11:28:43 PM     LOG [AppGateway] Nueva orden received: cmq4ey4tn00nnz4b6u39r37z7
-[Nest] 20  - 06/07/2026, 11:29:11 PM     LOG [AppGateway] Client KjjCcc20MRSqcWxMAAAn joined room: caja
-[Nest] 20  - 06/07/2026, 11:29:32 PM     LOG [AppGateway] Client KjjCcc20MRSqcWxMAAAn joined room: caja
-[Nest] 20  - 06/07/2026, 11:30:01 PM     LOG [AppGateway] Nueva orden received: cmq4ezt7400ntz4b6q0n78fm6
-[Nest] 20  - 06/07/2026, 11:30:21 PM     LOG [AppGateway] Nueva orden received: cmq4f08mf00nzz4b66ekebqj6
-[Nest] 20  - 06/07/2026, 11:31:09 PM     LOG [AppGateway] Nueva orden received: cmq4f19da00o8z4b6la06tqsv
-[Nest] 20  - 06/07/2026, 11:33:49 PM     LOG [AppGateway] Nueva orden received: cmq4f4p8c00oez4b64m35750w
-[Nest] 20  - 06/07/2026, 11:35:20 PM     LOG [AppGateway] Nueva orden received: cmq4f6n0800okz4b6w5gb8xmr
-[Nest] 20  - 06/07/2026, 11:35:34 PM     LOG [AppGateway] Orden actualizada received: cmq4d48pk00h7z4b6k2dbkb4m
-[Nest] 20  - 06/07/2026, 11:36:08 PM     LOG [AppGateway] Client KjjCcc20MRSqcWxMAAAn joined room: caja
-[Nest] 20  - 06/07/2026, 11:36:59 PM     LOG [AppGateway] Nueva orden received: cmq4f8s0400oqz4b6v5uopesv
-[Nest] 20  - 06/07/2026, 11:38:16 PM     LOG [AppGateway] Nueva orden received: cmq4faezo00ozz4b6dq3aciy2
-[Nest] 20  - 06/07/2026, 11:38:23 PM     LOG [AppGateway] Nueva orden received: cmq4fakt200p5z4b6kobj4se5
-[Nest] 20  - 06/07/2026, 11:39:22 PM     LOG [AppGateway] Nueva orden received: cmq4fbu3000pfz4b6zzvk13l1
-[Nest] 20  - 06/07/2026, 11:40:26 PM     LOG [AppGateway] Nueva orden received: cmq4fd77a00ppz4b60z9z4nj5
-[Nest] 20  - 06/07/2026, 11:42:49 PM     LOG [AppGateway] Nueva orden received: cmq4fg9yf00pvz4b6ujgqa3g6
-[Nest] 20  - 06/07/2026, 11:44:22 PM     LOG [AppGateway] Nueva orden received: cmq4fi9vq00q4z4b6ioeki0h9
-[Nest] 20  - 06/07/2026, 11:46:21 PM     LOG [AppGateway] Nueva orden received: cmq4fktii00qaz4b6ys6ymjy4
-[Nest] 20  - 06/07/2026, 11:47:51 PM     LOG [AppGateway] Nueva orden received: cmq4fmr8h00qgz4b6wz0vd8p3
-[Nest] 20  - 06/07/2026, 11:48:28 PM     LOG [AppGateway] Nueva orden received: cmq4fnjan00qmz4b6igoph5cq
-[Nest] 20  - 06/07/2026, 11:49:44 PM     LOG [AppGateway] Client disconnected: KjjCcc20MRSqcWxMAAAn (was in rooms: user_cmp5oiyx8002o3sjumc803yml, kitchen, caja)
-[Nest] 20  - 06/07/2026, 11:50:47 PM     LOG [AppGateway] Client ag_FqZEL1L7rG7CgAAAp mapped to user cmp5oiyx8002o3sjumc803yml and joined user_cmp5oiyx8002o3sjumc803yml
-[Nest] 20  - 06/07/2026, 11:50:48 PM     LOG [AppGateway] Client ag_FqZEL1L7rG7CgAAAp joined room: kitchen
-[Nest] 20  - 06/07/2026, 11:50:48 PM     LOG [AppGateway] Client ag_FqZEL1L7rG7CgAAAp joined room: kitchen
-[Nest] 20  - 06/07/2026, 11:51:55 PM     LOG [AppGateway] Nueva orden received: cmq4fryvo00qsz4b68z8kk7fl
-[Nest] 20  - 06/07/2026, 11:52:41 PM     LOG [AppGateway] Nueva orden received: cmq4fsyor00qyz4b6sn3la524
-[Nest] 20  - 06/07/2026, 11:55:27 PM     LOG [AppGateway] Client disconnected: ag_FqZEL1L7rG7CgAAAp (was in rooms: user_cmp5oiyx8002o3sjumc803yml, kitchen)
-[Nest] 20  - 06/07/2026, 11:55:32 PM     LOG [AppGateway] Client cTfd-ZnmK4XB0OozAAAr mapped to user cmp5oiyx8002o3sjumc803yml and joined user_cmp5oiyx8002o3sjumc803yml
-[Nest] 20  - 06/07/2026, 11:55:32 PM     LOG [AppGateway] Client cTfd-ZnmK4XB0OozAAAr joined room: kitchen
-[Nest] 20  - 06/07/2026, 11:55:33 PM     LOG [AppGateway] Client cTfd-ZnmK4XB0OozAAAr joined room: kitchen
-[Nest] 20  - 06/07/2026, 11:55:36 PM     LOG [AppGateway] Client disconnected: cTfd-ZnmK4XB0OozAAAr (was in rooms: user_cmp5oiyx8002o3sjumc803yml, kitchen)
-[Nest] 20  - 06/07/2026, 11:56:27 PM     LOG [AppGateway] Client E8WBmdo9bnM6iMvhAAAt mapped to user cmp5oiyx8002o3sjumc803yml and joined user_cmp5oiyx8002o3sjumc803yml
-[Nest] 20  - 06/07/2026, 11:56:27 PM     LOG [AppGateway] Client E8WBmdo9bnM6iMvhAAAt joined room: kitchen
-[Nest] 20  - 06/07/2026, 11:56:27 PM     LOG [AppGateway] Client E8WBmdo9bnM6iMvhAAAt joined room: kitchen
-[Nest] 20  - 06/07/2026, 11:58:31 PM     LOG [AppGateway] Client disconnected: E8WBmdo9bnM6iMvhAAAt (was in rooms: user_cmp5oiyx8002o3sjumc803yml, kitchen)
-[Nest] 20  - 06/07/2026, 11:59:15 PM     LOG [AppGateway] Client DOAlBHfnlL5ybkxAAAAv mapped to user cmp5oiyx8002o3sjumc803yml and joined user_cmp5oiyx8002o3sjumc803yml
-[Nest] 20  - 06/07/2026, 11:59:16 PM     LOG [AppGateway] Client DOAlBHfnlL5ybkxAAAAv joined room: kitchen
-[Nest] 20  - 06/07/2026, 11:59:16 PM     LOG [AppGateway] Client DOAlBHfnlL5ybkxAAAAv joined room: kitchen
-[Nest] 20  - 06/07/2026, 11:59:26 PM     LOG [AppGateway] Nueva orden received: cmq4g1mv400r7z4b62gcjhdow
-[Nest] 20  - 06/08/2026, 12:06:06 AM     LOG [AppGateway] Nueva orden received: cmq4ga89100rdz4b6r8o9rjg2
-[Nest] 20  - 06/08/2026, 12:08:10 AM     LOG [AppGateway] Client disconnected: DOAlBHfnlL5ybkxAAAAv (was in rooms: user_cmp5oiyx8002o3sjumc803yml, kitchen)
-[Nest] 20  - 06/08/2026, 12:08:31 AM     LOG [AppGateway] Client 8Ow8wLA2R7vqEXm1AAAx mapped to user cmp5oiyx8002o3sjumc803yml and joined user_cmp5oiyx8002o3sjumc803yml
-[Nest] 20  - 06/08/2026, 12:08:31 AM     LOG [AppGateway] Client 8Ow8wLA2R7vqEXm1AAAx joined room: kitchen
-[Nest] 20  - 06/08/2026, 12:08:31 AM     LOG [AppGateway] Client 8Ow8wLA2R7vqEXm1AAAx joined room: kitchen
-[Nest] 20  - 06/08/2026, 12:09:21 AM     LOG [AppGateway] Orden actualizada received: cmq4f08mf00nzz4b66ekebqj6
-[Nest] 20  - 06/08/2026, 12:09:27 AM     LOG [AppGateway] Client 8Ow8wLA2R7vqEXm1AAAx joined room: caja
-[Nest] 20  - 06/08/2026, 12:09:37 AM     LOG [AppGateway] Nueva orden received: cmq4geqhf00rmz4b62pjme0wy
-[Nest] 20  - 06/08/2026, 12:11:41 AM     LOG [AppGateway] Client disconnected: 8Ow8wLA2R7vqEXm1AAAx (was in rooms: user_cmp5oiyx8002o3sjumc803yml, kitchen, caja)
-[Nest] 20  - 06/08/2026, 12:14:00 AM     LOG [AppGateway] Client UiVlIkFZ1nHBjfYFAAAz mapped to user cmp5oiyx8002o3sjumc803yml and joined user_cmp5oiyx8002o3sjumc803yml
-[Nest] 20  - 06/08/2026, 12:14:01 AM     LOG [AppGateway] Client UiVlIkFZ1nHBjfYFAAAz joined room: kitchen
-[Nest] 20  - 06/08/2026, 12:14:01 AM     LOG [AppGateway] Client UiVlIkFZ1nHBjfYFAAAz joined room: kitchen
-[Nest] 20  - 06/08/2026, 12:17:47 AM     LOG [AppGateway] Nueva orden received: cmq4gp8vs00rsz4b68admyuv8
-[Nest] 20  - 06/08/2026, 12:18:22 AM     LOG [AppGateway] Nueva orden received: cmq4gpzve00s1z4b67qws9fyv
-[Nest] 20  - 06/08/2026, 12:18:26 AM     LOG [AppGateway] Nueva orden received: cmq4gq34z00s7z4b6rynherd0
-[Nest] 20  - 06/08/2026, 12:22:17 AM     LOG [AppGateway] Nueva orden received: cmq4gv0oz00sgz4b629f5w4p1
-[Nest] 20  - 06/08/2026, 12:22:36 AM     LOG [AppGateway] Client qUfc0tKHwcGm0nBLAAA1 mapped to user cmom4whz80000k0qnjs8qb3sc and joined user_cmom4whz80000k0qnjs8qb3sc
-[Nest] 20  - 06/08/2026, 12:22:37 AM     LOG [AppGateway] Client qUfc0tKHwcGm0nBLAAA1 joined room: kitchen
-[Nest] 20  - 06/08/2026, 12:22:37 AM     LOG [AppGateway] Client qUfc0tKHwcGm0nBLAAA1 joined room: kitchen
-[Nest] 20  - 06/08/2026, 12:22:47 AM     LOG [AppGateway] Nueva orden received: cmq4gvo7o00sqz4b62bmjhlmv
-[Nest] 20  - 06/08/2026, 12:24:51 AM     LOG [AppGateway] Client disconnected: UiVlIkFZ1nHBjfYFAAAz (was in rooms: user_cmp5oiyx8002o3sjumc803yml, kitchen)
-[Nest] 20  - 06/08/2026, 12:24:54 AM     LOG [AppGateway] Client disconnected: qUfc0tKHwcGm0nBLAAA1 (was in rooms: user_cmom4whz80000k0qnjs8qb3sc, kitchen)
-[Nest] 20  - 06/08/2026, 12:25:03 AM     LOG [AppGateway] Client wsF-DP0NnAAVWOUzAAA3 mapped to user cmom4whz80000k0qnjs8qb3sc and joined user_cmom4whz80000k0qnjs8qb3sc
-[Nest] 20  - 06/08/2026, 12:25:04 AM     LOG [AppGateway] Client wsF-DP0NnAAVWOUzAAA3 joined room: kitchen
-[Nest] 20  - 06/08/2026, 12:25:04 AM     LOG [AppGateway] Client wsF-DP0NnAAVWOUzAAA3 joined room: kitchen
-[Nest] 20  - 06/08/2026, 12:25:22 AM     LOG [AppGateway] Client disconnected: wsF-DP0NnAAVWOUzAAA3 (was in rooms: user_cmom4whz80000k0qnjs8qb3sc, kitchen)
-[Nest] 20  - 06/08/2026, 12:25:32 AM     LOG [AppGateway] Client ZqVGRm8_aNQX-HycAAA5 mapped to user cmom4whz80000k0qnjs8qb3sc and joined user_cmom4whz80000k0qnjs8qb3sc
-[Nest] 20  - 06/08/2026, 12:25:32 AM     LOG [AppGateway] Client ZqVGRm8_aNQX-HycAAA5 joined room: kitchen
-[Nest] 20  - 06/08/2026, 12:25:32 AM     LOG [AppGateway] Client ZqVGRm8_aNQX-HycAAA5 joined room: kitchen
-[Nest] 20  - 06/08/2026, 12:26:07 AM     LOG [AppGateway] Client xFmtcELUJLJAun5tAAA7 mapped to user cmp5oiyx8002o3sjumc803yml and joined user_cmp5oiyx8002o3sjumc803yml
-[Nest] 20  - 06/08/2026, 12:26:07 AM     LOG [AppGateway] Client xFmtcELUJLJAun5tAAA7 joined room: kitchen
-[Nest] 20  - 06/08/2026, 12:26:07 AM     LOG [AppGateway] Client xFmtcELUJLJAun5tAAA7 joined room: kitchen
-[Nest] 20  - 06/08/2026, 12:26:57 AM     LOG [AppGateway] Client disconnected: ZqVGRm8_aNQX-HycAAA5 (was in rooms: user_cmom4whz80000k0qnjs8qb3sc, kitchen)
-[Nest] 20  - 06/08/2026, 12:26:57 AM     LOG [AppGateway] Nueva orden received: cmq4h11ek00t4z4b6ni02yw3a
-[Nest] 20  - 06/08/2026, 12:27:07 AM     LOG [AppGateway] Client lx3M9uTtIULwzYsPAAA9 mapped to user cmom4whz80000k0qnjs8qb3sc and joined user_cmom4whz80000k0qnjs8qb3sc
-[Nest] 20  - 06/08/2026, 12:27:07 AM     LOG [AppGateway] Client lx3M9uTtIULwzYsPAAA9 joined room: kitchen
-[Nest] 20  - 06/08/2026, 12:27:07 AM     LOG [AppGateway] Client lx3M9uTtIULwzYsPAAA9 joined room: kitchen
-[Nest] 20  - 06/08/2026, 12:27:33 AM     LOG [AppGateway] Client disconnected: lx3M9uTtIULwzYsPAAA9 (was in rooms: user_cmom4whz80000k0qnjs8qb3sc, kitchen)
-[Nest] 20  - 06/08/2026, 12:27:49 AM     LOG [AppGateway] Client TSV7gF2vmFHYxdEhAAA_ mapped to user cmom4whz80000k0qnjs8qb3sc and joined user_cmom4whz80000k0qnjs8qb3sc
-[Nest] 20  - 06/08/2026, 12:27:50 AM     LOG [AppGateway] Client TSV7gF2vmFHYxdEhAAA_ joined room: kitchen
-[Nest] 20  - 06/08/2026, 12:27:50 AM     LOG [AppGateway] Client TSV7gF2vmFHYxdEhAAA_ joined room: kitchen
-[Nest] 20  - 06/08/2026, 12:28:02 AM     LOG [AppGateway] Nueva orden received: cmq4h2f3x00tez4b6i0eedogn
-[AiService] Respuesta RAW de Gemini (Text): [{"nombreExtraido":"Ojo de diablo Mix Premium 5.48L","cantidad":36,"precioUnitario":32000,"insumoId":"20475d76","observacion":""},{"nombreExtraido":"Venom Mix Premium 5.48L","cantidad":13,"precioUnitario":32000,"insumoId":"20475d85","observacion":""},{"nombreExtraido":"4Lok Pink Mix Premium 5.48L","cantidad":13,"precioUnitario":32000,"insumoId":"5e6f4f63","observacion":""},{"nombreExtraido":"Caipirih Mix Premium 5.48L","cantidad":13,"precioUnitario":32000,"insumoId":"d780b4b3","observacion":""},{"nombreExtraido":"Nerds Mix Premium 5.48L","cantidad":13,"precioUnitario":32000,"insumoId":"20475d71","observacion":""},{"nombreExtraido":"Pasión Purpura Mix Premium 5.48L","cantidad":13,"precioUnitario":32000,"insumoId":"318c6510","observacion":""},{"nombreExtraido":"Selvatik Mix Premium 5.48L","cantidad":13,"precioUnitario":32000,"insumoId":"20475d78","observacion":""},{"nombreExtraido":"Fresa Bommbon Mix Premium 5.48L","cantidad":8,"precioUnitario":32000,"insumoId":"cdbf7084","observacion":""},{"nombreExtraido":"Tuxx Mix Premium 5.48L","cantidad":8,"precioUnitario":32000,"insumoId":"20475d7b","observacion":""},{"nombreExtraido":"Mango Bik Mix Premium 5.48L","cantidad":8,"precioUnitario":32000,"insumoId":"aecb3c69","observacion":""},{"nombreExtraido":"Mimosi Mix Premium 5.48L","cantidad":8,"precioUnitario":32000,"insumoId":"e3acc043","observacion":""},{"nombreExtraido":"Mojitik Mix Premium 5.48L","cantidad":8,"precioUnitario":32000,"insumoId":"48cd95a1","observacion":""},{"nombreExtraido":"4Lok Gold Mix Premium 5.48L","cantidad":8,"precioUnitario":32000,"insumoId":"485cb7d3","observacion":""},{"nombreExtraido":"Ice Russian Mix Premium 5.48L","cantidad":8,"precioUnitario":32000,"insumoId":"f4db7a4e","observacion":""},{"nombreExtraido":"Blue Cotton Mix Premium 5.48L","cantidad":8,"precioUnitario":32000,"insumoId":"cmpypge6v006dgu8topfxq14v","observacion":
-[Nest] 20  - 06/08/2026, 12:28:23 AM    WARN [AiService] Parseo limpio falló. Intentando reparación agresiva...
-[AiService] Respuesta RAW de Gemini (Text): [{"nombreExtraido":"Ojo de diablo Mix Premium 5.48L","cantidad":36,"precioUnitario":32000,"insumoId":"20475d76","observacion":""},{"nombreExtraido":"Venom Mix Premium 5.48L","cantidad":13,"precioUnitario":32000,"insumoId":"20475d85","observacion":""},{"nombreExtraido":"4Lok Pink Mix Premium 5.48L","cantidad":13,"precioUnitario":32000,"insumoId":"5e6f4f63","observacion":""},{"nombreExtraido":"Caipirih Mix Premium 5.48L","cantidad":13,"precioUnitario":32000,"insumoId":"d780b4b3","observacion":""},{"nombreExtraido":"Nerds Mix Premium 5.48L","cantidad":13,"precioUnitario":32000,"insumoId":"20475d71","observacion":""},{"nombreExtraido":"Pasión Purpura Mix Premium 5.48L","cantidad":13,"precioUnitario":32000,"insumoId":"318c6510","observacion":""},{"nombreExtraido":"Selvatik Mix Premium 5.48L","cantidad":13,"precioUnitario":32000,"insumoId":"20475d78","observacion":""},{"nombreExtraido":"Fresa Bommbon Mix Premium 5.48L","cantidad":8,"precioUnitario":32000,"insumoId":"cdbf7084","observacion":""},{"nombreExtraido":"Tuxx Mix Premium 5.48L","cantidad":8,"precioUnitario":32000,"insumoId":"20475d7b","observacion":""},{"nombreExtraido":"Mango Bik Mix Premium 5.48L","cantidad":8,"precioUnitario":32000,"insumoId":"aecb3c69","observacion":""},{"nombreExtraido":"Mimosi Mix Premium 5.48L","cantidad":8,"precioUnitario":32000,"insumoId":"e3acc043","observacion":""},{"nombreExtraido":"Mojitik Mix Premium 5.48L","cantidad":8,"precioUnitario":32000,"insumoId":"48cd95a1","observacion":""},{"nombreExtraido":"4Lok Gold Mix Premium 5.48L","cantidad":8,"precioUnitario":32000,"insumoId":"485cb7d3","observacion":""},{"nombreExtraido":"Ice Russian Mix Premium 5.48L","cantidad":8,"precioUnitario":32000,"insumoId":"f4db7a4e","observacion":""},{"nombreExtraido":"Blue Cotton Mix Premium 5.48L","cantidad":8,"precioUnitario":32000,"insumoId":"cmpypge6v006dgu8topfxq14v","observacion":""},{"nombreExtraido":"Mora azul Mix Premium 5.48L","cantidad":8,"precioUnitario":32000,"insumoId":"0198226c","observacion":""},{"nombreExtraido":"Napoles Mix Premium 5.48L","cantidad":8,"precioUnitario":32000,"insumoId":"20475d79","observacion":""},{"nombreExtraido":"Mango Tek Mix Premium 5.48L","cantidad":8,"precioUnitario":32000,"insumoId":"20475d77","observacion":""},{"nombreExtraido":"4Lok Red Mix Premium 5.48L","cantidad":8,"precioUnitario":32000,"insumoId":"af470faa","observacion":""},{"nombreExtraido":"Manzana Green Mix Premium 5.48L","cantidad":8,"precioUnitario":32000,"insumoId":"20475d84","observacion":""},{"nombreExtraido":"Santorini Mix Premium 5.48L","cantidad":8,"precioUnitario":32000,"insumoId":"20475d81","observacion":""},{"nombreExtraido":"Fresa Bommbon - 6L, uso en granizadora","cantidad":62,"precioUnitario":28000,"insumoId":"cdbf7084","observacion":""},{"nombreExtraido":"Uva pasion - 6L, uso en granizadora","cantidad":20,"precioUnitario":28000,"insumoId":"db7e52a3","observacion":""},{"nombreExtraido":"Selvatik - 6L, uso en granizadora","cantidad":22,"precioUnitario":28000,"insumoId":"20475d78","observacion":""},{"nombreExtraido":"Mora Azul - 6L, uso en granizadora","cantidad":22,"precioUnitario":28000,"insumoId":"0198226c","observacion":""},{"nombreExtraido":"Caipirih - 6L, uso en granizadora","cantidad":20,"precioUnitario":28000,"insumoId":"d780b4b3","observacion":""},{"nombreExtraido":"Blue Cotton - 6L, uso en granizadora","cantidad":20,"precioUnitario":28000,"insumoId":"cmpypge6v006dgu8topfxq14v","observacion":""},{"nombreExtraido":"Venom - 6L, uso en granizadora","cantidad":20,"precioUnitario":28000,"insumoId":"20475d85","observacion":""},{"nombreExtraido":"Mango Maduro - 6L, uso en granizadora","cantidad":20,"precioUnitario":28000,"insumoId":"545b38b1","observacion":""},{"nombreExtraido":"Tuxx - 6L, uso en granizadora","cantidad":14,"precioUnitario":28000,"insumoId":"20475d7b","observacion":""},{"nombreExtraido":"Summer Fantasy - 6L, uso en granizadora","cantidad":18,"precioUnitario":28000,"insumoId":"20475d75","observacion":""},{"nombreExtraido":"Manzana Green - 6L, uso en granizadora","cantidad":18,"precioUnitario":28000,"insumoId":"20475d84","observacion":""},{"nombreExtraido":"Ojo de diablo - 6L, uso en granizadora","cantidad":18,"precioUnitario":28000,"insumoId":"20475d76","observacion":""},{"nombreExtraido":"Santorini - 6L, uso en granizadora","cantidad":18,"precioUnitario":28000,"insumoId":"20475d81","observacion":""}]
-[AiService] Respuesta RAW de Gemini (Text): [{"nombreExtraido":"Ojo de diablo Mix Premium 5.48L","cantidad":36,"precioUnitario":32000,"insumoId":"20475d76","observacion":""},{"nombreExtraido":"Venom Mix Premium 5.48L","cantidad":13,"precioUnitario":32000,"insumoId":"20475d85","observacion":""},{"nombreExtraido":"4Lok Pink Mix Premium 5.48L","cantidad":13,"precioUnitario":32000,"insumoId":"5e6f4f63","observacion":""},{"nombreExtraido":"Caipirih Mix Premium 5.48L","cantidad":13,"precioUnitario":32000,"insumoId":"d780b4b3","observacion":""},{"nombreExtraido":"Nerds Mix Premium 5.48L","cantidad":13,"precioUnitario":32000,"insumoId":"20475d71","observacion":""},{"nombreExtraido":"Pasión Purpura Mix Premium 5.48L","cantidad":13,"precioUnitario":32000,"insumoId":"318c6510","observacion":""},{"nombreExtraido":"Selvatik Mix Premium 5.48L","cantidad":13,"precioUnitario":32000,"insumoId":"20475d78","observacion":""},{"nombreExtraido":"Fresa Bommbon Mix Premium 5.48L","cantidad":8,"precioUnitario":32000,"insumoId":"cdbf7084","observacion":""},{"nombreExtraido":"Tuxx Mix Premium 5.48L","cantidad":8,"precioUnitario":32000,"insumoId":"20475d7b","observacion":""},{"nombreExtraido":"Mango Bik Mix Premium 5.48L","cantidad":8,"precioUnitario":32000,"insumoId":"aecb3c69","observacion":""},{"nombreExtraido":"Mimosi Mix Premium 5.48L","cantidad":8,"precioUnitario":32000,"insumoId":"e3acc043","observacion":""},{"nombreExtraido":"Mojitik Mix Premium 5.48L","cantidad":8,"precioUnitario":32000,"insumoId":"48cd95a1","observacion":""},{"nombreExtraido":"4Lok Gold Mix Premium 5.48L","cantidad":8,"precioUnitario":32000,"insumoId":"485cb7d3","observacion":""},{"nombreExtraido":"Ice Russian Mix Premium 5.48L","cantidad":8,"precioUnitario":32000,"insumoId":"f4db7a4e","observacion":""},{"nombreExtraido":"Blue Cotton Mix Premium 5.48L","cantidad":8,"precioUnitario":32000,"insumoId":"cmpypge6v006dgu8topfxq14v","observacion":""},{"nombreExtraido":"Mora azul Mix Premium 5.48L","cantidad":8,"precioUnitario":32000,"insumoId":"0198226c","observacion":""},{"nombreExtraido":"Napoles Mix Premium 5.48L","cantidad":8,"precioUnitario":32000,"insumoId":"20475d79","observacion":""},{"nombreExtraido":"Mango Tek Mix Premium 5.48L","cantidad":8,"precioUnitario":32000,"insumoId":"20475d77","observacion":""},{"nombreExtraido":"4Lok Red Mix Premium 5.48L","cantidad":8,"precioUnitario":32000,"insumoId":"af470faa","observacion":""},{"nombreExtraido":"Manzana Green Mix Premium 5.48L","cantidad":8,"precioUnitario":32000,"insumoId":"20475d84","observacion":""},{"nombreExtraido":"Santorini Mix Premium 5.48L","cantidad":8,"precioUnitario":32000,"insumoId":"20475d81","observacion":""},{"nombreExtraido":"Fresa Bommbon - 6L, uso en granizadora","cantidad":62,"precioUnitario":28000,"insumoId":null,"observacion":""},{"nombreExtraido":"Uva pasion - 6L, uso en granizadora","cantidad":20,"precioUnitario":28000,"insumoId":"db7e52a3","observacion":""},{"nombreExtraido":"Selvatik - 6L, uso en granizadora","cantidad":22,"precioUnitario":28000,"insumoId":"bca7bb21","observacion":""},{"nombreExtraido":"Mora Azul - 6L, uso en granizadora","cantidad":22,"precioUnitario":28000,"insumoId":"2b9855e7","observacion":""},{"nombreExtraido":"Caipirih - 6L, uso en granizadora","cantidad":20,"precioUnitario":28000,"insumoId":"9dbd9421","observacion":""},{"nombreExtraido":"Blue Cotton - 6L, uso en granizadora","cantidad":20,"precioUnitario":28000,"insumoId":"cmpyo6vbk0048gu8tb7476piy","observacion":""},{"nombreExtraido":"Venom - 6L, uso en granizadora","cantidad":20,"precioUnitario":28000,"insumoId":"33e0b56f","observacion":""},{"nombreExtraido":"Mango Maduro - 6L, uso en granizadora","cantidad":20,"precioUnitario":28000,"insumoId":"545b38b1","observacion":""},{"nombreExtraido":"Tuxx - 6L, uso en granizadora","cantidad":14,"precioUnitario":28000,"insumoId":"a22d63d8","observacion":""},{"nombreExtraido":"Summer Fantasy - 6L, uso en granizadora","cantidad":18,"precioUnitario":28000,"insumoId":"3047deff","observacion":""},{"nombreExtraido":"Manzana Green - 6L, uso en granizadora","cantidad":18,"precioUnitario":28000,"insumoId":"20475d84","observacion":""},{"nombreExtraido":"Ojo de diablo - 6L, uso en granizadora","cantidad":18,"precioUnitario":28000,"insumoId":"b55340c0","observacion":""},{"nombreExtraido":"Santorini - 6L, uso en granizadora","cantidad":18,"precioUnitario":28000,"insumoId":"2acc88b4","observacion":""}]
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [InstanceLoader] AiModule dependencies initialized +1ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [InstanceLoader] InsumosModule dependencies initialized +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [InstanceLoader] InventarioModule dependencies initialized +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [InstanceLoader] UsuariosModule dependencies initialized +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [InstanceLoader] ProductosModule dependencies initialized +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [InstanceLoader] CategoriasModule dependencies initialized +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [InstanceLoader] GastosModule dependencies initialized +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [InstanceLoader] CajaModule dependencies initialized +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [InstanceLoader] VentasModule dependencies initialized +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [WebSocketsController] AppGateway subscribed to the "joinRoom" message +82ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [WebSocketsController] AppGateway subscribed to the "leaveRoom" message +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [WebSocketsController] AppGateway subscribed to the "nuevaOrden" message +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [WebSocketsController] AppGateway subscribed to the "ordenActualizada" message +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [WebSocketsController] AppGateway subscribed to the "ordenCompletada" message +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RoutesResolver] AuthController {/api/v1/auth}: +1ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/auth/register, POST} route +3ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/auth/login, POST} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/auth/refresh, POST} route +1ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RoutesResolver] UsuariosController {/api/v1/usuarios}: +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/usuarios/roles, GET} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/usuarios, POST} route +1ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/usuarios, GET} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/usuarios/:id, GET} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/usuarios/:id, PATCH} route +1ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/usuarios/:id, DELETE} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RoutesResolver] ProductosController {/api/v1/productos}: +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/productos, POST} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/productos, GET} route +1ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/productos/:id, GET} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/productos/:id, PATCH} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/productos/:id, DELETE} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RoutesResolver] CategoriasController {/api/v1/categorias}: +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/categorias, POST} route +1ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/categorias, GET} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/categorias/:id, GET} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/categorias/:id, PATCH} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/categorias/:id, DELETE} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RoutesResolver] VentasController {/api/v1/ventas}: +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/ventas, POST} route +1ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/ventas/completa, POST} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/ventas, GET} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/ventas/hoy, GET} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/ventas/mesa/:mesaId, GET} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/ventas/:id, GET} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/ventas/:id/tiempo-total, GET} route +1ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/ventas/:id, PUT} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/ventas/:id/estado, PATCH} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/ventas/:id/pago, PATCH} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/ventas/:id/productos, POST} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/ventas/:ventaId/producto/:orderVentaId, PATCH} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/ventas/bulk, DELETE} route +1ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/ventas/trash/empty, DELETE} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/ventas/bulk/hard, DELETE} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/ventas/:id, DELETE} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/ventas/:id/hard, DELETE} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/ventas/:id/restore, POST} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RoutesResolver] InsumosController {/api/v1/insumos}: +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/insumos/upload-image, POST} route +1ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/insumos, POST} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/insumos, GET} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/insumos/alertas, GET} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/insumos/estadisticas, GET} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/insumos/:id, GET} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/insumos/:id/movimientos, GET} route +1ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/insumos/:id, PATCH} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/insumos/:id, DELETE} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/insumos/:id/movimiento, POST} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/insumos/bulk, POST} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/insumos/:id/agregar, POST} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/insumos/:id/descontar, POST} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RoutesResolver] NotificationsController {/api/v1/notifications}: +1ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/notifications/token, POST} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/notifications/settings/:userId, GET} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/notifications/settings/:userId, PATCH} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/notifications/history/:userId, GET} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/notifications/history/:id/read, PATCH} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RoutesResolver] InventarioController {/api/v1/inventario}: +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/inventario, POST} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/inventario, GET} route +1ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/inventario/items, GET} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/inventario/bajo, GET} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/inventario/item/:id/update, PATCH} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/inventario/item/update/:id, PATCH} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/inventario/item/update, PATCH} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/inventario/:id, GET} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/inventario/:id, PATCH} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/inventario/:id, DELETE} route +1ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/inventario/item, POST} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/inventario/items/bulk, POST} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/inventario/item/:id, DELETE} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/inventario/item/:id/comprar, PATCH} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/inventario/items/comprar, PATCH} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/inventario/insumo/:insumoId/stock-calculado, GET} route +1ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/inventario/recalcular-stock, POST} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RoutesResolver] ClientesController {/api/v1/clientes}: +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/clientes, POST} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/clientes, GET} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/clientes/:id, GET} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/clientes/:id, PATCH} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/clientes/:id, DELETE} route +1ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RoutesResolver] ProveedoresController {/api/v1/proveedores}: +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/proveedores, POST} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/proveedores, GET} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/proveedores/:id, GET} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/proveedores/:id, PATCH} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/proveedores/:id, DELETE} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RoutesResolver] CajaController {/api/v1/caja}: +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/caja/abrir, POST} route +1ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/caja/:id, PATCH} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/caja/cerrar/:id, PATCH} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/caja/reabrir/:id, PATCH} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/caja/activa, GET} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/caja/resumen/:id, GET} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/caja, GET} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/caja/:id, GET} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/caja/:id, DELETE} route +1ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/caja/:id/verificacion-pendiente, GET} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/caja/:id/registrar-conteo, POST} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/caja/:id/posponer-verificacion, POST} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/caja/:id/insumo/:insumoId/conteo/:conteoIndex, DELETE} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/caja/:id/insumo/:insumoId/conteo/:conteoIndex, PATCH} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/caja/:id/auto-cuadre/preview, POST} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/caja/:id/auto-cuadre/execute, POST} route +1ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RoutesResolver] AiController {/api/v1/ai}: +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/ai/extract-data, POST} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/ai/voice-order, POST} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/ai/extract-text, POST} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/ai/refine-extraction, POST} route +1ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RoutesResolver] AgentController {/api/v1/agent}: +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/agent/chat, POST} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RoutesResolver] ConfiguracionController {/api/v1/configuracion}: +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/configuracion, GET} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/configuracion, PUT} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/configuracion/ia, GET} route +1ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/configuracion/ia, PUT} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/configuracion/whatsapp, GET} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/configuracion/whatsapp, PUT} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/configuracion/whatsapp/send-report, POST} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/configuracion/whatsapp/upload-and-send, POST} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RoutesResolver] GastosController {/api/v1/gastos}: +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/gastos/upload-image, POST} route +1ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/gastos, POST} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/gastos/bulk, POST} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/gastos, GET} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/gastos/total, GET} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/gastos/:id, GET} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/gastos/:id, PATCH} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/gastos/:id, DELETE} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RoutesResolver] MesasController {/api/v1/mesas}: +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/mesas, POST} route +1ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/mesas, GET} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/mesas/:id, GET} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/mesas/:id, PATCH} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/mesas/:id, DELETE} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RoutesResolver] ComentariosController {/api/v1/comentarios}: +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/comentarios, POST} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/comentarios, GET} route +1ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/comentarios/:id, GET} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/comentarios/:id, PATCH} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/comentarios/:id, DELETE} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RoutesResolver] PrinterConfigController {/api/v1/printer-config}: +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/printer-config, GET} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/printer-config, PUT} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RoutesResolver] EstadisticasController {/api/v1/estadisticas}: +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/estadisticas/generales, GET} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RoutesResolver] ReportesController {/api/v1/reportes}: +1ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/reportes/dinero-guardado, GET} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/reportes/dinero-guardado, POST} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/reportes/dinero-guardado/:filterId, DELETE} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/reportes/dinero-guardado/:filterId, GET} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/reportes/dinero-guardado/:filterId/retiros, POST} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/reportes/dinero-guardado/retiros/:retiroId, DELETE} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/reportes/dinero-guardado/:filterId/base, POST} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RoutesResolver] CategoriasInsumosController {/api/v1/categorias-insumos}: +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/categorias-insumos, POST} route +1ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/categorias-insumos, GET} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/categorias-insumos/:id, GET} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/categorias-insumos/:id, PATCH} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/categorias-insumos/:id, DELETE} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RoutesResolver] CargosController {/api/v1/cargos}: +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/cargos, POST} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/cargos, GET} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/cargos/:id, GET} route +1ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/cargos/:id, PATCH} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/cargos/:id, DELETE} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RoutesResolver] NominaController {/api/v1/nomina}: +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/nomina/turno/entrada, POST} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/nomina/turno/:id/salida, PATCH} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/nomina/turno/activo-hoy, GET} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/nomina/turnos, GET} route +1ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/nomina/mis-turnos, GET} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/nomina/turno/:id, GET} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/nomina/turno/:id, PATCH} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/nomina/turno/:id, DELETE} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/nomina/descuento, POST} route +1ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/nomina/descuento/repartir, POST} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/nomina/descuentos, GET} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/nomina/mis-descuentos, GET} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/nomina/descuento/:id/visto, PATCH} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/nomina/descuento/:id, PATCH} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/nomina/descuento/:id, DELETE} route +1ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/nomina/resumen/mio, GET} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/nomina/resumen/:usuarioId, GET} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/nomina/liquidar, POST} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/nomina/liquidaciones, GET} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/nomina/liquidaciones/:id, GET} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [RouterExplorer] Mapped {/api/v1/nomina/liquidaciones/:id/pagar, PATCH} route +0ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [AgentService] PostgresSaver checkpointer configurado con éxito.
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [NestApplication] Nest application successfully started +22ms
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [Bootstrap] Application is running on: http://0.0.0.0:3000
+[Nest] 18  - 06/12/2026, 1:25:11 AM     LOG [Bootstrap] Swagger documentation: http://0.0.0.0:3000/api/docs
+[Nest] 18  - 06/12/2026, 1:25:26 AM     LOG [AppGateway] Client RviVgs9I8Ky9dq-2AAAB mapped to user cmp5oiyx8002o3sjumc803yml and joined user_cmp5oiyx8002o3sjumc803yml
+[Nest] 18  - 06/12/2026, 1:25:26 AM     LOG [AppGateway] Client RviVgs9I8Ky9dq-2AAAB joined room: kitchen
+[Nest] 18  - 06/12/2026, 1:25:28 AM     LOG [AppGateway] Client RviVgs9I8Ky9dq-2AAAB joined room: kitchen
+[Nest] 18  - 06/12/2026, 1:26:43 AM     LOG [AppGateway] Client disconnected: RviVgs9I8Ky9dq-2AAAB (was in rooms: user_cmp5oiyx8002o3sjumc803yml, kitchen)
+[Nest] 18  - 06/12/2026, 1:28:25 AM     LOG [AppGateway] Client mR8WQqiA9c4r62W1AAAD mapped to user cmom4whz80000k0qnjs8qb3sc and joined user_cmom4whz80000k0qnjs8qb3sc
+[Nest] 18  - 06/12/2026, 1:28:26 AM     LOG [AppGateway] Client mR8WQqiA9c4r62W1AAAD joined room: kitchen
+[Nest] 18  - 06/12/2026, 1:28:26 AM     LOG [AppGateway] Client mR8WQqiA9c4r62W1AAAD joined room: kitchen
+[Nest] 18  - 06/12/2026, 1:31:49 AM     LOG [AppGateway] Client disconnected: mR8WQqiA9c4r62W1AAAD (was in rooms: user_cmom4whz80000k0qnjs8qb3sc, kitchen)
+[Nest] 18  - 06/12/2026, 1:31:54 AM     LOG [AppGateway] Client bI6PQJdQaPI-bkPNAAAF mapped to user cmom4whz80000k0qnjs8qb3sc and joined user_cmom4whz80000k0qnjs8qb3sc
+[Nest] 18  - 06/12/2026, 1:31:55 AM     LOG [AppGateway] Client bI6PQJdQaPI-bkPNAAAF joined room: kitchen
+[Nest] 18  - 06/12/2026, 1:31:55 AM     LOG [AppGateway] Client bI6PQJdQaPI-bkPNAAAF joined room: kitchen
+[Nest] 18  - 06/12/2026, 1:32:00 AM     LOG [AppGateway] Client bI6PQJdQaPI-bkPNAAAF joined room: caja
+[Nest] 18  - 06/12/2026, 1:32:28 AM     LOG [AppGateway] Client BR9ze4wr68VSCsBwAAAH mapped to user cmp5oiyx8002o3sjumc803yml and joined user_cmp5oiyx8002o3sjumc803yml
+[Nest] 18  - 06/12/2026, 1:32:28 AM     LOG [AppGateway] Client BR9ze4wr68VSCsBwAAAH joined room: kitchen
+[Nest] 18  - 06/12/2026, 1:32:30 AM     LOG [AppGateway] Client BR9ze4wr68VSCsBwAAAH joined room: kitchen
+[Nest] 18  - 06/12/2026, 1:32:32 AM     LOG [AppGateway] Nueva orden received: cmqa94ran000111d5a2nervtb
+[Nest] 18  - 06/12/2026, 1:32:46 AM     LOG [AppGateway] Client disconnected: bI6PQJdQaPI-bkPNAAAF (was in rooms: user_cmom4whz80000k0qnjs8qb3sc, kitchen, caja)
+[Nest] 18  - 06/12/2026, 1:33:02 AM     LOG [AppGateway] Client _HLIuBkc5pZe1WbHAAAJ mapped to user cmom4whz80000k0qnjs8qb3sc and joined user_cmom4whz80000k0qnjs8qb3sc
+[Nest] 18  - 06/12/2026, 1:33:04 AM     LOG [AppGateway] Client _HLIuBkc5pZe1WbHAAAJ joined room: kitchen
+[Nest] 18  - 06/12/2026, 1:33:05 AM     LOG [AppGateway] Client _HLIuBkc5pZe1WbHAAAJ joined room: kitchen
+[Nest] 18  - 06/12/2026, 1:33:07 AM     LOG [AppGateway] Client disconnected: _HLIuBkc5pZe1WbHAAAJ (was in rooms: user_cmom4whz80000k0qnjs8qb3sc, kitchen)
+[Nest] 18  - 06/12/2026, 1:33:15 AM     LOG [AppGateway] Client kDoPJrh27ZHFgb2OAAAL mapped to user cmom4whz80000k0qnjs8qb3sc and joined user_cmom4whz80000k0qnjs8qb3sc
+[Nest] 18  - 06/12/2026, 1:33:16 AM     LOG [AppGateway] Client kDoPJrh27ZHFgb2OAAAL joined room: kitchen
+[Nest] 18  - 06/12/2026, 1:33:16 AM     LOG [AppGateway] Client kDoPJrh27ZHFgb2OAAAL joined room: kitchen
+[Nest] 18  - 06/12/2026, 1:33:24 AM     LOG [AppGateway] Client kDoPJrh27ZHFgb2OAAAL joined room: caja
+[Nest] 18  - 06/12/2026, 1:33:33 AM     LOG [AppGateway] Client BR9ze4wr68VSCsBwAAAH joined room: caja
+[Nest] 18  - 06/12/2026, 1:33:35 AM     LOG [AppGateway] Client kDoPJrh27ZHFgb2OAAAL joined room: caja
+[Nest] 18  - 06/12/2026, 1:33:41 AM     LOG [AppGateway] Client kDoPJrh27ZHFgb2OAAAL joined room: kitchen
+[Nest] 18  - 06/12/2026, 1:33:42 AM     LOG [AppGateway] Client kDoPJrh27ZHFgb2OAAAL joined room: caja
+[Nest] 18  - 06/12/2026, 1:33:44 AM     LOG [AppGateway] Nueva orden received: cmqa96akd000b11d5th2fc8r1
+[Nest] 18  - 06/12/2026, 1:34:02 AM     LOG [AppGateway] Client disconnected: kDoPJrh27ZHFgb2OAAAL (was in rooms: user_cmom4whz80000k0qnjs8qb3sc, kitchen, caja)
+[Nest] 18  - 06/12/2026, 1:34:52 AM     LOG [AppGateway] Orden actualizada received: cmqa96akd000b11d5th2fc8r1
+[Nest] 18  - 06/12/2026, 1:34:54 AM     LOG [AppGateway] Client 3KhnW5GdAdWWAnuiAAAN mapped to user cmom4whz80000k0qnjs8qb3sc and joined user_cmom4whz80000k0qnjs8qb3sc
+[Nest] 18  - 06/12/2026, 1:34:55 AM     LOG [AppGateway] Client 3KhnW5GdAdWWAnuiAAAN joined room: kitchen
+[Nest] 18  - 06/12/2026, 1:34:55 AM     LOG [AppGateway] Client 3KhnW5GdAdWWAnuiAAAN joined room: kitchen
+[Nest] 18  - 06/12/2026, 1:35:15 AM     LOG [AppGateway] Client BR9ze4wr68VSCsBwAAAH joined room: caja
+[Nest] 18  - 06/12/2026, 1:36:18 AM     LOG [AppGateway] Nueva orden received: cmqa99m09000h11d5q1jxo0bh
+[Nest] 18  - 06/12/2026, 1:37:59 AM     LOG [AppGateway] Nueva orden received: cmqa9brh6000n11d5rzecvs45
+[Nest] 18  - 06/12/2026, 1:40:02 AM     LOG [AppGateway] Client disconnected: BR9ze4wr68VSCsBwAAAH (was in rooms: user_cmp5oiyx8002o3sjumc803yml, kitchen, caja)
