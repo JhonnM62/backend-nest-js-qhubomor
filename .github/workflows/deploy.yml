@@ -28,6 +28,7 @@ jobs:
           host: ${{ steps.parse.outputs.host }}
           username: ${{ steps.parse.outputs.username }}
           password: ${{ secrets.AUTH_PASS }}
+          command_timeout: 30m
           script: |
             set -e
             

@@ -1,106 +1,104 @@
-2026-05-22T13:48:23.5378928Z Current runner version: '2.334.0'
-2026-05-22T13:48:23.5411946Z ##[group]Runner Image Provisioner
-2026-05-22T13:48:23.5413519Z Hosted Compute Agent
-2026-05-22T13:48:23.5414704Z Version: 20260213.493
-2026-05-22T13:48:23.5416339Z Commit: 5c115507f6dd24b8de37d8bbe0bb4509d0cc0fa3
-2026-05-22T13:48:23.5417744Z Build Date: 2026-02-13T00:28:41Z
-2026-05-22T13:48:23.5419170Z Worker ID: {2b103471-cfdd-4bb6-a71f-969da416a416}
-2026-05-22T13:48:23.5420551Z Azure Region: centralus
-2026-05-22T13:48:23.5421781Z ##[endgroup]
-2026-05-22T13:48:23.5423915Z ##[group]Operating System
-2026-05-22T13:48:23.5425850Z Ubuntu
-2026-05-22T13:48:23.5426891Z 24.04.4
-2026-05-22T13:48:23.5428042Z LTS
-2026-05-22T13:48:23.5429104Z ##[endgroup]
-2026-05-22T13:48:23.5430233Z ##[group]Runner Image
-2026-05-22T13:48:23.5431366Z Image: ubuntu-24.04
-2026-05-22T13:48:23.5432556Z Version: 20260518.149.1
-2026-05-22T13:48:23.5434581Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260518.149/images/ubuntu/Ubuntu2404-Readme.md
-2026-05-22T13:48:23.5436693Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260518.149
-2026-05-22T13:48:23.5437944Z ##[endgroup]
-2026-05-22T13:48:23.5439482Z ##[group]GITHUB_TOKEN Permissions
-2026-05-22T13:48:23.5441632Z Contents: read
-2026-05-22T13:48:23.5442543Z Metadata: read
-2026-05-22T13:48:23.5443314Z Packages: read
-2026-05-22T13:48:23.5444056Z ##[endgroup]
-2026-05-22T13:48:23.5446696Z Secret source: Actions
-2026-05-22T13:48:23.5447753Z Prepare workflow directory
-2026-05-22T13:48:23.5794564Z Prepare all required actions
-2026-05-22T13:48:23.5835772Z Getting action download info
-2026-05-22T13:48:23.9278072Z Download action repository 'appleboy/ssh-action@v1.0.3' (SHA:029f5b4aeeeb58fdfe1410a5d17f967dacf36262)
-2026-05-22T13:48:24.3492812Z Complete job name: deploy
-2026-05-22T13:48:24.4028408Z ##[group]Build container for action use: '/home/runner/work/_actions/appleboy/ssh-action/v1.0.3/Dockerfile'.
-2026-05-22T13:48:24.4107102Z ##[command]/usr/bin/docker build -t 9531f7:18eb629d9b494d48b2e5d7565aaa8ef4 -f "/home/runner/work/_actions/appleboy/ssh-action/v1.0.3/Dockerfile" "/home/runner/work/_actions/appleboy/ssh-action/v1.0.3"
-2026-05-22T13:48:25.1033309Z #0 building with "default" instance using docker driver
-2026-05-22T13:48:25.1034190Z 
-2026-05-22T13:48:25.1034653Z #1 [internal] load build definition from Dockerfile
-2026-05-22T13:48:25.1035883Z #1 transferring dockerfile: 149B done
-2026-05-22T13:48:25.1036671Z #1 DONE 0.0s
-2026-05-22T13:48:25.1037031Z 
-2026-05-22T13:48:25.1037505Z #2 [internal] load metadata for ghcr.io/appleboy/drone-ssh:1.7.3
-2026-05-22T13:48:25.5532868Z #2 DONE 0.6s
-2026-05-22T13:48:25.7234179Z 
-2026-05-22T13:48:25.7235640Z #3 [internal] load .dockerignore
-2026-05-22T13:48:25.7236854Z #3 transferring context: 2B done
-2026-05-22T13:48:25.7237930Z #3 DONE 0.0s
-2026-05-22T13:48:25.7238433Z 
-2026-05-22T13:48:25.7238846Z #4 [internal] load build context
-2026-05-22T13:48:25.7239857Z #4 transferring context: 108B done
-2026-05-22T13:48:25.7240837Z #4 DONE 0.0s
-2026-05-22T13:48:25.7241301Z 
-2026-05-22T13:48:25.7242303Z #5 [1/2] FROM ghcr.io/appleboy/drone-ssh:1.7.3@sha256:179cbd253771007f2ebcaf7a3860afe059207351de1f3378efafac93bd310158
-2026-05-22T13:48:25.7244528Z #5 resolve ghcr.io/appleboy/drone-ssh:1.7.3@sha256:179cbd253771007f2ebcaf7a3860afe059207351de1f3378efafac93bd310158 done
-2026-05-22T13:48:25.7246911Z #5 sha256:179cbd253771007f2ebcaf7a3860afe059207351de1f3378efafac93bd310158 2.38kB / 2.38kB done
-2026-05-22T13:48:25.7249243Z #5 sha256:1a52f94820e830bc9734623deb03bbafa6a248fba19cdc2e5605c70d90d91441 1.24kB / 1.24kB done
-2026-05-22T13:48:25.7251586Z #5 sha256:c4781b8d012b16b6c7468dc9104fad0a63f2a8815b2af8b7176bb544253ea8c7 3.86kB / 3.86kB done
-2026-05-22T13:48:25.7253950Z #5 sha256:1207c741d8c9b028d98c4006013f9de959da3c55f85b91ed5e4583438a0112ca 0B / 3.38MB 0.1s
-2026-05-22T13:48:25.7256624Z #5 sha256:654aaee5654be60f81172539ecd74485cf8bbe2e9137bab0d429862c31c676f6 0B / 284.83kB 0.1s
-2026-05-22T13:48:25.7259308Z #5 sha256:7e20f48a19643465f486f59127b8f4e0f4114bedc8bd5260fb4f92d5fda95f1c 0B / 1.20kB 0.1s
-2026-05-22T13:48:25.8651557Z #5 sha256:1207c741d8c9b028d98c4006013f9de959da3c55f85b91ed5e4583438a0112ca 1.05MB / 3.38MB 0.2s
-2026-05-22T13:48:25.8654338Z #5 extracting sha256:1207c741d8c9b028d98c4006013f9de959da3c55f85b91ed5e4583438a0112ca
-2026-05-22T13:48:25.9732683Z #5 sha256:1207c741d8c9b028d98c4006013f9de959da3c55f85b91ed5e4583438a0112ca 3.38MB / 3.38MB 0.2s done
-2026-05-22T13:48:25.9734442Z #5 sha256:654aaee5654be60f81172539ecd74485cf8bbe2e9137bab0d429862c31c676f6 284.83kB / 284.83kB 0.2s done
-2026-05-22T13:48:25.9737424Z #5 sha256:7e20f48a19643465f486f59127b8f4e0f4114bedc8bd5260fb4f92d5fda95f1c 1.20kB / 1.20kB 0.2s done
-2026-05-22T13:48:25.9738961Z #5 extracting sha256:1207c741d8c9b028d98c4006013f9de959da3c55f85b91ed5e4583438a0112ca 0.1s done
-2026-05-22T13:48:25.9740381Z #5 sha256:066e5b821e26d8313055e0314c056e6c297847bcf963e5df10e7aa03107f2246 125B / 125B 0.3s done
-2026-05-22T13:48:25.9741794Z #5 sha256:47353a6f9201a145b687290e5ae0278ac269faf4bb61bee3e9246c37a8d74277 0B / 2.44MB 0.3s
-2026-05-22T13:48:25.9742756Z #5 extracting sha256:654aaee5654be60f81172539ecd74485cf8bbe2e9137bab0d429862c31c676f6
-2026-05-22T13:48:26.1235366Z #5 sha256:47353a6f9201a145b687290e5ae0278ac269faf4bb61bee3e9246c37a8d74277 2.44MB / 2.44MB 0.4s done
-2026-05-22T13:48:26.1236789Z #5 extracting sha256:654aaee5654be60f81172539ecd74485cf8bbe2e9137bab0d429862c31c676f6 0.0s done
-2026-05-22T13:48:26.7507127Z #5 extracting sha256:7e20f48a19643465f486f59127b8f4e0f4114bedc8bd5260fb4f92d5fda95f1c
-2026-05-22T13:48:26.9928595Z #5 extracting sha256:7e20f48a19643465f486f59127b8f4e0f4114bedc8bd5260fb4f92d5fda95f1c done
-2026-05-22T13:48:26.9929704Z #5 extracting sha256:066e5b821e26d8313055e0314c056e6c297847bcf963e5df10e7aa03107f2246 done
-2026-05-22T13:48:26.9931184Z #5 extracting sha256:47353a6f9201a145b687290e5ae0278ac269faf4bb61bee3e9246c37a8d74277 0.0s done
-2026-05-22T13:48:26.9932053Z #5 DONE 1.2s
-2026-05-22T13:48:26.9932273Z 
-2026-05-22T13:48:26.9932491Z #6 [2/2] COPY entrypoint.sh /bin/entrypoint.sh
-2026-05-22T13:48:26.9933014Z #6 DONE 0.0s
-2026-05-22T13:48:26.9933230Z 
-2026-05-22T13:48:26.9933404Z #7 exporting to image
-2026-05-22T13:48:26.9933808Z #7 exporting layers
-2026-05-22T13:48:27.0045813Z #7 exporting layers 0.2s done
-2026-05-22T13:48:27.0230906Z #7 writing image sha256:1682cba4c5a3edc30eb3a83d407a66a0f854c18492bfe447e093e9e8fbc8234b done
-2026-05-22T13:48:27.0232117Z #7 naming to docker.io/library/9531f7:18eb629d9b494d48b2e5d7565aaa8ef4 done
-2026-05-22T13:48:27.0232955Z #7 DONE 0.2s
-2026-05-22T13:48:27.0533763Z ##[endgroup]
-2026-05-22T13:48:27.0784590Z ##[group]Run if [[ "$AUTH_SERVER" == *"@"* ]]; then
-2026-05-22T13:48:27.0785620Z [36;1mif [[ "$AUTH_SERVER" == *"@"* ]]; then[0m
-2026-05-22T13:48:27.0786239Z [36;1m  echo "username=$(echo $AUTH_SERVER | cut -d'@' -f1)" >> $GITHUB_OUTPUT[0m
-2026-05-22T13:48:27.0786871Z [36;1m  echo "host=$(echo $AUTH_SERVER | cut -d'@' -f2)" >> $GITHUB_OUTPUT[0m
-2026-05-22T13:48:27.0787363Z [36;1melse[0m
-2026-05-22T13:48:27.0787718Z [36;1m  echo "username=root" >> $GITHUB_OUTPUT[0m
-2026-05-22T13:48:27.0788198Z [36;1m  echo "host=$AUTH_SERVER" >> $GITHUB_OUTPUT[0m
-2026-05-22T13:48:27.0788585Z [36;1mfi[0m
-2026-05-22T13:48:27.0828889Z shell: /usr/bin/bash -e {0}
-2026-05-22T13:48:27.0829523Z env:
-2026-05-22T13:48:27.0830157Z   AUTH_SERVER: ***
-2026-05-22T13:48:27.0830512Z ##[endgroup]
-2026-05-22T13:48:27.1166685Z ##[group]Run appleboy/ssh-action@v1.0.3
-2026-05-22T13:48:27.1167137Z with:
-2026-05-22T13:48:27.1167462Z   host: 100.42.185.2
-2026-05-22T13:48:27.1167781Z   username: root
-2026-05-22T13:48:27.1168240Z   password: ***
-2026-05-22T13:48:27.1178187Z   script: set -e
+2026-06-12T02:04:14.6853286Z Current runner version: '2.335.1'
+2026-06-12T02:04:14.6887938Z ##[group]Runner Image Provisioner
+2026-06-12T02:04:14.6889070Z Hosted Compute Agent
+2026-06-12T02:04:14.6890117Z Version: 20260527.539
+2026-06-12T02:04:14.6891451Z Commit: a891dd388383b896fa6ac04a82c0b75cec981078
+2026-06-12T02:04:14.6892529Z Build Date: 2026-05-27T21:39:57Z
+2026-06-12T02:04:14.6893537Z Worker ID: {d33d7894-3ac7-4527-ba91-8ec55e9645bc}
+2026-06-12T02:04:14.6894643Z Azure Region: centralus
+2026-06-12T02:04:14.6895539Z ##[endgroup]
+2026-06-12T02:04:14.6897417Z ##[group]Operating System
+2026-06-12T02:04:14.6898463Z Ubuntu
+2026-06-12T02:04:14.6899300Z 24.04.4
+2026-06-12T02:04:14.6900074Z LTS
+2026-06-12T02:04:14.6901184Z ##[endgroup]
+2026-06-12T02:04:14.6902133Z ##[group]Runner Image
+2026-06-12T02:04:14.6903026Z Image: ubuntu-24.04
+2026-06-12T02:04:14.6903843Z Version: 20260607.184.1
+2026-06-12T02:04:14.6905446Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260607.184/images/ubuntu/Ubuntu2404-Readme.md
+2026-06-12T02:04:14.6907304Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260607.184
+2026-06-12T02:04:14.6908554Z ##[endgroup]
+2026-06-12T02:04:14.6910285Z ##[group]GITHUB_TOKEN Permissions
+2026-06-12T02:04:14.6913167Z Contents: read
+2026-06-12T02:04:14.6914014Z Metadata: read
+2026-06-12T02:04:14.6914916Z Packages: read
+2026-06-12T02:04:14.6915739Z ##[endgroup]
+2026-06-12T02:04:14.6918221Z Secret source: Actions
+2026-06-12T02:04:14.6919728Z Prepare workflow directory
+2026-06-12T02:04:14.7381454Z Prepare all required actions
+2026-06-12T02:04:14.7441704Z Getting action download info
+2026-06-12T02:04:15.1766890Z Download action repository 'appleboy/ssh-action@v1.0.3' (SHA:029f5b4aeeeb58fdfe1410a5d17f967dacf36262)
+2026-06-12T02:04:15.6003643Z Complete job name: deploy
+2026-06-12T02:04:15.6558715Z ##[group]Build container for action use: '/home/runner/work/_actions/appleboy/ssh-action/v1.0.3/Dockerfile'.
+2026-06-12T02:04:15.6793868Z ##[command]/usr/bin/docker build -t 2b1666:84a1e025a49a4fc28600b822f0ae61a7 -f "/home/runner/work/_actions/appleboy/ssh-action/v1.0.3/Dockerfile" "/home/runner/work/_actions/appleboy/ssh-action/v1.0.3"
+2026-06-12T02:04:16.1967767Z #0 building with "default" instance using docker driver
+2026-06-12T02:04:16.1969175Z 
+2026-06-12T02:04:16.1969887Z #1 [internal] load build definition from Dockerfile
+2026-06-12T02:04:16.1971882Z #1 transferring dockerfile: 149B done
+2026-06-12T02:04:16.1973239Z #1 DONE 0.0s
+2026-06-12T02:04:16.1973831Z 
+2026-06-12T02:04:16.1974586Z #2 [internal] load metadata for ghcr.io/appleboy/drone-ssh:1.7.3
+2026-06-12T02:04:16.5907299Z #2 DONE 0.5s
+2026-06-12T02:04:16.7077583Z 
+2026-06-12T02:04:16.7078233Z #3 [internal] load .dockerignore
+2026-06-12T02:04:16.7080342Z #3 transferring context: 2B done
+2026-06-12T02:04:16.7081892Z #3 DONE 0.0s
+2026-06-12T02:04:16.7082483Z 
+2026-06-12T02:04:16.7082974Z #4 [internal] load build context
+2026-06-12T02:04:16.7084373Z #4 transferring context: 108B done
+2026-06-12T02:04:16.7086293Z #4 DONE 0.0s
+2026-06-12T02:04:16.7086869Z 
+2026-06-12T02:04:16.7088090Z #5 [1/2] FROM ghcr.io/appleboy/drone-ssh:1.7.3@sha256:179cbd253771007f2ebcaf7a3860afe059207351de1f3378efafac93bd310158
+2026-06-12T02:04:16.7091674Z #5 resolve ghcr.io/appleboy/drone-ssh:1.7.3@sha256:179cbd253771007f2ebcaf7a3860afe059207351de1f3378efafac93bd310158 done
+2026-06-12T02:04:16.7094496Z #5 sha256:179cbd253771007f2ebcaf7a3860afe059207351de1f3378efafac93bd310158 2.38kB / 2.38kB done
+2026-06-12T02:04:16.7097148Z #5 sha256:1a52f94820e830bc9734623deb03bbafa6a248fba19cdc2e5605c70d90d91441 1.24kB / 1.24kB done
+2026-06-12T02:04:16.7099844Z #5 sha256:c4781b8d012b16b6c7468dc9104fad0a63f2a8815b2af8b7176bb544253ea8c7 3.86kB / 3.86kB done
+2026-06-12T02:04:16.7102863Z #5 sha256:1207c741d8c9b028d98c4006013f9de959da3c55f85b91ed5e4583438a0112ca 0B / 3.38MB 0.1s
+2026-06-12T02:04:16.7107002Z #5 sha256:654aaee5654be60f81172539ecd74485cf8bbe2e9137bab0d429862c31c676f6 0B / 284.83kB 0.1s
+2026-06-12T02:04:16.7111520Z #5 sha256:7e20f48a19643465f486f59127b8f4e0f4114bedc8bd5260fb4f92d5fda95f1c 0B / 1.20kB 0.1s
+2026-06-12T02:04:16.8083157Z #5 sha256:1207c741d8c9b028d98c4006013f9de959da3c55f85b91ed5e4583438a0112ca 3.38MB / 3.38MB 0.2s done
+2026-06-12T02:04:16.8087475Z #5 sha256:654aaee5654be60f81172539ecd74485cf8bbe2e9137bab0d429862c31c676f6 284.83kB / 284.83kB 0.2s done
+2026-06-12T02:04:16.8091938Z #5 sha256:7e20f48a19643465f486f59127b8f4e0f4114bedc8bd5260fb4f92d5fda95f1c 1.20kB / 1.20kB 0.1s done
+2026-06-12T02:04:16.8095649Z #5 extracting sha256:1207c741d8c9b028d98c4006013f9de959da3c55f85b91ed5e4583438a0112ca
+2026-06-12T02:04:16.8099031Z #5 sha256:066e5b821e26d8313055e0314c056e6c297847bcf963e5df10e7aa03107f2246 0B / 125B 0.2s
+2026-06-12T02:04:16.8102699Z #5 sha256:47353a6f9201a145b687290e5ae0278ac269faf4bb61bee3e9246c37a8d74277 0B / 2.44MB 0.2s
+2026-06-12T02:04:16.9456217Z #5 extracting sha256:1207c741d8c9b028d98c4006013f9de959da3c55f85b91ed5e4583438a0112ca 0.1s done
+2026-06-12T02:04:16.9458894Z #5 sha256:066e5b821e26d8313055e0314c056e6c297847bcf963e5df10e7aa03107f2246 125B / 125B 0.2s done
+2026-06-12T02:04:16.9460014Z #5 sha256:47353a6f9201a145b687290e5ae0278ac269faf4bb61bee3e9246c37a8d74277 2.44MB / 2.44MB 0.3s done
+2026-06-12T02:04:16.9461357Z #5 extracting sha256:654aaee5654be60f81172539ecd74485cf8bbe2e9137bab0d429862c31c676f6 0.0s done
+2026-06-12T02:04:17.0687620Z #5 extracting sha256:7e20f48a19643465f486f59127b8f4e0f4114bedc8bd5260fb4f92d5fda95f1c done
+2026-06-12T02:04:17.0693300Z #5 extracting sha256:066e5b821e26d8313055e0314c056e6c297847bcf963e5df10e7aa03107f2246 done
+2026-06-12T02:04:17.0694814Z #5 extracting sha256:47353a6f9201a145b687290e5ae0278ac269faf4bb61bee3e9246c37a8d74277 0.0s done
+2026-06-12T02:04:17.2686609Z #5 DONE 0.5s
+2026-06-12T02:04:17.2687121Z 
+2026-06-12T02:04:17.2687608Z #6 [2/2] COPY entrypoint.sh /bin/entrypoint.sh
+2026-06-12T02:04:17.2688873Z #6 DONE 0.0s
+2026-06-12T02:04:17.2689228Z 
+2026-06-12T02:04:17.2689508Z #7 exporting to image
+2026-06-12T02:04:17.2690042Z #7 exporting layers
+2026-06-12T02:04:18.0049048Z #7 exporting layers 0.9s done
+2026-06-12T02:04:18.0264940Z #7 writing image sha256:90215204adee6065e6c247444110d73d81389145ced7db81cc4c93e4a595a6f8 done
+2026-06-12T02:04:18.0266475Z #7 naming to docker.io/library/2b1666:84a1e025a49a4fc28600b822f0ae61a7 done
+2026-06-12T02:04:18.0267474Z #7 DONE 0.9s
+2026-06-12T02:04:18.0349042Z ##[endgroup]
+2026-06-12T02:04:18.0614546Z ##[group]Run if [[ "$AUTH_SERVER" == *"@"* ]]; then
+2026-06-12T02:04:18.0615373Z [36;1mif [[ "$AUTH_SERVER" == *"@"* ]]; then[0m
+2026-06-12T02:04:18.0615960Z [36;1m  echo "username=$(echo $AUTH_SERVER | cut -d'@' -f1)" >> $GITHUB_OUTPUT[0m
+2026-06-12T02:04:18.0616604Z [36;1m  echo "host=$(echo $AUTH_SERVER | cut -d'@' -f2)" >> $GITHUB_OUTPUT[0m
+2026-06-12T02:04:18.0617128Z [36;1melse[0m
+2026-06-12T02:04:18.0617526Z [36;1m  echo "username=root" >> $GITHUB_OUTPUT[0m
+2026-06-12T02:04:18.0618016Z [36;1m  echo "host=$AUTH_SERVER" >> $GITHUB_OUTPUT[0m
+2026-06-12T02:04:18.0618444Z [36;1mfi[0m
+2026-06-12T02:04:18.0655155Z shell: /usr/bin/bash -e {0}
+2026-06-12T02:04:18.0655827Z env:
+2026-06-12T02:04:18.0656564Z   AUTH_SERVER: ***
+2026-06-12T02:04:18.0656937Z ##[endgroup]
+2026-06-12T02:04:18.1033931Z ##[group]Run appleboy/ssh-action@v1.0.3
+2026-06-12T02:04:18.1034422Z with:
+2026-06-12T02:04:18.1034753Z   host: 100.42.185.2
+2026-06-12T02:04:18.1035106Z   username: root
+2026-06-12T02:04:18.1035584Z   password: ***
+2026-06-12T02:04:18.1045344Z   script: set -e
 
 # 1. Crear directorio del proyecto si no existe
 mkdir -p /root/backend-qhubomor
@@ -123,303 +121,202 @@ cat << 'EOF' > .env
 ***
 EOF
 
-# 5. Construir la nueva imagen de Docker localmente en Contabo (sin caché forzado)
+# 4. Construir la nueva imagen de Docker localmente en Contabo (sin cache para asegurar construccion limpia)
 echo "Construyendo imagen Docker..."
 docker build --no-cache -t qhubomor-backend .
 
-# 5.5 Aplicar migraciones/push de Prisma a la base de datos remotamente (sin borrar data)
-# Como el contenedor tiene prisma instalado, podemos correrlo efímeramente
-echo "Sincronizando esquema de base de datos..."
-docker run --rm --env-file .env qhubomor-backend npx prisma db push --accept-data-loss
-
-# 6. Detener y eliminar el contenedor anterior si existe
+# 5. Detener y eliminar el contenedor anterior si existe
 echo "Deteniendo contenedor anterior..."
 docker stop qhubomor-backend-app || true
 docker rm qhubomor-backend-app || true
 
-# 5.1 Crear directorios de subidas persistentes fuera de la carpeta del repo
-mkdir -p /root/backend-data/uploads/insumos
-mkdir -p /root/backend-data/uploads/gastos
-mkdir -p /root/backend-data/uploads/productos
+# 5.1 Crear directorios de subidas en el host para persistencia
+mkdir -p /root/backend-qhubomor/public/uploads/insumos
+mkdir -p /root/backend-qhubomor/public/uploads/gastos
+mkdir -p /root/backend-qhubomor/public/uploads/asistencia
 
-# Copiar archivos existentes si los hay en el repo clonado hacia el volumen persistente
-if [ -d "/root/backend-qhubomor/public/uploads" ]; then
-  cp -r /root/backend-qhubomor/public/uploads/* /root/backend-data/uploads/ 2>/dev/null || true
-fi
+# 5.5 Aplicar migraciones/push de Prisma a la base de datos remotamente (sin borrar data)
+echo "Sincronizando esquema de base de datos..."
+docker run --rm --env-file .env qhubomor-backend npx prisma db push --accept-data-loss
 
 # 6. Levantar el nuevo contenedor mapeando el puerto y el volumen de persistencia
 echo "Levantando nuevo contenedor..."
 docker run -d \
   --name qhubomor-backend-app \
   -p 8061:3000 \
-  -v /root/backend-data/uploads:/app/public/uploads \
+  -v /root/backend-qhubomor/public/uploads:/app/public/uploads \
   --restart unless-stopped \
   --env-file .env \
   qhubomor-backend
 
 echo "¡Despliegue completado exitosamente!"
 
-2026-05-22T13:48:27.1186305Z   port: 22
-2026-05-22T13:48:27.1186599Z   timeout: 30s
-2026-05-22T13:48:27.1186896Z   command_timeout: 10m
-2026-05-22T13:48:27.1187207Z   proxy_port: 22
-2026-05-22T13:48:27.1187507Z   proxy_timeout: 30s
-2026-05-22T13:48:27.1187816Z ##[endgroup]
-2026-05-22T13:48:27.1301270Z ##[command]/usr/bin/docker run --name f718eb629d9b494d48b2e5d7565aaa8ef4_bba578 --label 9531f7 --workdir /github/workspace --rm -e "INPUT_HOST" -e "INPUT_USERNAME" -e "INPUT_PASSWORD" -e "INPUT_SCRIPT" -e "INPUT_PORT" -e "INPUT_PASSPHRASE" -e "INPUT_SYNC" -e "INPUT_USE_INSECURE_CIPHER" -e "INPUT_CIPHER" -e "INPUT_TIMEOUT" -e "INPUT_COMMAND_TIMEOUT" -e "INPUT_KEY" -e "INPUT_KEY_PATH" -e "INPUT_FINGERPRINT" -e "INPUT_PROXY_HOST" -e "INPUT_PROXY_PORT" -e "INPUT_PROXY_USERNAME" -e "INPUT_PROXY_PASSWORD" -e "INPUT_PROXY_PASSPHRASE" -e "INPUT_PROXY_TIMEOUT" -e "INPUT_PROXY_KEY" -e "INPUT_PROXY_KEY_PATH" -e "INPUT_PROXY_FINGERPRINT" -e "INPUT_PROXY_CIPHER" -e "INPUT_PROXY_USE_INSECURE_CIPHER" -e "INPUT_SCRIPT_STOP" -e "INPUT_ENVS" -e "INPUT_ENVS_FORMAT" -e "INPUT_DEBUG" -e "INPUT_ALLENVS" -e "INPUT_REQUEST_PTY" -e "HOME" -e "GITHUB_JOB" -e "GITHUB_REF" -e "GITHUB_SHA" -e "GITHUB_REPOSITORY" -e "GITHUB_REPOSITORY_OWNER" -e "GITHUB_REPOSITORY_OWNER_ID" -e "GITHUB_RUN_ID" -e "GITHUB_RUN_NUMBER" -e "GITHUB_RETENTION_DAYS" -e "GITHUB_RUN_ATTEMPT" -e "GITHUB_ACTOR_ID" -e "GITHUB_ACTOR" -e "GITHUB_WORKFLOW" -e "GITHUB_HEAD_REF" -e "GITHUB_BASE_REF" -e "GITHUB_EVENT_NAME" -e "GITHUB_SERVER_URL" -e "GITHUB_API_URL" -e "GITHUB_GRAPHQL_URL" -e "GITHUB_REF_NAME" -e "GITHUB_REF_PROTECTED" -e "GITHUB_REF_TYPE" -e "GITHUB_WORKFLOW_REF" -e "GITHUB_WORKFLOW_SHA" -e "GITHUB_REPOSITORY_ID" -e "GITHUB_TRIGGERING_ACTOR" -e "GITHUB_WORKSPACE" -e "GITHUB_ACTION" -e "GITHUB_EVENT_PATH" -e "GITHUB_ACTION_REPOSITORY" -e "GITHUB_ACTION_REF" -e "GITHUB_PATH" -e "GITHUB_ENV" -e "GITHUB_STEP_SUMMARY" -e "GITHUB_STATE" -e "GITHUB_OUTPUT" -e "RUNNER_OS" -e "RUNNER_ARCH" -e "RUNNER_NAME" -e "RUNNER_ENVIRONMENT" -e "RUNNER_TOOL_CACHE" -e "RUNNER_TEMP" -e "RUNNER_WORKSPACE" -e "ACTIONS_RUNTIME_URL" -e "ACTIONS_RUNTIME_TOKEN" -e "ACTIONS_CACHE_URL" -e "ACTIONS_RESULTS_URL" -e "ACTIONS_ORCHESTRATION_ID" -e GITHUB_ACTIONS=true -e CI=true -v "/var/run/docker.sock":"/var/run/docker.sock" -v "/home/runner/work/_temp":"/github/runner_temp" -v "/home/runner/work/_temp/_github_home":"/github/home" -v "/home/runner/work/_temp/_github_workflow":"/github/workflow" -v "/home/runner/work/_temp/_runner_file_commands":"/github/file_commands" -v "/home/runner/work/backend-nest-js-qhubomor/backend-nest-js-qhubomor":"/github/workspace" 9531f7:18eb629d9b494d48b2e5d7565aaa8ef4
-2026-05-22T13:48:27.3240492Z ======CMD======
-2026-05-22T13:48:27.3241029Z set -e
-2026-05-22T13:48:27.3241275Z 
-2026-05-22T13:48:27.3241477Z # 1. Crear directorio del proyecto si no existe
-2026-05-22T13:48:27.3241934Z mkdir -p /root/backend-qhubomor
-2026-05-22T13:48:27.3242312Z cd /root/backend-qhubomor
-2026-05-22T13:48:27.3242520Z 
-2026-05-22T13:48:27.3242715Z # 2. Clonar el repositorio o actualizarlo si ya existe
-2026-05-22T13:48:27.3243145Z if [ ! -d ".git" ]; then
-2026-05-22T13:48:27.3243535Z   echo "Clonando repositorio por primera vez..."
-2026-05-22T13:48:27.3244527Z   git clone https://***@github.com/JhonnM62/backend-nest-js-qhubomor.git .
-2026-05-22T13:48:27.3245019Z else
-2026-05-22T13:48:27.3245800Z   echo "Actualizando repositorio existente..."
-2026-05-22T13:48:27.3246743Z   git remote set-url origin https://***@github.com/JhonnM62/backend-nest-js-qhubomor.git
-2026-05-22T13:48:27.3247298Z   git fetch --all
-2026-05-22T13:48:27.3247651Z   git reset --hard origin/main
-2026-05-22T13:48:27.3248000Z   git clean -fd
-2026-05-22T13:48:27.3248289Z fi
-2026-05-22T13:48:27.3248443Z 
-2026-05-22T13:48:27.3248694Z # 3. Inyectar las variables de entorno desde los secretos de GitHub
-2026-05-22T13:48:27.3249150Z cat << 'EOF' > .env
-2026-05-22T13:48:27.3249757Z ***
-2026-05-22T13:48:27.3250070Z ***
-2026-05-22T13:48:27.3250362Z ***
-2026-05-22T13:48:27.3250672Z ***
-2026-05-22T13:48:27.3250989Z ***
-2026-05-22T13:48:27.3251297Z ***
-2026-05-22T13:48:27.3251592Z ***
-2026-05-22T13:48:27.3251879Z ***
-2026-05-22T13:48:27.3252263Z ***
-2026-05-22T13:48:27.3252556Z ***
-2026-05-22T13:48:27.3252829Z ***
-2026-05-22T13:48:27.3253113Z ***
-2026-05-22T13:48:27.3253415Z ***
-2026-05-22T13:48:27.3253717Z ***
-2026-05-22T13:48:27.3253979Z EOF
-2026-05-22T13:48:27.3254144Z 
-2026-05-22T13:48:27.3341423Z # 5. Construir la nueva imagen de Docker localmente en Contabo (sin caché forzado)
-2026-05-22T13:48:27.3342106Z echo "Construyendo imagen Docker..."
-2026-05-22T13:48:27.3342534Z docker build --no-cache -t qhubomor-backend .
-2026-05-22T13:48:27.3342816Z 
-2026-05-22T13:48:27.3343145Z # 5.5 Aplicar migraciones/push de Prisma a la base de datos remotamente (sin borrar data)
-2026-05-22T13:48:27.3343886Z # Como el contenedor tiene prisma instalado, podemos correrlo efímeramente
-2026-05-22T13:48:27.3344422Z echo "Sincronizando esquema de base de datos..."
-2026-05-22T13:48:27.3344981Z docker run --rm --env-file .env qhubomor-backend npx prisma db push --accept-data-loss
-2026-05-22T13:48:27.3345662Z 
-2026-05-22T13:48:27.3345867Z # 6. Detener y eliminar el contenedor anterior si existe
-2026-05-22T13:48:27.3346315Z echo "Deteniendo contenedor anterior..."
-2026-05-22T13:48:27.3346721Z docker stop qhubomor-backend-app || true
-2026-05-22T13:48:27.3347140Z docker rm qhubomor-backend-app || true
-2026-05-22T13:48:27.3347386Z 
-2026-05-22T13:48:27.3347670Z # 5.1 Crear directorios de subidas persistentes fuera de la carpeta del repo
-2026-05-22T13:48:27.3348200Z mkdir -p /root/backend-data/uploads/insumos
-2026-05-22T13:48:27.3348612Z mkdir -p /root/backend-data/uploads/gastos
-2026-05-22T13:48:27.3349030Z mkdir -p /root/backend-data/uploads/productos
-2026-05-22T13:48:27.3349599Z 
-2026-05-22T13:48:27.3349918Z # Copiar archivos existentes si los hay en el repo clonado hacia el volumen persistente
-2026-05-22T13:48:27.3350540Z if [ -d "/root/backend-qhubomor/public/uploads" ]; then
-2026-05-22T13:48:27.3351153Z   cp -r /root/backend-qhubomor/public/uploads/* /root/backend-data/uploads/ 2>/dev/null || true
-2026-05-22T13:48:27.3351700Z fi
-2026-05-22T13:48:27.3351952Z 
-2026-05-22T13:48:27.3352236Z # 6. Levantar el nuevo contenedor mapeando el puerto y el volumen de persistencia
-2026-05-22T13:48:27.3352768Z echo "Levantando nuevo contenedor..."
-2026-05-22T13:48:27.3353132Z docker run -d \
-2026-05-22T13:48:27.3353451Z   --name qhubomor-backend-app \
-2026-05-22T13:48:27.3353972Z   -p 8061:3000 \
-2026-05-22T13:48:27.3354332Z   -v /root/backend-data/uploads:/app/public/uploads \
-2026-05-22T13:48:27.3354758Z   --restart unless-stopped \
-2026-05-22T13:48:27.3355340Z   --env-file .env \
-2026-05-22T13:48:27.3355668Z   qhubomor-backend
-2026-05-22T13:48:27.3355847Z 
-2026-05-22T13:48:27.3356109Z echo "¡Despliegue completado exitosamente!"
-2026-05-22T13:48:27.3356371Z 
-2026-05-22T13:48:27.3356496Z ======END======
-2026-05-22T13:48:28.7881445Z out: Actualizando repositorio existente...
-2026-05-22T13:48:28.8260109Z out: Fetching origin
-2026-05-22T13:48:29.2827520Z err: From https://github.com/JhonnM62/backend-nest-js-qhubomor
-2026-05-22T13:48:29.2828351Z err:    491595d..f0a83d3  main       -> origin/main
-2026-05-22T13:48:29.3059012Z out: HEAD is now at f0a83d3 fix(deploy): add --no-cache to docker build to force fresh Prisma client
-2026-05-22T13:48:29.3088676Z out: Construyendo imagen Docker...
-2026-05-22T13:48:29.9760459Z err: #0 building with "default" instance using docker driver
-2026-05-22T13:48:29.9761736Z err: #1 [internal] load build definition from Dockerfile
-2026-05-22T13:48:29.9762454Z err: #1 transferring dockerfile: 1.12kB done
-2026-05-22T13:48:29.9763047Z err: #1 DONE 0.0s
-2026-05-22T13:48:29.9763647Z err: #2 [internal] load metadata for docker.io/library/node:20-slim
-2026-05-22T13:48:30.3153483Z err: #2 DONE 0.5s
-2026-05-22T13:48:30.5000270Z err: #3 [internal] load .dockerignore
-2026-05-22T13:48:30.5001105Z err: #3 transferring context: 105B done
-2026-05-22T13:48:30.5001811Z err: #3 DONE 0.0s
-2026-05-22T13:48:30.5003114Z err: #4 [deps 1/6] FROM docker.io/library/node:20-slim@sha256:2cf067cfed83d5ea958367df9f966191a942351a2df77d6f0193e162b5febfc0
-2026-05-22T13:48:30.5004574Z err: #4 CACHED
-2026-05-22T13:48:30.5005412Z err: #5 [internal] load build context
-2026-05-22T13:48:30.5006189Z err: #5 transferring context: 42.05kB 0.0s done
-2026-05-22T13:48:30.5006906Z err: #5 DONE 0.0s
-2026-05-22T13:48:30.5007883Z err: #6 [deps 2/6] RUN apt-get update && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
-2026-05-22T13:48:30.6106330Z err: #6 0.284 Get:1 http://deb.debian.org/debian bookworm InRelease [151 kB]
-2026-05-22T13:48:30.8477499Z err: #6 0.297 Get:2 http://deb.debian.org/debian bookworm-updates InRelease [55.4 kB]
-2026-05-22T13:48:30.8479009Z err: #6 0.298 Get:3 http://deb.debian.org/debian-security bookworm-security InRelease [48.0 kB]
-2026-05-22T13:48:30.8480305Z err: #6 0.371 Get:4 http://deb.debian.org/debian bookworm/main amd64 Packages [8790 kB]
-2026-05-22T13:48:31.0612724Z err: #6 0.735 Get:5 http://deb.debian.org/debian bookworm-updates/main amd64 Packages [6924 B]
-2026-05-22T13:48:31.2119125Z err: #6 0.735 Get:6 http://deb.debian.org/debian-security bookworm-security/main amd64 Packages [306 kB]
-2026-05-22T13:48:31.8443840Z err: #6 1.518 Fetched 9358 kB in 1s (7490 kB/s)
-2026-05-22T13:48:32.3418731Z err: #6 1.518 Reading package lists...
-2026-05-22T13:48:32.8773431Z err: #6 2.033 Reading package lists...
-2026-05-22T13:48:33.0358090Z err: #6 2.562 Building dependency tree...
-2026-05-22T13:48:33.1869501Z err: #6 2.709 Reading state information...
-2026-05-22T13:48:33.2947559Z err: #6 2.968 The following additional packages will be installed:
-2026-05-22T13:48:33.4526082Z err: #6 2.969   libssl3
-2026-05-22T13:48:33.4526510Z err: #6 2.971 Suggested packages:
-2026-05-22T13:48:33.4527544Z err: #6 2.971   ca-certificates
-2026-05-22T13:48:33.4528055Z err: #6 3.008 The following NEW packages will be installed:
-2026-05-22T13:48:33.4528553Z err: #6 3.008   libssl3 openssl
-2026-05-22T13:48:33.4529064Z err: #6 3.035 0 upgraded, 2 newly installed, 0 to remove and 11 not upgraded.
-2026-05-22T13:48:33.4529644Z err: #6 3.035 Need to get 3472 kB of archives.
-2026-05-22T13:48:33.4530229Z err: #6 3.035 After this operation, 8540 kB of additional disk space will be used.
-2026-05-22T13:48:33.4531101Z err: #6 3.035 Get:1 http://deb.debian.org/debian bookworm/main amd64 libssl3 amd64 3.0.20-1~deb12u1 [2034 kB]
-2026-05-22T13:48:33.4532089Z err: #6 3.126 Get:2 http://deb.debian.org/debian bookworm/main amd64 openssl amd64 3.0.20-1~deb12u1 [1438 kB]
-2026-05-22T13:48:33.6657794Z err: #6 3.339 debconf: delaying package configuration, since apt-utils is not installed
-2026-05-22T13:48:33.8884798Z err: #6 3.372 Fetched 3472 kB in 0s (21.0 MB/s)
-2026-05-22T13:48:33.8886079Z err: #6 3.399 Selecting previously unselected package libssl3:amd64.
-2026-05-22T13:48:33.8886831Z err: #6 3.399 (Reading database ... 
-2026-05-22T13:48:33.8887376Z (Reading database ... 5%
-2026-05-22T13:48:33.8887834Z (Reading database ... 10%
-2026-05-22T13:48:33.8888334Z (Reading database ... 15%
-2026-05-22T13:48:33.8888690Z (Reading database ... 20%
-2026-05-22T13:48:33.8889035Z (Reading database ... 25%
-2026-05-22T13:48:33.8889379Z (Reading database ... 30%
-2026-05-22T13:48:33.8889724Z (Reading database ... 35%
-2026-05-22T13:48:33.8890070Z (Reading database ... 40%
-2026-05-22T13:48:33.8890410Z (Reading database ... 45%
-2026-05-22T13:48:33.8890747Z (Reading database ... 50%
-2026-05-22T13:48:33.8891135Z (Reading database ... 55%
-2026-05-22T13:48:33.8891488Z (Reading database ... 60%
-2026-05-22T13:48:33.8892028Z (Reading database ... 65%
-2026-05-22T13:48:33.8892558Z (Reading database ... 70%
-2026-05-22T13:48:33.8893106Z (Reading database ... 75%
-2026-05-22T13:48:33.8893606Z (Reading database ... 80%
-2026-05-22T13:48:33.8894195Z (Reading database ... 85%
-2026-05-22T13:48:33.8894669Z (Reading database ... 90%
-2026-05-22T13:48:33.8895465Z (Reading database ... 95%
-2026-05-22T13:48:33.8895944Z (Reading database ... 100%
-2026-05-22T13:48:33.8896606Z (Reading database ... 6096 files and directories currently installed.)
-2026-05-22T13:48:33.8897543Z err: #6 3.426 Preparing to unpack .../libssl3_3.0.20-1~deb12u1_amd64.deb ...
-2026-05-22T13:48:33.8898361Z err: #6 3.429 Unpacking libssl3:amd64 (3.0.20-1~deb12u1) ...
-2026-05-22T13:48:33.8899068Z err: #6 3.562 Selecting previously unselected package openssl.
-2026-05-22T13:48:33.9914859Z err: #6 3.563 Preparing to unpack .../openssl_3.0.20-1~deb12u1_amd64.deb ...
-2026-05-22T13:48:33.9916141Z err: #6 3.570 Unpacking openssl (3.0.20-1~deb12u1) ...
-2026-05-22T13:48:33.9916849Z err: #6 3.656 Setting up libssl3:amd64 (3.0.20-1~deb12u1) ...
-2026-05-22T13:48:33.9917429Z err: #6 3.659 Setting up openssl (3.0.20-1~deb12u1) ...
-2026-05-22T13:48:33.9917999Z err: #6 3.665 Processing triggers for libc-bin (2.36-9+deb12u13) ...
-2026-05-22T13:48:34.0968772Z err: #6 DONE 3.8s
-2026-05-22T13:48:34.0969193Z err: #7 [deps 3/6] WORKDIR /app
-2026-05-22T13:48:34.0969564Z err: #7 DONE 0.0s
-2026-05-22T13:48:34.2913149Z err: #8 [deps 4/6] COPY package*.json ./
-2026-05-22T13:48:34.2913718Z err: #8 DONE 0.0s
-2026-05-22T13:48:34.2914164Z err: #9 [deps 5/6] COPY prisma ./prisma/
-2026-05-22T13:48:34.2914697Z err: #9 DONE 0.0s
-2026-05-22T13:48:34.2915377Z err: #10 [deps 6/6] RUN npm ci
-2026-05-22T13:48:38.6107471Z err: #10 4.470 npm warn deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
-2026-05-22T13:48:38.9848251Z err: #10 4.844 npm warn deprecated node-domexception@1.0.0: Use your platform's native DOMException instead
-2026-05-22T13:48:39.8420091Z err: #10 5.701 npm warn deprecated @types/bcryptjs@3.0.0: This is a stub types definition. bcryptjs provides its own type definitions, so you do not need this installed.
-2026-05-22T13:48:41.1175420Z err: #10 6.977 npm warn deprecated glob@7.2.3: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
-2026-05-22T13:48:42.1393950Z err: #10 7.999 npm warn deprecated glob@10.5.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
-2026-05-22T13:48:42.3542846Z err: #10 8.019 npm warn deprecated glob@10.5.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
-2026-05-22T13:48:42.3546701Z err: #10 8.035 npm warn deprecated glob@10.5.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
-2026-05-22T13:48:42.3549438Z err: #10 8.063 npm warn deprecated glob@10.5.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
-2026-05-22T13:48:50.2413834Z err: #10 16.10 
-2026-05-22T13:48:50.2414540Z err: #10 16.10 added 887 packages, and audited 889 packages in 16s
-2026-05-22T13:48:50.2415609Z err: #10 16.10 
-2026-05-22T13:48:50.2416101Z err: #10 16.10 173 packages are looking for funding
-2026-05-22T13:48:50.2416744Z err: #10 16.10   run `npm fund` for details
-2026-05-22T13:48:50.4041738Z err: #10 16.11 
-2026-05-22T13:48:50.4042478Z err: #10 16.11 7 vulnerabilities (6 moderate, 1 high)
-2026-05-22T13:48:50.4042978Z err: #10 16.11 
-2026-05-22T13:48:50.4043341Z err: #10 16.11 To address all issues, run:
-2026-05-22T13:48:50.4043782Z err: #10 16.11   npm audit fix
-2026-05-22T13:48:50.4044135Z err: #10 16.11 
-2026-05-22T13:48:50.4044420Z err: #10 16.11 Run `npm audit` for details.
-2026-05-22T13:48:50.4044772Z err: #10 16.11 npm notice
-2026-05-22T13:48:50.4045403Z err: #10 16.11 npm notice New major version of npm available! 10.8.2 -> 11.15.0
-2026-05-22T13:48:50.4046030Z err: #10 16.11 npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.15.0
-2026-05-22T13:48:50.4046621Z err: #10 16.11 npm notice To update run: npm install -g npm@11.15.0
-2026-05-22T13:48:50.4047053Z err: #10 16.11 npm notice
-2026-05-22T13:48:50.6040835Z err: #10 DONE 16.5s
-2026-05-22T13:48:52.5552602Z err: #11 [builder 4/7] COPY --from=deps /app/node_modules ./node_modules
-2026-05-22T13:48:54.9333997Z err: #11 DONE 2.4s
-2026-05-22T13:48:55.1618188Z err: #12 [builder 5/7] COPY . .
-2026-05-22T13:48:55.1618924Z err: #12 DONE 0.1s
-2026-05-22T13:48:55.1619517Z err: #13 [builder 6/7] RUN npx prisma generate
-2026-05-22T13:48:55.8023839Z err: #13 0.791 Prisma schema loaded from prisma/schema.prisma
-2026-05-22T13:48:56.2870154Z err: #13 1.276 
-2026-05-22T13:48:56.2871487Z err: #13 1.276 ✔ Generated Prisma Client (v5.22.0) to ./node_modules/@prisma/client in 248ms
-2026-05-22T13:48:56.2872646Z err: #13 1.276 
-2026-05-22T13:48:56.2873773Z err: #13 1.276 Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
-2026-05-22T13:48:56.2874861Z err: #13 1.276 
-2026-05-22T13:48:56.2876234Z err: #13 1.276 Tip: Interested in query caching in just a few lines of code? Try Accelerate today! https://pris.ly/tip-3-accelerate
-2026-05-22T13:48:56.2877398Z err: #13 1.276 
-2026-05-22T13:48:56.4821901Z err: #13 1.471 npm notice
-2026-05-22T13:48:56.4822957Z err: #13 1.471 npm notice New major version of npm available! 10.8.2 -> 11.15.0
-2026-05-22T13:48:56.4824465Z err: #13 1.471 npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.15.0
-2026-05-22T13:48:56.4825592Z err: #13 1.471 npm notice To update run: npm install -g npm@11.15.0
-2026-05-22T13:48:56.4826224Z err: #13 1.471 npm notice
-2026-05-22T13:48:56.6740585Z err: #13 DONE 1.5s
-2026-05-22T13:48:56.6741126Z err: #14 [builder 7/7] RUN npm run build
-2026-05-22T13:48:56.8944226Z err: #14 0.371 
-2026-05-22T13:48:56.8944759Z err: #14 0.371 > puntodeventabackend@0.0.1 build
-2026-05-22T13:48:56.8945537Z err: #14 0.371 > nest build
-2026-05-22T13:48:56.8945906Z err: #14 0.371 
-2026-05-22T13:49:02.7111848Z err: #14 6.187 [96msrc/caja/caja.service.ts[0m:[93m734[0m:[93m16[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'cuadrarInsumos' does not exist in type 'InsumosWhereInput'.
-2026-05-22T13:49:02.7114872Z err: #14 6.187 
-2026-05-22T13:49:02.7116243Z err: #14 6.187 [7m734[0m       where: { cuadrarInsumos: true, estado: 'ACTIVO' }
-2026-05-22T13:49:02.7117498Z err: #14 6.187 [7m   [0m [91m               ~~~~~~~~~~~~~~[0m
-2026-05-22T13:49:02.7121494Z err: #14 6.187 [96msrc/caja/caja.service.ts[0m:[93m738[0m:[93m31[0m - [91merror[0m[90m TS2339: [0mProperty 'ultimosConteos' does not exist on type '{ nombre: string; createdAt: Date | null; updatedAt: Date | null; estado: string | null; fecha: Date | null; total: Decimal | null; cantidad: number | null; ... 17 more ...; imagencard: string | null; }'.
-2026-05-22T13:49:02.7124859Z err: #14 6.187 
-2026-05-22T13:49:02.7125947Z err: #14 6.187 [7m738[0m       const conteos = (insumo.ultimosConteos as any[]) || [];
-2026-05-22T13:49:02.7127061Z err: #14 6.187 [7m   [0m [91m                              ~~~~~~~~~~~~~~[0m
-2026-05-22T13:49:02.7130134Z err: #14 6.187 [96msrc/caja/caja.service.ts[0m:[93m790[0m:[93m41[0m - [91merror[0m[90m TS2339: [0mProperty 'ultimosConteos' does not exist on type '{ nombre: string; createdAt: Date | null; updatedAt: Date | null; estado: string | null; fecha: Date | null; total: Decimal | null; cantidad: number | null; ... 17 more ...; imagencard: string | null; }'.
-2026-05-22T13:49:02.7132530Z err: #14 6.187 
-2026-05-22T13:49:02.7133461Z err: #14 6.187 [7m790[0m         const conteosActuales = (insumo.ultimosConteos as any[]) || [];
-2026-05-22T13:49:02.7134703Z err: #14 6.187 [7m   [0m [91m                                        ~~~~~~~~~~~~~~[0m
-2026-05-22T13:49:02.7137970Z err: #14 6.187 [96msrc/caja/caja.service.ts[0m:[93m805[0m:[93m13[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'ultimosConteos' does not exist in type '(Without<InsumosUpdateInput, InsumosUncheckedUpdateInput> & InsumosUncheckedUpdateInput) | (Without<...> & InsumosUpdateInput)'.
-2026-05-22T13:49:02.7140404Z err: #14 6.187 
-2026-05-22T13:49:02.7141127Z err: #14 6.187 [7m805[0m             ultimosConteos: nuevosConteos
-2026-05-22T13:49:02.7142009Z err: #14 6.187 [7m   [0m [91m            ~~~~~~~~~~~~~~[0m
-2026-05-22T13:49:02.7142636Z err: #14 6.187 
-2026-05-22T13:49:02.7143498Z err: #14 6.187   [96mnode_modules/.prisma/client/index.d.ts[0m:[93m12030[0m:[93m5[0m
-2026-05-22T13:49:02.7144777Z err: #14 6.187     [7m12030[0m     data: XOR<InsumosUpdateInput, InsumosUncheckedUpdateInput>
-2026-05-22T13:49:02.7146081Z err: #14 6.187     [7m     [0m [96m    ~~~~[0m
-2026-05-22T13:49:02.7148589Z err: #14 6.187     The expected type comes from property 'data' which is declared here on type '{ select?: InsumosSelect<DefaultArgs> | null | undefined; include?: InsumosInclude<DefaultArgs> | null | undefined; data: (Without<...> & InsumosUncheckedUpdateInput) | (Without<...> & InsumosUpdateInput); where: InsumosWhereUniqueInput; }'
-2026-05-22T13:49:02.7150986Z err: #14 6.187 
-2026-05-22T13:49:02.8181615Z err: #14 6.188 Found 4 error(s).
-2026-05-22T13:49:02.8182090Z err: #14 6.188 
-2026-05-22T13:49:02.8182700Z err: #14 ERROR: process "/bin/sh -c npm run build" did not complete successfully: exit code: 1
-2026-05-22T13:49:02.8183367Z err: ------
-2026-05-22T13:49:02.8184062Z err:  > [builder 7/7] RUN npm run build:
-2026-05-22T13:49:02.8184886Z err: 6.187 [7m805[0m             ultimosConteos: nuevosConteos
-2026-05-22T13:49:02.8185866Z err: 6.187 [7m   [0m [91m            ~~~~~~~~~~~~~~[0m
-2026-05-22T13:49:02.8186411Z err: 6.187 
-2026-05-22T13:49:02.8186997Z err: 6.187   [96mnode_modules/.prisma/client/index.d.ts[0m:[93m12030[0m:[93m5[0m
-2026-05-22T13:49:02.8188305Z err: 6.187     [7m12030[0m     data: XOR<InsumosUpdateInput, InsumosUncheckedUpdateInput>
-2026-05-22T13:49:02.8189336Z err: 6.187     [7m     [0m [96m    ~~~~[0m
-2026-05-22T13:49:02.8191669Z err: 6.187     The expected type comes from property 'data' which is declared here on type '{ select?: InsumosSelect<DefaultArgs> | null | undefined; include?: InsumosInclude<DefaultArgs> | null | undefined; data: (Without<...> & InsumosUncheckedUpdateInput) | (Without<...> & InsumosUpdateInput); where: InsumosWhereUniqueInput; }'
-2026-05-22T13:49:02.8193665Z err: 6.187 
-2026-05-22T13:49:02.8193998Z err: 6.188 Found 4 error(s).
-2026-05-22T13:49:02.8194359Z err: 6.188 
-2026-05-22T13:49:02.8194658Z err: ------
-2026-05-22T13:49:02.8194993Z err: Dockerfile:17
-2026-05-22T13:49:02.8195484Z err: --------------------
-2026-05-22T13:49:02.8195950Z err:   15 |     # Generamos el cliente de Prisma antes de compilar
-2026-05-22T13:49:02.8196496Z err:   16 |     RUN npx prisma generate
-2026-05-22T13:49:02.8196905Z err:   17 | >>> RUN npm run build
-2026-05-22T13:49:02.8197209Z err:   18 |     
-2026-05-22T13:49:02.8197642Z err:   19 |     # Etapa 3: Producción (Imagen final ligera)
-2026-05-22T13:49:02.8198163Z err: --------------------
-2026-05-22T13:49:02.8198683Z err: ERROR: failed to solve: process "/bin/sh -c npm run build" did not complete successfully: exit code: 1
-2026-05-22T13:49:02.8245540Z 2026/05/22 13:49:02 Process exited with status 1
-2026-05-22T13:49:02.9037046Z Cleaning up orphan processes
+2026-06-12T02:04:18.1053565Z   port: 22
+2026-06-12T02:04:18.1053904Z   timeout: 30s
+2026-06-12T02:04:18.1054444Z   command_timeout: 10m
+2026-06-12T02:04:18.1054820Z   proxy_port: 22
+2026-06-12T02:04:18.1055164Z   proxy_timeout: 30s
+2026-06-12T02:04:18.1055542Z ##[endgroup]
+2026-06-12T02:04:18.1185409Z ##[command]/usr/bin/docker run --name b166684a1e025a49a4fc28600b822f0ae61a7_319c23 --label 2b1666 --workdir /github/workspace --rm -e "INPUT_HOST" -e "INPUT_USERNAME" -e "INPUT_PASSWORD" -e "INPUT_SCRIPT" -e "INPUT_PORT" -e "INPUT_PASSPHRASE" -e "INPUT_SYNC" -e "INPUT_USE_INSECURE_CIPHER" -e "INPUT_CIPHER" -e "INPUT_TIMEOUT" -e "INPUT_COMMAND_TIMEOUT" -e "INPUT_KEY" -e "INPUT_KEY_PATH" -e "INPUT_FINGERPRINT" -e "INPUT_PROXY_HOST" -e "INPUT_PROXY_PORT" -e "INPUT_PROXY_USERNAME" -e "INPUT_PROXY_PASSWORD" -e "INPUT_PROXY_PASSPHRASE" -e "INPUT_PROXY_TIMEOUT" -e "INPUT_PROXY_KEY" -e "INPUT_PROXY_KEY_PATH" -e "INPUT_PROXY_FINGERPRINT" -e "INPUT_PROXY_CIPHER" -e "INPUT_PROXY_USE_INSECURE_CIPHER" -e "INPUT_SCRIPT_STOP" -e "INPUT_ENVS" -e "INPUT_ENVS_FORMAT" -e "INPUT_DEBUG" -e "INPUT_ALLENVS" -e "INPUT_REQUEST_PTY" -e "HOME" -e "GITHUB_JOB" -e "GITHUB_REF" -e "GITHUB_SHA" -e "GITHUB_REPOSITORY" -e "GITHUB_REPOSITORY_OWNER" -e "GITHUB_REPOSITORY_OWNER_ID" -e "GITHUB_RUN_ID" -e "GITHUB_RUN_NUMBER" -e "GITHUB_RETENTION_DAYS" -e "GITHUB_RUN_ATTEMPT" -e "GITHUB_ACTOR_ID" -e "GITHUB_ACTOR" -e "GITHUB_WORKFLOW" -e "GITHUB_HEAD_REF" -e "GITHUB_BASE_REF" -e "GITHUB_EVENT_NAME" -e "GITHUB_SERVER_URL" -e "GITHUB_API_URL" -e "GITHUB_GRAPHQL_URL" -e "GITHUB_REF_NAME" -e "GITHUB_REF_PROTECTED" -e "GITHUB_REF_TYPE" -e "GITHUB_WORKFLOW_REF" -e "GITHUB_WORKFLOW_SHA" -e "GITHUB_REPOSITORY_ID" -e "GITHUB_TRIGGERING_ACTOR" -e "GITHUB_WORKSPACE" -e "GITHUB_ACTION" -e "GITHUB_EVENT_PATH" -e "GITHUB_ACTION_REPOSITORY" -e "GITHUB_ACTION_REF" -e "GITHUB_PATH" -e "GITHUB_ENV" -e "GITHUB_STEP_SUMMARY" -e "GITHUB_STATE" -e "GITHUB_OUTPUT" -e "RUNNER_OS" -e "RUNNER_ARCH" -e "RUNNER_NAME" -e "RUNNER_ENVIRONMENT" -e "RUNNER_TOOL_CACHE" -e "RUNNER_TEMP" -e "RUNNER_WORKSPACE" -e "ACTIONS_RUNTIME_URL" -e "ACTIONS_RUNTIME_TOKEN" -e "ACTIONS_CACHE_URL" -e "ACTIONS_RESULTS_URL" -e "ACTIONS_ORCHESTRATION_ID" -e GITHUB_ACTIONS=true -e CI=true -v "/var/run/docker.sock":"/var/run/docker.sock" -v "/home/runner/work/_temp":"/github/runner_temp" -v "/home/runner/work/_temp/_github_home":"/github/home" -v "/home/runner/work/_temp/_github_workflow":"/github/workflow" -v "/home/runner/work/_temp/_runner_file_commands":"/github/file_commands" -v "/home/runner/work/backend-nest-js-qhubomor/backend-nest-js-qhubomor":"/github/workspace" 2b1666:84a1e025a49a4fc28600b822f0ae61a7
+2026-06-12T02:04:18.3222692Z ======CMD======
+2026-06-12T02:04:18.3223361Z set -e
+2026-06-12T02:04:18.3223571Z 
+2026-06-12T02:04:18.3223784Z # 1. Crear directorio del proyecto si no existe
+2026-06-12T02:04:18.3224285Z mkdir -p /root/backend-qhubomor
+2026-06-12T02:04:18.3225020Z cd /root/backend-qhubomor
+2026-06-12T02:04:18.3225252Z 
+2026-06-12T02:04:18.3225494Z # 2. Clonar el repositorio o actualizarlo si ya existe
+2026-06-12T02:04:18.3225953Z if [ ! -d ".git" ]; then
+2026-06-12T02:04:18.3226357Z   echo "Clonando repositorio por primera vez..."
+2026-06-12T02:04:18.3227387Z   git clone https://***@github.com/JhonnM62/backend-nest-js-qhubomor.git .
+2026-06-12T02:04:18.3227923Z else
+2026-06-12T02:04:18.3228290Z   echo "Actualizando repositorio existente..."
+2026-06-12T02:04:18.3229093Z   git remote set-url origin https://***@github.com/JhonnM62/backend-nest-js-qhubomor.git
+2026-06-12T02:04:18.3229667Z   git fetch --all
+2026-06-12T02:04:18.3298572Z   git reset --hard origin/main
+2026-06-12T02:04:18.3299154Z   git clean -fd
+2026-06-12T02:04:18.3299491Z fi
+2026-06-12T02:04:18.3299691Z 
+2026-06-12T02:04:18.3300009Z # 3. Inyectar las variables de entorno desde los secretos de GitHub
+2026-06-12T02:04:18.3300857Z cat << 'EOF' > .env
+2026-06-12T02:04:18.3301781Z ***
+2026-06-12T02:04:18.3302220Z ***
+2026-06-12T02:04:18.3302559Z ***
+2026-06-12T02:04:18.3302896Z ***
+2026-06-12T02:04:18.3303259Z ***
+2026-06-12T02:04:18.3303600Z ***
+2026-06-12T02:04:18.3303925Z ***
+2026-06-12T02:04:18.3304238Z ***
+2026-06-12T02:04:18.3304686Z ***
+2026-06-12T02:04:18.3305010Z ***
+2026-06-12T02:04:18.3305323Z ***
+2026-06-12T02:04:18.3305653Z ***
+2026-06-12T02:04:18.3305992Z ***
+2026-06-12T02:04:18.3306325Z ***
+2026-06-12T02:04:18.3306615Z EOF
+2026-06-12T02:04:18.3306804Z 
+2026-06-12T02:04:18.3307213Z # 4. Construir la nueva imagen de Docker localmente en Contabo (sin cache para asegurar construccion limpia)
+2026-06-12T02:04:18.3307918Z echo "Construyendo imagen Docker..."
+2026-06-12T02:04:18.3308372Z docker build --no-cache -t qhubomor-backend .
+2026-06-12T02:04:18.3308662Z 
+2026-06-12T02:04:18.3308877Z # 5. Detener y eliminar el contenedor anterior si existe
+2026-06-12T02:04:18.3309365Z echo "Deteniendo contenedor anterior..."
+2026-06-12T02:04:18.3309801Z docker stop qhubomor-backend-app || true
+2026-06-12T02:04:18.3310260Z docker rm qhubomor-backend-app || true
+2026-06-12T02:04:18.3310848Z 
+2026-06-12T02:04:18.3311155Z # 5.1 Crear directorios de subidas en el host para persistencia
+2026-06-12T02:04:18.3311748Z mkdir -p /root/backend-qhubomor/public/uploads/insumos
+2026-06-12T02:04:18.3312303Z mkdir -p /root/backend-qhubomor/public/uploads/gastos
+2026-06-12T02:04:18.3312834Z mkdir -p /root/backend-qhubomor/public/uploads/asistencia
+2026-06-12T02:04:18.3313193Z 
+2026-06-12T02:04:18.3313636Z # 5.5 Aplicar migraciones/push de Prisma a la base de datos remotamente (sin borrar data)
+2026-06-12T02:04:18.3314323Z echo "Sincronizando esquema de base de datos..."
+2026-06-12T02:04:18.3314973Z docker run --rm --env-file .env qhubomor-backend npx prisma db push --accept-data-loss
+2026-06-12T02:04:18.3315421Z 
+2026-06-12T02:04:18.3315725Z # 6. Levantar el nuevo contenedor mapeando el puerto y el volumen de persistencia
+2026-06-12T02:04:18.3316301Z echo "Levantando nuevo contenedor..."
+2026-06-12T02:04:18.3316715Z docker run -d \
+2026-06-12T02:04:18.3317089Z   --name qhubomor-backend-app \
+2026-06-12T02:04:18.3317903Z   -p 8061:3000 \
+2026-06-12T02:04:18.3318385Z   -v /root/backend-qhubomor/public/uploads:/app/public/uploads \
+2026-06-12T02:04:18.3318907Z   --restart unless-stopped \
+2026-06-12T02:04:18.3319293Z   --env-file .env \
+2026-06-12T02:04:18.3319645Z   qhubomor-backend
+2026-06-12T02:04:18.3319843Z 
+2026-06-12T02:04:18.3408208Z echo "¡Despliegue completado exitosamente!"
+2026-06-12T02:04:18.3408582Z 
+2026-06-12T02:04:18.3408743Z ======END======
+2026-06-12T02:04:19.7207365Z out: Actualizando repositorio existente...
+2026-06-12T02:04:19.7445762Z out: Fetching origin
+2026-06-12T02:04:20.2914409Z err: From https://github.com/JhonnM62/backend-nest-js-qhubomor
+2026-06-12T02:04:20.2915295Z err:    aad757d..9a48fc6  main       -> origin/main
+2026-06-12T02:04:20.3189915Z out: HEAD is now at 9a48fc6 feat: implement AgentToolsService with LangChain tools for inventory, expense, and sales management
+2026-06-12T02:04:20.3333724Z out: Construyendo imagen Docker...
+2026-06-12T02:04:20.7305310Z err: #0 building with "default" instance using docker driver
+2026-06-12T02:04:20.7306038Z err: #1 [internal] load build definition from Dockerfile
+2026-06-12T02:04:20.7306546Z err: #1 transferring dockerfile: 1.15kB done
+2026-06-12T02:04:20.7306966Z err: #1 DONE 0.0s
+2026-06-12T02:04:20.7307417Z err: #2 [internal] load metadata for docker.io/library/node:20-slim
+2026-06-12T02:04:21.0934793Z err: #2 DONE 0.5s
+2026-06-12T02:04:21.3361147Z err: #3 [deps 1/6] FROM docker.io/library/node:20-slim@sha256:2cf067cfed83d5ea958367df9f966191a942351a2df77d6f0193e162b5febfc0
+2026-06-12T02:04:21.3362423Z err: #3 CACHED
+2026-06-12T02:04:21.3363326Z err: #4 [deps 2/6] RUN apt-get update && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
+2026-06-12T02:04:21.3364539Z err: #4 0.353 Get:1 http://deb.debian.org/debian bookworm InRelease [151 kB]
+2026-06-12T02:04:21.3365703Z err: #4 0.365 Get:2 http://deb.debian.org/debian bookworm-updates InRelease [55.4 kB]
+2026-06-12T02:04:21.3367061Z err: #4 0.366 Get:3 http://deb.debian.org/debian-security bookworm-security InRelease [48.0 kB]
+2026-06-12T02:04:21.3367924Z err: #4 0.441 Get:4 http://deb.debian.org/debian bookworm/main amd64 Packages [8790 kB]
+2026-06-12T02:04:21.3368646Z err: #4 0.801 Get:5 http://deb.debian.org/debian bookworm-updates/main amd64 Packages [6924 B]
+2026-06-12T02:04:21.3369390Z err: #4 0.802 Get:6 http://deb.debian.org/debian-security bookworm-security/main amd64 Packages [311 kB]
+2026-06-12T02:04:21.3369973Z err: #4 1.535 Fetched 9363 kB in 1s (7783 kB/s)
+2026-06-12T02:04:21.3370348Z err: #4 1.535 Reading package lists...
+2026-06-12T02:04:21.3371042Z err: #4 2.047 Reading package lists...
+2026-06-12T02:04:21.3371405Z err: #4 2.578 Building dependency tree...
+2026-06-12T02:04:21.3371783Z err: #4 2.736 Reading state information...
+2026-06-12T02:04:21.3372212Z err: #4 2.910 The following additional packages will be installed:
+2026-06-12T02:04:21.3372645Z err: #4 2.910   libssl3
+2026-06-12T02:04:21.3372961Z err: #4 2.912 Suggested packages:
+2026-06-12T02:04:21.3373302Z err: #4 2.912   ca-certificates
+2026-06-12T02:04:21.3373669Z err: #4 2.935 The following NEW packages will be installed:
+2026-06-12T02:04:21.3374059Z err: #4 2.936   libssl3 openssl
+2026-06-12T02:04:21.3374469Z err: #4 2.961 0 upgraded, 2 newly installed, 0 to remove and 12 not upgraded.
+2026-06-12T02:04:21.3374937Z err: #4 2.961 Need to get 3475 kB of archives.
+2026-06-12T02:04:21.3375406Z err: #4 2.961 After this operation, 8540 kB of additional disk space will be used.
+2026-06-12T02:04:21.3376180Z err: #4 2.961 Get:1 http://deb.debian.org/debian-security bookworm-security/main amd64 libssl3 amd64 3.0.20-1~deb12u2 [2036 kB]
+2026-06-12T02:04:21.3377085Z err: #4 3.045 Get:2 http://deb.debian.org/debian-security bookworm-security/main amd64 openssl amd64 3.0.20-1~deb12u2 [1439 kB]
+2026-06-12T02:04:21.3377860Z err: #4 3.264 debconf: delaying package configuration, since apt-utils is not installed
+2026-06-12T02:04:21.3378363Z err: #4 3.294 Fetched 3475 kB in 0s (21.8 MB/s)
+2026-06-12T02:04:21.3379078Z err: #4 3.319 Selecting previously unselected package libssl3:amd64.
+2026-06-12T02:04:21.3379517Z err: #4 3.319 (Reading database ... 
+2026-06-12T02:04:21.3379849Z (Reading database ... 5%
+2026-06-12T02:04:21.3380148Z (Reading database ... 10%
+2026-06-12T02:04:21.3380440Z (Reading database ... 15%
+2026-06-12T02:04:21.3381015Z (Reading database ... 20%
+2026-06-12T02:04:21.3381300Z (Reading database ... 25%
+2026-06-12T02:04:21.3381591Z (Reading database ... 30%
+2026-06-12T02:04:21.3381872Z (Reading database ... 35%
+2026-06-12T02:04:21.3382159Z (Reading database ... 40%
+2026-06-12T02:04:21.3382436Z (Reading database ... 45%
+2026-06-12T02:04:21.3382725Z (Reading database ... 50%
+2026-06-12T02:04:21.3383007Z (Reading database ... 55%
+2026-06-12T02:04:21.3383292Z (Reading database ... 60%
+2026-06-12T02:04:21.3383579Z (Reading database ... 65%
+2026-06-12T02:04:21.3383864Z (Reading database ... 70%
+2026-06-12T02:04:21.3384157Z (Reading database ... 75%
+2026-06-12T02:04:21.3384633Z (Reading database ... 80%
+2026-06-12T02:04:21.3384928Z (Reading database ... 85%
+2026-06-12T02:04:21.3385205Z (Reading database ... 90%
+2026-06-12T02:04:21.3385484Z (Reading database ... 95%
+2026-06-12T02:04:21.3385765Z (Reading database ... 100%
+2026-06-12T02:04:21.3386159Z (Reading database ... 6096 files and directories currently installed.)
+2026-06-12T02:04:21.3386688Z err: #4 3.346 Preparing to unpack .../libssl3_3.0.20-1~deb12u2_amd64.deb ...
+2026-06-12T02:04:21.3387170Z err: #4 3.350 Unpacking libssl3:amd64 (3.0.20-1~deb12u2) ...
+2026-06-12T02:04:21.3387626Z err: #4 3.472 Selecting previously unselected package openssl.
+2026-06-12T02:04:21.3388107Z err: #4 3.473 Preparing to unpack .../openssl_3.0.20-1~deb12u2_amd64.deb ...
+2026-06-12T02:04:21.3388577Z err: #4 3.475 Unpacking openssl (3.0.20-1~deb12u2) ...
+2026-06-12T02:04:21.3388986Z err: #4 3.562 Setting up libssl3:amd64 (3.0.20-1~deb12u2) ...
+2026-06-12T02:04:21.3389404Z err: #4 3.566 Setting up openssl (3.0.20-1~deb12u2) ...
+2026-06-12T02:04:21.3389858Z err: #4 3.573 Processing triggers for libc-bin (2.36-9+deb12u13) ...
+2026-06-12T02:04:21.3390844Z err: #4 DONE 3.7s
+2026-06-12T02:04:21.3391136Z err: #5 [deps 3/6] WORKDIR /app
+2026-06-12T02:04:21.3391556Z err: #5 DONE 0.0s
+2026-06-12T02:04:21.3391853Z err: #6 [deps 4/6] COPY package*.json ./
+2026-06-12T02:04:21.3392177Z err: #6 DONE 0.0s
+2026-06-12T02:04:21.3392448Z err: #7 [deps 5/6] COPY prisma ./prisma/
+2026-06-12T02:04:21.3392767Z err: #7 DONE 0.0s
+2026-06-12T02:04:21.3393074Z err: #8 [internal] load .dockerignore
+2026-06-12T02:04:21.3393421Z err: #8 transferring context: 105B done
+2026-06-12T02:04:21.3393737Z err: #8 DONE 0.0s
+2026-06-12T02:04:21.3394013Z err: #9 [internal] load build context
+2026-06-12T02:04:21.3394360Z err: #9 transferring context: 1.01MB 0.0s done
+2026-06-12T02:04:21.3394693Z err: #9 DONE 0.1s
+2026-06-12T02:04:21.3394968Z err: #10 [deps 6/6] RUN npm ci
+2026-06-12T02:04:21.3396018Z err: #10 4.280 npm warn deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
+2026-06-12T02:04:21.3397357Z err: #10 4.423 npm warn deprecated node-domexception@1.0.0: Use your platform's native DOMException instead
+2026-06-12T02:04:21.3398342Z err: #10 5.473 npm warn deprecated @types/bcryptjs@3.0.0: This is a stub types definition. bcryptjs provides its own type definitions, so you do not need this installed.
+2026-06-12T02:04:21.3399998Z err: #10 6.767 npm warn deprecated glob@7.2.3: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+2026-06-12T02:04:21.3402438Z err: #10 7.885 npm warn deprecated glob@10.5.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+2026-06-12T02:04:21.3404432Z err: #10 7.955 npm warn deprecated glob@10.5.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+2026-06-12T02:04:21.3406409Z err: #10 7.967 npm warn deprecated glob@10.5.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+2026-06-12T02:04:21.3408428Z err: #10 8.016 npm warn deprecated glob@10.5.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+2026-06-12T02:14:19.7992978Z 2026/06/12 02:14:19 Run Command Timeout
+2026-06-12T02:14:19.8747465Z Cleaning up orphan processes
