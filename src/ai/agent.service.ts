@@ -3,6 +3,7 @@ import { AgentToolsService } from './agent.tools';
 import { PostgresSaver } from '@langchain/langgraph-checkpoint-postgres';
 import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
 import { StateGraph, StateSchema, START, END, MemorySaver, interrupt, Command, MessagesValue } from '@langchain/langgraph';
+import { InMemoryStore } from '@langchain/langgraph';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
 import { AIMessage, HumanMessage, ToolMessage } from '@langchain/core/messages';
 import { Pool } from 'pg';
@@ -16,6 +17,7 @@ const AgentState = new StateSchema({
 export class AgentService implements OnModuleInit {
   private graph: any;
   private checkpointer: PostgresSaver | MemorySaver;
+  private store: InMemoryStore;
   private readonly logger = new Logger(AgentService.name);
 
   constructor(
@@ -24,6 +26,9 @@ export class AgentService implements OnModuleInit {
   ) {}
 
   async onModuleInit() {
+    // Configurar Store (Memoria a largo plazo)
+    this.store = new InMemoryStore();
+
     const dbUrl = process.env.DATABASE_URL;
     if (dbUrl) {
       try {
@@ -125,7 +130,7 @@ Usa esta fecha para resolver cualquier consulta que mencione "hoy", "ayer" o fec
       .addConditionalEdges("call_model", route)
       .addEdge("tools", "call_model");
 
-    this.graph = workflow.compile({ checkpointer: this.checkpointer });
+    this.graph = workflow.compile({ checkpointer: this.checkpointer, store: this.store });
   }
 
   async invokeAgent(message: string, threadId: string, resumeCommand?: any) {
