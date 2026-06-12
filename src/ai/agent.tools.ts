@@ -182,8 +182,10 @@ export class AgentToolsService {
     return tool(
       async (args) => {
         try {
-          const startDate = new Date(`${args.fechaInicio}T00:00:00.000Z`);
-          const endDate = new Date(`${args.fechaFin}T23:59:59.999Z`);
+          const startDate = new Date(`${args.fechaInicio}T05:00:00.000Z`);
+          const nextDay = new Date(`${args.fechaFin}T05:00:00.000Z`);
+          nextDay.setDate(nextDay.getDate() + 1);
+          const endDate = new Date(nextDay.getTime() - 1);
           
           const whereClause: any = {
             fecha: {

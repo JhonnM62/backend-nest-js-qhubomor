@@ -44,22 +44,24 @@ export class AgentService implements OnModuleInit {
     const toolNode = new ToolNode(tools);
 
     const callModel = async (state: typeof AgentState.State) => {
-      // 1. Obtener la configuración dinámica de la base de datos
       const configIA = await this.configuracionService.getConfiguracionIA();
       const apiKey = configIA?.apiKey || process.env.GEMINI_API_KEY;
-      const modeloDefecto = configIA?.modeloDefecto || 'gemini-3.5-flash';
+      const modeloDefecto = configIA?.modeloDefecto || 'gemini-1.5-pro';
 
-      // 2. Instanciar el LLM con el modelo configurado
       const llm = new ChatGoogleGenerativeAI({
         model: modeloDefecto,
         apiKey: apiKey,
         temperature: 0,
-        // Agregamos opciones adicionales en caso de que el modelo soporte el thinkingLevel
-        // a través de la librería subyacente.
       });
       
       const llmWithTools = llm.bindTools(tools);
-      const response = await llmWithTools.invoke(state.messages);
+      
+      const { SystemMessage } = await import('@langchain/core/messages');
+      const systemMessage = new SystemMessage(`Eres el asistente de IA avanzado de Q'hubo Mor POS. 
+Hoy es: ${new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' })}.
+Usa esta fecha para resolver cualquier consulta que mencione "hoy", "ayer" o fechas relativas. No supongas otra fecha.`);
+
+      const response = await llmWithTools.invoke([systemMessage, ...state.messages]);
       return { messages: [response] };
     };
 
@@ -125,10 +127,15 @@ export class AgentService implements OnModuleInit {
     const config = { configurable: { thread_id: threadId } };
     
     let result;
-    if (resumeCommand) {
-       result = await this.graph.invoke(new Command({ resume: resumeCommand }), config);
-    } else {
-       result = await this.graph.invoke({ messages: [new HumanMessage(message)] }, config);
+    try {
+      if (resumeCommand) {
+         result = await this.graph.invoke(new Command({ resume: resumeCommand }), config);
+      } else {
+         result = await this.graph.invoke({ messages: [new HumanMessage(message)] }, config);
+      }
+    } catch (error) {
+      this.logger.error('Error invoking graph:', error);
+      throw error;
     }
 
     const state = await this.graph.getState(config);
