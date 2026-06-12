@@ -52,9 +52,11 @@ export class AgentService implements OnModuleInit {
         model: modeloDefecto,
         apiKey: apiKey,
         temperature: 0,
-        thinkingConfig: {
-          thinkingLevel: 'HIGH' // Equivalente a ThinkingLevel.HIGH de @google/genai
-        }
+        ...(configIA?.usarRazonamiento ? {
+          thinkingConfig: {
+            thinkingLevel: 'HIGH'
+          }
+        } : {})
       });
       
       const llmWithTools = llm.bindTools(tools);

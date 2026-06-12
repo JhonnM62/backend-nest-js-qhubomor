@@ -47,6 +47,7 @@ export class ConfiguracionController {
     topP?: number;
     maxTokens?: number;
     isActive?: boolean;
+    usarRazonamiento?: boolean;
   }) {
     return this.configuracionService.updateConfiguracionIA(data);
   }

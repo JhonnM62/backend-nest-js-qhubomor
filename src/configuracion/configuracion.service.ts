@@ -66,7 +66,8 @@ async updateConfiguracion(data: {
           temperatura: 0.4,
           topP: 0.95,
           maxTokens: 8192,
-          isActive: true
+          isActive: true,
+          usarRazonamiento: false
         }
       });
     }
@@ -81,12 +82,19 @@ async updateConfiguracion(data: {
     topP?: number;
     maxTokens?: number;
     isActive?: boolean;
+    usarRazonamiento?: boolean;
   }) {
     return this.prisma.configuracionIA.upsert({
       where: { id: 1 },
       update: data,
       create: {
         id: 1,
+        modeloDefecto: 'gemini-3.5-flash',
+        temperatura: 0.4,
+        topP: 0.95,
+        maxTokens: 8192,
+        isActive: true,
+        usarRazonamiento: false,
         ...data,
       }
     });

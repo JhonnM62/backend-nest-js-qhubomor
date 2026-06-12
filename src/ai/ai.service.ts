@@ -189,9 +189,7 @@ Rules:
           responseSchema: responseSchema,
           // SDK types for advanced configs
           mediaResolution: "MEDIA_RESOLUTION_HIGH" as any,
-          thinkingConfig: {
-            thinkingLevel: "HIGH" as any
-          }
+          ...(configIA.usarRazonamiento ? { thinkingConfig: { thinkingLevel: "HIGH" as any } } : {})
         }
       });
 
@@ -600,9 +598,7 @@ REGLAS DE FORMATO:
           temperature: 0.1,
           responseMimeType: "application/json",
           responseSchema: responseSchema,
-          thinkingConfig: {
-            thinkingLevel: "HIGH" as any
-          }
+          ...(configIA.usarRazonamiento ? { thinkingConfig: { thinkingLevel: "HIGH" as any } } : {})
         }
       });
 

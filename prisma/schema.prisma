@@ -8,58 +8,53 @@ datasource db {
 }
 
 model Usuarios {
-  IDusuarios           String    @id @default(cuid()) @map("IDUsuarios")
-  nombre               String?   @map("Nombre")
-  email                String?   @map("email")
-  cedula               Int?      @map("Cedula")
-  telefono             String?   @map("Telefono")
-  direccion            String?   @map("Direccion")
-  propinas             Decimal?  @map("Propinas") @db.Money
-  rol                  String?   @map("Rol")
-  foto                 String?   @map("Foto")
-  salario              Decimal?  @map("Salario") @db.Money
-  password             String?
-  isActive             Boolean?
-  permisos             Json?     @map("Permisos")
-  // --- Nómina ---
-  cargoId              String?   @map("CargoId")
-  tarifaPersonalizada  Decimal?  @map("TarifaPersonalizada") @db.Money
-  geocercaActiva       Boolean   @default(true) @map("GeocercaActiva")
-  esPersonalDePrueba   Boolean   @default(false) @map("EsPersonalDePrueba")
-  // ----------------
-  createdAt            DateTime? @map("createdAt")
-  updatedAt            DateTime? @map("updatedAt")
-
-  ventas              Ventas[]
-  ordenVentas         Orderventas[]
-  dineroRetirado      DineroRetirado[]
-  pushTokens          PushToken[]
-  notificationSetting NotificationSetting?
-  notificationHistory NotificationHistory[]
-  cargo               CargosEmpleado?      @relation(fields: [cargoId], references: [IDcargo])
-  turnos              Turnos[]
+  IDusuarios          String                @id @default(cuid()) @map("IDUsuarios")
+  nombre              String?               @map("Nombre")
+  email               String?               @map("email")
+  cedula              Int?                  @map("Cedula")
+  telefono            String?               @map("Telefono")
+  direccion           String?               @map("Direccion")
+  propinas            Decimal?              @map("Propinas") @db.Money
+  rol                 String?               @map("Rol")
+  foto                String?               @map("Foto")
+  salario             Decimal?              @map("Salario") @db.Money
+  createdAt           DateTime?             @map("createdAt")
+  isActive            Boolean?
+  password            String?
+  updatedAt           DateTime?             @map("updatedAt")
+  permisos            Json?                 @map("Permisos")
+  cargoId             String?               @map("CargoId")
+  esPersonalDePrueba  Boolean               @default(false) @map("EsPersonalDePrueba")
+  geocercaActiva      Boolean               @default(true) @map("GeocercaActiva")
+  tarifaPersonalizada Decimal?              @map("TarifaPersonalizada") @db.Money
   descuentos          DescuentosEmpleado[]
+  dineroRetirado      DineroRetirado[]
   liquidaciones       Liquidaciones[]
+  notificationHistory NotificationHistory[]
+  notificationSetting NotificationSetting?
+  ordenVentas         Orderventas[]
+  pushTokens          PushToken[]
+  turnos              Turnos[]
+  cargo               CargosEmpleado?       @relation(fields: [cargoId], references: [IDcargo])
+  ventas              Ventas[]
 
   @@map("USUARIOS")
 }
 
 model Categorias {
-  IDcategoria String  @id @default(cuid()) @map("IDcategoria")
-  nombre      String  @map("Nombre")
-  image       String? @map("Image")
-
-  productos Productos[]
+  IDcategoria String      @id @default(cuid()) @map("IDcategoria")
+  nombre      String      @map("Nombre")
+  image       String?     @map("Image")
+  productos   Productos[]
 
   @@map("CATEGORIAS")
 }
 
 model CategoriasInsumos {
-  IDcategoriainsumos String  @id @default(cuid()) @map("IDcategoriainsumos")
-  nombre             String  @map("Nombre")
-  imagen             String? @map("Imagen")
-
-  insumos Insumos[]
+  IDcategoriainsumos String    @id @default(cuid()) @map("IDcategoriainsumos")
+  nombre             String    @map("Nombre")
+  imagen             String?   @map("Imagen")
+  insumos            Insumos[]
 
   @@map("CATEGORIAS INSUMOS")
 }
@@ -77,195 +72,186 @@ model Clientes {
   whatsapp                   String?   @map("Whatsapp")
   observaciones              String?   @map("Observaciones")
   isActive                   Boolean   @default(true) @map("isActive")
-
-  ventas Ventas[]
+  ventas                     Ventas[]
 
   @@map("CLIENTES")
 }
 
 model Proveedores {
-  IDprovedor         String  @id @default(cuid()) @map("IDprovedor")
-  nombre             String? @map("Nombre")
-  telefono           String? @map("Telefono")
-  direccion_y_ciudad String? @map("Direccion y Ciudad")
-
-  ordenInventario Orderinventario[]
+  IDprovedor         String            @id @default(cuid()) @map("IDprovedor")
+  nombre             String?           @map("Nombre")
+  telefono           String?           @map("Telefono")
+  direccion_y_ciudad String?           @map("Direccion y Ciudad")
+  ordenInventario    Orderinventario[]
 
   @@map("PROVEDORES")
 }
 
 model Mesas {
-  IdMesas String  @id @default(cuid()) @map("IdMesas")
-  nombre  String? @map("Nombre")
-
-  ventas Ventas[]
+  IdMesas String   @id @default(cuid()) @map("IdMesas")
+  nombre  String?  @map("Nombre")
+  ventas  Ventas[]
 
   @@map("MESAS")
 }
 
 model Productos {
-  IDproductos             String    @id @default(cuid()) @map("IDproductos")
-  categoria               String?   @map("Categoria")
-  categoriaNombre         String?   @map("Categoria_Nombre")
-  nombre                  String    @map("Nombre")
-  mostrar                 String?   @map("Mostrar")
-  cantidad                Int?      @map("Cantidad")
-  precioUnitario          Decimal?  @map("Precio Unitario") @db.Money
-  image                   String?   @map("Image")
-  imagenUrl               String?   @map("ImagenUrl")
-  IDventas                String?   @map("IDventas")
-  fechaDeCantidadAgregada DateTime? @map("Fecha de Cantidad agregada")
-  cantidadAgregada        Int?      @map("Cantidad Agregada")
-  precioDeCompra          Decimal?  @map("Precio de compra") @db.Money
-  unidades                String?   @map("Unidades")
-  descontar               String?   @map("Descontar")
-  stockFiltro             Decimal?  @map("Stock_Filtro") @db.Money
-  combo                   String?   @map("Combo")
-  llevarControlEnCaja     String?   @map("Llevar control en caja")
-  orden                   Int?      @map("Orden")
-
-  categoriaRelacion Categorias?     @relation(fields: [categoria], references: [IDcategoria])
-  ordenVentas       Orderventas[]
-  recetaInsumos     Recetainsumos[]
+  IDproductos             String          @id @default(cuid()) @map("IDproductos")
+  categoria               String?         @map("Categoria")
+  categoriaNombre         String?         @map("Categoria_Nombre")
+  nombre                  String          @map("Nombre")
+  mostrar                 String?         @map("Mostrar")
+  cantidad                Int?            @map("Cantidad")
+  precioUnitario          Decimal?        @map("Precio Unitario") @db.Money
+  image                   String?         @map("Image")
+  imagenUrl               String?         @map("ImagenUrl")
+  IDventas                String?         @map("IDventas")
+  fechaDeCantidadAgregada DateTime?       @map("Fecha de Cantidad agregada")
+  cantidadAgregada        Int?            @map("Cantidad Agregada")
+  precioDeCompra          Decimal?        @map("Precio de compra") @db.Money
+  unidades                String?         @map("Unidades")
+  descontar               String?         @map("Descontar")
+  combo                   String?         @map("Combo")
+  llevarControlEnCaja     String?         @map("Llevar control en caja")
+  orden                   Int?            @map("Orden")
+  stockFiltro             Decimal?        @map("Stock_Filtro") @db.Money
+  ordenVentas             Orderventas[]
+  categoriaRelacion       Categorias?     @relation(fields: [categoria], references: [IDcategoria])
+  recetaInsumos           Recetainsumos[]
 
   @@map("PRODUCTOS")
 }
 
 model Insumos {
-  IDalimentos           String    @id @default(cuid()) @map("IDalimentos")
-  categoria             String?   @map("Categoria")
-  nombre                String    @map("Nombre")
-  unidades              String?   @map("Unidades")
-  cantidad              Int?      @map("Cantidad")
-  imagen                String?   @map("imagen")
-  fechaDeVencimiento    DateTime? @map("fecha de vencimiento") @db.Date
-  nombreCategoria       String?   @map("NombreCategoria")
-  precio                Decimal?  @map("Precio") @db.Money
-  total                 Decimal?  @map("Total") @db.Money
-  agregarCantidad       Int?      @map("Agregar Cantidad")
-  fecha                 DateTime? @map("Fecha") @db.Date
-  descontarCantDeVentas String?   @map("Descontar cant de ventas?")
-  notificarAWhatsapp    String?   @map("Notificar a whatsapp")
-  apartirDeCantidad     Int?      @map("apartir de cantidad")
-  enviarSiONo           String?   @map("Enviar si o no")
-  disponible            Decimal?  @map("Disponible") @db.Money
-  estado                String?   @default("ACTIVO") @map("Estado")
-  contador              Int?      @map("Contador")
-  imageUrl              String?   @map("Image Url")
-  llevarControlEnCaja   String?   @map("Llevar control en caja")
-  contador2             Int?      @map("Contador 2")
-  imagencard            String?   @map("imagencard")
-  cuadrarInsumos        Boolean   @default(false) @map("Cuadrar Insumos")
-  ultimosConteos        Json?     @map("Ultimos Conteos")
-  createdAt             DateTime?
-  updatedAt             DateTime?
-
-  categoriaInsumosRelacion CategoriasInsumos?      @relation(fields: [categoria], references: [IDcategoriainsumos])
+  IDalimentos              String                  @id @default(cuid()) @map("IDalimentos")
+  categoria                String?                 @map("Categoria")
+  nombre                   String                  @map("Nombre")
+  unidades                 String?                 @map("Unidades")
+  cantidad                 Int?                    @map("Cantidad")
+  imagen                   String?                 @map("imagen")
+  fechaDeVencimiento       DateTime?               @map("fecha de vencimiento") @db.Date
+  nombreCategoria          String?                 @map("NombreCategoria")
+  precio                   Decimal?                @map("Precio") @db.Money
+  total                    Decimal?                @map("Total") @db.Money
+  agregarCantidad          Int?                    @map("Agregar Cantidad")
+  fecha                    DateTime?               @map("Fecha") @db.Date
+  descontarCantDeVentas    String?                 @map("Descontar cant de ventas?")
+  notificarAWhatsapp       String?                 @map("Notificar a whatsapp")
+  apartirDeCantidad        Int?                    @map("apartir de cantidad")
+  enviarSiONo              String?                 @map("Enviar si o no")
+  disponible               Decimal?                @map("Disponible") @db.Money
+  contador                 Int?                    @map("Contador")
+  imageUrl                 String?                 @map("Image Url")
+  llevarControlEnCaja      String?                 @map("Llevar control en caja")
+  contador2                Int?                    @map("Contador 2")
+  imagencard               String?                 @map("imagencard")
+  createdAt                DateTime?
+  updatedAt                DateTime?
+  estado                   String?                 @default("ACTIVO") @map("Estado")
+  cuadrarInsumos           Boolean                 @default(false) @map("Cuadrar Insumos")
+  ultimosConteos           Json?                   @map("Ultimos Conteos")
   aperturaCierreInsumos    AperturaCierreInsumos[]
+  categoriaInsumosRelacion CategoriasInsumos?      @relation(fields: [categoria], references: [IDcategoriainsumos])
   recetaInsumos            Recetainsumos[]
 
   @@map("INSUMOS")
 }
 
 model Recetainsumos {
-  idinsumos    String  @id @default(cuid()) @map("idinsumos")
-  IDproductos  String? @map("IDproductos")
-  categoria    String? @map("Categoria")
-  insumo       String  @map("Insumo")
-  tipoDeMedida String? @map("Tipo de medida")
-  cantidad     Int?    @map("Cantidad")
-
+  idinsumos      String     @id @default(cuid()) @map("idinsumos")
+  IDproductos    String?    @map("IDproductos")
+  categoria      String?    @map("Categoria")
+  insumo         String     @map("Insumo")
+  tipoDeMedida   String?    @map("Tipo de medida")
+  cantidad       Int?       @map("Cantidad")
   producto       Productos? @relation(fields: [IDproductos], references: [IDproductos])
-  insumoRelacion Insumos?   @relation(fields: [insumo], references: [IDalimentos])
+  insumoRelacion Insumos    @relation(fields: [insumo], references: [IDalimentos])
 
   @@map("RECETAINSUMOS")
 }
 
 model Inventario {
-  IDinventario String    @id @default(cuid()) @map("IDinventario")
-  nombre       String    @map("Nombre")
-  fechaYHora   DateTime? @map("Fecha y hora")
-  tipo         String?   @map("Tipo")
-  total        Decimal?  @map("Total") @db.Money
-  descuento    Decimal?  @map("Descuento") @db.Money
-  createdAt    DateTime?
-  updatedAt    DateTime?
-
+  IDinventario    String            @id @default(cuid()) @map("IDinventario")
+  nombre          String            @map("Nombre")
+  fechaYHora      DateTime?         @map("Fecha y hora")
+  tipo            String?           @map("Tipo")
+  total           Decimal?          @map("Total") @db.Money
+  descuento       Decimal?          @map("Descuento") @db.Money
+  createdAt       DateTime?
+  updatedAt       DateTime?
   ordenInventario Orderinventario[]
 
   @@map("INVENTARIO")
 }
 
 model Orderinventario {
-  IDorderinventario String    @id @default(cuid()) @map("IDorderinventario")
-  IDinventario      String?   @map("IDinventario")
-  categoria         String?   @map("Categoria")
-  nombreDelAlimento String?   @map("Nombre del Alimento")
-  cantidad          Int?      @map("Cantidad")
-  observacion       String?   @map("Observacion")
-  nombreCategoria   String?   @map("NombreCategoria")
-  fecha             DateTime? @map("Fecha") @db.Date
-  precio            Decimal?  @map("Precio") @db.Money
-  precioActual      Decimal?  @map("Precio Actual") @db.Money
-  subtotal          Decimal?  @map("Subtotal") @db.Money
-  precioAnterior    Decimal?  @map("Precio Anterior") @db.Money
-  cantInsumos       Int?      @map("Cant insumos")
-  agregarAInsumos   String?   @map("Agregar a Insumos?")
-  provedor          String?   @map("Provedor")
-  telefonoProvedor  String?   @map("Telefono Provedor")
-  direccionProvedor String?   @map("Direccion Provedor")
-  disponible        String?   @map("Disponible")
-  fechaYHora        DateTime? @map("Fecha y hora")
-  seCompro          String?   @map("Se compro?")
+  IDorderinventario String       @id @default(cuid()) @map("IDorderinventario")
+  IDinventario      String?      @map("IDinventario")
+  categoria         String?      @map("Categoria")
+  nombreDelAlimento String?      @map("Nombre del Alimento")
+  cantidad          Int?         @map("Cantidad")
+  observacion       String?      @map("Observacion")
+  nombreCategoria   String?      @map("NombreCategoria")
+  fecha             DateTime?    @map("Fecha") @db.Date
+  precio            Decimal?     @map("Precio") @db.Money
+  precioActual      Decimal?     @map("Precio Actual") @db.Money
+  subtotal          Decimal?     @map("Subtotal") @db.Money
+  precioAnterior    Decimal?     @map("Precio Anterior") @db.Money
+  cantInsumos       Int?         @map("Cant insumos")
+  agregarAInsumos   String?      @map("Agregar a Insumos?")
+  provedor          String?      @map("Provedor")
+  telefonoProvedor  String?      @map("Telefono Provedor")
+  direccionProvedor String?      @map("Direccion Provedor")
+  disponible        String?      @map("Disponible")
+  fechaYHora        DateTime?    @map("Fecha y hora")
+  seCompro          String?      @map("Se compro?")
   createdAt         DateTime?
   updatedAt         DateTime?
-
-  inventario Inventario?  @relation(fields: [IDinventario], references: [IDinventario], onDelete: Cascade)
-  proveedor  Proveedores? @relation(fields: [provedor], references: [IDprovedor])
+  inventario        Inventario?  @relation(fields: [IDinventario], references: [IDinventario], onDelete: Cascade)
+  proveedor         Proveedores? @relation(fields: [provedor], references: [IDprovedor])
 
   @@map("ORDERINVENTARIO")
 }
 
 model Ventas {
-  IDventas              String    @id @default(cuid()) @map("IDventas")
-  fechaYHora            DateTime? @map("Fecha y hora")
-  escanear              String?   @map("Escanear")
-  producto              String?   @map("Producto")
-  estado                String?   @map("Estado")
-  mesa                  String?   @map("MESA")
-  fecha                 DateTime? @map("FECHA") @db.Date
-  hora                  String?   @map("HORA")
-  efectivoRecibido      Decimal?  @map("Efectivo Recibido") @db.Money
-  devueltas             Decimal?  @map("Devueltas") @db.Money
-  icon                  String?   @map("Icon")
-  direccion             String?   @map("Direccion")
-  costoDelDomicilio     Decimal?  @map("Costo del Domicilio") @db.Money
-  porcentajeDeDescuento String?   @map("% de descuento")
-  descuento             Decimal?  @map("Descuento") @db.Money
-  medioDePago           String?   @map("Medio de pago")
-  banco                 String?   @map("BANCO")
-  valorDeTransferencia  Decimal?  @map("Valor de transferencia") @db.Money
-  pedido                String?   @map("Pedido")
-  agregarProductos      String?   @map("AGREGAR PRODUCTOS")
-  usuario               String?   @map("Usuario")
-  numeroTelefono        Int?      @map("Numero telefono")
-  mensaje               String?   @map("Mensaje")
-  totalInput            Decimal?  @map("TOTAL INPUT") @db.Money
-  cliente               String?   @map("Clente")
-  compras               String?   @map("Compras")
-  deletedAt             DateTime? @map("deletedAt")
-  deletedBy             String?   @map("deletedBy")
-  deleteReason          String?   @map("deleteReason")
+  IDventas              String               @id @default(cuid()) @map("IDventas")
+  fechaYHora            DateTime?            @map("Fecha y hora")
+  escanear              String?              @map("Escanear")
+  producto              String?              @map("Producto")
+  estado                String?              @map("Estado")
+  mesa                  String?              @map("MESA")
+  fecha                 DateTime?            @map("FECHA") @db.Date
+  hora                  String?              @map("HORA")
+  efectivoRecibido      Decimal?             @map("Efectivo Recibido") @db.Money
+  devueltas             Decimal?             @map("Devueltas") @db.Money
+  icon                  String?              @map("Icon")
+  direccion             String?              @map("Direccion")
+  costoDelDomicilio     Decimal?             @map("Costo del Domicilio") @db.Money
+  porcentajeDeDescuento String?              @map("% de descuento")
+  descuento             Decimal?             @map("Descuento") @db.Money
+  medioDePago           String?              @map("Medio de pago")
+  banco                 String?              @map("BANCO")
+  valorDeTransferencia  Decimal?             @map("Valor de transferencia") @db.Money
+  pedido                String?              @map("Pedido")
+  agregarProductos      String?              @map("AGREGAR PRODUCTOS")
+  usuario               String?              @map("Usuario")
+  numeroTelefono        Int?                 @map("Numero telefono")
+  mensaje               String?              @map("Mensaje")
+  totalInput            Decimal?             @map("TOTAL INPUT") @db.Money
+  cliente               String?              @map("Clente")
+  compras               String?              @map("Compras")
   createdAt             DateTime?
   updatedAt             DateTime?
-  registroDeTiempo      Json?     @default("[]") @map("Registro_de_tiempo")
-
-  usuarioRelacion    Usuarios?            @relation(fields: [usuario], references: [IDusuarios])
-  mesaRelacion       Mesas?               @relation(fields: [mesa], references: [IdMesas])
-  ordenVentas        Orderventas[]
-  aperturaCierreCaja AperturaCierreCaja[]
-  clienteId          Int?                 @map("IDcliente_FK")
-  clienteRelacion    Clientes?            @relation(fields: [clienteId], references: [IDcliente], onDelete: SetNull)
+  deleteReason          String?              @map("deleteReason")
+  deletedAt             DateTime?            @map("deletedAt")
+  deletedBy             String?              @map("deletedBy")
+  registroDeTiempo      Json?                @default("[]") @map("Registro_de_tiempo")
+  clienteId             Int?                 @map("IDcliente_FK")
+  ordenVentas           Orderventas[]
+  clienteRelacion       Clientes?            @relation(fields: [clienteId], references: [IDcliente])
+  mesaRelacion          Mesas?               @relation(fields: [mesa], references: [IdMesas])
+  usuarioRelacion       Usuarios?            @relation(fields: [usuario], references: [IDusuarios])
+  aperturaCierreCaja    AperturaCierreCaja[] @relation("AperturaCierreCajaToVentas")
 
   @@index([fechaYHora])
   @@index([createdAt])
@@ -273,31 +259,30 @@ model Ventas {
 }
 
 model Orderventas {
-  IDorderventas     String    @id @default(cuid()) @map("IDorderventas")
-  IDventas          String?   @map("IDventas")
-  categoria         String?   @map("Categoria")
-  nombre            String?   @map("Nombre")
-  cantidad          Int?      @map("Cantidad")
-  precio            Decimal?  @map("Precio") @db.Money
-  precioTotal       Decimal?  @map("Precio total") @db.Money
-  estado            String?   @map("Estado")
-  comentarios       String?   @map("Comentarios")
-  imagen            String?   @map("Imagen")
-  fecha             DateTime? @map("fecha") @db.Date
-  salsa             String?   @map("SALSA")
-  helado            String?   @map("HELADO")
-  topings           String?   @map("TOPINGS")
-  nombreProducto    String?   @map("NombreProducto")
-  categoriaProducto String?   @map("CategoriaProducto")
-  imagenUrl         String?   @map("ImagenUrl")
+  IDorderventas     String     @id @default(cuid()) @map("IDorderventas")
+  IDventas          String?    @map("IDventas")
+  categoria         String?    @map("Categoria")
+  nombre            String?    @map("Nombre")
+  cantidad          Int?       @map("Cantidad")
+  precio            Decimal?   @map("Precio") @db.Money
+  precioTotal       Decimal?   @map("Precio total") @db.Money
+  estado            String?    @map("Estado")
+  comentarios       String?    @map("Comentarios")
+  imagen            String?    @map("Imagen")
+  fecha             DateTime?  @map("fecha") @db.Date
+  salsa             String?    @map("SALSA")
+  helado            String?    @map("HELADO")
+  topings           String?    @map("TOPINGS")
+  categoriaProducto String?    @map("CategoriaProducto")
+  imagenUrl         String?    @map("ImagenUrl")
+  nombreProducto    String?    @map("NombreProducto")
   createdAt         DateTime?
+  productoId        String?
   updatedAt         DateTime?
-
-  venta      Ventas?    @relation(fields: [IDventas], references: [IDventas])
-  usuario    Usuarios?  @relation(fields: [usuarioId], references: [IDusuarios])
-  producto   Productos? @relation(fields: [productoId], references: [IDproductos])
-  usuarioId  String?
-  productoId String?
+  usuarioId         String?
+  venta             Ventas?    @relation(fields: [IDventas], references: [IDventas])
+  producto          Productos? @relation(fields: [productoId], references: [IDproductos])
+  usuario           Usuarios?  @relation(fields: [usuarioId], references: [IDusuarios])
 
   @@map("ORDERVENTAS")
 }
@@ -314,10 +299,9 @@ model DineroRetirado {
   comentario  String?   @map("comentario")
   createdAt   DateTime?
   updatedAt   DateTime?
-
-  filter    Filter?   @relation(fields: [filterID], references: [FilterID])
-  usuario   Usuarios? @relation(fields: [usuarioId], references: [IDusuarios])
-  usuarioId String?
+  usuarioId   String?
+  filter      Filter?   @relation(fields: [filterID], references: [FilterID])
+  usuario     Usuarios? @relation(fields: [usuarioId], references: [IDusuarios])
 
   @@map("Dinero retirado")
 }
@@ -345,55 +329,52 @@ model AperturaCierreCaja {
   plataGuardada          Decimal?  @map("Plata Guardada") @db.Money
   cuadroCaja             String?   @map("Cuadro Caja?")
   valorFaltante          Decimal?  @map("Valor Faltante") @db.Money
-  valorExcedente            Decimal?  @db.Money @map("Valor Excedente")
-  transferenciasContadas    Decimal?  @db.Money @map("Transferencias Contadas")
-  horaCongelada          String?   @map("Hora Congelada")
-  horaEnLaQueSeActualizo   DateTime? @map("Hora en la que se actualizo")
+  valorExcedente         Decimal?  @map("Valor Excedente") @db.Money
+  horaEnLaQueSeActualizo DateTime? @map("Hora en la que se actualizo")
   contador               Int?      @map("Contador")
   contador2              Int?      @map("Contador 2")
   createdAt              DateTime?
   updatedAt              DateTime?
-
-  venta Ventas[]
+  transferenciasContadas Decimal?  @map("Transferencias Contadas") @db.Money
+  horaCongelada          String?   @map("Hora Congelada")
+  venta                  Ventas[]  @relation("AperturaCierreCajaToVentas")
 
   @@map("APERTURA Y CIERRE DE CAJA")
 }
 
 model AperturaCierreInsumos {
-  Idcierreyapertura String    @id @default(cuid()) @map("Idcierreyapertura")
-  IDcaja            String?   @map("IDCaja")
-  paraQueProducto   Json?     @map("Para que producto")
-  nombreDelProducto String?   @map("Nombre del Producto")
-  categoria         String?   @map("Categoria")
-  insumos           String?   @map("Insumos")
-  nombreInsumo      String?   @map("Nombre Insumo")
-  unidadDeMedida    String?   @map("Unidad de medida")
-  cantApertura      Int?      @map("Cant apertura")
-  fechaYHora        DateTime? @map("Fecha y hora")
-  fecha             DateTime? @map("Fecha") @db.Date
-  cantDeCierre      Int?      @map("Cant de cierre")
-  seUtilizaron      Int?      @map("se utilizaron")
-  observacion       String?   @map("Observacion")
-  agregarCant       Int?      @map("Agregar Cant")
+  Idcierreyapertura String                 @id @default(cuid()) @map("Idcierreyapertura")
+  IDcaja            String?                @map("IDCaja")
+  nombreDelProducto String?                @map("Nombre del Producto")
+  categoria         String?                @map("Categoria")
+  insumos           String?                @map("Insumos")
+  nombreInsumo      String?                @map("Nombre Insumo")
+  unidadDeMedida    String?                @map("Unidad de medida")
+  cantApertura      Int?                   @map("Cant apertura")
+  fechaYHora        DateTime?              @map("Fecha y hora")
+  fecha             DateTime?              @map("Fecha") @db.Date
+  cantDeCierre      Int?                   @map("Cant de cierre")
+  observacion       String?                @map("Observacion")
+  agregarCant       Int?                   @map("Agregar Cant")
   createdAt         DateTime?
   updatedAt         DateTime?
-
-  insumo    Insumos?               @relation(fields: [nombreInsumo], references: [IDalimentos])
-  historial HistorialCajaInsumos[]
+  seUtilizaron      Int?                   @map("se utilizaron")
+  paraQueProducto   Json?                  @map("Para que producto")
+  insumo            Insumos?               @relation(fields: [nombreInsumo], references: [IDalimentos])
+  historial         HistorialCajaInsumos[]
 
   @@map("APERTURA Y CIERRE INSUMOS")
 }
 
 model HistorialCajaInsumos {
-  IDhistorial       String   @id @default(cuid()) @map("IDhistorial")
-  Idcierreyapertura String   @map("Idcierreyapertura")
-  usuario           String?  @map("Usuario")
-  campoModificado   String   @map("Campo Modificado")
-  valorAnterior     String   @map("Valor Anterior")
-  valorNuevo        String   @map("Valor Nuevo")
-  fechaYHora        DateTime @default(now()) @map("Fecha y hora")
-
-  insumoCaja AperturaCierreInsumos @relation(fields: [Idcierreyapertura], references: [Idcierreyapertura], onDelete: Cascade)
+  IDhistorial       String                @id @default(cuid()) @map("IDhistorial")
+  Idcierreyapertura String                @map("Idcierreyapertura")
+  usuario           String?               @map("Usuario")
+  campoModificado   String                @map("Campo Modificado")
+  valorAnterior     String                @map("Valor Anterior")
+  valorNuevo        String                @map("Valor Nuevo")
+  fechaYHora        DateTime              @default(now()) @map("Fecha y hora")
+  insumoCaja        AperturaCierreInsumos @relation(fields: [Idcierreyapertura], references: [Idcierreyapertura], onDelete: Cascade)
 
   @@map("HISTORIAL CAJA INSUMOS")
 }
@@ -407,9 +388,9 @@ model Gastos {
   fotos              String?   @map("Fotos")
   medioDePago        String?   @map("Medio de pago")
   relacionConInsumos String?   @map("Relacion con insumos")
-  tipo               String?   @default("NEGOCIO") @map("Tipo")
   createdAt          DateTime?
   updatedAt          DateTime?
+  tipo               String?   @default("NEGOCIO") @map("Tipo")
 
   @@map("GASTOS")
 }
@@ -426,63 +407,61 @@ model Comentarios {
 }
 
 model Filter {
-  FilterID                      String    @id @default(cuid()) @map("FilterID")
-  desde                         DateTime? @map("Desde") @db.Date
-  hasta                         DateTime? @map("Hasta") @db.Date
-  categoria                     String?   @map("Categoria")
-  producto                      String?   @map("Producto")
-  ingresoTotal                  Decimal?  @map("Ingreso Total") @db.Money
-  pdf                           String?   @map("pdf")
-  categoriaAlimentos            String?   @map("Categoria Alimentos")
-  alimentos                     String?   @map("Alimentos")
-  pdf2                          String?   @map("pdf2")
-  desde2                        DateTime? @map("Desde2") @db.Date
-  hasta2                        Boolean?  @map("Hasta2")
-  tipoDeFiltro                  String?   @map("TIPO DE FILTRO")
-  desde3                        DateTime? @map("Desde3") @db.Date
-  hasta3                        DateTime? @map("Hasta3") @db.Date
-  categoria2                    String?   @map("Categoria2")
-  producto2                     String?   @map("Producto2")
-  numeroDeUnidadesVendidas      Int?      @map("Numero de Unidades Vendidas")
-  precioTotalDelProductoVendido Int?      @map("Precio Total del Producto Vendido")
-  desde4                        DateTime? @map("Desde4") @db.Date
-  hasta4                        DateTime? @map("Hasta4") @db.Date
-  pdf3                          String?   @map("pdf3")
-  totalGastos                   Decimal?  @map("Total Gastos") @db.Money
-  desde5                        DateTime? @map("Desde5") @db.Date
-  hasta5                        DateTime? @map("Hasta5") @db.Date
-  pdf4                          String?   @map("pdf4")
-  totalGastosPersonales         Decimal?  @map("Total Gastos personales") @db.Money
-  desde6                        DateTime? @map("Desde6") @db.Date
-  hasta6                        DateTime? @map("Hasta6") @db.Date
-  pdf5                          String?   @map("pdf5")
-  totalDePlataGuardada          Decimal?  @map("Total de plata guardada") @db.Money
-  fechaInicioVentas             DateTime? @map("Fecha Inicio Ventas") @db.Date
-  fechaFinalVentas              DateTime? @map("Fecha Final Ventas") @db.Date
-  ventasTotal                   Decimal?  @map("Ventas TOTAL") @db.Money
-  gastosTotal                   Decimal?  @map("Gastos TOTAL") @db.Money
-  inventarioTotal               Decimal?  @map("Inventario TOTAL") @db.Money
-  gastosPersonalesTotal         Decimal?  @map("Gastos Personales TOTAL") @db.Money
-  utilidadNegocio               Decimal?  @map("Utilidad Negocio") @db.Money
-  utilidadNeta                  Decimal?  @map("Utilidad Neta") @db.Money
+  FilterID                      String           @id @default(cuid()) @map("FilterID")
+  desde                         DateTime?        @map("Desde") @db.Date
+  hasta                         DateTime?        @map("Hasta") @db.Date
+  categoria                     String?          @map("Categoria")
+  producto                      String?          @map("Producto")
+  ingresoTotal                  Decimal?         @map("Ingreso Total") @db.Money
+  pdf                           String?          @map("pdf")
+  categoriaAlimentos            String?          @map("Categoria Alimentos")
+  alimentos                     String?          @map("Alimentos")
+  pdf2                          String?          @map("pdf2")
+  desde2                        DateTime?        @map("Desde2") @db.Date
+  hasta2                        Boolean?         @map("Hasta2")
+  tipoDeFiltro                  String?          @map("TIPO DE FILTRO")
+  desde3                        DateTime?        @map("Desde3") @db.Date
+  hasta3                        DateTime?        @map("Hasta3") @db.Date
+  categoria2                    String?          @map("Categoria2")
+  producto2                     String?          @map("Producto2")
+  numeroDeUnidadesVendidas      Int?             @map("Numero de Unidades Vendidas")
+  precioTotalDelProductoVendido Int?             @map("Precio Total del Producto Vendido")
+  desde4                        DateTime?        @map("Desde4") @db.Date
+  hasta4                        DateTime?        @map("Hasta4") @db.Date
+  pdf3                          String?          @map("pdf3")
+  totalGastos                   Decimal?         @map("Total Gastos") @db.Money
+  desde5                        DateTime?        @map("Desde5") @db.Date
+  hasta5                        DateTime?        @map("Hasta5") @db.Date
+  pdf4                          String?          @map("pdf4")
+  totalGastosPersonales         Decimal?         @map("Total Gastos personales") @db.Money
+  desde6                        DateTime?        @map("Desde6") @db.Date
+  hasta6                        DateTime?        @map("Hasta6") @db.Date
+  pdf5                          String?          @map("pdf5")
+  totalDePlataGuardada          Decimal?         @map("Total de plata guardada") @db.Money
+  fechaInicioVentas             DateTime?        @map("Fecha Inicio Ventas") @db.Date
+  fechaFinalVentas              DateTime?        @map("Fecha Final Ventas") @db.Date
+  ventasTotal                   Decimal?         @map("Ventas TOTAL") @db.Money
+  gastosTotal                   Decimal?         @map("Gastos TOTAL") @db.Money
+  inventarioTotal               Decimal?         @map("Inventario TOTAL") @db.Money
+  gastosPersonalesTotal         Decimal?         @map("Gastos Personales TOTAL") @db.Money
+  utilidadNegocio               Decimal?         @map("Utilidad Negocio") @db.Money
+  utilidadNeta                  Decimal?         @map("Utilidad Neta") @db.Money
   createdAt                     DateTime?
   updatedAt                     DateTime?
-
-  dineroRetirado DineroRetirado[]
+  dineroRetirado                DineroRetirado[]
 
   @@map("Filter")
 }
 
 model Home {
-  IDhome     String  @id @default(cuid()) @map("IDhome")
-  menu       String? @map("Menu")
-  mostrarRol String? @map("MostrarRol")
-  icono      String? @map("Icono")
-  vista      String? @map("Vista")
-  accion     String? @map("Accion")
-  orden      Int?    @map("Orden")
-
-  submenu Submenu[]
+  IDhome     String    @id @default(cuid()) @map("IDhome")
+  menu       String?   @map("Menu")
+  mostrarRol String?   @map("MostrarRol")
+  icono      String?   @map("Icono")
+  vista      String?   @map("Vista")
+  accion     String?   @map("Accion")
+  orden      Int?      @map("Orden")
+  submenu    Submenu[]
 
   @@map("HOME")
 }
@@ -495,62 +474,60 @@ model Submenu {
   imagen    String? @map("Imagen")
   vista     String? @map("Vista")
   orden     Int?    @map("Orden")
-
-  home Home? @relation(fields: [IDhome], references: [IDhome])
+  home      Home?   @relation(fields: [IDhome], references: [IDhome])
 
   @@map("SUBMENU")
 }
 
 model ConfiguracionImpresora {
   id              String   @id @default(cuid())
-  estadoOrden     String   @unique // "PAGADO", "TOMADO", "CARRITO", etc.
-  imprimirComanda Boolean  @default(false)
-  imprimirFactura Boolean  @default(false)
+  estadoOrden     String   @unique
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+  imprimirComanda Boolean  @default(false)
+  imprimirFactura Boolean  @default(false)
 
   @@map("CONFIGURACION_IMPRESORA")
 }
 
 model ConfiguracionNegocio {
-  id                Int      @id @default(1)
-  nombreComercial   String?  @default("Q HUBO MOR")
-  nit               String?
-  direccion         String?
-  telefono          String?
-  horaCorteDia      String   @default("00:00") // Formato "HH:mm" (ej. "04:00")
-  modoOperacion     String   @default("GENERAL") // "GENERAL" o "RESTAURANTE"
-  // --- Geocerca Nómina ---
-  latitudNegocio    Float?   // Latitud GPS del establecimiento
-  longitudNegocio   Float?   // Longitud GPS del establecimiento
-  radioGeocercaM    Int      @default(100) // Radio en metros para validar check-in
-  // -----------------------
-  updatedAt         DateTime @updatedAt
+  id              Int      @id @default(1)
+  horaCorteDia    String   @default("00:00")
+  updatedAt       DateTime @updatedAt
+  modoOperacion   String   @default("GENERAL")
+  direccion       String?
+  nit             String?
+  nombreComercial String?  @default("Q HUBO MOR")
+  telefono        String?
+  latitudNegocio  Float?
+  longitudNegocio Float?
+  radioGeocercaM  Int      @default(100)
 }
 
 model ConfiguracionIA {
-  id             Int      @id @default(1)
-  apiKey         String?
-  modeloDefecto  String   @default("gemini-1.5-flash")
-  temperatura    Float    @default(0.4)
-  topP           Float    @default(0.95)
-  maxTokens      Int      @default(2048)
-  isActive       Boolean  @default(true)
-  updatedAt      DateTime @updatedAt
+  id               Int      @id @default(1)
+  apiKey           String?
+  modeloDefecto    String   @default("gemini-1.5-flash")
+  temperatura      Float    @default(0.4)
+  topP             Float    @default(0.95)
+  maxTokens        Int      @default(2048)
+  isActive         Boolean  @default(true)
+  updatedAt        DateTime @updatedAt
+  usarRazonamiento Boolean? @default(false)
 
   @@map("CONFIGURACION_IA")
 }
 
 model ConfiguracionWhatsapp {
-  id               Int      @id @default(1)
-  enabled          Boolean  @default(false)
-  urlBase          String?  // Ej. url donde esta la API de Evolution
-  sessionId        String?  // Ej. 'default' o el ID de la sesion
-  token            String?  // El x-access-token
-  receiver         String?  // El numero telefónico destino
-  isGroup          Boolean  @default(false)
-  updatedAt        DateTime @updatedAt
-  
+  id        Int      @id @default(1)
+  enabled   Boolean  @default(false)
+  urlBase   String?
+  sessionId String?
+  token     String?
+  receiver  String?
+  isGroup   Boolean  @default(false)
+  updatedAt DateTime @updatedAt
+
   @@map("CONFIGURACION_WHATSAPP")
 }
 
@@ -561,52 +538,37 @@ model PushToken {
   deviceName String?
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
-
-  usuario Usuarios @relation(fields: [userId], references: [IDusuarios], onDelete: Cascade)
+  usuario    Usuarios @relation(fields: [userId], references: [IDusuarios], onDelete: Cascade)
 
   @@map("PUSH_TOKENS")
 }
 
 model NotificationSetting {
-  userId String @id @map("UsuarioId")
-
-  // Ventas / Pedidos
-  notifyVentaCreated    Boolean @default(false)
-  notifyVentaUpdated    Boolean @default(false)
-  notifyVentaDeleted    Boolean @default(true)
-  notifyVentaTrashEmpty Boolean @default(false)
-
-  // Productos
-  notifyProductoCreated       Boolean @default(false)
-  notifyProductoPriceChanged  Boolean @default(true)
-  notifyProductoRecipeChanged Boolean @default(true)
-  notifyProductoDeleted       Boolean @default(false)
-
-  // Insumos
-  notifyInsumoCreated       Boolean @default(false)
-  notifyInsumoStockPositive Boolean @default(false)
-  notifyInsumoStockNegative Boolean @default(true)
-  notifyInsumoStockLow      Boolean @default(true)
-  notifyInsumoDeleted       Boolean @default(false)
-
-  // Caja y Apertura Insumos
-  notifyCajaOpened             Boolean @default(false)
-  notifyCajaClosedPerfect      Boolean @default(false)
-  notifyCajaClosedMismatch     Boolean @default(true)
-  notifyCajaDeleted            Boolean @default(false)
-  notifyOrderInventarioUpdated Boolean @default(true)
-
-  // Dinero Guardado
-  notifyDineroRetirado Boolean @default(true)
-
-  // Gastos
-  notifyGastoCreated Boolean @default(false)
-  notifyGastoDeleted Boolean @default(false)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  usuario Usuarios @relation(fields: [userId], references: [IDusuarios], onDelete: Cascade)
+  userId                       String   @id @map("UsuarioId")
+  notifyVentaCreated           Boolean  @default(false)
+  notifyVentaUpdated           Boolean  @default(false)
+  notifyVentaDeleted           Boolean  @default(true)
+  notifyVentaTrashEmpty        Boolean  @default(false)
+  notifyProductoCreated        Boolean  @default(false)
+  notifyProductoPriceChanged   Boolean  @default(true)
+  notifyProductoRecipeChanged  Boolean  @default(true)
+  notifyProductoDeleted        Boolean  @default(false)
+  notifyInsumoCreated          Boolean  @default(false)
+  notifyInsumoStockPositive    Boolean  @default(false)
+  notifyInsumoStockNegative    Boolean  @default(true)
+  notifyInsumoStockLow         Boolean  @default(true)
+  notifyInsumoDeleted          Boolean  @default(false)
+  notifyCajaOpened             Boolean  @default(false)
+  notifyCajaClosedPerfect      Boolean  @default(false)
+  notifyCajaClosedMismatch     Boolean  @default(true)
+  notifyCajaDeleted            Boolean  @default(false)
+  notifyOrderInventarioUpdated Boolean  @default(true)
+  notifyDineroRetirado         Boolean  @default(true)
+  notifyGastoCreated           Boolean  @default(false)
+  notifyGastoDeleted           Boolean  @default(false)
+  createdAt                    DateTime @default(now())
+  updatedAt                    DateTime @updatedAt
+  usuario                      Usuarios @relation(fields: [userId], references: [IDusuarios], onDelete: Cascade)
 
   @@map("NOTIFICATION_SETTINGS")
 }
@@ -620,107 +582,134 @@ model NotificationHistory {
   data      Json?
   read      Boolean  @default(false)
   createdAt DateTime @default(now())
-
-  usuario Usuarios @relation(fields: [userId], references: [IDusuarios], onDelete: Cascade)
+  usuario   Usuarios @relation(fields: [userId], references: [IDusuarios], onDelete: Cascade)
 
   @@map("NOTIFICATION_HISTORY")
 }
-// ============================================================
-// MÓDULO DE NÓMINA Y ASISTENCIA
-// ============================================================
 
 model CargosEmpleado {
-  IDcargo          String     @id @default(cuid()) @map("IDcargo")
-  nombre           String     @map("Nombre")           // "Cocina", "Granizados", etc.
-  tarifaLunes      Decimal    @default(0) @map("TarifaLunes") @db.Money
-  tarifaMartes     Decimal    @default(0) @map("TarifaMartes") @db.Money
-  tarifaMiercoles  Decimal    @default(0) @map("TarifaMiercoles") @db.Money
-  tarifaJueves     Decimal    @default(0) @map("TarifaJueves") @db.Money
-  tarifaViernes    Decimal    @default(0) @map("TarifaViernes") @db.Money
-  tarifaSabado     Decimal    @default(0) @map("TarifaSabado") @db.Money
-  tarifaDomingo    Decimal    @default(0) @map("TarifaDomingo") @db.Money
-  descuentoCena    Decimal    @default(0) @map("DescuentoCena") @db.Money
-  createdAt        DateTime   @default(now())
-  updatedAt        DateTime   @updatedAt
-
-  usuarios         Usuarios[]
+  IDcargo         String     @id @default(cuid()) @map("IDcargo")
+  nombre          String     @map("Nombre")
+  tarifaLunes     Decimal    @default(0) @map("TarifaLunes") @db.Money
+  tarifaMartes    Decimal    @default(0) @map("TarifaMartes") @db.Money
+  tarifaMiercoles Decimal    @default(0) @map("TarifaMiercoles") @db.Money
+  tarifaJueves    Decimal    @default(0) @map("TarifaJueves") @db.Money
+  tarifaViernes   Decimal    @default(0) @map("TarifaViernes") @db.Money
+  tarifaSabado    Decimal    @default(0) @map("TarifaSabado") @db.Money
+  tarifaDomingo   Decimal    @default(0) @map("TarifaDomingo") @db.Money
+  descuentoCena   Decimal    @default(0) @map("DescuentoCena") @db.Money
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+  usuarios        Usuarios[]
 
   @@map("CARGOS_EMPLEADO")
 }
 
 model Turnos {
-  IDturno          String     @id @default(cuid()) @map("IDturno")
-  usuarioId        String     @map("UsuarioId")
-  fecha            DateTime   @map("Fecha") @db.Date
-  horaEntrada      DateTime   @map("HoraEntrada")
-  horaSalida       DateTime?  @map("HoraSalida")
-  fotoEntrada      String?    @map("FotoEntrada")      // path relativo: /uploads/asistencia/file.jpg
-  latitud          Float?     @map("Latitud")
-  longitud         Float?     @map("Longitud")
-  distanciaMetros  Float?     @map("DistanciaMetros")  // distancia al negocio al check-in
-  dentroGeocerca   Boolean    @default(false) @map("DentroGeocerca")
-  
-  // --- Check-Out ---
-  fotoSalida           String?    @map("FotoSalida")
-  latitudSalida        Float?     @map("LatitudSalida")
-  longitudSalida       Float?     @map("LongitudSalida")
-  distanciaMetrosSalida Float?    @map("DistanciaMetrosSalida")
-  dentroGeocercaSalida  Boolean?  @map("DentroGeocercaSalida")
-
-  ceno             Boolean?   @map("Ceno")             // NULL = turno activo, true/false = cerrado
-  valorTurno       Decimal    @default(0) @map("ValorTurno") @db.Money
-  estado           String     @default("ACTIVO") @map("Estado") // ACTIVO | COMPLETADO | ANULADO
-  observacion      String?    @map("Observacion")
-  createdAt        DateTime   @default(now())
-  updatedAt        DateTime   @updatedAt
-
-  usuario          Usuarios   @relation(fields: [usuarioId], references: [IDusuarios], onDelete: Cascade)
-  descuentos       DescuentosEmpleado[]
+  IDturno               String               @id @default(cuid()) @map("IDturno")
+  usuarioId             String               @map("UsuarioId")
+  fecha                 DateTime             @map("Fecha") @db.Date
+  horaEntrada           DateTime             @map("HoraEntrada")
+  horaSalida            DateTime?            @map("HoraSalida")
+  fotoEntrada           String?              @map("FotoEntrada")
+  latitud               Float?               @map("Latitud")
+  longitud              Float?               @map("Longitud")
+  distanciaMetros       Float?               @map("DistanciaMetros")
+  dentroGeocerca        Boolean              @default(false) @map("DentroGeocerca")
+  ceno                  Boolean?             @map("Ceno")
+  valorTurno            Decimal              @default(0) @map("ValorTurno") @db.Money
+  estado                String               @default("ACTIVO") @map("Estado")
+  observacion           String?              @map("Observacion")
+  createdAt             DateTime             @default(now())
+  updatedAt             DateTime             @updatedAt
+  dentroGeocercaSalida  Boolean?             @map("DentroGeocercaSalida")
+  distanciaMetrosSalida Float?               @map("DistanciaMetrosSalida")
+  fotoSalida            String?              @map("FotoSalida")
+  latitudSalida         Float?               @map("LatitudSalida")
+  longitudSalida        Float?               @map("LongitudSalida")
+  descuentos            DescuentosEmpleado[]
+  usuario               Usuarios             @relation(fields: [usuarioId], references: [IDusuarios], onDelete: Cascade)
 
   @@map("TURNOS")
 }
 
 model DescuentosEmpleado {
-  IDdescuento      String     @id @default(cuid()) @map("IDdescuento")
-  usuarioId        String     @map("UsuarioId")
-  turnoId          String?    @map("TurnoId")          // Opcional: vinculado a un turno
-  loteId           String?    @map("LoteId")           // Agrupa descuentos de un reparto
-  fecha            DateTime   @map("Fecha")
-  // Concepto: DESCUADRE_CAJA | CENA | PERDIDA | ROBO | ADELANTO | OTRO
-  concepto         String     @map("Concepto")
-  descripcion      String     @map("Descripcion")
-  valor            Decimal    @map("Valor") @db.Money
-  // Estado: PENDIENTE (empleado no lo ha visto) | VISTO | APROBADO
-  estado           String     @default("PENDIENTE") @map("Estado")
-  creadoPor        String     @map("CreadoPor")
-  createdAt        DateTime   @default(now())
-  updatedAt        DateTime   @updatedAt
-
-  usuario          Usuarios   @relation(fields: [usuarioId], references: [IDusuarios], onDelete: Cascade)
-  turno            Turnos?    @relation(fields: [turnoId], references: [IDturno])
+  IDdescuento String   @id @default(cuid()) @map("IDdescuento")
+  usuarioId   String   @map("UsuarioId")
+  turnoId     String?  @map("TurnoId")
+  loteId      String?  @map("LoteId")
+  fecha       DateTime @map("Fecha")
+  concepto    String   @map("Concepto")
+  descripcion String   @map("Descripcion")
+  valor       Decimal  @map("Valor") @db.Money
+  estado      String   @default("PENDIENTE") @map("Estado")
+  creadoPor   String   @map("CreadoPor")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  turno       Turnos?  @relation(fields: [turnoId], references: [IDturno])
+  usuario     Usuarios @relation(fields: [usuarioId], references: [IDusuarios], onDelete: Cascade)
 
   @@map("DESCUENTOS_EMPLEADO")
 }
 
 model Liquidaciones {
-  IDliquidacion     String     @id @default(cuid()) @map("IDliquidacion")
-  usuarioId         String     @map("UsuarioId")
-  fechaInicio       DateTime   @map("FechaInicio") @db.Date
-  fechaFin          DateTime   @map("FechaFin") @db.Date
-  totalTurnos       Int        @default(0) @map("TotalTurnos")
-  totalBruto        Decimal    @default(0) @map("TotalBruto") @db.Money
-  totalDescuentos   Decimal    @default(0) @map("TotalDescuentos") @db.Money
-  totalNeto         Decimal    @default(0) @map("TotalNeto") @db.Money
-  estado            String     @default("PENDIENTE") @map("Estado") // PENDIENTE | PAGADA
-  observaciones     String?    @map("Observaciones")
-  pdfUrl            String?    @map("PdfUrl")
-  creadoPor         String     @map("CreadoPor")
-  turnosDetalle     Json?      @map("TurnosDetalle")   // snapshot de turnos al liquidar
-  descuentosDetalle Json?      @map("DescuentosDetalle") // snapshot de descuentos al liquidar
-  createdAt         DateTime   @default(now())
-  updatedAt         DateTime   @updatedAt
-
-  usuario           Usuarios   @relation(fields: [usuarioId], references: [IDusuarios], onDelete: Cascade)
+  IDliquidacion     String   @id @default(cuid()) @map("IDliquidacion")
+  usuarioId         String   @map("UsuarioId")
+  fechaInicio       DateTime @map("FechaInicio") @db.Date
+  fechaFin          DateTime @map("FechaFin") @db.Date
+  totalTurnos       Int      @default(0) @map("TotalTurnos")
+  totalBruto        Decimal  @default(0) @map("TotalBruto") @db.Money
+  totalDescuentos   Decimal  @default(0) @map("TotalDescuentos") @db.Money
+  totalNeto         Decimal  @default(0) @map("TotalNeto") @db.Money
+  estado            String   @default("PENDIENTE") @map("Estado")
+  observaciones     String?  @map("Observaciones")
+  pdfUrl            String?  @map("PdfUrl")
+  creadoPor         String   @map("CreadoPor")
+  turnosDetalle     Json?    @map("TurnosDetalle")
+  descuentosDetalle Json?    @map("DescuentosDetalle")
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  usuario           Usuarios @relation(fields: [usuarioId], references: [IDusuarios], onDelete: Cascade)
 
   @@map("LIQUIDACIONES")
+}
+
+model checkpoint_blobs {
+  thread_id     String
+  checkpoint_ns String @default("")
+  channel       String
+  version       String
+  type          String
+  blob          Bytes?
+
+  @@id([thread_id, checkpoint_ns, channel, version])
+}
+
+model checkpoint_migrations {
+  v Int @id
+}
+
+model checkpoint_writes {
+  thread_id     String
+  checkpoint_ns String  @default("")
+  checkpoint_id String
+  task_id       String
+  idx           Int
+  channel       String
+  type          String?
+  blob          Bytes
+
+  @@id([thread_id, checkpoint_ns, checkpoint_id, task_id, idx])
+}
+
+model checkpoints {
+  thread_id            String
+  checkpoint_ns        String  @default("")
+  checkpoint_id        String
+  parent_checkpoint_id String?
+  type                 String?
+  checkpoint           Json
+  metadata             Json    @default("{}")
+
+  @@id([thread_id, checkpoint_ns, checkpoint_id])
 }
