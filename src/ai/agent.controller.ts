@@ -1,7 +1,7 @@
 import { Controller, Post, Body } from '@nestjs/common';
 import { AgentService } from './agent.service';
 
-@Controller('v1/agent')
+@Controller('agent')
 export class AgentController {
   constructor(private agentService: AgentService) {}
 
