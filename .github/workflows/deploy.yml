@@ -55,7 +55,7 @@ jobs:
             
             # 4. Construir la nueva imagen de Docker localmente en Contabo (sin cache para asegurar construccion limpia)
             echo "Construyendo imagen Docker..."
-            docker build --no-cache -t qhubomor-backend .
+            docker build -t qhubomor-backend .
             
             # 5. Detener y eliminar el contenedor anterior si existe
             echo "Deteniendo contenedor anterior..."
