@@ -1037,31 +1037,27 @@ export class CajaService {
         });
 
         if (accion.action === 'change_payment') {
-          // VALIDACIÓN ESTRICTA (OPCIÓN B): Enforzar matemática en 'EFECTIVO Y OTROS'
+          // VALIDACIÓN: Enforzar que EFECTIVO Y OTROS sume exactamente el total de la venta
           if (accion.method === 'EFECTIVO Y OTROS' && accion.ventaId) {
             const targetSale = ventasEligibles.find(v => v.ventaId === accion.ventaId);
-            if (targetSale && remainingDiferenciaTransferencia > 0) {
-              const saleTotal = targetSale.total;
-              const adjustAmount = Math.min(remainingDiferenciaTransferencia, saleTotal);
-              
-              if (diferenciaTransferencia > 0) {
-                // Físico > Sistema: Necesitamos sumar transferencias al sistema
-                accion.transferenciaRecibida = adjustAmount;
-                accion.efectivoRecibido = saleTotal - adjustAmount;
-              } else {
-                // Físico < Sistema: Necesitamos restar transferencias del sistema
-                accion.transferenciaRecibida = saleTotal - adjustAmount;
-                accion.efectivoRecibido = adjustAmount;
-              }
-              remainingDiferenciaTransferencia -= adjustAmount;
-              accion.motivo = accion.motivo + ` (Cantidades exactas calculadas por Backend: Transf $${accion.transferenciaRecibida}, Efec $${accion.efectivoRecibido})`;
-            }
-          } else if (accion.ventaId) {
-            // Si el método no es mixto, descontamos la venta total del remanente si es que aplica
-            const targetSale = ventasEligibles.find(v => v.ventaId === accion.ventaId);
             if (targetSale) {
-               remainingDiferenciaTransferencia -= targetSale.total;
-               if (remainingDiferenciaTransferencia < 0) remainingDiferenciaTransferencia = 0;
+              const saleTotal = Number(targetSale.total);
+              let ef = Number(accion.efectivoRecibido || 0);
+              let tr = Number(accion.transferenciaRecibida || 0);
+              
+              if (ef + tr !== saleTotal) {
+                if (tr > 0 && tr <= saleTotal) {
+                  ef = saleTotal - tr;
+                } else if (ef > 0 && ef <= saleTotal) {
+                  tr = saleTotal - ef;
+                } else {
+                  tr = saleTotal;
+                  ef = 0;
+                }
+                accion.efectivoRecibido = ef;
+                accion.transferenciaRecibida = tr;
+                accion.motivo = accion.motivo + ` (Ajuste Backend: Sumas corregidas al total de $${saleTotal})`;
+              }
             }
           }
           correctedAcciones.push(accion);

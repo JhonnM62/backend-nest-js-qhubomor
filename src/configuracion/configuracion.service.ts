@@ -62,10 +62,10 @@ async updateConfiguracion(data: {
       configIA = await this.prisma.configuracionIA.create({
         data: {
           id: 1,
-          modeloDefecto: 'gemini-1.5-flash',
+          modeloDefecto: 'gemini-3.5-flash',
           temperatura: 0.4,
           topP: 0.95,
-          maxTokens: 2048,
+          maxTokens: 8192,
           isActive: true
         }
       });
