@@ -16,6 +16,7 @@ export class AgentToolsService {
       this.modificarCuentaTool(),
       this.liquidarEmpleadoTool(),
       this.cerrarCajaTool(),
+      this.consultarVentasTool(),
     ];
   }
 
@@ -172,6 +173,64 @@ export class AgentToolsService {
         schema: z.object({
           apertura: z.number().describe('Cantidad de insumos reportada al abrir (si la dicta el usuario)'),
           cierre: z.number().describe('Cantidad de insumos reportada al cerrar (si la dicta el usuario)'),
+        }),
+      }
+    );
+  }
+
+  private consultarVentasTool() {
+    return tool(
+      async (args) => {
+        try {
+          const startDate = new Date(`${args.fechaInicio}T00:00:00.000Z`);
+          const endDate = new Date(`${args.fechaFin}T23:59:59.999Z`);
+          
+          const whereClause: any = {
+            fecha: {
+              gte: startDate,
+              lte: endDate
+            },
+            venta: {
+              estado: { in: ['PAGADO', 'ENTREGADO'] }
+            }
+          };
+
+          if (args.producto) {
+            whereClause.nombre = { contains: args.producto, mode: 'insensitive' };
+          }
+
+          const ordenes = await this.prisma.orderventas.findMany({
+            where: whereClause,
+            select: { cantidad: true, precioTotal: true, nombre: true }
+          });
+
+          let totalUnidades = 0;
+          let ingresosTotales = 0;
+          
+          for (const orden of ordenes) {
+            totalUnidades += orden.cantidad || 0;
+            ingresosTotales += Number(orden.precioTotal) || 0;
+          }
+
+          if (ordenes.length === 0) {
+            return `No se encontraron ventas pagadas${args.producto ? ` del producto '${args.producto}'` : ''} entre el ${args.fechaInicio} y el ${args.fechaFin}.`;
+          }
+
+          return `Resumen de ventas${args.producto ? ` para '${args.producto}'` : ''} (${args.fechaInicio} a ${args.fechaFin}):
+- Unidades vendidas: ${totalUnidades}
+- Ingresos generados: $${ingresosTotales.toLocaleString('es-CO')}`;
+
+        } catch (error: any) {
+          return `Ocurrió un error al consultar las ventas: ${error.message}`;
+        }
+      },
+      {
+        name: 'consultar_ventas',
+        description: 'Útil para consultar reportes de ventas históricas, sumar ingresos o contar cuántas unidades de un producto específico (ej. "24 onzas") se vendieron en un rango de fechas.',
+        schema: z.object({
+          fechaInicio: z.string().describe('Fecha de inicio (YYYY-MM-DD). Calcula la fecha exacta si el usuario dice "ayer" o "hoy".'),
+          fechaFin: z.string().describe('Fecha de fin (YYYY-MM-DD). Si es para un solo día, usa la misma que fechaInicio.'),
+          producto: z.string().optional().describe('Palabra clave del producto a buscar, ej. "24 onzas", "granizado". Si no se especifica, se buscarán todas las ventas.'),
         }),
       }
     );
