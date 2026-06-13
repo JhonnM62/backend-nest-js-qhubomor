@@ -434,13 +434,14 @@ export class AgentToolsService {
 
         const cajas = await this.prisma.aperturaCierreCaja.findMany({
           where: {
-            fechaDeCierre: { gte: start, lte: end },
+            fechaDeApertura: { gte: start, lte: end },
             OR: [
               { valorFaltante: { gt: 0 } },
               { valorExcedente: { gt: 0 } }
             ]
           },
           select: {
+            fechaDeApertura: true,
             fechaDeCierre: true,
             valorFaltante: true,
             valorExcedente: true,
@@ -458,7 +459,8 @@ export class AgentToolsService {
         return JSON.stringify({
           totalFaltante,
           totalExcedente,
-          descuadresRegistrados: cajas
+          descuadresRegistrados: cajas,
+          nota: "Usa 'fechaDeApertura' como la fecha principal de la caja al dar la respuesta al usuario, ya que así es como se organizan los días en el negocio."
         });
       },
       {
