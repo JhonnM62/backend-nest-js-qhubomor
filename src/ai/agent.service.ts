@@ -134,7 +134,7 @@ IMPORTANTE: NUNCA uses formato Markdown (asteriscos para negritas, cursivas o vi
     this.graph = workflow.compile({ checkpointer: this.checkpointer, store: this.store });
   }
 
-  async invokeAgent(message: string, threadId: string, resumeCommand?: any) {
+  async invokeAgent(message: string, threadId: string, resumeCommand?: any, file?: Express.Multer.File) {
     const config = { configurable: { thread_id: threadId } };
     
     let result;
@@ -142,7 +142,15 @@ IMPORTANTE: NUNCA uses formato Markdown (asteriscos para negritas, cursivas o vi
       if (resumeCommand) {
          result = await this.graph.invoke(new Command({ resume: resumeCommand }), config);
       } else {
-         result = await this.graph.invoke({ messages: [new HumanMessage(message)] }, config);
+         let messageContent: any = message;
+         if (file) {
+             const base64Img = file.buffer.toString('base64');
+             messageContent = [
+                 { type: 'text', text: message || "Describe esta imagen." },
+                 { type: 'image_url', image_url: `data:${file.mimetype};base64,${base64Img}` }
+             ];
+         }
+         result = await this.graph.invoke({ messages: [new HumanMessage({ content: messageContent })] }, config);
       }
     } catch (error) {
       this.logger.error('Error invoking graph:', error);
