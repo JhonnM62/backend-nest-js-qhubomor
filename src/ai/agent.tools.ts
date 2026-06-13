@@ -435,7 +435,10 @@ export class AgentToolsService {
         const cajas = await this.prisma.aperturaCierreCaja.findMany({
           where: {
             fechaDeCierre: { gte: start, lte: end },
-            cuadroCaja: "No"
+            OR: [
+              { valorFaltante: { gt: 0 } },
+              { valorExcedente: { gt: 0 } }
+            ]
           },
           select: {
             fechaDeCierre: true,
