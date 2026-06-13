@@ -8,6 +8,7 @@ import { ToolNode } from '@langchain/langgraph/prebuilt';
 import { AIMessage, HumanMessage, ToolMessage } from '@langchain/core/messages';
 import { Pool } from 'pg';
 import { ConfiguracionService } from '../configuracion/configuracion.service';
+import { PrismaService } from '../prisma/prisma.service';
 
 const AgentState = new StateSchema({
   messages: MessagesValue,
@@ -22,7 +23,8 @@ export class AgentService implements OnModuleInit {
 
   constructor(
     private agentTools: AgentToolsService,
-    private configuracionService: ConfiguracionService
+    private configuracionService: ConfiguracionService,
+    private prisma: PrismaService
   ) {}
 
   async onModuleInit() {
@@ -67,10 +69,15 @@ export class AgentService implements OnModuleInit {
       const llmWithTools = llm.bindTools(tools);
       
       const { SystemMessage } = await import('@langchain/core/messages');
+      const reglasDb = await this.prisma.instruccionesAgente.findMany();
+      const reglasTexto = reglasDb.length > 0 
+        ? '\n\nREGLAS Y RETROALIMENTACIÓN APRENDIDAS DEL USUARIO:\n' + reglasDb.map(r => `🔹 [${r.contexto}]: ${r.instruccion}`).join('\n')
+        : '';
+
       const systemMessage = new SystemMessage(`Eres el asistente de IA avanzado de Q'hubo Mor POS. 
 Hoy es: ${new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' })}.
 Usa esta fecha para resolver cualquier consulta que mencione "hoy", "ayer" o fechas relativas. No supongas otra fecha.
-IMPORTANTE: NUNCA uses formato Markdown (asteriscos para negritas, cursivas o viñetas). La app móvil no renderiza Markdown y muestra los asteriscos literalmente. En lugar de eso, usa emojis (🔹, 💰, 📅, 🟢, 🔴, etc.) para resaltar puntos clave, hacer viñetas y estructurar tus respuestas en texto plano de forma atractiva y fácil de leer.`);
+IMPORTANTE: NUNCA uses formato Markdown (asteriscos para negritas, cursivas o viñetas). La app móvil no renderiza Markdown y muestra los asteriscos literalmente. En lugar de eso, usa emojis (🔹, 💰, 📅, 🟢, 🔴, etc.) para resaltar puntos clave, hacer viñetas y estructurar tus respuestas en texto plano de forma atractiva y fácil de leer.${reglasTexto}`);
 
       const response = await llmWithTools.invoke([systemMessage, ...state.messages]);
       return { messages: [response] };

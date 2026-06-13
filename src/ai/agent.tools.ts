@@ -28,7 +28,8 @@ export class AgentToolsService {
       this.consultarInventarioGeneralTool(),
       this.buscarClienteTool(),
       this.analizarMovimientosInsumosTool(),
-      this.consultarDescuadresCajaTool()
+      this.consultarDescuadresCajaTool(),
+      this.aprenderReglaTool()
     ];
   }
 
@@ -469,6 +470,32 @@ export class AgentToolsService {
         schema: z.object({
           fechaInicio: z.string().describe('Fecha de inicio (YYYY-MM-DD)'),
           fechaFin: z.string().describe('Fecha de fin (YYYY-MM-DD)'),
+        }),
+      }
+    );
+  }
+
+  private aprenderReglaTool() {
+    return tool(
+      async (args) => {
+        try {
+          await this.prisma.instruccionesAgente.create({
+            data: {
+              contexto: args.contexto,
+              instruccion: args.instruccion,
+            }
+          });
+          return `Regla aprendida y guardada exitosamente bajo el contexto: ${args.contexto}. Me acordaré de esto en el futuro.`;
+        } catch (error: any) {
+          return `Ocurrió un error al guardar la regla: ${error.message}`;
+        }
+      },
+      {
+        name: 'aprender_regla',
+        description: 'Usa esta herramienta cuando el usuario te dé una retroalimentación, instrucción o regla sobre cómo debes comportarte, cómo hacer cálculos o cómo usar tus otras herramientas (ej. "A partir de ahora ten en cuenta X al revisar la caja"). Esto guardará la regla en la base de datos para que la recuerdes siempre en tus futuras conversaciones.',
+        schema: z.object({
+          contexto: z.string().describe('El tema o categoría de la regla (ej. "Caja", "Ventas", "Inventario", "consultarVentasTool", "General").'),
+          instruccion: z.string().describe('La instrucción o regla exacta que el usuario quiere que aprendas y recuerdes.'),
         }),
       }
     );

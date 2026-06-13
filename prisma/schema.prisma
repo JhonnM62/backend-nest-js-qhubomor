@@ -713,3 +713,13 @@ model checkpoints {
 
   @@id([thread_id, checkpoint_ns, checkpoint_id])
 }
+
+model InstruccionesAgente {
+  id          Int      @id @default(autoincrement())
+  contexto    String   @map("Contexto")
+  instruccion String   @map("Instruccion") 
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("INSTRUCCIONES_AGENTE")
+}
