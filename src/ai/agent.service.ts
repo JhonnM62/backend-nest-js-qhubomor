@@ -80,6 +80,9 @@ Usa esta fecha para resolver cualquier consulta que mencione "hoy", "ayer" o fec
 IMPORTANTE: NUNCA uses formato Markdown (asteriscos para negritas, cursivas o viñetas). La app móvil no renderiza Markdown y muestra los asteriscos literalmente. En lugar de eso, usa emojis (🔹, 💰, 📅, 🟢, 🔴, etc.) para resaltar puntos clave, hacer viñetas y estructurar tus respuestas en texto plano de forma atractiva y fácil de leer.${reglasTexto}`);
 
       const response = await llmWithTools.invoke([systemMessage, ...state.messages]);
+      if (response.tool_calls && response.tool_calls.length > 0) {
+        this.logger.debug(`[AgentService] LLM is calling tools: ${response.tool_calls.map((t: any) => t.name).join(', ')}`);
+      }
       return { messages: [response] };
     };
 
@@ -159,8 +162,15 @@ IMPORTANTE: NUNCA uses formato Markdown (asteriscos para negritas, cursivas o vi
          }
          result = await this.graph.invoke({ messages: [new HumanMessage({ content: messageContent })] }, config);
       }
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error('Error invoking graph:', error);
+      if (error.name === 'GraphRecursionError' || (error.message && error.message.includes('Recursion limit'))) {
+          // Graceful degradation for recursion
+          return {
+             status: 'completed',
+             message: '🤖 Lo siento, tuve un problema interno de límite de herramientas (GraphRecursionError) y no pude terminar. La herramienta no respondió como esperaba. Por favor intenta reformular tu solicitud.'
+          };
+      }
       throw error;
     }
 

@@ -1019,9 +1019,16 @@ export class CajaService {
     for (const d of insumosDescuadrados) {
       differenceTracker.set(d.productoAsociado, Math.abs(d.diferencia));
     }
-    let remainingDiferenciaTransferencia = Math.abs(diferenciaTransferencia);
+    
+    // Hacemos una copia profunda de ventasEligibles para simular cambios de dinero
+    const simulatedVentas = JSON.parse(JSON.stringify(ventasEligibles));
 
-    // Step 1: Validate and correct each AI-generated action
+    // Función auxiliar para recalcular total de una venta
+    const recalcVentaTotal = (venta: any) => {
+      venta.total = venta.productos.reduce((sum: number, p: any) => sum + p.precioTotal, 0);
+    };
+
+    // Step 1: Validate and correct product actions (add/remove) and simulate them
     if (plan.acciones && Array.isArray(plan.acciones)) {
       for (const accion of plan.acciones) {
         // Find which descuadre this action addresses
@@ -1037,30 +1044,7 @@ export class CajaService {
         });
 
         if (accion.action === 'change_payment') {
-          // VALIDACIÓN: Enforzar que EFECTIVO Y OTROS sume exactamente el total de la venta
-          if (accion.method === 'EFECTIVO Y OTROS' && accion.ventaId) {
-            const targetSale = ventasEligibles.find(v => v.ventaId === accion.ventaId);
-            if (targetSale) {
-              const saleTotal = Number(targetSale.total);
-              let ef = Number(accion.efectivoRecibido || 0);
-              let tr = Number(accion.transferenciaRecibida || 0);
-              
-              if (ef + tr !== saleTotal) {
-                if (tr > 0 && tr <= saleTotal) {
-                  ef = saleTotal - tr;
-                } else if (ef > 0 && ef <= saleTotal) {
-                  tr = saleTotal - ef;
-                } else {
-                  tr = saleTotal;
-                  ef = 0;
-                }
-                accion.efectivoRecibido = ef;
-                accion.transferenciaRecibida = tr;
-                accion.motivo = accion.motivo + ` (Ajuste Backend: Sumas corregidas al total de $${saleTotal})`;
-              }
-            }
-          }
-          correctedAcciones.push(accion);
+          // Procesaremos change_payment en el Step 3, después de tener los totales reales.
           continue;
         }
 
@@ -1088,6 +1072,26 @@ export class CajaService {
 
           if (diff > 0) {
             // PHYSICAL > SYSTEM → must ADD products to system
+            // Simular el ADD
+            const simVenta = simulatedVentas.find((v: any) => v.ventaId === accion.ventaId);
+            if (simVenta) {
+               let unitPrice = 0;
+               const existingProd = simVenta.productos.find((p: any) => p.productoId === matchingDescuadre.productoId || p.nombre === matchingDescuadre.productoAsociado);
+               if (existingProd && existingProd.cantidad > 0) {
+                 unitPrice = existingProd.precioTotal / existingProd.cantidad;
+                 existingProd.cantidad += applyQuantity;
+                 existingProd.precioTotal += unitPrice * applyQuantity;
+               } else {
+                 simVenta.productos.push({
+                   productoId: matchingDescuadre.productoId || accion.productoId,
+                   nombre: matchingDescuadre.productoAsociado || accion.nombreProducto,
+                   cantidad: applyQuantity,
+                   precioTotal: 0 
+                 });
+               }
+               recalcVentaTotal(simVenta);
+            }
+            
             correctedAcciones.push({
               ...accion,
               action: 'add_product',
@@ -1099,6 +1103,18 @@ export class CajaService {
             });
           } else if (diff < 0) {
             // SYSTEM > PHYSICAL → must REMOVE products from system
+            const simVenta = simulatedVentas.find((v: any) => v.ventaId === accion.ventaId);
+            if (simVenta) {
+               const targetProduct = simVenta.productos.find((p: any) => p.productoId === matchingDescuadre.productoId || p.nombre === matchingDescuadre.productoAsociado);
+               if (targetProduct) {
+                 const actualRemove = Math.min(applyQuantity, targetProduct.cantidad);
+                 const unitPrice = targetProduct.cantidad > 0 ? targetProduct.precioTotal / targetProduct.cantidad : 0;
+                 targetProduct.cantidad -= actualRemove;
+                 targetProduct.precioTotal -= unitPrice * actualRemove;
+                 recalcVentaTotal(simVenta);
+               }
+            }
+
             correctedAcciones.push({
               ...accion,
               action: 'remove_product',
@@ -1109,9 +1125,6 @@ export class CajaService {
               motivo: accion.motivo || `Se detectó un excedente en el sistema para ${matchingDescuadre.productoAsociado}. Se remueven del sistema para igualar el conteo físico.`,
             });
           }
-        } else {
-          // Action doesn't match any descuadre - keep as-is (could be a payment change)
-          correctedAcciones.push(accion);
         }
       }
     }
@@ -1123,8 +1136,16 @@ export class CajaService {
 
       if (desc.diferencia > 0) {
         // Need to ADD — pick first eligible sale
-        const targetSale = ventasEligibles[0];
+        const targetSale = simulatedVentas[0];
         if (targetSale) {
+          targetSale.productos.push({
+            productoId: desc.productoId,
+            nombre: desc.productoAsociado,
+            cantidad: remaining,
+            precioTotal: 0
+          });
+          recalcVentaTotal(targetSale);
+          
           correctedAcciones.push({
             action: 'add_product',
             ventaId: targetSale.ventaId,
@@ -1136,23 +1157,169 @@ export class CajaService {
         }
       } else {
         // Need to REMOVE — find a sale that contains this product
-        const targetSale = ventasEligibles.find(v =>
-          v.productos.some((p: any) => p.productoId === desc.productoId || p.nombre === desc.productoAsociado)
+        const targetSale = simulatedVentas.find((v: any) =>
+          v.productos.some((p: any) => (p.productoId === desc.productoId || p.nombre === desc.productoAsociado) && p.cantidad > 0)
         );
         if (targetSale) {
           const targetProduct = targetSale.productos.find(
-            (p: any) => p.productoId === desc.productoId || p.nombre === desc.productoAsociado
+            (p: any) => (p.productoId === desc.productoId || p.nombre === desc.productoAsociado) && p.cantidad > 0
           );
-          correctedAcciones.push({
-            action: 'remove_product',
-            ventaId: targetSale.ventaId,
-            ordenId: targetProduct?.ordenId,
-            productoId: desc.productoId,
-            nombreProducto: desc.productoAsociado,
-            cantidadARemover: remaining,
-            motivo: `El sistema registró ${remaining} unidades más que el consumo físico de ${desc.productoAsociado}. Se remueve del pedido ${targetSale.pedido || targetSale.ventaId} para cuadrar.`,
-          });
+          if (targetProduct) {
+             const actualRemove = Math.min(remaining, targetProduct.cantidad);
+             const unitPrice = targetProduct.cantidad > 0 ? targetProduct.precioTotal / targetProduct.cantidad : 0;
+             targetProduct.cantidad -= actualRemove;
+             targetProduct.precioTotal -= unitPrice * actualRemove;
+             recalcVentaTotal(targetSale);
+
+             correctedAcciones.push({
+               action: 'remove_product',
+               ventaId: targetSale.ventaId,
+               ordenId: targetProduct.ordenId,
+               productoId: desc.productoId,
+               nombreProducto: desc.productoAsociado,
+               cantidadARemover: remaining,
+               motivo: `El sistema registró ${remaining} unidades más que el consumo físico de ${desc.productoAsociado}. Se remueve del pedido ${targetSale.pedido || targetSale.ventaId} para cuadrar.`,
+             });
+          }
         }
+      }
+      differenceTracker.set(desc.productoAsociado, 0);
+    }
+
+    // Step 3: Recalcular dinero esperado con base en las simulaciones
+    let simulatedTotalEfectivo = 0;
+    let simulatedTotalTransferencia = 0;
+
+    for (const v of simulatedVentas) {
+      if (['TRANSFERENCIA', 'NEQUI', 'DAVIPLATA', 'BANCOLOMBIA'].includes(v.metodo)) {
+         simulatedTotalTransferencia += v.total;
+      } else if (v.metodo === 'EFECTIVO') {
+         simulatedTotalEfectivo += v.total;
+      } else if (v.metodo === 'EFECTIVO Y OTROS') {
+         simulatedTotalEfectivo += v.total;
+      }
+    }
+
+    let actualDiferenciaTransferencia = transferenciasContadas - simulatedTotalTransferencia;
+
+    // Evaluar los change_payment propuestos por la IA
+    if (plan.acciones && Array.isArray(plan.acciones)) {
+      for (const accion of plan.acciones) {
+         if (accion.action !== 'change_payment') continue;
+         
+         const simVenta = simulatedVentas.find((v: any) => v.ventaId === accion.ventaId);
+         if (!simVenta) continue;
+
+         const currentTotal = simVenta.total;
+
+         if (accion.method === 'EFECTIVO Y OTROS') {
+            let ef = Number(accion.efectivoRecibido || 0);
+            let tr = Number(accion.transferenciaRecibida || 0);
+            
+            if (ef + tr !== currentTotal) {
+               if (tr > 0 && tr <= currentTotal) {
+                 ef = currentTotal - tr;
+               } else if (ef > 0 && ef <= currentTotal) {
+                 tr = currentTotal - ef;
+               } else {
+                 tr = currentTotal;
+                 ef = 0;
+               }
+               accion.efectivoRecibido = ef;
+               accion.transferenciaRecibida = tr;
+               accion.motivo = (accion.motivo || '') + ` (Ajuste Backend: Sumas corregidas al nuevo total de $${currentTotal})`;
+            }
+
+            if (['TRANSFERENCIA', 'NEQUI', 'DAVIPLATA', 'BANCOLOMBIA'].includes(simVenta.metodo)) {
+               actualDiferenciaTransferencia += currentTotal; // Remove old
+               actualDiferenciaTransferencia -= tr; // Add new
+            } else if (simVenta.metodo === 'EFECTIVO') {
+               actualDiferenciaTransferencia -= tr; // Add new
+            }
+
+            simVenta.metodo = 'EFECTIVO Y OTROS';
+            correctedAcciones.push(accion);
+
+         } else if (['TRANSFERENCIA', 'NEQUI', 'DAVIPLATA', 'BANCOLOMBIA'].includes(accion.method)) {
+            if (simVenta.metodo !== 'TRANSFERENCIA' && !['NEQUI', 'DAVIPLATA', 'BANCOLOMBIA'].includes(simVenta.metodo)) {
+               actualDiferenciaTransferencia -= currentTotal;
+               simVenta.metodo = 'TRANSFERENCIA';
+               correctedAcciones.push(accion);
+            }
+         } else if (accion.method === 'EFECTIVO') {
+            if (['TRANSFERENCIA', 'NEQUI', 'DAVIPLATA', 'BANCOLOMBIA'].includes(simVenta.metodo)) {
+               actualDiferenciaTransferencia += currentTotal;
+               simVenta.metodo = 'EFECTIVO';
+               correctedAcciones.push(accion);
+            }
+         }
+      }
+    }
+
+    // Step 4: Auto-fill change_payment si actualDiferenciaTransferencia !== 0
+    if (actualDiferenciaTransferencia !== 0) {
+      if (actualDiferenciaTransferencia > 0) {
+         // Faltante en transferencia en sistema (Físico > Sistema). Convertir Efectivo -> Transferencia
+         let restantesParaPasarATransferencia = actualDiferenciaTransferencia;
+         for (const simVenta of simulatedVentas) {
+            if (restantesParaPasarATransferencia <= 0) break;
+            if (simVenta.metodo === 'EFECTIVO' && simVenta.total > 0) {
+               if (simVenta.total <= restantesParaPasarATransferencia) {
+                  restantesParaPasarATransferencia -= simVenta.total;
+                  simVenta.metodo = 'TRANSFERENCIA';
+                  correctedAcciones.push({
+                     action: 'change_payment',
+                     ventaId: simVenta.ventaId,
+                     method: 'TRANSFERENCIA',
+                     motivo: `Ajuste automático Backend: Se encontró un excedente físico en Transferencias. Esta venta en Efectivo se cambia a Transferencia para nivelar.`
+                  });
+               } else {
+                  const parteEfectivo = simVenta.total - restantesParaPasarATransferencia;
+                  const parteTransferencia = restantesParaPasarATransferencia;
+                  restantesParaPasarATransferencia = 0;
+                  simVenta.metodo = 'EFECTIVO Y OTROS';
+                  correctedAcciones.push({
+                     action: 'change_payment',
+                     ventaId: simVenta.ventaId,
+                     method: 'EFECTIVO Y OTROS',
+                     efectivoRecibido: parteEfectivo,
+                     transferenciaRecibida: parteTransferencia,
+                     motivo: `Ajuste automático Backend: Se fracciona este pago para cubrir el monto exacto faltante en Transferencias en el sistema.`
+                  });
+               }
+            }
+         }
+      } else {
+         // Excedente en transferencia en sistema (Físico < Sistema). Convertir Transferencia -> Efectivo
+         let restantesParaPasarAEfectivo = Math.abs(actualDiferenciaTransferencia);
+         for (const simVenta of simulatedVentas) {
+            if (restantesParaPasarAEfectivo <= 0) break;
+            if (['TRANSFERENCIA', 'NEQUI', 'DAVIPLATA', 'BANCOLOMBIA'].includes(simVenta.metodo) && simVenta.total > 0) {
+               if (simVenta.total <= restantesParaPasarAEfectivo) {
+                  restantesParaPasarAEfectivo -= simVenta.total;
+                  simVenta.metodo = 'EFECTIVO';
+                  correctedAcciones.push({
+                     action: 'change_payment',
+                     ventaId: simVenta.ventaId,
+                     method: 'EFECTIVO',
+                     motivo: `Ajuste automático Backend: Se detectó un faltante físico en Transferencias. Esta venta en Transferencia se pasa a Efectivo para nivelar.`
+                  });
+               } else {
+                  const parteTransferencia = simVenta.total - restantesParaPasarAEfectivo;
+                  const parteEfectivo = restantesParaPasarAEfectivo;
+                  restantesParaPasarAEfectivo = 0;
+                  simVenta.metodo = 'EFECTIVO Y OTROS';
+                  correctedAcciones.push({
+                     action: 'change_payment',
+                     ventaId: simVenta.ventaId,
+                     method: 'EFECTIVO Y OTROS',
+                     efectivoRecibido: parteEfectivo,
+                     transferenciaRecibida: parteTransferencia,
+                     motivo: `Ajuste automático Backend: Se fracciona este pago para cubrir el monto exacto faltante físico en Transferencias.`
+                  });
+               }
+            }
+         }
       }
     }
 
@@ -1169,7 +1336,7 @@ export class CajaService {
     });
 
     const correctedPlan = {
-      justificacionGeneral: plan.justificacionGeneral || 'Plan de cuadre generado y validado.',
+      justificacionGeneral: plan.justificacionGeneral || 'Plan de cuadre generado y validado automáticamente.',
       acciones: correctedAcciones,
     };
 
