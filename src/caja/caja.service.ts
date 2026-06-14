@@ -1187,20 +1187,19 @@ export class CajaService {
     }
 
     // Step 3: Recalcular dinero esperado con base en las simulaciones
-    let simulatedTotalEfectivo = 0;
-    let simulatedTotalTransferencia = 0;
+    let actualDiferenciaTransferencia = diferenciaTransferencia;
 
-    for (const v of simulatedVentas) {
-      if (['TRANSFERENCIA', 'NEQUI', 'DAVIPLATA', 'BANCOLOMBIA'].includes(v.metodo)) {
-         simulatedTotalTransferencia += v.total;
-      } else if (v.metodo === 'EFECTIVO') {
-         simulatedTotalEfectivo += v.total;
-      } else if (v.metodo === 'EFECTIVO Y OTROS') {
-         simulatedTotalEfectivo += v.total;
+    for (const simVenta of simulatedVentas) {
+      const originalVenta = ventasEligibles.find((v: any) => v.ventaId === simVenta.ventaId);
+      if (!originalVenta) continue;
+
+      if (originalVenta.metodo && ['TRANSFERENCIA', 'NEQUI', 'DAVIPLATA', 'BANCOLOMBIA'].includes(originalVenta.metodo)) {
+         // Si la venta era transferencia original, un cambio en su total afecta las transferencias esperadas.
+         // Un aumento en esperado = reducción en faltante (Contadas - Esperadas).
+         const deltaTotal = simVenta.total - originalVenta.total;
+         actualDiferenciaTransferencia -= deltaTotal; 
       }
     }
-
-    let actualDiferenciaTransferencia = transferenciasContadas - simulatedTotalTransferencia;
 
     // Evaluar los change_payment propuestos por la IA
     if (plan.acciones && Array.isArray(plan.acciones)) {
