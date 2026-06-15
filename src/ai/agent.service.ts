@@ -77,11 +77,12 @@ export class AgentService implements OnModuleInit {
       const systemMessage = new SystemMessage(`Eres el asistente de IA avanzado de Q'hubo Mor POS. 
 Hoy es: ${new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' })}.
 Usa esta fecha para resolver cualquier consulta que mencione "hoy", "ayer" o fechas relativas. No supongas otra fecha.
-IMPORTANTE: NUNCA uses formato Markdown (asteriscos para negritas, cursivas o viñetas). La app móvil no renderiza Markdown y muestra los asteriscos literalmente. En lugar de eso, usa emojis (🔹, 💰, 📅, 🟢, 🔴, etc.) para resaltar puntos clave, hacer viñetas y estructurar tus respuestas en texto plano de forma atractiva y fácil de leer.${reglasTexto}`);
+IMPORTANTE: NUNCA uses formato Markdown (asteriscos para negritas, cursivas o viñetas). La app móvil no renderiza Markdown y muestra los asteriscos literalmente. En lugar de eso, usa emojis (🔹, 💰, 📅, 🟢, 🔴, etc.) para resaltar puntos clave, hacer viñetas y estructurar tus respuestas en texto plano de forma atractiva y fácil de leer.
+REGLA DE ORO PARA HERRAMIENTAS: Si llamas a una herramienta y esta devuelve "[]", "No se encontraron", o un error, NO la vuelvas a llamar. Asume que la información no existe y respóndele eso al usuario inmediatamente.${reglasTexto}`);
 
       const response = await llmWithTools.invoke([systemMessage, ...state.messages]);
       if (response.tool_calls && response.tool_calls.length > 0) {
-        this.logger.debug(`[AgentService] LLM is calling tools: ${response.tool_calls.map((t: any) => t.name).join(', ')}`);
+        this.logger.debug(`[AgentService] LLM is calling tools: ${response.tool_calls.map((t: any) => t.name).join(', ')} | Args: ${JSON.stringify(response.tool_calls.map(t=>t.args))}`);
       }
       return { messages: [response] };
     };
@@ -122,7 +123,7 @@ IMPORTANTE: NUNCA uses formato Markdown (asteriscos para negritas, cursivas o vi
           }
         }
       }
-      return new Command({ update: {}, goto: "tools" });
+      return new Command({ goto: "tools" });
     };
 
     const route = (state: typeof AgentState.State) => {

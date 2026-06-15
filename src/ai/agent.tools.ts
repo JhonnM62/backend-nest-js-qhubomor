@@ -195,8 +195,27 @@ export class AgentToolsService {
     return tool(
       async (args) => {
         try {
-          const startDate = new Date(`${args.fechaInicio}T05:00:00.000Z`);
-          const nextDay = new Date(`${args.fechaFin}T05:00:00.000Z`);
+          // Robust date parsing
+          const parseDate = (dateStr: string) => {
+            const str = dateStr.toLowerCase();
+            const d = new Date();
+            d.setHours(d.getHours() - 5); // To Colombia Time roughly
+            if (str === 'hoy') return d.toISOString().split('T')[0];
+            if (str === 'ayer') {
+              d.setDate(d.getDate() - 1);
+              return d.toISOString().split('T')[0];
+            }
+            // Check if it's a valid YYYY-MM-DD
+            if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return str;
+            // Fallback to today
+            return d.toISOString().split('T')[0];
+          };
+
+          const fInicio = parseDate(args.fechaInicio);
+          const fFin = parseDate(args.fechaFin);
+
+          const startDate = new Date(`${fInicio}T05:00:00.000Z`);
+          const nextDay = new Date(`${fFin}T05:00:00.000Z`);
           nextDay.setDate(nextDay.getDate() + 1);
           const endDate = new Date(nextDay.getTime() - 1);
           
