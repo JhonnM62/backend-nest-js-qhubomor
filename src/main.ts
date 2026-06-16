@@ -9,6 +9,9 @@ async function bootstrap() {
 
   const app = await NestFactory.create(AppModule);
 
+  // Enable shutdown hooks so Prisma disconnects gracefully on server restart/stop
+  app.enableShutdownHooks();
+
   app.enableCors({
     origin: '*',
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
