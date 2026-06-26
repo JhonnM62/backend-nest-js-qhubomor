@@ -881,11 +881,21 @@ export class VentasService {
 
     const nuevoRegistro = this.appendTiempoLog(venta.registroDeTiempo, estado);
 
-    const updated = await this.prisma.ventas.update({
+    await this.prisma.ventas.update({
       where: { IDventas: id },
       data: {
         estado,
         registroDeTiempo: nuevoRegistro
+      },
+    });
+
+    // FIX: fetch with ordenVentas so the frontend never receives a payload
+    // that overwrites the products/totalInput with stale/incomplete data.
+    const updated = await this.prisma.ventas.findUnique({
+      where: { IDventas: id },
+      include: {
+        ordenVentas: true,
+        usuarioRelacion: { select: { IDusuarios: true, nombre: true, email: true } },
       },
     });
 
@@ -930,7 +940,7 @@ export class VentasService {
 
     const nuevoRegistro = this.appendTiempoLog(venta.registroDeTiempo, updateData.estado || 'PAGADO');
 
-    const updated = await this.prisma.ventas.update({
+    await this.prisma.ventas.update({
       where: { IDventas: id },
       data: {
         estado: updateData.estado || 'PAGADO',
@@ -942,6 +952,15 @@ export class VentasService {
         descuento: updateData.descuento,
         porcentajeDeDescuento: updateData.porcentajeDeDescuento,
         registroDeTiempo: nuevoRegistro,
+      },
+    });
+
+    // FIX: always emit with full ordenVentas to prevent frontend stale-data issues
+    const updated = await this.prisma.ventas.findUnique({
+      where: { IDventas: id },
+      include: {
+        ordenVentas: true,
+        usuarioRelacion: { select: { IDusuarios: true, nombre: true, email: true } },
       },
     });
 
