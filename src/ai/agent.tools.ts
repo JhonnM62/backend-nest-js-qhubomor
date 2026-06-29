@@ -36,15 +36,19 @@ export class AgentToolsService {
   private listarInsumosCriticosTool() {
     return tool(
       async () => {
-        const insumos = await this.prisma.insumos.findMany({
-          where: {
-            OR: [
-              { disponible: { lte: 5 } }, // Arbitrary threshold for now
-            ],
-          },
-          select: { nombre: true, disponible: true },
-        });
-        return JSON.stringify(insumos);
+        try {
+          const insumos = await this.prisma.insumos.findMany({
+            where: {
+              OR: [
+                { disponible: { lte: 5 } }, // Arbitrary threshold for now
+              ],
+            },
+            select: { nombre: true, disponible: true },
+          });
+          return JSON.stringify(insumos);
+        } catch (e: any) {
+          return "Error consultando insumos críticos: " + e.message;
+        }
       },
       {
         name: 'listar_insumos_criticos',
@@ -57,15 +61,19 @@ export class AgentToolsService {
   private registrarGastoTool() {
     return tool(
       async (args) => {
-        const gasto = await this.prisma.gastos.create({
-          data: {
-            concepto: args.categoria + ' - ' + args.descripcion,
-            valor: args.valor,
-            fechaYHora: new Date(),
-            fecha: new Date(),
-          },
-        });
-        return `Gasto registrado con ID: ${gasto.IDgastos}`;
+        try {
+          const gasto = await this.prisma.gastos.create({
+            data: {
+              concepto: args.categoria + ' - ' + args.descripcion,
+              valor: args.valor,
+              fechaYHora: new Date(),
+              fecha: new Date(),
+            },
+          });
+          return `Gasto registrado con ID: ${gasto.IDgastos}`;
+        } catch (e: any) {
+          return "Error registrando gasto: " + e.message;
+        }
       },
       {
         name: 'registrar_gasto',
@@ -82,27 +90,31 @@ export class AgentToolsService {
   private registroMasivoInsumosTool() {
     return tool(
       async (args) => {
-        const resultados = [];
-        for (const item of args.operaciones) {
-          const insumoDb = await this.prisma.insumos.findFirst({
-            where: { nombre: { contains: item.nombre, mode: 'insensitive' } },
-          });
-
-          if (insumoDb) {
-            const nuevoDisponible = item.tipo === 'entrada' 
-              ? Number(insumoDb.disponible || 0) + item.cantidad 
-              : Number(insumoDb.disponible || 0) - item.cantidad;
-
-            await this.prisma.insumos.update({
-              where: { IDalimentos: insumoDb.IDalimentos },
-              data: { disponible: nuevoDisponible },
+        try {
+          const resultados = [];
+          for (const item of args.operaciones) {
+            const insumoDb = await this.prisma.insumos.findFirst({
+              where: { nombre: { contains: item.nombre, mode: 'insensitive' } },
             });
-            resultados.push(`${item.nombre}: actualizado a ${nuevoDisponible}`);
-          } else {
-            resultados.push(`${item.nombre}: NO ENCONTRADO`);
+
+            if (insumoDb) {
+              const nuevoDisponible = item.tipo === 'entrada' 
+                ? Number(insumoDb.disponible || 0) + item.cantidad 
+                : Number(insumoDb.disponible || 0) - item.cantidad;
+
+              await this.prisma.insumos.update({
+                where: { IDalimentos: insumoDb.IDalimentos },
+                data: { disponible: nuevoDisponible },
+              });
+              resultados.push(`${item.nombre}: actualizado a ${nuevoDisponible}`);
+            } else {
+              resultados.push(`${item.nombre}: NO ENCONTRADO`);
+            }
           }
+          return JSON.stringify(resultados);
+        } catch (e: any) {
+          return "Error en registro masivo de insumos: " + e.message;
         }
-        return JSON.stringify(resultados);
       },
       {
         name: 'registro_masivo_insumos',
@@ -123,14 +135,18 @@ export class AgentToolsService {
   private buscarCuentaMesaTool() {
     return tool(
       async (args) => {
-        const ventas = await this.prisma.ventas.findMany({
-          where: { 
-            mesa: args.mesaId.toString(),
-            estado: { in: ['TOMADO', 'EN_EL_CARRITO', 'LISTO_PARA_ENTREGA'] }
-          },
-          include: { ordenVentas: true }
-        });
-        return JSON.stringify(ventas);
+        try {
+          const ventas = await this.prisma.ventas.findMany({
+            where: { 
+              mesa: args.mesaId.toString(),
+              estado: { in: ['TOMADO', 'EN_EL_CARRITO', 'LISTO_PARA_ENTREGA'] }
+            },
+            include: { ordenVentas: true }
+          });
+          return JSON.stringify(ventas);
+        } catch (e: any) {
+          return "Error buscando cuenta de mesa: " + e.message;
+        }
       },
       {
         name: 'buscar_cuenta_mesa',
@@ -370,11 +386,15 @@ export class AgentToolsService {
   private consultarInventarioGeneralTool() {
     return tool(
       async () => {
-        const insumos = await this.prisma.insumos.findMany({
-          where: { estado: 'ACTIVO' },
-          select: { nombre: true, disponible: true, unidades: true }
-        });
-        return JSON.stringify(insumos);
+        try {
+          const insumos = await this.prisma.insumos.findMany({
+            where: { estado: 'ACTIVO' },
+            select: { nombre: true, disponible: true, unidades: true }
+          });
+          return JSON.stringify(insumos);
+        } catch (e: any) {
+          return "Error consultando inventario: " + e.message;
+        }
       },
       {
         name: 'consultar_inventario_general',
@@ -387,17 +407,21 @@ export class AgentToolsService {
   private buscarClienteTool() {
     return tool(
       async (args) => {
-        const clientes = await this.prisma.clientes.findMany({
-          where: {
-            OR: [
-              { nombre: { contains: args.query, mode: 'insensitive' } },
-              { whatsapp: { contains: args.query, mode: 'insensitive' } }
-            ],
-            isActive: true
-          },
-          take: 20
-        });
-        return JSON.stringify(clientes);
+        try {
+          const clientes = await this.prisma.clientes.findMany({
+            where: {
+              OR: [
+                { nombre: { contains: args.query, mode: 'insensitive' } },
+                { whatsapp: { contains: args.query, mode: 'insensitive' } }
+              ],
+              isActive: true
+            },
+            take: 20
+          });
+          return JSON.stringify(clientes);
+        } catch (e: any) {
+          return "Error buscando cliente: " + e.message;
+        }
       },
       {
         name: 'buscar_cliente',
@@ -412,27 +436,31 @@ export class AgentToolsService {
   private analizarMovimientosInsumosTool() {
     return tool(
       async (args) => {
-        const start = new Date(`${args.fechaInicio}T05:00:00.000Z`);
-        const end = new Date(`${args.fechaFin}T05:00:00.000Z`);
-        end.setUTCHours(23, 59, 59, 999);
+        try {
+          const start = new Date(`${args.fechaInicio}T05:00:00.000Z`);
+          const end = new Date(`${args.fechaFin}T05:00:00.000Z`);
+          end.setUTCHours(23, 59, 59, 999);
 
-        // Buscar en compras (Orderinventario)
-        const compras = await this.prisma.orderinventario.findMany({
-          where: { fecha: { gte: start, lte: end } },
-          select: { nombreDelAlimento: true, cantidad: true, precioActual: true, subtotal: true }
-        });
+          // Buscar en compras (Orderinventario)
+          const compras = await this.prisma.orderinventario.findMany({
+            where: { fecha: { gte: start, lte: end } },
+            select: { nombreDelAlimento: true, cantidad: true, precioActual: true, subtotal: true }
+          });
 
-        // Buscar en gastos reales reportados en caja (AperturaCierreInsumos)
-        const consumosFisicos = await this.prisma.aperturaCierreInsumos.findMany({
-          where: { fecha: { gte: start, lte: end } },
-          select: { nombreDelProducto: true, cantApertura: true, cantDeCierre: true, seUtilizaron: true }
-        });
+          // Buscar en gastos reales reportados en caja (AperturaCierreInsumos)
+          const consumosFisicos = await this.prisma.aperturaCierreInsumos.findMany({
+            where: { fecha: { gte: start, lte: end } },
+            select: { nombreDelProducto: true, cantApertura: true, cantDeCierre: true, seUtilizaron: true }
+          });
 
-        return JSON.stringify({
-          comprasRegistradas: compras.slice(0, 100), 
-          consumosFisicosEnCaja: consumosFisicos.slice(0, 100),
-          nota: "Las listas muestran las operaciones del periodo. Agrupa por nombreDelAlimento o nombreDelProducto para decirle al usuario cuáles fueron los que más se compraron o gastaron."
-        });
+          return JSON.stringify({
+            comprasRegistradas: compras.slice(0, 100), 
+            consumosFisicosEnCaja: consumosFisicos.slice(0, 100),
+            nota: "Las listas muestran las operaciones del periodo. Agrupa por nombreDelAlimento o nombreDelProducto para decirle al usuario cuáles fueron los que más se compraron o gastaron."
+          });
+        } catch (e: any) {
+          return "Error analizando movimientos: " + e.message;
+        }
       },
       {
         name: 'analizar_movimientos_insumos',
@@ -448,40 +476,44 @@ export class AgentToolsService {
   private consultarDescuadresCajaTool() {
     return tool(
       async (args) => {
-        const start = new Date(`${args.fechaInicio}T05:00:00.000Z`);
-        const end = new Date(`${args.fechaFin}T05:00:00.000Z`);
-        end.setUTCHours(23, 59, 59, 999);
+        try {
+          const start = new Date(`${args.fechaInicio}T05:00:00.000Z`);
+          const end = new Date(`${args.fechaFin}T05:00:00.000Z`);
+          end.setUTCHours(23, 59, 59, 999);
 
-        const cajas = await this.prisma.aperturaCierreCaja.findMany({
-          where: {
-            fechaDeApertura: { gte: start, lte: end },
-            OR: [
-              { valorFaltante: { gt: 0 } },
-              { valorExcedente: { gt: 0 } }
-            ]
-          },
-          select: {
-            fechaDeApertura: true,
-            fechaDeCierre: true,
-            valorFaltante: true,
-            valorExcedente: true,
-            observaciones: true
+          const cajas = await this.prisma.aperturaCierreCaja.findMany({
+            where: {
+              fechaDeApertura: { gte: start, lte: end },
+              OR: [
+                { valorFaltante: { gt: 0 } },
+                { valorExcedente: { gt: 0 } }
+              ]
+            },
+            select: {
+              fechaDeApertura: true,
+              fechaDeCierre: true,
+              valorFaltante: true,
+              valorExcedente: true,
+              observaciones: true
+            }
+          });
+
+          let totalFaltante = 0;
+          let totalExcedente = 0;
+          for (const caja of cajas) {
+            totalFaltante += Number(caja.valorFaltante || 0);
+            totalExcedente += Number(caja.valorExcedente || 0);
           }
-        });
 
-        let totalFaltante = 0;
-        let totalExcedente = 0;
-        for (const caja of cajas) {
-          totalFaltante += Number(caja.valorFaltante || 0);
-          totalExcedente += Number(caja.valorExcedente || 0);
+          return JSON.stringify({
+            totalFaltante,
+            totalExcedente,
+            descuadresRegistrados: cajas,
+            nota: "Usa 'fechaDeApertura' como la fecha principal de la caja al dar la respuesta al usuario, ya que así es como se organizan los días en el negocio."
+          });
+        } catch (e: any) {
+          return "Error consultando descuadres de caja: " + e.message;
         }
-
-        return JSON.stringify({
-          totalFaltante,
-          totalExcedente,
-          descuadresRegistrados: cajas,
-          nota: "Usa 'fechaDeApertura' como la fecha principal de la caja al dar la respuesta al usuario, ya que así es como se organizan los días en el negocio."
-        });
       },
       {
         name: 'consultar_descuadres_caja',

@@ -78,7 +78,8 @@ export class AgentService implements OnModuleInit {
 Hoy es: ${new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' })}.
 Usa esta fecha para resolver cualquier consulta que mencione "hoy", "ayer" o fechas relativas. No supongas otra fecha.
 IMPORTANTE: NUNCA uses formato Markdown (asteriscos para negritas, cursivas o viñetas). La app móvil no renderiza Markdown y muestra los asteriscos literalmente. En lugar de eso, usa emojis (🔹, 💰, 📅, 🟢, 🔴, etc.) para resaltar puntos clave, hacer viñetas y estructurar tus respuestas en texto plano de forma atractiva y fácil de leer.
-REGLA DE ORO PARA HERRAMIENTAS: Si llamas a una herramienta y esta devuelve "[]", "No se encontraron", o un error, NO la vuelvas a llamar. Asume que la información no existe y respóndele eso al usuario inmediatamente.${reglasTexto}`);
+CONTEXTO DE CAJA: Si el usuario te pide analizar cierres de caja, ten en cuenta que el dinero físico real que quedó en la caja se suele reportar en el campo 'plata guardada', 'efectivo de cierre' o en la observación del cierre. Si encuentras herramientas de caja, revisa cuidadosamente la sección de observaciones o notas para encontrar esta información.
+REGLA DE ORO PARA HERRAMIENTAS: Si llamas a una herramienta y esta devuelve "[]", "No se encontraron", o un texto que empiece con "Error", NO la vuelvas a llamar ciegamente. Lee el error, asume que falló, y explícale amigablemente al usuario lo que sucedió.${reglasTexto}`);
 
       const response = await llmWithTools.invoke([systemMessage, ...state.messages]);
       if (response.tool_calls && response.tool_calls.length > 0) {
