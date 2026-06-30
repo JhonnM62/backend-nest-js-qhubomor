@@ -48,7 +48,6 @@ export class NominaService {
       where: {
         usuarioId,
         estado: 'ACTIVO',
-        fecha: { gte: hoy },
       },
     });
 
@@ -75,15 +74,24 @@ export class NominaService {
 
     // Calcular geocerca
     let distanciaMetros: number | undefined;
-    let dentroGeocerca = false;
-    if (dto.latitud && dto.longitud) {
-      const config = await this.prisma.configuracionNegocio.findFirst();
-      if (config?.latitudNegocio && config?.longitudNegocio) {
-        distanciaMetros = calcularDistancia(
-          dto.latitud, dto.longitud,
-          config.latitudNegocio, config.longitudNegocio
-        );
-        dentroGeocerca = distanciaMetros <= (config.radioGeocercaM || 100);
+    let dentroGeocerca = true;
+    
+    const config = await this.prisma.configuracionNegocio.findFirst();
+    if (config?.latitudNegocio && config?.longitudNegocio) {
+      if (!dto.latitud || !dto.longitud) {
+        throw new BadRequestException('La ubicación es obligatoria para registrar el turno.');
+      }
+      
+      distanciaMetros = calcularDistancia(
+        dto.latitud, dto.longitud,
+        config.latitudNegocio, config.longitudNegocio
+      );
+      
+      const radioPermitido = config.radioGeocercaM || 100;
+      dentroGeocerca = distanciaMetros <= radioPermitido;
+      
+      if (!dentroGeocerca) {
+        throw new BadRequestException(`Estás a ${Math.round(distanciaMetros)}m del negocio. El límite permitido es ${radioPermitido}m. No puedes iniciar tu turno desde aquí.`);
       }
     }
 
@@ -107,7 +115,6 @@ export class NominaService {
       success: true,
       data: turno,
       mensaje: `Turno iniciado correctamente. Valor del turno: $${valorTurno.toLocaleString('es-CO')}`,
-      alertaGeocerca: !dentroGeocerca && dto.latitud ? `Atención: estás a ${Math.round(distanciaMetros || 0)}m del negocio (fuera del radio permitido)` : null,
     };
   }
 
@@ -129,16 +136,28 @@ export class NominaService {
 
     // Calcular geocerca para salida
     let distanciaMetrosSalida: number | undefined;
-    let dentroGeocercaSalida: boolean | undefined;
+    let dentroGeocercaSalida = true;
     
-    if (dto.latitud && dto.longitud) {
-      const config = await this.prisma.configuracionNegocio.findFirst();
-      if (config?.latitudNegocio && config?.longitudNegocio) {
+    const config = await this.prisma.configuracionNegocio.findFirst();
+    if (config?.latitudNegocio && config?.longitudNegocio) {
+      if (!dto.latitud || !dto.longitud) {
+        if (!esAdmin) {
+          throw new BadRequestException('La ubicación es obligatoria para cerrar el turno.');
+        }
+      } else {
         distanciaMetrosSalida = calcularDistancia(
           dto.latitud, dto.longitud,
           config.latitudNegocio, config.longitudNegocio
         );
-        dentroGeocercaSalida = distanciaMetrosSalida <= (config.radioGeocercaM || 100);
+        
+        const radioPermitido = config.radioGeocercaM || 100;
+        dentroGeocercaSalida = distanciaMetrosSalida <= radioPermitido;
+        
+        if (!dentroGeocercaSalida && !esAdmin) {
+          if (!dto.observacion || dto.observacion.length < 10) {
+            throw new BadRequestException(`Estás a ${Math.round(distanciaMetrosSalida)}m del negocio. Para cerrar el turno fuera del rango permitido (${radioPermitido}m), es OBLIGATORIO ingresar una justificación válida (mínimo 10 caracteres).`);
+          }
+        }
       }
     }
 
@@ -180,15 +199,12 @@ export class NominaService {
 
     let mensajeRespuesta = dto.ceno
       ? 'Turno cerrado. Se registró la cena y se aplicó el descuento correspondiente.'
-      : 'Turno cerrado correctamente.';
+      : 'Turno finalizado correctamente';
 
     return {
       success: true,
       data: turnoActualizado,
       mensaje: mensajeRespuesta,
-      alertaGeocerca: dentroGeocercaSalida === false && dto.latitud 
-        ? `Atención: el turno fue cerrado a ${Math.round(distanciaMetrosSalida || 0)}m del negocio (fuera del radio permitido).` 
-        : null,
     };
   }
 
