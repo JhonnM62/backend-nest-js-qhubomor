@@ -153,6 +153,7 @@ export class ReportesService {
         resumen: true,
         valorFaltante: true,
         valorExcedente: true,
+        transferenciasContadas: true,
         venta: {
           select: {
             medioDePago: true,

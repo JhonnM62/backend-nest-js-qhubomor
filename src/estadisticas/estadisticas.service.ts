@@ -49,8 +49,23 @@ export class EstadisticasService {
     const ventasTotal = ventasRaw.reduce((sum, v) => sum + Number(v.totalInput || 0), 0);
 
     // 2. Obtener Gastos
+    // NOTA: El campo `fechaYHora` es nullable. Muchos registros usan solo el campo `fecha` (@db.Date).
+    // Se usa OR para cubrir ambos campos y no perder registros con fechaYHora=null.
     const gastosRaw = await this.prisma.gastos.findMany({
-      where: { fechaYHora: { gte: start, lte: end } },
+      where: {
+        OR: [
+          { fechaYHora: { gte: start, lte: end } },
+          {
+            fechaYHora: null,
+            fecha: { gte: start, lte: end }
+          },
+          {
+            fechaYHora: null,
+            fecha: null,
+            createdAt: { gte: start, lte: end }
+          }
+        ]
+      },
       select: { valor: true, tipo: true }
     });
 
@@ -62,17 +77,31 @@ export class EstadisticasService {
     });
 
     const utilidadNegocio = ventasTotal - gastosNegocio;
-    const utilidadNeta = utilidadNegocio - gastosPersonales;
+    // ⚠️ Utilidad Neta = Ventas - Gastos Negocio - Gastos Personales - Inventario
+    // (el inventario representa el costo de lo que se compró/repuso en el periodo)
 
     // 3. Obtener Total Inventario (compras en el periodo)
+    // También usamos OR por si fechaYHora es null en algunos registros
     const inventarioRaw = await this.prisma.inventario.findMany({
-      where: { 
-        fechaYHora: { gte: start, lte: end },
-        tipo: { contains: 'ENTRADA', mode: 'insensitive' }
+      where: {
+        OR: [
+          {
+            fechaYHora: { gte: start, lte: end },
+            tipo: { contains: 'ENTRADA', mode: 'insensitive' }
+          },
+          {
+            fechaYHora: null,
+            createdAt: { gte: start, lte: end },
+            tipo: { contains: 'ENTRADA', mode: 'insensitive' }
+          }
+        ]
       },
       select: { total: true, descuento: true }
     });
     const inventarioTotal = inventarioRaw.reduce((sum, i) => sum + (Number(i.total || 0) - Number(i.descuento || 0)), 0);
+
+    // Utilidad Neta definitiva: descontar también el inventario
+    const utilidadNeta = utilidadNegocio - gastosPersonales - inventarioTotal;
 
     // 4. Datos para los gráficos de barras (Diario, Semanal, Mensual)
     const ventasPorDiaMap = new Map<string, number>();
