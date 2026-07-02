@@ -150,7 +150,7 @@ export class CreateDescuentoDto {
 export class RepartirDescuentoDto {
   @ApiProperty({ type: [String], description: 'IDs de empleados entre quienes se reparte' })
   @IsArray()
-  @ArrayMinSize(2, { message: 'Selecciona al menos 2 empleados para repartir' })
+  @ArrayMinSize(1, { message: 'Selecciona al menos 1 empleado' })
   @IsString({ each: true })
   usuarioIds: string[];
 
