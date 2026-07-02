@@ -32,6 +32,11 @@ export class CreateGastoDto {
   @IsOptional()
   @IsString()
   tipo?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  fecha?: string;
 }
 
 export class CreateBulkGastoDto {
@@ -72,6 +77,11 @@ export class UpdateGastoDto {
   @IsOptional()
   @IsString()
   tipo?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  fecha?: string;
 }
 
 export class GastosQueryDto extends PaginationDto {

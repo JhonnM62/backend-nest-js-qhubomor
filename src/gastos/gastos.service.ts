@@ -15,11 +15,15 @@ export class GastosService {
   ) {}
 
   async create(createGastoDto: CreateGastoDto) {
+    const customDate = createGastoDto.fecha ? new Date(createGastoDto.fecha) : new Date();
+    // Remover `fecha` del DTO para no pisarlo como string y ponerlo bien tipado
+    const { fecha, ...restDto } = createGastoDto;
+
     const gasto = await this.prisma.gastos.create({
       data: {
-        ...createGastoDto,
-        fechaYHora: new Date(),
-        fecha: new Date(),
+        ...restDto,
+        fechaYHora: customDate,
+        fecha: customDate,
       },
     });
 
