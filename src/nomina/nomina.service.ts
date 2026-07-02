@@ -275,10 +275,12 @@ export class NominaService {
   }
 
   async getTurnoActivoDelDia(usuarioId: string) {
-    const hoy = new Date();
-    hoy.setHours(0, 0, 0, 0);
+    // NOTA: No filtramos por fecha porque el servidor corre en UTC.
+    // A las 11:30 PM en Colombia (UTC-5), el servidor ya está en el siguiente día UTC,
+    // por lo que filtrar por fecha rompe la búsqueda. Como un usuario solo puede tener
+    // UN turno ACTIVO a la vez, buscar únicamente por estado es correcto y seguro.
     const turno = await this.prisma.turnos.findFirst({
-      where: { usuarioId, estado: 'ACTIVO', fecha: { gte: hoy } },
+      where: { usuarioId, estado: 'ACTIVO' },
       include: { usuario: { select: { nombre: true, cargo: { select: { nombre: true } } } } },
     });
     return { data: turno, tieneActivo: !!turno };
