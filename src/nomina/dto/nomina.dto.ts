@@ -69,7 +69,13 @@ export class UpdateTurnoAdminDto {
 
   @ApiPropertyOptional()
   @IsOptional()
+  @IsDateString()
   horaSalida?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsDateString()
+  horaEntrada?: string;
 }
 
 export class TurnosQueryDto {

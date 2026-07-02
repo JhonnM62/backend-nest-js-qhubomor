@@ -259,6 +259,11 @@ export class NominaService {
     await this.getTurno(turnoId);
     const updateData: any = { ...dto };
     if (dto.horaSalida) updateData.horaSalida = new Date(dto.horaSalida);
+    if (dto.horaEntrada) updateData.horaEntrada = new Date(dto.horaEntrada);
+    // Si se está cerrando el turno (COMPLETADO) y aún no tiene horaSalida, asignamos la hora actual
+    if (dto.estado === 'COMPLETADO' && !dto.horaSalida && !updateData.horaSalida) {
+      updateData.horaSalida = new Date();
+    }
     const updated = await this.prisma.turnos.update({
       where: { IDturno: turnoId },
       data: updateData,
