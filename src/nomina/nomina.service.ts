@@ -40,19 +40,30 @@ export class NominaService {
   // ─────────────────────────────────────────────
 
   async registrarEntrada(usuarioId: string, dto: RegistrarEntradaDto, fotoPath?: string) {
-    // Verificar que no haya turno ACTIVO hoy
-    const hoy = new Date();
-    hoy.setHours(0, 0, 0, 0);
+    // Ajuste a hora Colombia (UTC-5)
+    const now = new Date();
+    const colombiaTime = new Date(now.getTime() - (5 * 60 * 60 * 1000));
+    
+    const y = colombiaTime.getUTCFullYear();
+    const m = colombiaTime.getUTCMonth();
+    const d = colombiaTime.getUTCDate();
+    const offsetMs = 5 * 60 * 60 * 1000;
+    const inicioDiaLocal = new Date(Date.UTC(y, m, d, 0, 0, 0, 0) + offsetMs);
 
-    const turnoActivo = await this.prisma.turnos.findFirst({
+    // Verificar que no haya NINGÚN turno hoy (activo, completado, liquidado...)
+    const turnoExistenteHoy = await this.prisma.turnos.findFirst({
       where: {
         usuarioId,
-        estado: 'ACTIVO',
+        fecha: { gte: inicioDiaLocal },
       },
     });
 
-    if (turnoActivo) {
-      throw new BadRequestException('Ya tienes un turno activo hoy. Debes cerrar el turno anterior primero.');
+    if (turnoExistenteHoy) {
+      if (turnoExistenteHoy.estado === 'ACTIVO') {
+        throw new BadRequestException('Ya tienes un turno activo hoy. Debes cerrar el turno anterior primero.');
+      } else {
+        throw new BadRequestException('Ya tienes un turno registrado para el día de hoy. No puedes abrir múltiples turnos en la misma fecha.');
+      }
     }
 
     // Cargar usuario y cargo
@@ -62,8 +73,8 @@ export class NominaService {
     });
     if (!usuario) throw new NotFoundException('Usuario no encontrado');
 
-    // Calcular valor del turno según el día de la semana
-    const diaSemana = new Date().getDay(); // 0=Dom...6=Sáb
+    // Calcular valor del turno según el día de la semana en hora de Colombia
+    const diaSemana = colombiaTime.getUTCDay(); // 0=Dom...6=Sáb
     const campoDia = TARIFA_POR_DIA[diaSemana];
     let valorTurno = 0;
     if (usuario.tarifaPersonalizada) {
@@ -107,6 +118,7 @@ export class NominaService {
         dentroGeocerca,
         valorTurno,
         estado: 'ACTIVO',
+        observacion: dto.observacion || null,
       },
       include: { usuario: { select: { nombre: true, cargo: true } } },
     });
@@ -334,7 +346,7 @@ export class NominaService {
             valor: montoIndividual,
             estado: 'PENDIENTE',
             creadoPor,
-            fecha: new Date(),
+            fecha: dto.fecha ? new Date(dto.fecha) : new Date(),
           },
         })
       )
@@ -567,5 +579,62 @@ export class NominaService {
       data: { estado: 'PAGADA' },
     });
     return { success: true, data: updated };
+  }
+
+  // ─────────────────────────────────────────────
+  // RECÁLCULO
+  // ─────────────────────────────────────────────
+  async recalcularTurnosEmpleado(usuarioId: string) {
+    const usuario = await this.prisma.usuarios.findUnique({
+      where: { IDusuarios: usuarioId },
+      include: { cargo: true },
+    });
+
+    if (!usuario) throw new NotFoundException('Usuario no encontrado');
+    if (!usuario.cargo && !usuario.tarifaPersonalizada) {
+      throw new BadRequestException('El usuario no tiene un cargo asignado ni tarifa personalizada. No se puede recalcular.');
+    }
+
+    // Buscar turnos en $0 de este empleado
+    const turnosEnCero = await this.prisma.turnos.findMany({
+      where: {
+        usuarioId,
+        valorTurno: 0,
+      }
+    });
+
+    if (turnosEnCero.length === 0) {
+      return { success: true, mensaje: 'No se encontraron turnos con valor $0 para este empleado.' };
+    }
+
+    let actualizados = 0;
+
+    for (const turno of turnosEnCero) {
+      const entrada = new Date(turno.horaEntrada);
+      // Ajustar a UTC-5 (hora de Colombia) para obtener el día real
+      const colombiaTime = new Date(entrada.getTime() - (5 * 60 * 60 * 1000));
+      const diaSemana = colombiaTime.getUTCDay();
+      const campoDia = TARIFA_POR_DIA[diaSemana];
+
+      let nuevoValor = 0;
+      if (usuario.tarifaPersonalizada) {
+        nuevoValor = Number(usuario.tarifaPersonalizada);
+      } else if (usuario.cargo) {
+        nuevoValor = Number(usuario.cargo[campoDia] ?? 0);
+      }
+
+      if (nuevoValor > 0) {
+        await this.prisma.turnos.update({
+          where: { IDturno: turno.IDturno },
+          data: { valorTurno: nuevoValor },
+        });
+        actualizados++;
+      }
+    }
+
+    return { 
+      success: true, 
+      mensaje: `Se recalcularon ${actualizados} turnos correctamente.` 
+    };
   }
 }

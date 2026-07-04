@@ -17,6 +17,11 @@ export class RegistrarEntradaDto {
   @IsOptional()
   @IsNumber()
   longitud?: number;
+
+  @ApiPropertyOptional({ description: 'Observación opcional al iniciar turno' })
+  @IsOptional()
+  @IsString()
+  observacion?: string;
 }
 
 export class RegistrarSalidaDto {
@@ -176,6 +181,10 @@ export class RepartirDescuentoDto {
   @IsOptional()
   @IsString()
   turnoId?: string;
+  @ApiPropertyOptional({ description: 'Fecha en la que se generó el descuento' })
+  @IsOptional()
+  @IsDateString()
+  fecha?: string;
 }
 
 export class UpdateDescuentoDto {

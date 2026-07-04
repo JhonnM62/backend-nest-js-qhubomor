@@ -236,6 +236,13 @@ export class CajaService {
             parsedData[key] = value;
           }
         }
+
+        if (parsedData.efectivoDeCierre !== undefined || parsedData.efectivoDeApertura !== undefined) {
+          const efCierre = parsedData.efectivoDeCierre !== undefined ? Number(parsedData.efectivoDeCierre) : Number(caja.efectivoDeCierre || 0);
+          const efApertura = parsedData.efectivoDeApertura !== undefined ? Number(parsedData.efectivoDeApertura) : Number(caja.efectivoDeApertura || 0);
+          parsedData.resumen = efCierre - efApertura;
+        }
+
         parsedData.horaEnLaQueSeActualizo = new Date();
 
         await tx.aperturaCierreCaja.update({

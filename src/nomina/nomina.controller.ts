@@ -233,6 +233,14 @@ export class NominaController {
 
   // ─── LIQUIDACIONES ────────────────────────────────────────────────────────
 
+  @Post('recalcular/:usuarioId')
+  @UseGuards(RolesGuard)
+  @Roles(...ROLES_ADMIN)
+  @ApiOperation({ summary: '(Admin) Recalcular turnos en $0 de un empleado' })
+  recalcularTurnosEmpleado(@Param('usuarioId') usuarioId: string) {
+    return this.nominaService.recalcularTurnosEmpleado(usuarioId);
+  }
+
   @Post('liquidar')
   @UseGuards(RolesGuard)
   @Roles(...ROLES_ADMIN)
