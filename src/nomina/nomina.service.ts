@@ -316,7 +316,7 @@ export class NominaService {
         where, skip, take: limit,
         orderBy: { horaEntrada: 'desc' },
         include: {
-          usuario: { select: { nombre: true, rol: true, cargo: { select: { nombre: true } } } },
+          usuario: { select: { nombre: true, rol: true, cargo: { select: { nombre: true, descuentoCena: true } } } },
           descuentos: true,
           _count: { select: { descuentos: true } },
         },
@@ -324,8 +324,30 @@ export class NominaService {
       this.prisma.turnos.count({ where }),
     ]);
 
+    const dataConDescuentosExtras = await Promise.all(data.map(async (turno) => {
+      const startOfDay = new Date(turno.fecha);
+      startOfDay.setUTCHours(0, 0, 0, 0);
+      const endOfDay = new Date(turno.fecha);
+      endOfDay.setUTCHours(23, 59, 59, 999);
+      
+      const extraDescuentos = await this.prisma.descuentosEmpleado.findMany({
+        where: {
+          usuarioId: turno.usuarioId,
+          fecha: {
+            gte: startOfDay,
+            lte: endOfDay,
+          },
+          turnoId: null,
+        }
+      });
+      return {
+        ...turno,
+        descuentos: [...turno.descuentos, ...extraDescuentos]
+      };
+    }));
+
     return {
-      data,
+      data: dataConDescuentosExtras,
       meta: { total, page, limit, totalPages: Math.ceil(total / limit) },
     };
   }
