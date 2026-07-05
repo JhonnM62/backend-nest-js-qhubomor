@@ -590,16 +590,37 @@ model NotificationHistory {
 model CargosEmpleado {
   IDcargo         String     @id @default(cuid()) @map("IDcargo")
   nombre          String     @map("Nombre")
-  tarifaLunes     Decimal    @default(0) @map("TarifaLunes") @db.Money
-  tarifaMartes    Decimal    @default(0) @map("TarifaMartes") @db.Money
-  tarifaMiercoles Decimal    @default(0) @map("TarifaMiercoles") @db.Money
-  tarifaJueves    Decimal    @default(0) @map("TarifaJueves") @db.Money
-  tarifaViernes   Decimal    @default(0) @map("TarifaViernes") @db.Money
-  tarifaSabado    Decimal    @default(0) @map("TarifaSabado") @db.Money
-  tarifaDomingo   Decimal    @default(0) @map("TarifaDomingo") @db.Money
-  descuentoCena   Decimal    @default(0) @map("DescuentoCena") @db.Money
-  createdAt       DateTime   @default(now())
-  updatedAt       DateTime   @updatedAt
+  tarifaLunes          Decimal    @default(0) @map("TarifaLunes") @db.Money
+  horaEntradaLunes     String?    @map("HoraEntradaLunes")
+  horaSalidaLunes      String?    @map("HoraSalidaLunes")
+  
+  tarifaMartes         Decimal    @default(0) @map("TarifaMartes") @db.Money
+  horaEntradaMartes    String?    @map("HoraEntradaMartes")
+  horaSalidaMartes     String?    @map("HoraSalidaMartes")
+  
+  tarifaMiercoles      Decimal    @default(0) @map("TarifaMiercoles") @db.Money
+  horaEntradaMiercoles String?    @map("HoraEntradaMiercoles")
+  horaSalidaMiercoles  String?    @map("HoraSalidaMiercoles")
+  
+  tarifaJueves         Decimal    @default(0) @map("TarifaJueves") @db.Money
+  horaEntradaJueves    String?    @map("HoraEntradaJueves")
+  horaSalidaJueves     String?    @map("HoraSalidaJueves")
+  
+  tarifaViernes        Decimal    @default(0) @map("TarifaViernes") @db.Money
+  horaEntradaViernes   String?    @map("HoraEntradaViernes")
+  horaSalidaViernes    String?    @map("HoraSalidaViernes")
+  
+  tarifaSabado         Decimal    @default(0) @map("TarifaSabado") @db.Money
+  horaEntradaSabado    String?    @map("HoraEntradaSabado")
+  horaSalidaSabado     String?    @map("HoraSalidaSabado")
+  
+  tarifaDomingo        Decimal    @default(0) @map("TarifaDomingo") @db.Money
+  horaEntradaDomingo   String?    @map("HoraEntradaDomingo")
+  horaSalidaDomingo    String?    @map("HoraSalidaDomingo")
+  
+  descuentoCena        Decimal    @default(0) @map("DescuentoCena") @db.Money
+  createdAt            DateTime   @default(now())
+  updatedAt            DateTime   @updatedAt
   usuarios        Usuarios[]
 
   @@map("CARGOS_EMPLEADO")

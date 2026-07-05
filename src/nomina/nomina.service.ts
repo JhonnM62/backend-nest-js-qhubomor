@@ -21,6 +21,26 @@ const TARIFA_POR_DIA = [
   'tarifaSabado',    // 6
 ] as const;
 
+const HORA_ENTRADA_POR_DIA = [
+  'horaEntradaDomingo',
+  'horaEntradaLunes',
+  'horaEntradaMartes',
+  'horaEntradaMiercoles',
+  'horaEntradaJueves',
+  'horaEntradaViernes',
+  'horaEntradaSabado',
+] as const;
+
+const HORA_SALIDA_POR_DIA = [
+  'horaSalidaDomingo',
+  'horaSalidaLunes',
+  'horaSalidaMartes',
+  'horaSalidaMiercoles',
+  'horaSalidaJueves',
+  'horaSalidaViernes',
+  'horaSalidaSabado',
+] as const;
+
 // Helper: distancia en metros entre dos coordenadas (fórmula Haversine)
 function calcularDistancia(lat1: number, lon1: number, lat2: number, lon2: number): number {
   const R = 6371000; // radio Tierra en metros
@@ -76,11 +96,48 @@ export class NominaService {
     // Calcular valor del turno según el día de la semana en hora de Colombia
     const diaSemana = colombiaTime.getUTCDay(); // 0=Dom...6=Sáb
     const campoDia = TARIFA_POR_DIA[diaSemana];
+    const campoEntrada = HORA_ENTRADA_POR_DIA[diaSemana];
+    const campoSalida = HORA_SALIDA_POR_DIA[diaSemana];
+
     let valorTurno = 0;
     if (usuario.tarifaPersonalizada) {
       valorTurno = Number(usuario.tarifaPersonalizada);
     } else if (usuario.cargo) {
       valorTurno = Number(usuario.cargo[campoDia] ?? 0);
+    }
+
+    let minutosRetraso = 0;
+    let valorDescuento = 0;
+
+    if (usuario.cargo && usuario.cargo[campoEntrada] && usuario.cargo[campoSalida] && valorTurno > 0) {
+      const horaEntradaStr = usuario.cargo[campoEntrada] as string;
+      const horaSalidaStr = usuario.cargo[campoSalida] as string;
+
+      const [hEntrada, mEntrada] = horaEntradaStr.split(':').map(Number);
+      const [hSalida, mSalida] = horaSalidaStr.split(':').map(Number);
+
+      const minutosEsperados = (hSalida * 60 + mSalida) - (hEntrada * 60 + mEntrada);
+      // Ajuste para turnos que cruzan medianoche
+      const minutosTotalesEsperados = minutosEsperados < 0 ? minutosEsperados + (24 * 60) : minutosEsperados;
+
+      if (minutosTotalesEsperados > 0) {
+        const valorPorMinuto = valorTurno / minutosTotalesEsperados;
+        const hActual = colombiaTime.getUTCHours();
+        const mActual = colombiaTime.getUTCMinutes();
+        const minutosActuales = hActual * 60 + mActual;
+        const minutosEntradaEsperada = hEntrada * 60 + mEntrada;
+        
+        let retraso = minutosActuales - minutosEntradaEsperada;
+        if (retraso > 0 && retraso < 12 * 60) {
+           minutosRetraso = retraso;
+        }
+
+        // Si es mayor a 5 minutos, calculamos el descuento desde el primer minuto.
+        const TOLERANCIA_MINUTOS = 5; 
+        if (minutosRetraso > TOLERANCIA_MINUTOS) {
+           valorDescuento = Math.round(minutosRetraso * valorPorMinuto);
+        }
+      }
     }
 
     // Calcular geocerca
@@ -123,10 +180,31 @@ export class NominaService {
       include: { usuario: { select: { nombre: true, cargo: true } } },
     });
 
+    if (valorDescuento > 0) {
+      const fechaStr = turno.fecha.toLocaleDateString('es-CO', { day: '2-digit', month: '2-digit', year: 'numeric' });
+      await this.prisma.descuentosEmpleado.create({
+        data: {
+          usuarioId: turno.usuarioId,
+          turnoId: turno.IDturno,
+          concepto: 'LLEGADA_TARDIA',
+          descripcion: `Llegada tardía de ${minutosRetraso} minutos en el turno del ${fechaStr}`,
+          valor: valorDescuento,
+          estado: 'APROBADO',
+          creadoPor: 'Sistema (automático)',
+          fecha: new Date(),
+        },
+      });
+    }
+
+    let mensajeBase = `Turno iniciado correctamente. Valor del turno: $${valorTurno.toLocaleString('es-CO')}`;
+    if (valorDescuento > 0) {
+      mensajeBase += `. Llegada tardía registrada: ${minutosRetraso} mins, se descontará $${valorDescuento.toLocaleString('es-CO')}.`;
+    }
+
     return {
       success: true,
       data: turno,
-      mensaje: `Turno iniciado correctamente. Valor del turno: $${valorTurno.toLocaleString('es-CO')}`,
+      mensaje: mensajeBase,
     };
   }
 
@@ -239,6 +317,7 @@ export class NominaService {
         orderBy: { horaEntrada: 'desc' },
         include: {
           usuario: { select: { nombre: true, rol: true, cargo: { select: { nombre: true } } } },
+          descuentos: true,
           _count: { select: { descuentos: true } },
         },
       }),

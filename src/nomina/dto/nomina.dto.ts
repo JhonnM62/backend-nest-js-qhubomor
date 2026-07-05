@@ -120,7 +120,7 @@ export class TurnosQueryDto {
 
 // ─── DESCUENTOS ───────────────────────────────────────────────────────────────
 
-const CONCEPTOS_VALIDOS = ['DESCUADRE_CAJA', 'CENA', 'PERDIDA', 'ROBO', 'ADELANTO', 'OTRO'];
+const CONCEPTOS_VALIDOS = ['DESCUADRE_CAJA', 'CENA', 'PERDIDA', 'ROBO', 'ADELANTO', 'LLEGADA_TARDIA', 'OTRO'];
 
 export class CreateDescuentoDto {
   @ApiProperty()

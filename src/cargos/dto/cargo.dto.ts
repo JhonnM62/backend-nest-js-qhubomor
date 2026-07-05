@@ -15,12 +15,32 @@ export class CreateCargoDto {
   @Type(() => Number)
   tarifaLunes?: number;
 
+  @ApiPropertyOptional({ example: '08:00' })
+  @IsOptional()
+  @IsString()
+  horaEntradaLunes?: string;
+
+  @ApiPropertyOptional({ example: '14:00' })
+  @IsOptional()
+  @IsString()
+  horaSalidaLunes?: string;
+
   @ApiPropertyOptional({ example: 54300 })
   @IsOptional()
   @IsNumber()
   @Min(0)
   @Type(() => Number)
   tarifaMartes?: number;
+
+  @ApiPropertyOptional({ example: '08:00' })
+  @IsOptional()
+  @IsString()
+  horaEntradaMartes?: string;
+
+  @ApiPropertyOptional({ example: '14:00' })
+  @IsOptional()
+  @IsString()
+  horaSalidaMartes?: string;
 
   @ApiPropertyOptional({ example: 54300 })
   @IsOptional()
@@ -29,12 +49,32 @@ export class CreateCargoDto {
   @Type(() => Number)
   tarifaMiercoles?: number;
 
+  @ApiPropertyOptional({ example: '08:00' })
+  @IsOptional()
+  @IsString()
+  horaEntradaMiercoles?: string;
+
+  @ApiPropertyOptional({ example: '14:00' })
+  @IsOptional()
+  @IsString()
+  horaSalidaMiercoles?: string;
+
   @ApiPropertyOptional({ example: 54300 })
   @IsOptional()
   @IsNumber()
   @Min(0)
   @Type(() => Number)
   tarifaJueves?: number;
+
+  @ApiPropertyOptional({ example: '08:00' })
+  @IsOptional()
+  @IsString()
+  horaEntradaJueves?: string;
+
+  @ApiPropertyOptional({ example: '14:00' })
+  @IsOptional()
+  @IsString()
+  horaSalidaJueves?: string;
 
   @ApiPropertyOptional({ example: 68400 })
   @IsOptional()
@@ -43,6 +83,16 @@ export class CreateCargoDto {
   @Type(() => Number)
   tarifaViernes?: number;
 
+  @ApiPropertyOptional({ example: '08:00' })
+  @IsOptional()
+  @IsString()
+  horaEntradaViernes?: string;
+
+  @ApiPropertyOptional({ example: '14:00' })
+  @IsOptional()
+  @IsString()
+  horaSalidaViernes?: string;
+
   @ApiPropertyOptional({ example: 60000 })
   @IsOptional()
   @IsNumber()
@@ -50,12 +100,32 @@ export class CreateCargoDto {
   @Type(() => Number)
   tarifaSabado?: number;
 
+  @ApiPropertyOptional({ example: '08:00' })
+  @IsOptional()
+  @IsString()
+  horaEntradaSabado?: string;
+
+  @ApiPropertyOptional({ example: '14:00' })
+  @IsOptional()
+  @IsString()
+  horaSalidaSabado?: string;
+
   @ApiPropertyOptional({ example: 60000 })
   @IsOptional()
   @IsNumber()
   @Min(0)
   @Type(() => Number)
   tarifaDomingo?: number;
+
+  @ApiPropertyOptional({ example: '08:00' })
+  @IsOptional()
+  @IsString()
+  horaEntradaDomingo?: string;
+
+  @ApiPropertyOptional({ example: '14:00' })
+  @IsOptional()
+  @IsString()
+  horaSalidaDomingo?: string;
 
   @ApiPropertyOptional({ example: 8000, description: 'Descuento si el empleado cena' })
   @IsOptional()
@@ -80,10 +150,30 @@ export class UpdateCargoDto {
 
   @ApiPropertyOptional()
   @IsOptional()
+  @IsString()
+  horaEntradaLunes?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  horaSalidaLunes?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
   @IsNumber()
   @Min(0)
   @Type(() => Number)
   tarifaMartes?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  horaEntradaMartes?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  horaSalidaMartes?: string;
 
   @ApiPropertyOptional()
   @IsOptional()
@@ -94,10 +184,30 @@ export class UpdateCargoDto {
 
   @ApiPropertyOptional()
   @IsOptional()
+  @IsString()
+  horaEntradaMiercoles?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  horaSalidaMiercoles?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
   @IsNumber()
   @Min(0)
   @Type(() => Number)
   tarifaJueves?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  horaEntradaJueves?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  horaSalidaJueves?: string;
 
   @ApiPropertyOptional()
   @IsOptional()
@@ -108,6 +218,16 @@ export class UpdateCargoDto {
 
   @ApiPropertyOptional()
   @IsOptional()
+  @IsString()
+  horaEntradaViernes?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  horaSalidaViernes?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
   @IsNumber()
   @Min(0)
   @Type(() => Number)
@@ -115,10 +235,30 @@ export class UpdateCargoDto {
 
   @ApiPropertyOptional()
   @IsOptional()
+  @IsString()
+  horaEntradaSabado?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  horaSalidaSabado?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
   @IsNumber()
   @Min(0)
   @Type(() => Number)
   tarifaDomingo?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  horaEntradaDomingo?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  horaSalidaDomingo?: string;
 
   @ApiPropertyOptional()
   @IsOptional()
