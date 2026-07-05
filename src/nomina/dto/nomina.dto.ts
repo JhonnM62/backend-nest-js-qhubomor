@@ -205,6 +205,11 @@ export class UpdateDescuentoDto {
   @IsString()
   @IsIn(['PENDIENTE', 'VISTO', 'APROBADO'])
   estado?: string;
+
+  @ApiPropertyOptional({ description: 'Fecha del descuento' })
+  @IsOptional()
+  @IsDateString()
+  fecha?: string;
 }
 
 export class DescuentosQueryDto {
