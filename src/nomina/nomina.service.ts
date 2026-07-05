@@ -325,17 +325,23 @@ export class NominaService {
     ]);
 
     const dataConDescuentosExtras = await Promise.all(data.map(async (turno) => {
-      const startOfDay = new Date(turno.fecha);
-      startOfDay.setUTCHours(0, 0, 0, 0);
-      const endOfDay = new Date(turno.fecha);
-      endOfDay.setUTCHours(23, 59, 59, 999);
+      // Obtenemos la fecha local en Colombia (UTC-5) basada en la hora de entrada real
+      const shiftDateLocal = new Date(turno.horaEntrada.getTime() - (5 * 60 * 60 * 1000));
+      
+      const y = shiftDateLocal.getUTCFullYear();
+      const m = shiftDateLocal.getUTCMonth();
+      const d = shiftDateLocal.getUTCDate();
+
+      // Ajustamos los límites del día a la hora de Colombia. (00:00 local = 05:00 UTC)
+      const startOfDayUTC = new Date(Date.UTC(y, m, d, 5, 0, 0, 0));
+      const endOfDayUTC = new Date(Date.UTC(y, m, d + 1, 4, 59, 59, 999));
       
       const extraDescuentos = await this.prisma.descuentosEmpleado.findMany({
         where: {
           usuarioId: turno.usuarioId,
           fecha: {
-            gte: startOfDay,
-            lte: endOfDay,
+            gte: startOfDayUTC,
+            lte: endOfDayUTC,
           },
           turnoId: null,
         }
