@@ -141,18 +141,19 @@ export class VentasService {
     // Buscar configuración dinámica
     let config = await this.prisma.configuracionNegocio.findUnique({ where: { id: 1 } });
     if (!config) {
-      config = { 
-        id: 1, 
+      config = {
+        id: 1,
         nombreComercial: 'Q HUBO MOR',
         nit: null,
         direccion: null,
         telefono: null,
-        horaCorteDia: '00:00', 
-        modoOperacion: 'GENERAL', 
-        latitudNegocio: null, 
-        longitudNegocio: null, 
+        horaCorteDia: '00:00',
+        modoOperacion: 'GENERAL',
+        latitudNegocio: null,
+        longitudNegocio: null,
         radioGeocercaM: 100,
-        updatedAt: new Date() 
+        minutosGraciaLlegadaTarde: 5,
+        updatedAt: new Date(),
       };
     }
     

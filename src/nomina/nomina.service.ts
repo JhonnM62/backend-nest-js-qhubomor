@@ -113,8 +113,19 @@ export class NominaService {
       const horaEntradaStr = usuario.cargo[campoEntrada] as string;
       const horaSalidaStr = usuario.cargo[campoSalida] as string;
 
-      const [hEntrada, mEntrada] = horaEntradaStr.split(':').map(Number);
-      const [hSalida, mSalida] = horaSalidaStr.split(':').map(Number);
+      const parseTimeStr = (t: string) => {
+        const match = t.trim().match(/^(\d{1,2}):(\d{2})(?:\s*(AM|PM|am|pm))?$/);
+        if (!match) return { h: 0, m: 0 };
+        let h = parseInt(match[1], 10);
+        const m = parseInt(match[2], 10);
+        const p = match[3] ? match[3].toUpperCase() : null;
+        if (p === 'PM' && h < 12) h += 12;
+        if (p === 'AM' && h === 12) h = 0;
+        return { h, m };
+      };
+
+      const { h: hEntrada, m: mEntrada } = parseTimeStr(horaEntradaStr);
+      const { h: hSalida, m: mSalida } = parseTimeStr(horaSalidaStr);
 
       const minutosEsperados = (hSalida * 60 + mSalida) - (hEntrada * 60 + mEntrada);
       // Ajuste para turnos que cruzan medianoche
@@ -132,14 +143,9 @@ export class NominaService {
            minutosRetraso = retraso;
         }
 
-        // Si es mayor al tiempo de gracia, calculamos el descuento desde el primer minuto.
-        const confGlobal = await this.prisma.configuracionGlobal.findFirst();
-        const TOLERANCIA_MINUTOS = confGlobal?.minutosGraciaLlegadaTarde ?? 5; 
+        const confNegocio = await this.prisma.configuracionNegocio.findFirst();
+        const TOLERANCIA_MINUTOS = confNegocio?.minutosGraciaLlegadaTarde ?? 5; 
         if (minutosRetraso > TOLERANCIA_MINUTOS) {
-           // Opcional: ¿se descuenta el tiempo de gracia? Según el plan: "(restando el tiempo de gracia si aplica, o aplicándolo a la totalidad si superó la gracia)."
-           // La respuesta del usuario fue: "(tomaremos la tarifa del día, sacaremos el valor por hora, luego por minuto, y lo multiplicaremos por los minutos de retraso)". 
-           // En mi mensaje anterior le dije "descontando los 5 minutos de gracia".
-           // Lo descontaré para ser justos:
            const minutosParaCobrar = minutosRetraso - TOLERANCIA_MINUTOS;
            valorDescuento = Math.round(minutosParaCobrar * valorPorMinuto);
         }
@@ -283,7 +289,7 @@ export class NominaService {
 
     // Actualizar el turno con la salida y el campo cenó
     // Forzamos evaluación estricta a booleano, ya que form-data puede enviar strings como "false"
-    const isCeno = dto.ceno === true || String(dto.ceno) === 'true';
+    const isCeno = dto.ceno === true || String(dto.ceno).toLowerCase() === 'true' || String(dto.ceno) === '1';
 
     const turnoActualizado = await this.prisma.turnos.update({
       where: { IDturno: turnoId },
@@ -304,19 +310,24 @@ export class NominaService {
     if (isCeno && turno.usuario.cargo) {
       const descuentoCena = Number(turno.usuario.cargo.descuentoCena || 0);
       if (descuentoCena > 0) {
-        const fechaStr = turno.fecha.toLocaleDateString('es-CO', { day: '2-digit', month: '2-digit', year: 'numeric' });
-        await this.prisma.descuentosEmpleado.create({
-          data: {
-            usuarioId: turno.usuarioId,
-            turnoId: turno.IDturno,
-            concepto: 'CENA',
-            descripcion: `Cena del turno del ${fechaStr}`,
-            valor: descuentoCena,
-            estado: 'APROBADO',
-            creadoPor: 'Sistema (automático)',
-            fecha: new Date(),
-          },
+        const existeCena = await this.prisma.descuentosEmpleado.findFirst({
+          where: { turnoId: turno.IDturno, concepto: 'CENA' }
         });
+        if (!existeCena) {
+          const fechaStr = turno.fecha.toLocaleDateString('es-CO', { day: '2-digit', month: '2-digit', year: 'numeric' });
+          await this.prisma.descuentosEmpleado.create({
+            data: {
+              usuarioId: turno.usuarioId,
+              turnoId: turno.IDturno,
+              concepto: 'CENA',
+              descripcion: `Cena del turno del ${fechaStr}`,
+              valor: descuentoCena,
+              estado: 'APROBADO',
+              creadoPor: 'Sistema (automático)',
+              fecha: new Date(),
+            },
+          });
+        }
       }
     }
 
@@ -419,26 +430,31 @@ export class NominaService {
 
     // Gestionar creación/eliminación de descuento de cena si cambia el estado
     if (dto.ceno !== undefined) {
-      const isCeno = dto.ceno === true || String(dto.ceno) === 'true';
+      const isCeno = dto.ceno === true || String(dto.ceno).toLowerCase() === 'true' || String(dto.ceno) === '1';
       updateData.ceno = isCeno;
       
       // Si antes NO había cenado y ahora SÍ, y hay descuento en el cargo
       if (isCeno && !turno.ceno) {
         const descuentoCena = Number(turno.usuario.cargo?.descuentoCena || 0);
         if (descuentoCena > 0) {
-          const fechaStr = turno.fecha.toLocaleDateString('es-CO', { day: '2-digit', month: '2-digit', year: 'numeric' });
-          await this.prisma.descuentosEmpleado.create({
-            data: {
-              usuarioId: turno.usuarioId,
-              turnoId: turno.IDturno,
-              concepto: 'CENA',
-              descripcion: `Cena del turno del ${fechaStr}`,
-              valor: descuentoCena,
-              estado: 'APROBADO',
-              creadoPor: 'Admin',
-              fecha: new Date(),
-            },
+          const existeCena = await this.prisma.descuentosEmpleado.findFirst({
+            where: { turnoId: turno.IDturno, concepto: 'CENA' }
           });
+          if (!existeCena) {
+            const fechaStr = turno.fecha.toLocaleDateString('es-CO', { day: '2-digit', month: '2-digit', year: 'numeric' });
+            await this.prisma.descuentosEmpleado.create({
+              data: {
+                usuarioId: turno.usuarioId,
+                turnoId: turno.IDturno,
+                concepto: 'CENA',
+                descripcion: `Cena del turno del ${fechaStr}`,
+                valor: descuentoCena,
+                estado: 'APROBADO',
+                creadoPor: 'Admin',
+                fecha: new Date(),
+              },
+            });
+          }
         }
       } 
       // Si antes SÍ había cenado y ahora NO, eliminamos el descuento de CENA asociado a este turno
@@ -771,26 +787,32 @@ export class NominaService {
       throw new BadRequestException('El usuario no tiene un cargo asignado ni tarifa personalizada. No se puede recalcular.');
     }
 
-    // Buscar turnos en $0 de este empleado
-    const turnosEnCero = await this.prisma.turnos.findMany({
+    // Buscar turnos NO liquidados de este empleado
+    const turnosPendientes = await this.prisma.turnos.findMany({
       where: {
         usuarioId,
-        valorTurno: 0,
+        estado: { not: 'LIQUIDADO' },
       }
     });
 
-    if (turnosEnCero.length === 0) {
-      return { success: true, mensaje: 'No se encontraron turnos con valor $0 para este empleado.' };
+    if (turnosPendientes.length === 0) {
+      return { success: true, mensaje: 'No se encontraron turnos pendientes por recalcular para este empleado.' };
     }
 
-    let actualizados = 0;
+    const confNegocio = await this.prisma.configuracionNegocio.findFirst();
+    const TOLERANCIA_MINUTOS = confNegocio?.minutosGraciaLlegadaTarde ?? 5;
 
-    for (const turno of turnosEnCero) {
+    let actualizados = 0;
+    let llegadasTardeCreadasOActualizadas = 0;
+
+    for (const turno of turnosPendientes) {
       const entrada = new Date(turno.horaEntrada);
       // Ajustar a UTC-5 (hora de Colombia) para obtener el día real
       const colombiaTime = new Date(entrada.getTime() - (5 * 60 * 60 * 1000));
       const diaSemana = colombiaTime.getUTCDay();
       const campoDia = TARIFA_POR_DIA[diaSemana];
+      const campoEntrada = HORA_ENTRADA_POR_DIA[diaSemana];
+      const campoSalida = HORA_SALIDA_POR_DIA[diaSemana];
 
       let nuevoValor = 0;
       if (usuario.tarifaPersonalizada) {
@@ -799,18 +821,88 @@ export class NominaService {
         nuevoValor = Number(usuario.cargo[campoDia] ?? 0);
       }
 
-      if (nuevoValor > 0) {
+      // Actualizar valor de turno si es distinto o 0
+      if (nuevoValor > 0 && Number(turno.valorTurno) !== nuevoValor) {
         await this.prisma.turnos.update({
           where: { IDturno: turno.IDturno },
           data: { valorTurno: nuevoValor },
         });
         actualizados++;
+      } else {
+        nuevoValor = Number(turno.valorTurno);
+      }
+
+      // Recalcular llegada tarde
+      let minutosRetraso = 0;
+      let valorDescuento = 0;
+
+      if (usuario.cargo && usuario.cargo[campoEntrada] && usuario.cargo[campoSalida] && nuevoValor > 0) {
+        const horaEntradaStr = usuario.cargo[campoEntrada] as string;
+        const horaSalidaStr = usuario.cargo[campoSalida] as string;
+
+        const parseTimeStr = (t: string) => {
+          const match = t.trim().match(/^(\d{1,2}):(\d{2})(?:\s*(AM|PM|am|pm))?$/);
+          if (!match) return { h: 0, m: 0 };
+          let h = parseInt(match[1], 10);
+          const m = parseInt(match[2], 10);
+          const p = match[3] ? match[3].toUpperCase() : null;
+          if (p === 'PM' && h < 12) h += 12;
+          if (p === 'AM' && h === 12) h = 0;
+          return { h, m };
+        };
+
+        const { h: hEntrada, m: mEntrada } = parseTimeStr(horaEntradaStr);
+        const { h: hSalida, m: mSalida } = parseTimeStr(horaSalidaStr);
+
+        const minutosEsperados = (hSalida * 60 + mSalida) - (hEntrada * 60 + mEntrada);
+        const minutosTotalesEsperados = minutosEsperados < 0 ? minutosEsperados + (24 * 60) : minutosEsperados;
+
+        if (minutosTotalesEsperados > 0) {
+          const valorPorMinuto = nuevoValor / minutosTotalesEsperados;
+          const hActual = colombiaTime.getUTCHours();
+          const mActual = colombiaTime.getUTCMinutes();
+          const minutosActuales = hActual * 60 + mActual;
+          const minutosEntradaEsperada = hEntrada * 60 + mEntrada;
+          
+          let retraso = minutosActuales - minutosEntradaEsperada;
+          if (retraso > 0 && retraso < 12 * 60) {
+             minutosRetraso = retraso;
+          }
+
+          if (minutosRetraso > TOLERANCIA_MINUTOS) {
+             const minutosParaCobrar = minutosRetraso - TOLERANCIA_MINUTOS;
+             valorDescuento = Math.round(minutosParaCobrar * valorPorMinuto);
+          }
+        }
+      }
+
+      if (valorDescuento > 0) {
+        const existeLlegada = await this.prisma.descuentosEmpleado.findFirst({
+          where: { turnoId: turno.IDturno, concepto: 'LLEGADA_TARDE' }
+        });
+
+        if (!existeLlegada) {
+          const fechaStr = turno.fecha.toLocaleDateString('es-CO', { day: '2-digit', month: '2-digit', year: 'numeric' });
+          await this.prisma.descuentosEmpleado.create({
+            data: {
+              usuarioId: turno.usuarioId,
+              turnoId: turno.IDturno,
+              concepto: 'LLEGADA_TARDE',
+              descripcion: `Llegada tardía de ${minutosRetraso} minutos en el turno del ${fechaStr}`,
+              valor: valorDescuento,
+              estado: 'PENDIENTE',
+              creadoPor: 'Sistema (automático)',
+              fecha: new Date(),
+            },
+          });
+          llegadasTardeCreadasOActualizadas++;
+        }
       }
     }
 
     return { 
       success: true, 
-      mensaje: `Se recalcularon ${actualizados} turnos correctamente.` 
+      mensaje: `Se recalcularon ${actualizados} valores de turno y se evaluaron ${llegadasTardeCreadasOActualizadas} nuevas llegadas tarde.` 
     };
   }
 }

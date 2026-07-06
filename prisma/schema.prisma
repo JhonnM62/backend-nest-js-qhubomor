@@ -491,9 +491,10 @@ model ConfiguracionImpresora {
 }
 
 model ConfiguracionNegocio {
-  id              Int      @id @default(1)
-  horaCorteDia    String   @default("00:00")
-  updatedAt       DateTime @updatedAt
+  id                          Int      @id @default(1)
+  horaCorteDia                String   @default("00:00")
+  minutosGraciaLlegadaTarde   Int      @default(5)
+  updatedAt                   DateTime @updatedAt
   modoOperacion   String   @default("GENERAL")
   direccion       String?
   nit             String?

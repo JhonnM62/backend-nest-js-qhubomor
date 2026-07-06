@@ -26,10 +26,10 @@ export class CajaService {
 
     let config = await this.prisma.configuracionNegocio.findUnique({ where: { id: 1 } });
     if (!config) {
-      config = { id: 1, nombreComercial: 'Q HUBO MOR', nit: null, direccion: null, telefono: null, horaCorteDia: '00:00', modoOperacion: 'GENERAL', latitudNegocio: null, longitudNegocio: null, radioGeocercaM: 100, updatedAt: new Date() };
+      config = { id: 1, nombreComercial: 'Q HUBO MOR', nit: null, direccion: null, telefono: null, horaCorteDia: '00:00', modoOperacion: 'GENERAL', latitudNegocio: null, longitudNegocio: null, radioGeocercaM: 100, minutosGraciaLlegadaTarde: 5, updatedAt: new Date() };
     }
     
-    const [corteHours, corteMinutes] = config.horaCorteDia.split(':').map(Number);
+    const [corteHours, corteMinutes] = config!.horaCorteDia.split(':').map(Number);
     const localDate = new Date(date.getTime() - (5 * 60 * 60 * 1000));
     const currentMinutes = (localDate.getUTCHours() * 60) + localDate.getUTCMinutes();
     const corteTotalMinutes = (corteHours * 60) + corteMinutes;
