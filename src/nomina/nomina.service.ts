@@ -622,7 +622,7 @@ export class NominaService {
       this.prisma.descuentosEmpleado.findMany({
         where, skip, take: limit,
         orderBy: { fecha: 'desc' },
-        include: { usuario: { select: { nombre: true } } },
+        include: { usuario: { select: { IDusuarios: true, nombre: true } } },
       }),
       this.prisma.descuentosEmpleado.count({ where }),
     ]);
