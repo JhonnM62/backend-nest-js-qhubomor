@@ -203,7 +203,7 @@ export class NominaService {
           valor: valorDescuento,
           estado: 'PENDIENTE',
           creadoPor: 'Sistema (automático)',
-          fecha: new Date(),
+          fecha: turno.fecha,
         },
       });
     }
@@ -892,7 +892,7 @@ export class NominaService {
               valor: valorDescuento,
               estado: 'PENDIENTE',
               creadoPor: 'Sistema (automático)',
-              fecha: new Date(),
+              fecha: turno.fecha,
             },
           });
           llegadasTardeCreadasOActualizadas++;
