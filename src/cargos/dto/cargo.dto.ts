@@ -267,3 +267,37 @@ export class UpdateCargoDto {
   @Type(() => Number)
   descuentoCena?: number;
 }
+
+export class CreateExcepcionHorarioDto {
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsString()
+  cargoId: string;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsString()
+  fecha: string;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsString()
+  nombre: string;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsNumber()
+  @Min(0)
+  @Type(() => Number)
+  tarifa: number;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsString()
+  horaEntrada: string;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsString()
+  horaSalida: string;
+}

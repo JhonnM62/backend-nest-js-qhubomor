@@ -99,25 +99,47 @@ export class NominaService {
     });
     if (!usuario) throw new NotFoundException('Usuario no encontrado');
 
-    // Calcular valor del turno según el día de la semana en hora de Colombia
-    const diaSemana = colombiaTime.getUTCDay(); // 0=Dom...6=Sáb
-    const campoDia = TARIFA_POR_DIA[diaSemana];
-    const campoEntrada = HORA_ENTRADA_POR_DIA[diaSemana];
-    const campoSalida = HORA_SALIDA_POR_DIA[diaSemana];
-
     let valorTurno = 0;
+    let horaEntradaStr: string | null = null;
+    let horaSalidaStr: string | null = null;
+    let isExcepcion = false;
+
+    if (usuario.cargo) {
+      const excepcion = await this.prisma.excepcionHorarioCargo.findFirst({
+        where: {
+          cargoId: usuario.cargo.IDcargo,
+          fecha: fechaAInsertar,
+        }
+      });
+      if (excepcion) {
+        isExcepcion = true;
+        valorTurno = Number(excepcion.tarifa);
+        horaEntradaStr = excepcion.horaEntrada;
+        horaSalidaStr = excepcion.horaSalida;
+      }
+    }
+
+    if (!isExcepcion) {
+      const diaSemana = colombiaTime.getUTCDay(); // 0=Dom...6=Sáb
+      const campoDia = TARIFA_POR_DIA[diaSemana];
+      const campoEntrada = HORA_ENTRADA_POR_DIA[diaSemana];
+      const campoSalida = HORA_SALIDA_POR_DIA[diaSemana];
+      
+      if (usuario.cargo) {
+        valorTurno = Number(usuario.cargo[campoDia] ?? 0);
+        horaEntradaStr = usuario.cargo[campoEntrada] as string;
+        horaSalidaStr = usuario.cargo[campoSalida] as string;
+      }
+    }
+
     if (usuario.tarifaPersonalizada) {
       valorTurno = Number(usuario.tarifaPersonalizada);
-    } else if (usuario.cargo) {
-      valorTurno = Number(usuario.cargo[campoDia] ?? 0);
     }
 
     let minutosRetraso = 0;
     let valorDescuento = 0;
 
-    if (usuario.cargo && usuario.cargo[campoEntrada] && usuario.cargo[campoSalida] && valorTurno > 0) {
-      const horaEntradaStr = usuario.cargo[campoEntrada] as string;
-      const horaSalidaStr = usuario.cargo[campoSalida] as string;
+    if (horaEntradaStr && horaSalidaStr && valorTurno > 0) {
 
       const parseTimeStr = (t: string) => {
         const match = t.trim().match(/^(\d{1,2}):(\d{2})(?:\s*(AM|PM|am|pm))?$/);
@@ -841,11 +863,41 @@ export class NominaService {
       const campoEntrada = HORA_ENTRADA_POR_DIA[diaSemana];
       const campoSalida = HORA_SALIDA_POR_DIA[diaSemana];
 
+      const y = colombiaTime.getUTCFullYear();
+      const m = colombiaTime.getUTCMonth();
+      const d = colombiaTime.getUTCDate();
+      const fechaTurno = new Date(Date.UTC(y, m, d, 0, 0, 0, 0));
+
       let nuevoValor = 0;
+      let horaEntradaStr: string | null = null;
+      let horaSalidaStr: string | null = null;
+      let isExcepcion = false;
+
+      if (usuario.cargo) {
+        const excepcion = await this.prisma.excepcionHorarioCargo.findFirst({
+          where: {
+            cargoId: usuario.cargo.IDcargo,
+            fecha: fechaTurno,
+          }
+        });
+        if (excepcion) {
+          isExcepcion = true;
+          nuevoValor = Number(excepcion.tarifa);
+          horaEntradaStr = excepcion.horaEntrada;
+          horaSalidaStr = excepcion.horaSalida;
+        }
+      }
+
+      if (!isExcepcion) {
+        if (usuario.cargo) {
+          nuevoValor = Number(usuario.cargo[campoDia] ?? 0);
+          horaEntradaStr = (usuario.cargo[campoEntrada] as string) || null;
+          horaSalidaStr = (usuario.cargo[campoSalida] as string) || null;
+        }
+      }
+
       if (usuario.tarifaPersonalizada) {
         nuevoValor = Number(usuario.tarifaPersonalizada);
-      } else if (usuario.cargo) {
-        nuevoValor = Number(usuario.cargo[campoDia] ?? 0);
       }
 
       // Actualizar valor de turno si es distinto o 0
@@ -863,9 +915,7 @@ export class NominaService {
       let minutosRetraso = 0;
       let valorDescuento = 0;
 
-      if (usuario.cargo && usuario.cargo[campoEntrada] && usuario.cargo[campoSalida] && nuevoValor > 0) {
-        const horaEntradaStr = usuario.cargo[campoEntrada] as string;
-        const horaSalidaStr = usuario.cargo[campoSalida] as string;
+      if (horaEntradaStr && horaSalidaStr && nuevoValor > 0) {
 
         const parseTimeStr = (t: string) => {
           const match = t.trim().match(/^(\d{1,2}):(\d{2})(?:\s*(AM|PM|am|pm))?$/);

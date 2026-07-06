@@ -624,7 +624,8 @@ model CargosEmpleado {
   descuentoCena        Decimal    @default(0) @map("DescuentoCena") @db.Money
   createdAt            DateTime   @default(now())
   updatedAt            DateTime   @updatedAt
-  usuarios        Usuarios[]
+  usuarios             Usuarios[]
+  excepcionesHorario   ExcepcionHorarioCargo[]
 
   @@map("CARGOS_EMPLEADO")
 }
@@ -755,4 +756,20 @@ model ConfiguracionGlobal {
   updatedAt                 DateTime @updatedAt
 
   @@map("CONFIGURACION_GLOBAL")
+}
+
+model ExcepcionHorarioCargo {
+  id              String   @id @default(cuid())
+  cargoId         String   @map("CargoId")
+  fecha           DateTime @db.Date @map("Fecha")
+  nombre          String   @map("Nombre")
+  tarifa          Decimal  @db.Money @map("Tarifa")
+  horaEntrada     String   @map("HoraEntrada")
+  horaSalida      String   @map("HoraSalida")
+  createdAt       DateTime @default(now())
+
+  cargo           CargosEmpleado @relation(fields: [cargoId], references: [IDcargo], onDelete: Cascade)
+
+  @@unique([cargoId, fecha])
+  @@map("EXCEPCION_HORARIO_CARGO")
 }
