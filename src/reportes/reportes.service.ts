@@ -154,6 +154,7 @@ export class ReportesService {
         valorFaltante: true,
         valorExcedente: true,
         transferenciasContadas: true,
+        fechaDeCierre: true,
         venta: {
           select: {
             medioDePago: true,
@@ -165,6 +166,37 @@ export class ReportesService {
       },
       orderBy: { fechaDeApertura: 'asc' }
     });
+
+    // Emular la fórmula de AppSheet: Si la caja no tiene ventas vinculadas por relación,
+    // buscarlas por el rango de fechas (Fecha de Apertura a Fecha de Cierre)
+    for (const c of cajas) {
+      if (!c.venta || c.venta.length === 0) {
+        if (c.fechaDeApertura) {
+          const fApertura = new Date(c.fechaDeApertura);
+          fApertura.setUTCHours(0, 0, 0, 0);
+          
+          const fCierre = c.fechaDeCierre ? new Date(c.fechaDeCierre) : new Date(c.fechaDeApertura);
+          fCierre.setUTCHours(23, 59, 59, 999);
+
+          const ventasFiltradas = await this.prisma.ventas.findMany({
+            where: {
+              fecha: {
+                gte: fApertura,
+                lte: fCierre
+              }
+            },
+            select: {
+              medioDePago: true,
+              totalInput: true,
+              efectivoRecibido: true,
+              valorDeTransferencia: true
+            }
+          });
+          
+          c.venta = ventasFiltradas as any;
+        }
+      }
+    }
 
     // Obtener los retiros asociados a este "FilterID"
     const retiros = await this.prisma.dineroRetirado.findMany({
