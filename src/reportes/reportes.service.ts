@@ -175,7 +175,9 @@ export class ReportesService {
           const fApertura = new Date(c.fechaDeApertura);
           fApertura.setUTCHours(0, 0, 0, 0);
           
-          const fCierre = c.fechaDeCierre ? new Date(c.fechaDeCierre) : new Date(c.fechaDeApertura);
+          // Limitamos el rango al mismo día de la apertura. 
+          // Si cerramos la caja días después por error, no queremos sumar ventas de otros días.
+          const fCierre = new Date(c.fechaDeApertura);
           fCierre.setUTCHours(23, 59, 59, 999);
 
           const ventasFiltradas = await this.prisma.ventas.findMany({
