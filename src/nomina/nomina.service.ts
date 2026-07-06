@@ -178,7 +178,7 @@ export class NominaService {
     const turno = await this.prisma.turnos.create({
       data: {
         usuarioId,
-        fecha: new Date(),
+        fecha: new Date(Date.UTC(y, m, d, 0, 0, 0, 0)),
         horaEntrada: new Date(),
         fotoEntrada: fotoPath || null,
         latitud: dto.latitud || null,
@@ -572,7 +572,7 @@ export class NominaService {
     const [data, total] = await Promise.all([
       this.prisma.descuentosEmpleado.findMany({
         where, skip, take: limit,
-        orderBy: { createdAt: 'desc' },
+        orderBy: { fecha: 'desc' },
         include: { usuario: { select: { nombre: true } } },
       }),
       this.prisma.descuentosEmpleado.count({ where }),
@@ -656,7 +656,7 @@ export class NominaService {
           usuarioId,
           ...(Object.keys(fechaFiltro).length ? { fecha: fechaFiltro } : {}),
         },
-        orderBy: { createdAt: 'desc' },
+        orderBy: { fecha: 'desc' },
       }),
     ]);
 
@@ -882,7 +882,7 @@ export class NominaService {
         });
 
         if (!existeLlegada) {
-          const fechaStr = turno.fecha.toLocaleDateString('es-CO', { day: '2-digit', month: '2-digit', year: 'numeric' });
+          const fechaStr = turno.fecha.toLocaleDateString('es-CO', { timeZone: 'UTC', day: '2-digit', month: '2-digit', year: 'numeric' });
           await this.prisma.descuentosEmpleado.create({
             data: {
               usuarioId: turno.usuarioId,
