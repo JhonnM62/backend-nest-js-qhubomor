@@ -70,11 +70,13 @@ export class NominaService {
     const offsetMs = 5 * 60 * 60 * 1000;
     const inicioDiaLocal = new Date(Date.UTC(y, m, d, 0, 0, 0, 0) + offsetMs);
 
+    const fechaAInsertar = new Date(Date.UTC(y, m, d, 0, 0, 0, 0));
+
     // Verificar que no haya NINGÚN turno hoy (activo, completado, liquidado...)
     const turnoExistenteHoy = await this.prisma.turnos.findFirst({
       where: {
         usuarioId,
-        fecha: { gte: inicioDiaLocal },
+        fecha: fechaAInsertar,
       },
     });
 
@@ -178,7 +180,7 @@ export class NominaService {
     const turno = await this.prisma.turnos.create({
       data: {
         usuarioId,
-        fecha: new Date(Date.UTC(y, m, d, 0, 0, 0, 0)),
+        fecha: fechaAInsertar,
         horaEntrada: new Date(),
         fotoEntrada: fotoPath || null,
         latitud: dto.latitud || null,
