@@ -132,10 +132,16 @@ export class NominaService {
            minutosRetraso = retraso;
         }
 
-        // Si es mayor a 5 minutos, calculamos el descuento desde el primer minuto.
-        const TOLERANCIA_MINUTOS = 5; 
+        // Si es mayor al tiempo de gracia, calculamos el descuento desde el primer minuto.
+        const confGlobal = await this.prisma.configuracionGlobal.findFirst();
+        const TOLERANCIA_MINUTOS = confGlobal?.minutosGraciaLlegadaTarde ?? 5; 
         if (minutosRetraso > TOLERANCIA_MINUTOS) {
-           valorDescuento = Math.round(minutosRetraso * valorPorMinuto);
+           // Opcional: ¿se descuenta el tiempo de gracia? Según el plan: "(restando el tiempo de gracia si aplica, o aplicándolo a la totalidad si superó la gracia)."
+           // La respuesta del usuario fue: "(tomaremos la tarifa del día, sacaremos el valor por hora, luego por minuto, y lo multiplicaremos por los minutos de retraso)". 
+           // En mi mensaje anterior le dije "descontando los 5 minutos de gracia".
+           // Lo descontaré para ser justos:
+           const minutosParaCobrar = minutosRetraso - TOLERANCIA_MINUTOS;
+           valorDescuento = Math.round(minutosParaCobrar * valorPorMinuto);
         }
       }
     }
@@ -186,10 +192,10 @@ export class NominaService {
         data: {
           usuarioId: turno.usuarioId,
           turnoId: turno.IDturno,
-          concepto: 'LLEGADA_TARDIA',
+          concepto: 'LLEGADA_TARDE',
           descripcion: `Llegada tardía de ${minutosRetraso} minutos en el turno del ${fechaStr}`,
           valor: valorDescuento,
-          estado: 'APROBADO',
+          estado: 'PENDIENTE',
           creadoPor: 'Sistema (automático)',
           fecha: new Date(),
         },
@@ -205,6 +211,30 @@ export class NominaService {
       success: true,
       data: turno,
       mensaje: mensajeBase,
+    };
+  }
+
+  async aplicarLlegadasTarde(descuentoIds: string[], adminId: string) {
+    if (descuentoIds.length === 0) {
+      return { success: true, count: 0, mensaje: 'No se seleccionaron descuentos para aprobar.' };
+    }
+
+    const { count } = await this.prisma.descuentosEmpleado.updateMany({
+      where: {
+        IDdescuento: { in: descuentoIds },
+        estado: 'PENDIENTE',
+        concepto: 'LLEGADA_TARDE'
+      },
+      data: {
+        estado: 'APROBADO',
+        // Opcionalmente podemos registrar quién lo aprobó, pero dejemos creadoPor si no queremos sobreescribir.
+      }
+    });
+
+    return {
+      success: true,
+      count,
+      mensaje: `Se aprobaron ${count} descuentos por llegada tarde.`
     };
   }
 
@@ -252,11 +282,14 @@ export class NominaService {
     }
 
     // Actualizar el turno con la salida y el campo cenó
+    // Forzamos evaluación estricta a booleano, ya que form-data puede enviar strings como "false"
+    const isCeno = dto.ceno === true || String(dto.ceno) === 'true';
+
     const turnoActualizado = await this.prisma.turnos.update({
       where: { IDturno: turnoId },
       data: {
         horaSalida: new Date(),
-        ceno: dto.ceno,
+        ceno: isCeno,
         estado: 'COMPLETADO',
         observacion: dto.observacion || null,
         fotoSalida: fotoPath || null,
@@ -268,7 +301,7 @@ export class NominaService {
     });
 
     // Si cenó y el cargo tiene descuento de cena, crear descuento automático
-    if (dto.ceno && turno.usuario.cargo) {
+    if (isCeno && turno.usuario.cargo) {
       const descuentoCena = Number(turno.usuario.cargo.descuentoCena || 0);
       if (descuentoCena > 0) {
         const fechaStr = turno.fecha.toLocaleDateString('es-CO', { day: '2-digit', month: '2-digit', year: 'numeric' });
@@ -287,7 +320,7 @@ export class NominaService {
       }
     }
 
-    let mensajeRespuesta = dto.ceno
+    let mensajeRespuesta = isCeno
       ? 'Turno cerrado. Se registró la cena y se aplicó el descuento correspondiente.'
       : 'Turno finalizado correctamente';
 
@@ -375,7 +408,7 @@ export class NominaService {
   }
 
   async updateTurnoAdmin(turnoId: string, dto: UpdateTurnoAdminDto) {
-    await this.getTurno(turnoId);
+    const turno = await this.getTurno(turnoId);
     const updateData: any = { ...dto };
     if (dto.horaSalida) updateData.horaSalida = new Date(dto.horaSalida);
     if (dto.horaEntrada) updateData.horaEntrada = new Date(dto.horaEntrada);
@@ -383,6 +416,42 @@ export class NominaService {
     if (dto.estado === 'COMPLETADO' && !dto.horaSalida && !updateData.horaSalida) {
       updateData.horaSalida = new Date();
     }
+
+    // Gestionar creación/eliminación de descuento de cena si cambia el estado
+    if (dto.ceno !== undefined) {
+      const isCeno = dto.ceno === true || String(dto.ceno) === 'true';
+      updateData.ceno = isCeno;
+      
+      // Si antes NO había cenado y ahora SÍ, y hay descuento en el cargo
+      if (isCeno && !turno.ceno) {
+        const descuentoCena = Number(turno.usuario.cargo?.descuentoCena || 0);
+        if (descuentoCena > 0) {
+          const fechaStr = turno.fecha.toLocaleDateString('es-CO', { day: '2-digit', month: '2-digit', year: 'numeric' });
+          await this.prisma.descuentosEmpleado.create({
+            data: {
+              usuarioId: turno.usuarioId,
+              turnoId: turno.IDturno,
+              concepto: 'CENA',
+              descripcion: `Cena del turno del ${fechaStr}`,
+              valor: descuentoCena,
+              estado: 'APROBADO',
+              creadoPor: 'Admin',
+              fecha: new Date(),
+            },
+          });
+        }
+      } 
+      // Si antes SÍ había cenado y ahora NO, eliminamos el descuento de CENA asociado a este turno
+      else if (!isCeno && turno.ceno) {
+        await this.prisma.descuentosEmpleado.deleteMany({
+          where: {
+            turnoId: turnoId,
+            concepto: 'CENA',
+          }
+        });
+      }
+    }
+
     const updated = await this.prisma.turnos.update({
       where: { IDturno: turnoId },
       data: updateData,
@@ -576,7 +645,7 @@ export class NominaService {
     ]);
 
     const totalBruto = turnos.reduce((sum: number, t: any) => sum + Number(t.valorTurno), 0);
-    const totalDescuentos = descuentos.reduce((sum: number, d: any) => sum + Number(d.valor), 0);
+    const totalDescuentos = descuentos.reduce((sum: number, d: any) => sum + (d.concepto === 'LLEGADA_TARDE' && d.estado === 'PENDIENTE' ? 0 : Number(d.valor)), 0);
     const totalNeto = totalBruto - totalDescuentos;
 
     return {
@@ -623,7 +692,7 @@ export class NominaService {
     });
 
     const totalBruto = turnos.reduce((sum: number, t: any) => sum + Number(t.valorTurno), 0);
-    const totalDescuentos = descuentos.reduce((sum: number, d: any) => sum + Number(d.valor), 0);
+    const totalDescuentos = descuentos.reduce((sum: number, d: any) => sum + (d.concepto === 'LLEGADA_TARDE' && d.estado === 'PENDIENTE' ? 0 : Number(d.valor)), 0);
     const totalNeto = totalBruto - totalDescuentos;
 
     const liquidacion = await this.prisma.liquidaciones.create({

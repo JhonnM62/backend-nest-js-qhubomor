@@ -744,3 +744,12 @@ model InstruccionesAgente {
 
   @@map("INSTRUCCIONES_AGENTE")
 }
+
+model ConfiguracionGlobal {
+  id                        Int      @id @default(autoincrement())
+  minutosGraciaLlegadaTarde Int      @default(5) @map("MinutosGraciaLlegadaTarde")
+  createdAt                 DateTime @default(now())
+  updatedAt                 DateTime @updatedAt
+
+  @@map("CONFIGURACION_GLOBAL")
+}

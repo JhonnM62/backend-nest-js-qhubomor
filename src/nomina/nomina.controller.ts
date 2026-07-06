@@ -141,8 +141,19 @@ export class NominaController {
   @UseGuards(RolesGuard)
   @Roles(...ROLES_ADMIN)
   @ApiOperation({ summary: '(Admin) Editar turno manualmente' })
-  updateTurno(@Param('id') id: string, @Body() dto: UpdateTurnoAdminDto) {
+  updateTurno(@Param('id') id: string, @Body() dto: UpdateTurnoAdminDto, @Request() req: any) {
     return this.nominaService.updateTurnoAdmin(id, dto);
+  }
+
+  @Post('llegadas-tarde/aplicar')
+  @UseGuards(RolesGuard)
+  @Roles(...ROLES_ADMIN)
+  @ApiOperation({ summary: '(Admin) Aprobar y aplicar descuentos por llegadas tarde' })
+  aplicarLlegadasTarde(@Body() body: { descuentoIds: string[] }, @Request() req: any) {
+    if (!body.descuentoIds || !Array.isArray(body.descuentoIds)) {
+      throw new BadRequestException('Se requiere un array de descuentoIds');
+    }
+    return this.nominaService.aplicarLlegadasTarde(body.descuentoIds, req.user.id);
   }
 
   @Delete('turno/:id')
