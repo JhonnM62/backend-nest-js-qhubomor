@@ -2,6 +2,7 @@ import {
   Injectable, NotFoundException, BadRequestException, ForbiddenException
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import {
   RegistrarEntradaDto, RegistrarSalidaDto, UpdateTurnoAdminDto, TurnosQueryDto,
   CreateDescuentoDto, RepartirDescuentoDto, UpdateDescuentoDto, DescuentosQueryDto,
@@ -53,7 +54,10 @@ function calcularDistancia(lat1: number, lon1: number, lat2: number, lon2: numbe
 
 @Injectable()
 export class NominaService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private notificationsService: NotificationsService
+  ) {}
 
   // ─────────────────────────────────────────────
   // TURNOS
@@ -146,7 +150,7 @@ export class NominaService {
         }
 
         const confNegocio = await this.prisma.configuracionNegocio.findFirst();
-        const TOLERANCIA_MINUTOS = confNegocio?.minutosGraciaLlegadaTarde ?? 5; 
+        const TOLERANCIA_MINUTOS = (confNegocio as any)?.minutosGraciaLlegadaTarde ?? 5; 
         if (minutosRetraso > TOLERANCIA_MINUTOS) {
            const minutosParaCobrar = minutosRetraso - TOLERANCIA_MINUTOS;
            valorDescuento = Math.round(minutosParaCobrar * valorPorMinuto);
@@ -214,6 +218,19 @@ export class NominaService {
     if (valorDescuento > 0) {
       mensajeBase += `. Llegada tardía registrada: ${minutosRetraso} mins, se descontará $${valorDescuento.toLocaleString('es-CO')}.`;
     }
+
+    let pushBody = `El empleado ${turno.usuario.nombre} ha abierto su turno.`;
+    if (minutosRetraso > 0) {
+      pushBody += ` Llegó ${minutosRetraso} minutos tarde.`;
+    }
+
+    // Enviar notificación a los administradores
+    await this.notificationsService.sendNotification(
+      'TURNO_OPENED',
+      'Turno Iniciado',
+      pushBody,
+      { turnoId: turno.IDturno, usuarioId }
+    );
 
     return {
       success: true,
@@ -336,6 +353,14 @@ export class NominaService {
     let mensajeRespuesta = isCeno
       ? 'Turno cerrado. Se registró la cena y se aplicó el descuento correspondiente.'
       : 'Turno finalizado correctamente';
+
+    // Enviar notificación a los administradores
+    await this.notificationsService.sendNotification(
+      'TURNO_CLOSED',
+      'Turno Finalizado',
+      `El empleado ${turno.usuario.nombre} ha cerrado su turno.`,
+      { turnoId: turno.IDturno, usuarioId: turno.usuarioId }
+    );
 
     return {
       success: true,
@@ -802,7 +827,7 @@ export class NominaService {
     }
 
     const confNegocio = await this.prisma.configuracionNegocio.findFirst();
-    const TOLERANCIA_MINUTOS = confNegocio?.minutosGraciaLlegadaTarde ?? 5;
+    const TOLERANCIA_MINUTOS = (confNegocio as any)?.minutosGraciaLlegadaTarde ?? 5;
 
     let actualizados = 0;
     let llegadasTardeCreadasOActualizadas = 0;

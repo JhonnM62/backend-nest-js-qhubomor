@@ -27,9 +27,8 @@ export class RegistrarEntradaDto {
 export class RegistrarSalidaDto {
   @ApiProperty({ description: '¿Cenó el empleado durante este turno? (OBLIGATORIO)' })
   @IsNotEmpty({ message: 'Debes indicar si el empleado cenó o no. Este campo es obligatorio.' })
-  @Transform(({ value }) => value === 'true' || value === true)
-  @IsBoolean({ message: 'El campo "ceno" debe ser true o false' })
-  ceno: boolean;
+  @Transform(({ value }) => value === 'true' || value === true || value === '1')
+  ceno: any;
 
   @ApiPropertyOptional()
   @IsOptional()
@@ -52,8 +51,8 @@ export class RegistrarSalidaDto {
 export class UpdateTurnoAdminDto {
   @ApiPropertyOptional()
   @IsOptional()
-  @IsBoolean()
-  ceno?: boolean;
+  @Transform(({ value }) => value === 'true' || value === true || value === '1')
+  ceno?: any;
 
   @ApiPropertyOptional()
   @IsOptional()

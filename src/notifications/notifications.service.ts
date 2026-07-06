@@ -9,7 +9,8 @@ export type NotificationEventType =
   | 'CAJA_OPENED' | 'CAJA_CLOSED_PERFECT' | 'CAJA_CLOSED_MISMATCH' | 'CAJA_DELETED'
   | 'ORDER_INVENTARIO_UPDATED'
   | 'DINERO_RETIRADO'
-  | 'GASTO_CREATED' | 'GASTO_DELETED' | 'GASTOS_BULK_CREATED';
+  | 'GASTO_CREATED' | 'GASTO_DELETED' | 'GASTOS_BULK_CREATED'
+  | 'TURNO_OPENED' | 'TURNO_CLOSED';
 
 @Injectable()
 export class NotificationsService {
@@ -261,6 +262,8 @@ export class NotificationsService {
       'GASTO_CREATED': 'notifyGastoCreated',
       'GASTO_DELETED': 'notifyGastoDeleted',
       'GASTOS_BULK_CREATED': 'notifyGastoCreated', // Reuse the same setting column
+      'TURNO_OPENED': 'notifyTurnoOpened',
+      'TURNO_CLOSED': 'notifyTurnoClosed',
     };
     return map[eventType] || null;
   }
