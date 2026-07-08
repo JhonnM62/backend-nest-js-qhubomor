@@ -542,8 +542,8 @@ export class NominaService {
     const updateData: any = { ...dto };
     if (dto.horaSalida) updateData.horaSalida = new Date(dto.horaSalida);
     if (dto.horaEntrada) updateData.horaEntrada = new Date(dto.horaEntrada);
-    // Si se está cerrando el turno (COMPLETADO) y aún no tiene horaSalida, asignamos la hora actual
-    if (dto.estado === 'COMPLETADO' && !dto.horaSalida && !updateData.horaSalida) {
+    // Si se está cerrando el turno (COMPLETADO o FINALIZADO) y aún no tiene horaSalida, asignamos la hora actual
+    if ((dto.estado === 'COMPLETADO' || dto.estado === 'FINALIZADO') && !dto.horaSalida && !updateData.horaSalida) {
       updateData.horaSalida = new Date();
     }
 
@@ -783,10 +783,14 @@ export class NominaService {
     const totalDescuentos = descuentos.reduce((sum: number, d: any) => sum + (d.concepto === 'LLEGADA_TARDE' && d.estado === 'PENDIENTE' ? 0 : Number(d.valor)), 0);
     const totalNeto = totalBruto - totalDescuentos;
 
+    const confNegocio = await this.prisma.configuracionNegocio.findFirst();
+    const minutosGracia = confNegocio?.minutosGraciaLlegadaTarde ?? 5;
+
     return {
       success: true,
       data: {
         usuario,
+        minutosGracia,
         totalTurnos: turnos.length,
         totalBruto,
         totalDescuentos,
