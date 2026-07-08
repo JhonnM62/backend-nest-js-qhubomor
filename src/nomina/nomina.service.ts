@@ -138,6 +138,7 @@ export class NominaService {
 
     let minutosRetraso = 0;
     let valorDescuento = 0;
+    let descLlegadaTarde = '';
 
     if (horaEntradaStr && horaSalidaStr && valorTurno > 0) {
 
@@ -176,6 +177,19 @@ export class NominaService {
         if (minutosRetraso > TOLERANCIA_MINUTOS) {
            const minutosParaCobrar = minutosRetraso - TOLERANCIA_MINUTOS;
            valorDescuento = Math.round(minutosParaCobrar * valorPorMinuto);
+
+           const formatTime = (h: number, m: number) => {
+             const ampm = h >= 12 ? 'PM' : 'AM';
+             let h12 = h % 12;
+             if (h12 === 0) h12 = 12;
+             return `${h12.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')} ${ampm}`;
+           };
+           const strEsperada = formatTime(hEntrada, mEntrada);
+           const strLlegada = formatTime(hActual, mActual);
+           const tarifaMin = valorPorMinuto.toLocaleString('es-CO', { maximumFractionDigits: 1 });
+           const tarifaHora = Math.round(valorPorMinuto * 60).toLocaleString('es-CO');
+
+           descLlegadaTarde = `Llegada: ${strLlegada} (Horario: ${strEsperada}). Retraso total: ${minutosRetraso} min. Gracia: -${TOLERANCIA_MINUTOS} min. Penalizados: ${minutosParaCobrar} min a $${tarifaMin}/min ($${tarifaHora}/h).`;
         }
       }
     }
@@ -227,7 +241,7 @@ export class NominaService {
           usuarioId: turno.usuarioId,
           turnoId: turno.IDturno,
           concepto: 'LLEGADA_TARDE',
-          descripcion: `Llegada tardía de ${minutosRetraso} minutos en el turno del ${fechaStr}`,
+          descripcion: descLlegadaTarde || `Llegada tardía de ${minutosRetraso} minutos en el turno del ${fechaStr}`,
           valor: valorDescuento,
           estado: 'PENDIENTE',
           creadoPor: 'Sistema (automático)',
@@ -1123,6 +1137,7 @@ export class NominaService {
       // Recalcular llegada tarde
       let minutosRetraso = 0;
       let valorDescuento = 0;
+      let descLlegadaTarde = '';
 
       if (horaEntradaStr && horaSalidaStr && nuevoValor > 0) {
 
@@ -1158,6 +1173,19 @@ export class NominaService {
           if (minutosRetraso > TOLERANCIA_MINUTOS) {
              const minutosParaCobrar = minutosRetraso - TOLERANCIA_MINUTOS;
              valorDescuento = Math.round(minutosParaCobrar * valorPorMinuto);
+
+             const formatTime = (h: number, m: number) => {
+               const ampm = h >= 12 ? 'PM' : 'AM';
+               let h12 = h % 12;
+               if (h12 === 0) h12 = 12;
+               return `${h12.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')} ${ampm}`;
+             };
+             const strEsperada = formatTime(hEntrada, mEntrada);
+             const strLlegada = formatTime(hActual, mActual);
+             const tarifaMin = valorPorMinuto.toLocaleString('es-CO', { maximumFractionDigits: 1 });
+             const tarifaHora = Math.round(valorPorMinuto * 60).toLocaleString('es-CO');
+
+             descLlegadaTarde = `Llegada: ${strLlegada} (Horario: ${strEsperada}). Retraso total: ${minutosRetraso} min. Gracia: -${TOLERANCIA_MINUTOS} min. Penalizados: ${minutosParaCobrar} min a $${tarifaMin}/min ($${tarifaHora}/h).`;
           }
         }
       }
@@ -1174,12 +1202,22 @@ export class NominaService {
               usuarioId: turno.usuarioId,
               turnoId: turno.IDturno,
               concepto: 'LLEGADA_TARDE',
-              descripcion: `Llegada tardía de ${minutosRetraso} minutos en el turno del ${fechaStr}`,
+              descripcion: descLlegadaTarde || `Llegada tardía de ${minutosRetraso} minutos en el turno del ${fechaStr}`,
               valor: valorDescuento,
               estado: 'PENDIENTE',
               creadoPor: 'Sistema (automático)',
               fecha: turno.fecha,
             },
+          });
+          llegadasTardeCreadasOActualizadas++;
+        } else {
+          // If it exists, let's just make sure the description and value are up to date
+          await this.prisma.descuentosEmpleado.update({
+            where: { IDdescuento: existeLlegada.IDdescuento },
+            data: {
+              descripcion: descLlegadaTarde || existeLlegada.descripcion,
+              valor: valorDescuento
+            }
           });
           llegadasTardeCreadasOActualizadas++;
         }
