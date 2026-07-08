@@ -103,7 +103,7 @@ export class UsuariosService {
           tarifaPersonalizada: true,
           geocercaActiva: true,
           esPersonalDePrueba: true,
-          cargo: { select: { IDcargo: true, nombre: true } },
+          cargo: true,
           createdAt: true,
         },
       }),
@@ -143,7 +143,7 @@ export class UsuariosService {
         tarifaPersonalizada: true,
         geocercaActiva: true,
         esPersonalDePrueba: true,
-        cargo: { select: { IDcargo: true, nombre: true } },
+        cargo: true,
         createdAt: true,
       },
     });
