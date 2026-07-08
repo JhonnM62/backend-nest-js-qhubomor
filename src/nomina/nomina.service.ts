@@ -506,7 +506,7 @@ export class NominaService {
 
       if (dto.horaSalida) {
         hSalida = parseTime(dto.horaSalida, fecha);
-        estado = 'FINALIZADO';
+        estado = 'COMPLETADO';
         const horasTrabajadas = (hSalida.getTime() - hEntrada.getTime()) / (1000 * 60 * 60);
 
         const diaSemana = fecha.getDay();
@@ -543,7 +543,7 @@ export class NominaService {
     if (dto.horaSalida) updateData.horaSalida = new Date(dto.horaSalida);
     if (dto.horaEntrada) updateData.horaEntrada = new Date(dto.horaEntrada);
     // Si se está cerrando el turno (COMPLETADO o FINALIZADO) y aún no tiene horaSalida, asignamos la hora actual
-    if ((dto.estado === 'COMPLETADO' || dto.estado === 'FINALIZADO') && !dto.horaSalida && !updateData.horaSalida) {
+    if (dto.estado === 'COMPLETADO' && !dto.horaSalida && !updateData.horaSalida) {
       updateData.horaSalida = new Date();
     }
 
@@ -761,12 +761,11 @@ export class NominaService {
     if (fechaDesde) fechaFiltro.gte = new Date(fechaDesde);
     if (fechaHasta) fechaFiltro.lte = new Date(fechaHasta);
 
-    const [turnos, descuentos] = await Promise.all([
+    const [todosLosTurnosCompletados, descuentos] = await Promise.all([
       this.prisma.turnos.findMany({
         where: {
           usuarioId,
-          estado: 'COMPLETADO',
-          ...(Object.keys(fechaFiltro).length ? { fecha: fechaFiltro } : {}),
+          estado: { in: ['COMPLETADO', 'FINALIZADO'] },
         },
         orderBy: { fecha: 'desc' },
       }),
@@ -778,6 +777,17 @@ export class NominaService {
         orderBy: { fecha: 'desc' },
       }),
     ]);
+
+    const turnosAnteriores = [];
+    const turnos = [];
+    
+    for (const t of todosLosTurnosCompletados) {
+      if (fechaDesde && new Date(t.fecha) < new Date(fechaDesde)) {
+        turnosAnteriores.push(t);
+      } else if (!fechaHasta || new Date(t.fecha) <= new Date(fechaHasta)) {
+        turnos.push(t);
+      }
+    }
 
     const totalBruto = turnos.reduce((sum: number, t: any) => sum + Number(t.valorTurno), 0);
     const totalDescuentos = descuentos.reduce((sum: number, d: any) => sum + (d.concepto === 'LLEGADA_TARDE' && d.estado === 'PENDIENTE' ? 0 : Number(d.valor)), 0);
@@ -796,6 +806,7 @@ export class NominaService {
         totalDescuentos,
         totalNeto,
         turnos,
+        turnosAnteriores,
         descuentos,
       },
     };
@@ -813,12 +824,21 @@ export class NominaService {
     const fechaFin = new Date(dto.fechaFin);
     fechaFin.setHours(23, 59, 59, 999);
 
-    // Obtener turnos completados en el período
+    // Obtener turnos completados en el período y los extra seleccionados
+    const extraTurnosIds = Array.isArray(dto.extraTurnosIds) ? dto.extraTurnosIds : [];
+    
     const turnos = await this.prisma.turnos.findMany({
       where: {
         usuarioId: dto.usuarioId,
-        estado: 'COMPLETADO',
-        fecha: { gte: fechaInicio, lte: fechaFin },
+        OR: [
+          {
+            estado: { in: ['COMPLETADO', 'FINALIZADO'] },
+            fecha: { gte: fechaInicio, lte: fechaFin },
+          },
+          {
+            IDturno: { in: extraTurnosIds }
+          }
+        ]
       },
     });
 
@@ -852,6 +872,22 @@ export class NominaService {
       },
       include: { usuario: { select: { nombre: true, cargo: true } } },
     });
+
+    // Marcar turnos como LIQUIDADO
+    if (turnos.length > 0) {
+      await this.prisma.turnos.updateMany({
+        where: { IDturno: { in: turnos.map((t: any) => t.IDturno) } },
+        data: { estado: 'LIQUIDADO' },
+      });
+    }
+
+    // Marcar descuentos como COBRADO
+    if (descuentos.length > 0) {
+      await this.prisma.descuentosEmpleado.updateMany({
+        where: { IDdescuento: { in: descuentos.map((d: any) => d.IDdescuento) } },
+        data: { estado: 'COBRADO' },
+      });
+    }
 
     // Emit websocket event to the specific user's room
     this.appGateway.server.to(`user_${dto.usuarioId}`).emit('nueva_liquidacion', {

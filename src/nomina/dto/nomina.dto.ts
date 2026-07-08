@@ -82,7 +82,7 @@ export class UpdateTurnoAdminDto {
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
-  @IsIn(['ACTIVO', 'COMPLETADO', 'FINALIZADO', 'ANULADO'])
+  @IsIn(['ACTIVO', 'COMPLETADO', 'FINALIZADO', 'ANULADO', 'LIQUIDADO'])
   estado?: string;
 
   @ApiPropertyOptional()
@@ -126,7 +126,7 @@ export class TurnosQueryDto {
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
-  @IsIn(['ACTIVO', 'COMPLETADO', 'ANULADO'])
+  @IsIn(['ACTIVO', 'COMPLETADO', 'ANULADO', 'LIQUIDADO'])
   estado?: string;
 
   @ApiPropertyOptional({ default: 1 })
