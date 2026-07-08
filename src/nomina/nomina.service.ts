@@ -747,6 +747,73 @@ export class NominaService {
   }
 
   // ─────────────────────────────────────────────
+  // LOTE (grupo de repartos)
+  // ─────────────────────────────────────────────
+
+  async getLote(loteId: string) {
+    const descuentos = await this.prisma.descuentosEmpleado.findMany({
+      where: { loteId },
+      include: { usuario: { select: { IDusuarios: true, nombre: true } } },
+      orderBy: { fecha: 'asc' },
+    });
+    if (descuentos.length === 0) throw new NotFoundException('Lote no encontrado');
+    return { success: true, data: descuentos };
+  }
+
+  async deleteLote(loteId: string) {
+    const result = await this.prisma.descuentosEmpleado.deleteMany({ where: { loteId } });
+    if (result.count === 0) throw new NotFoundException('Lote no encontrado');
+    return { success: true, message: `${result.count} descuentos eliminados del lote` };
+  }
+
+  async updateLote(loteId: string, dto: any, creadoPor: string) {
+    const { usuarioIds, montoTotal, concepto, descripcion, fecha } = dto;
+
+    if (!usuarioIds || usuarioIds.length === 0) {
+      throw new BadRequestException('Debes seleccionar al menos un empleado');
+    }
+
+    const usuarios = await this.prisma.usuarios.findMany({
+      where: { IDusuarios: { in: usuarioIds } },
+    });
+    if (usuarios.length !== usuarioIds.length) {
+      throw new BadRequestException('Uno o más empleados seleccionados no existen');
+    }
+
+    const montoIndividual = Math.round(Number(montoTotal) / usuarioIds.length);
+    const nombresTodos = usuarios.map((u: any) => u.nombre).join(', ');
+
+    // Build new description keeping the same format
+    let newDescripcion = descripcion;
+    // Strip old "repartido entre" and rebuild
+    const baseDesc = descripcion.replace(/\s*repartido entre:.*\)$/, ')').replace(/\)$/, '').trim();
+    newDescripcion = `${baseDesc} repartido entre: ${nombresTodos})`;
+
+    await this.prisma.$transaction([
+      // Delete old records
+      this.prisma.descuentosEmpleado.deleteMany({ where: { loteId } }),
+      // Create new records with the same loteId
+      ...usuarioIds.map((uid: string) =>
+        this.prisma.descuentosEmpleado.create({
+          data: {
+            usuarioId: uid,
+            loteId,
+            concepto: concepto || 'DESCUADRE_CAJA',
+            descripcion: newDescripcion,
+            valor: montoIndividual,
+            estado: 'PENDIENTE',
+            creadoPor,
+            fecha: fecha ? new Date(fecha) : new Date(),
+          },
+        })
+      ),
+    ]);
+
+    const updated = await this.getLote(loteId);
+    return updated;
+  }
+
+  // ─────────────────────────────────────────────
   // RESUMEN (para dashboard)
   // ─────────────────────────────────────────────
 

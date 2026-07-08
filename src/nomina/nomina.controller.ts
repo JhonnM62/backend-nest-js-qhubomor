@@ -226,6 +226,32 @@ export class NominaController {
     return this.nominaService.deleteDescuento(id);
   }
 
+  // ─── LOTE (grupo de descuentos del mismo reparto) ─────────────────────────
+
+  @Get('descuentos/lote/:loteId')
+  @UseGuards(RolesGuard)
+  @Roles(...ROLES_ADMIN)
+  @ApiOperation({ summary: '(Admin) Obtener todos los descuentos de un lote/reparto' })
+  getLote(@Param('loteId') loteId: string) {
+    return this.nominaService.getLote(loteId);
+  }
+
+  @Patch('descuentos/lote/:loteId')
+  @UseGuards(RolesGuard)
+  @Roles(...ROLES_ADMIN)
+  @ApiOperation({ summary: '(Admin) Editar un lote: cambia personas y/o monto. Recrea los registros.' })
+  updateLote(@Param('loteId') loteId: string, @Body() dto: any, @Request() req: any) {
+    return this.nominaService.updateLote(loteId, dto, req.user.id);
+  }
+
+  @Delete('descuentos/lote/:loteId')
+  @UseGuards(RolesGuard)
+  @Roles(...ROLES_ADMIN)
+  @ApiOperation({ summary: '(Admin) Eliminar todos los descuentos de un lote/reparto' })
+  deleteLote(@Param('loteId') loteId: string) {
+    return this.nominaService.deleteLote(loteId);
+  }
+
   // ─── RESUMEN ──────────────────────────────────────────────────────────────
 
   @Get('resumen/mio')
