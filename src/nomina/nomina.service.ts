@@ -850,8 +850,10 @@ export class NominaService {
       },
     });
 
+    const descuentosAplicados = descuentos.filter(d => !(d.concepto === 'LLEGADA_TARDE' && d.estado === 'PENDIENTE'));
+
     const totalBruto = turnos.reduce((sum: number, t: any) => sum + Number(t.valorTurno), 0);
-    const totalDescuentos = descuentos.reduce((sum: number, d: any) => sum + (d.concepto === 'LLEGADA_TARDE' && d.estado === 'PENDIENTE' ? 0 : Number(d.valor)), 0);
+    const totalDescuentos = descuentosAplicados.reduce((sum: number, d: any) => sum + Number(d.valor), 0);
     const totalNeto = totalBruto - totalDescuentos;
 
     const liquidacion = await this.prisma.liquidaciones.create({
@@ -867,7 +869,7 @@ export class NominaService {
         observaciones: dto.observaciones || null,
         creadoPor,
         turnosDetalle: turnos as any,
-        descuentosDetalle: descuentos as any,
+        descuentosDetalle: descuentosAplicados as any,
         firmaAdmin: dto.firmaAdmin || null,
       },
       include: { usuario: { select: { nombre: true, cargo: true } } },
@@ -882,9 +884,9 @@ export class NominaService {
     }
 
     // Marcar descuentos como COBRADO
-    if (descuentos.length > 0) {
+    if (descuentosAplicados.length > 0) {
       await this.prisma.descuentosEmpleado.updateMany({
-        where: { IDdescuento: { in: descuentos.map((d: any) => d.IDdescuento) } },
+        where: { IDdescuento: { in: descuentosAplicados.map((d: any) => d.IDdescuento) } },
         data: { estado: 'COBRADO' },
       });
     }
