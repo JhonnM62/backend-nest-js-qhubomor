@@ -689,6 +689,8 @@ model Liquidaciones {
   estado            String   @default("PENDIENTE") @map("Estado")
   observaciones     String?  @map("Observaciones")
   pdfUrl            String?  @map("PdfUrl")
+  firmaAdmin        String?  @map("FirmaAdmin") @db.Text
+  firmaEmpleado     String?  @map("FirmaEmpleado") @db.Text
   creadoPor         String   @map("CreadoPor")
   turnosDetalle     Json?    @map("TurnosDetalle")
   descuentosDetalle Json?    @map("DescuentosDetalle")

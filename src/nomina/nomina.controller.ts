@@ -13,7 +13,7 @@ import { NominaService } from './nomina.service';
 import {
   RegistrarEntradaDto, RegistrarSalidaDto, UpdateTurnoAdminDto, TurnosQueryDto,
   CreateDescuentoDto, RepartirDescuentoDto, UpdateDescuentoDto, DescuentosQueryDto,
-  LiquidarEmpleadoDto
+  LiquidarEmpleadoDto, CreateTurnoManualDto, FirmarLiquidacionDto
 } from './dto/nomina.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
@@ -145,6 +145,14 @@ export class NominaController {
     return this.nominaService.updateTurnoAdmin(id, dto);
   }
 
+  @Post('turno/manual')
+  @UseGuards(RolesGuard)
+  @Roles(...ROLES_ADMIN)
+  @ApiOperation({ summary: '(Admin) Crear turnos manualmente en días sin registro' })
+  crearTurnoManual(@Body() dto: CreateTurnoManualDto) {
+    return this.nominaService.crearTurnoManual(dto);
+  }
+
   @Post('llegadas-tarde/aplicar')
   @UseGuards(RolesGuard)
   @Roles(...ROLES_ADMIN)
@@ -255,9 +263,15 @@ export class NominaController {
   @Post('liquidar')
   @UseGuards(RolesGuard)
   @Roles(...ROLES_ADMIN)
-  @ApiOperation({ summary: '(Admin) Generar liquidación para un empleado en un período' })
-  liquidar(@Body() dto: LiquidarEmpleadoDto, @Request() req: any) {
-    return this.nominaService.liquidarEmpleado(dto, req.user.nombre);
+  @ApiOperation({ summary: '(Admin) Liquidar empleado y opcionalmente guardar firma' })
+  liquidarEmpleado(@Body() body: any, @Request() req: any) {
+    return this.nominaService.liquidarEmpleado(body, req.user.id);
+  }
+
+  @Post('liquidar/:id/firmar')
+  @ApiOperation({ summary: 'Empleado firma y acepta la liquidación' })
+  firmarLiquidacionEmpleado(@Param('id') id: string, @Body() dto: FirmarLiquidacionDto) {
+    return this.nominaService.firmarLiquidacionEmpleado(id, dto.firma);
   }
 
   @Get('liquidaciones')

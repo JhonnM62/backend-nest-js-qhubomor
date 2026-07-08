@@ -1,12 +1,11 @@
-import {
-  Injectable, NotFoundException, BadRequestException, ForbiddenException
-} from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, ForbiddenException, Inject, forwardRef } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
+import { AppGateway } from '../websocket/app.gateway';
 import {
   RegistrarEntradaDto, RegistrarSalidaDto, UpdateTurnoAdminDto, TurnosQueryDto,
   CreateDescuentoDto, RepartirDescuentoDto, UpdateDescuentoDto, DescuentosQueryDto,
-  LiquidarEmpleadoDto
+  LiquidarEmpleadoDto, CreateTurnoManualDto
 } from './dto/nomina.dto';
 import { Prisma } from '@prisma/client';
 import * as path from 'path';
@@ -55,8 +54,9 @@ function calcularDistancia(lat1: number, lon1: number, lat2: number, lon2: numbe
 @Injectable()
 export class NominaService {
   constructor(
-    private prisma: PrismaService,
-    private notificationsService: NotificationsService
+    private readonly prisma: PrismaService,
+    private readonly notificationsService: NotificationsService,
+    @Inject(forwardRef(() => AppGateway)) private readonly appGateway: AppGateway
   ) {}
 
   // ─────────────────────────────────────────────
@@ -467,6 +467,76 @@ export class NominaService {
     return turno;
   }
 
+  async crearTurnoManual(dto: CreateTurnoManualDto) {
+    const usuario = await this.prisma.usuarios.findUnique({
+      where: { IDusuarios: dto.usuarioId },
+      include: { cargo: true }
+    });
+    if (!usuario) throw new NotFoundException('Usuario no encontrado');
+
+    // Obtener la ubicación por defecto del negocio
+    const config = await this.prisma.configuracionNegocio.findFirst();
+    const latitud = Number(config?.latitudNegocio) || 0;
+    const longitud = Number(config?.longitudNegocio) || 0;
+
+    const turnosCreados = [];
+
+    for (const fechaStr of dto.fechas) {
+      // Create local date around noon to avoid timezone shift on the date part
+      const [y, m, d] = fechaStr.split('-');
+      const fecha = new Date(Number(y), Number(m) - 1, Number(d), 12, 0, 0);
+
+      // Parse times
+      const parseTime = (timeStr: string, dateObj: Date) => {
+        // timeStr like "08:00 AM" or "14:30"
+        const [time, modifier] = timeStr.split(' ');
+        let [hours, minutes] = time.split(':');
+        let h = parseInt(hours, 10);
+        if (modifier === 'PM' && h < 12) h += 12;
+        if (modifier === 'AM' && h === 12) h = 0;
+        const dt = new Date(dateObj);
+        dt.setHours(h, parseInt(minutes, 10), 0, 0);
+        return dt;
+      };
+
+      const hEntrada = parseTime(dto.horaEntrada, fecha);
+      let hSalida = null;
+      let estado = 'ACTIVO';
+      let valorTurno = 0;
+
+      if (dto.horaSalida) {
+        hSalida = parseTime(dto.horaSalida, fecha);
+        estado = 'FINALIZADO';
+        const horasTrabajadas = (hSalida.getTime() - hEntrada.getTime()) / (1000 * 60 * 60);
+
+        const diaSemana = fecha.getDay();
+        const campoDia = TARIFA_POR_DIA[diaSemana];
+        valorTurno = Number(usuario.cargo?.[campoDia] ?? 0);
+      }
+
+      const t = await this.prisma.turnos.create({
+        data: {
+          usuarioId: dto.usuarioId,
+          fecha,
+          horaEntrada: hEntrada,
+          horaSalida: hSalida,
+          estado,
+          valorTurno,
+          latitud,
+          longitud,
+          ceno: false, // Default no cenó
+        }
+      });
+      turnosCreados.push(t);
+    }
+
+    return {
+      success: true,
+      data: turnosCreados,
+      mensaje: `Se crearon ${turnosCreados.length} turnos exitosamente.`
+    };
+  }
+
   async updateTurnoAdmin(turnoId: string, dto: UpdateTurnoAdminDto) {
     const turno = await this.getTurno(turnoId);
     const updateData: any = { ...dto };
@@ -731,7 +801,7 @@ export class NominaService {
   // LIQUIDACIONES
   // ─────────────────────────────────────────────
 
-  async liquidarEmpleado(dto: LiquidarEmpleadoDto, creadoPor: string) {
+  async liquidarEmpleado(dto: any, creadoPor: string) {
     const usuario = await this.prisma.usuarios.findUnique({ where: { IDusuarios: dto.usuarioId } });
     if (!usuario) throw new NotFoundException('Empleado no encontrado');
 
@@ -769,19 +839,49 @@ export class NominaService {
         totalBruto,
         totalDescuentos,
         totalNeto,
-        estado: 'PENDIENTE',
+        estado: 'ESPERANDO_FIRMA',
         observaciones: dto.observaciones || null,
         creadoPor,
         turnosDetalle: turnos as any,
         descuentosDetalle: descuentos as any,
+        firmaAdmin: dto.firmaAdmin || null,
       },
       include: { usuario: { select: { nombre: true, cargo: true } } },
+    });
+
+    // Emit websocket event to the specific user's room
+    this.appGateway.server.to(`user_${dto.usuarioId}`).emit('nueva_liquidacion', {
+      liquidacionId: liquidacion.IDliquidacion,
+      mensaje: 'Tienes una nueva liquidación pendiente de firma',
     });
 
     return {
       success: true,
       data: liquidacion,
       mensaje: `Liquidación generada: $${totalNeto.toLocaleString('es-CO')} a pagar a ${usuario.nombre}`,
+    };
+  }
+
+  async firmarLiquidacionEmpleado(id: string, firma: string) {
+    const liquidacion = await this.prisma.liquidaciones.findUnique({ where: { IDliquidacion: id } });
+    if (!liquidacion) throw new NotFoundException('Liquidación no encontrada');
+
+    if (liquidacion.estado === 'FIRMADO') {
+      throw new BadRequestException('Esta liquidación ya ha sido firmada por el empleado');
+    }
+
+    const updated = await this.prisma.liquidaciones.update({
+      where: { IDliquidacion: id },
+      data: {
+        firmaEmpleado: firma,
+        estado: 'FIRMADO',
+      },
+    });
+
+    return {
+      success: true,
+      data: updated,
+      mensaje: 'Liquidación firmada exitosamente',
     };
   }
 

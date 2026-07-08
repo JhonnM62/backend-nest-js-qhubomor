@@ -24,6 +24,31 @@ export class RegistrarEntradaDto {
   observacion?: string;
 }
 
+export class CreateTurnoManualDto {
+  @IsNotEmpty()
+  @IsString()
+  usuarioId: string;
+
+  @IsArray()
+  @ArrayMinSize(1)
+  @IsString({ each: true })
+  fechas: string[];
+
+  @IsNotEmpty()
+  @IsString()
+  horaEntrada: string;
+
+  @IsOptional()
+  @IsString()
+  horaSalida?: string;
+}
+
+export class FirmarLiquidacionDto {
+  @IsNotEmpty()
+  @IsString()
+  firma: string;
+}
+
 export class RegistrarSalidaDto {
   @ApiProperty({ description: '¿Cenó el empleado durante este turno? (OBLIGATORIO)' })
   @IsNotEmpty({ message: 'Debes indicar si el empleado cenó o no. Este campo es obligatorio.' })
