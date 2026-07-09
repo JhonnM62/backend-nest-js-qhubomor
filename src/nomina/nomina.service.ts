@@ -929,6 +929,7 @@ export class NominaService {
         usuarioId: dto.usuarioId,
         estado: { not: 'COBRADO' },
       },
+      orderBy: { fecha: 'desc' }
     });
 
     const descuentosAplicados = descuentos.filter(d => !(d.concepto === 'LLEGADA_TARDE' && d.estado === 'PENDIENTE'));
@@ -1051,7 +1052,7 @@ export class NominaService {
       this.prisma.liquidaciones.findMany({
         where, skip, take: limit,
         orderBy: { createdAt: 'desc' },
-        include: { usuario: { select: { nombre: true, cargo: { select: { nombre: true } } } } },
+        include: { usuario: { select: { nombre: true, cargo: true } } },
       }),
       this.prisma.liquidaciones.count({ where }),
     ]);
