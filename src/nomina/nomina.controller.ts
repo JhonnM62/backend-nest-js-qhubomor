@@ -325,4 +325,12 @@ export class NominaController {
   marcarPagada(@Param('id') id: string) {
     return this.nominaService.marcarLiquidacionPagada(id);
   }
+
+  @Post('liquidaciones/:id/reenviar-notificacion')
+  @UseGuards(RolesGuard)
+  @Roles(...ROLES_ADMIN)
+  @ApiOperation({ summary: '(Admin) Reenviar notificación de firma al empleado' })
+  reenviarNotificacionFirma(@Param('id') id: string) {
+    return this.nominaService.reenviarNotificacionFirma(id);
+  }
 }

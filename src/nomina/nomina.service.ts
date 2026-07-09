@@ -853,6 +853,7 @@ export class NominaService {
       this.prisma.descuentosEmpleado.findMany({
         where: {
           usuarioId,
+          estado: { not: 'COBRADO' },
           ...(Object.keys(fechaFiltro).length ? { fecha: fechaFiltro } : {}),
         },
         orderBy: { fecha: 'desc' },
@@ -983,6 +984,23 @@ export class NominaService {
       data: liquidacion,
       mensaje: `Liquidación generada: $${totalNeto.toLocaleString('es-CO')} a pagar a ${usuario.nombre}`,
     };
+  }
+
+  async reenviarNotificacionFirma(id: string) {
+    const liquidacion = await this.prisma.liquidaciones.findUnique({ where: { IDliquidacion: id } });
+    if (!liquidacion) throw new NotFoundException('Liquidación no encontrada');
+    
+    if (liquidacion.estado !== 'ESPERANDO_FIRMA') {
+      throw new BadRequestException('Esta liquidación no está esperando firma.');
+    }
+
+    // Emitir el evento de websocket al empleado
+    this.appGateway.server.to(`user_${liquidacion.usuarioId}`).emit('nueva_liquidacion', {
+      liquidacionId: liquidacion.IDliquidacion,
+      mensaje: 'Tienes una nueva liquidación pendiente de firma',
+    });
+
+    return { success: true, message: 'Notificación enviada' };
   }
 
   async firmarLiquidacionEmpleado(id: string, firma: string) {
