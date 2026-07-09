@@ -854,7 +854,6 @@ export class NominaService {
         where: {
           usuarioId,
           estado: { not: 'COBRADO' },
-          ...(Object.keys(fechaFiltro).length ? { fecha: fechaFiltro } : {}),
         },
         orderBy: { fecha: 'desc' },
       }),
@@ -924,11 +923,11 @@ export class NominaService {
       },
     });
 
-    // Obtener descuentos en el período
+    // Obtener todos los descuentos pendientes (no cobrados) sin importar la fecha
     const descuentos = await this.prisma.descuentosEmpleado.findMany({
       where: {
         usuarioId: dto.usuarioId,
-        fecha: { gte: fechaInicio, lte: fechaFin },
+        estado: { not: 'COBRADO' },
       },
     });
 
@@ -1023,6 +1022,24 @@ export class NominaService {
       success: true,
       data: updated,
       mensaje: 'Liquidación firmada exitosamente',
+    };
+  }
+
+  async firmarLiquidacionAdmin(id: string, firma: string) {
+    const liquidacion = await this.prisma.liquidaciones.findUnique({ where: { IDliquidacion: id } });
+    if (!liquidacion) throw new NotFoundException('Liquidación no encontrada');
+
+    const updated = await this.prisma.liquidaciones.update({
+      where: { IDliquidacion: id },
+      data: {
+        firmaAdmin: firma,
+      },
+    });
+
+    return {
+      success: true,
+      data: updated,
+      mensaje: 'Firma de administrador guardada exitosamente',
     };
   }
 
