@@ -1044,6 +1044,47 @@ export class NominaService {
     };
   }
 
+  async agregarDescuentoExtraLiquidacion(id: string, dto: { concepto: string, descripcion: string, valor: number }, adminId: string) {
+    const liquidacion = await this.prisma.liquidaciones.findUnique({ where: { IDliquidacion: id } });
+    if (!liquidacion) throw new NotFoundException('Liquidación no encontrada');
+    if (liquidacion.estado !== 'ESPERANDO_FIRMA') throw new BadRequestException('Solo se pueden modificar liquidaciones en espera de firma');
+
+    const descuento = await this.prisma.descuentosEmpleado.create({
+      data: {
+        usuarioId: liquidacion.usuarioId,
+        concepto: dto.concepto,
+        descripcion: dto.descripcion,
+        valor: dto.valor,
+        fecha: new Date(),
+        estado: 'COBRADO',
+        creadoPor: adminId,
+      }
+    });
+
+    const currentDescuentos = (liquidacion.descuentosDetalle as any[]) || [];
+    const updatedDescuentos = [descuento, ...currentDescuentos].sort((a,b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime());
+
+    const additionalDeduction = Number(dto.valor);
+    const newTotalDescuentos = Number(liquidacion.totalDescuentos) + additionalDeduction;
+    const newTotalNeto = Number(liquidacion.totalBruto) - newTotalDescuentos;
+
+    const updated = await this.prisma.liquidaciones.update({
+      where: { IDliquidacion: id },
+      data: {
+        descuentosDetalle: updatedDescuentos,
+        totalDescuentos: newTotalDescuentos,
+        totalNeto: newTotalNeto,
+      },
+      include: { usuario: { select: { nombre: true, cargo: true } } }
+    });
+
+    return {
+      success: true,
+      data: updated,
+      mensaje: 'Descuento extra agregado correctamente',
+    };
+  }
+
   async getLiquidaciones(usuarioId?: string, page = 1, limit = 20) {
     const skip = (page - 1) * limit;
     const where: Prisma.LiquidacionesWhereInput = usuarioId ? { usuarioId } : {};

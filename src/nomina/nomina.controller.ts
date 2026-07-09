@@ -308,6 +308,14 @@ export class NominaController {
     return this.nominaService.firmarLiquidacionAdmin(id, dto.firma);
   }
 
+  @Post('liquidar/:id/descuento-extra')
+  @UseGuards(RolesGuard)
+  @Roles(...ROLES_ADMIN)
+  @ApiOperation({ summary: '(Admin) Agregar descuento extra a una liquidación en espera' })
+  agregarDescuentoExtraLiquidacion(@Param('id') id: string, @Body() dto: { concepto: string, descripcion: string, valor: number }, @Request() req: any) {
+    return this.nominaService.agregarDescuentoExtraLiquidacion(id, dto, req.user.id);
+  }
+
   @Get('liquidaciones')
   @UseGuards(RolesGuard)
   @Roles(...ROLES_ADMIN)
