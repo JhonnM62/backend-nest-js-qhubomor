@@ -162,6 +162,11 @@ export class UsuarioQueryDto extends PaginationDto {
   @IsOptional()
   @IsString()
   buscar?: string;
+
+  @ApiPropertyOptional({ description: 'Si es true, devuelve solo usuarios inactivos' })
+  @IsOptional()
+  @IsBoolean()
+  soloInactivos?: boolean;
 }
 
 export const ROLES_DISPONIBLES = [

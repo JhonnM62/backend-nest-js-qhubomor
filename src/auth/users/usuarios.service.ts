@@ -78,7 +78,11 @@ export class UsuariosService {
       ];
     }
 
-    where.isActive = true;
+    if (query.soloInactivos === true || String(query.soloInactivos) === 'true') {
+      where.isActive = false;
+    } else {
+      where.isActive = true;
+    }
 
     const [data, total] = await Promise.all([
       this.prisma.usuarios.findMany({
