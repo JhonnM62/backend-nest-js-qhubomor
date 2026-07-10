@@ -1186,6 +1186,7 @@ export class NominaService {
 
     let actualizados = 0;
     let llegadasTardeCreadasOActualizadas = 0;
+    let cenasCalculadas = 0;
 
     for (const turno of turnosPendientes) {
       const entrada = new Date(turno.horaEntrada);
@@ -1332,11 +1333,51 @@ export class NominaService {
           llegadasTardeCreadasOActualizadas++;
         }
       }
+
+      // ─────────────────────────────────────────────
+      // RECALCULAR CENA
+      // ─────────────────────────────────────────────
+      if (turno.ceno) {
+        const descuentoCena = Number(usuario.cargo?.descuentoCena || 0);
+        if (descuentoCena > 0) {
+          const existeCena = await this.prisma.descuentosEmpleado.findFirst({
+            where: { turnoId: turno.IDturno, concepto: 'CENA' }
+          });
+          if (!existeCena) {
+            const fechaStr = turno.fecha.toLocaleDateString('es-CO', { timeZone: 'UTC', day: '2-digit', month: '2-digit', year: 'numeric' });
+            await this.prisma.descuentosEmpleado.create({
+              data: {
+                usuarioId: turno.usuarioId,
+                turnoId: turno.IDturno,
+                concepto: 'CENA',
+                descripcion: `Cena del turno del ${fechaStr}`,
+                valor: descuentoCena,
+                estado: 'APROBADO', // Las cenas suelen estar aprobadas por defecto
+                creadoPor: 'Sistema (recalcular)',
+                fecha: turno.fecha,
+              },
+            });
+            cenasCalculadas++;
+          } else if (Number(existeCena.valor) !== descuentoCena) {
+             await this.prisma.descuentosEmpleado.update({
+               where: { IDdescuento: existeCena.IDdescuento },
+               data: { valor: descuentoCena }
+             });
+             cenasCalculadas++;
+          }
+        }
+      } else {
+        // Si el turno indica que NO cenó, limpiamos posibles descuentos de CENA residuales
+        const deleted = await this.prisma.descuentosEmpleado.deleteMany({
+          where: { turnoId: turno.IDturno, concepto: 'CENA' }
+        });
+        if (deleted.count > 0) cenasCalculadas++;
+      }
     }
 
     return { 
       success: true, 
-      mensaje: `Se recalcularon ${actualizados} valores de turno y se evaluaron ${llegadasTardeCreadasOActualizadas} nuevas llegadas tarde.` 
+      mensaje: `Se recalcularon ${actualizados} valores de turno, ${llegadasTardeCreadasOActualizadas} llegadas tarde y ${cenasCalculadas} cenas.` 
     };
   }
 }
