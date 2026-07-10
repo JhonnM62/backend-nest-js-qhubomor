@@ -303,9 +303,17 @@ export class NominaController {
   @Post('liquidar/:id/firmar-admin')
   @UseGuards(RolesGuard)
   @Roles(...ROLES_ADMIN)
-  @ApiOperation({ summary: '(Admin) Guardar firma faltante del administrador en liquidación' })
+  @ApiOperation({ summary: '(Admin) Administrador firma una liquidación generada' })
   firmarLiquidacionAdmin(@Param('id') id: string, @Body() dto: FirmarLiquidacionDto) {
     return this.nominaService.firmarLiquidacionAdmin(id, dto.firma);
+  }
+
+  @Delete('liquidar/:id')
+  @UseGuards(RolesGuard)
+  @Roles(...ROLES_ADMIN)
+  @ApiOperation({ summary: '(Admin) Deshacer una liquidación' })
+  deshacerLiquidacion(@Param('id') id: string) {
+    return this.nominaService.deshacerLiquidacion(id);
   }
 
   @Post('liquidar/:id/descuento-extra')

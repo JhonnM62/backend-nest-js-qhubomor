@@ -1003,6 +1003,39 @@ export class NominaService {
     return { success: true, message: 'Notificación enviada' };
   }
 
+  async deshacerLiquidacion(id: string) {
+    const liquidacion = await this.prisma.liquidaciones.findUnique({
+      where: { IDliquidacion: id }
+    });
+    if (!liquidacion) throw new NotFoundException('Liquidación no encontrada');
+
+    const turnosDetalle: any = liquidacion.turnosDetalle || [];
+    const descuentosDetalle: any = liquidacion.descuentosDetalle || [];
+
+    const turnoIds = turnosDetalle.map((t: any) => t.IDturno);
+    const descuentoIds = descuentosDetalle.map((d: any) => d.IDdescuento);
+
+    if (turnoIds.length > 0) {
+      await this.prisma.turnos.updateMany({
+        where: { IDturno: { in: turnoIds } },
+        data: { estado: 'COMPLETADO' }
+      });
+    }
+
+    if (descuentoIds.length > 0) {
+      await this.prisma.descuentosEmpleado.updateMany({
+        where: { IDdescuento: { in: descuentoIds } },
+        data: { estado: 'APROBADO' }
+      });
+    }
+
+    await this.prisma.liquidaciones.delete({
+      where: { IDliquidacion: id }
+    });
+
+    return { success: true, mensaje: 'Liquidación eliminada y turnos restaurados correctamente.' };
+  }
+
   async firmarLiquidacionEmpleado(id: string, firma: string) {
     const liquidacion = await this.prisma.liquidaciones.findUnique({ where: { IDliquidacion: id } });
     if (!liquidacion) throw new NotFoundException('Liquidación no encontrada');
