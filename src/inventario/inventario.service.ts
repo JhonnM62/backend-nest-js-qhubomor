@@ -273,6 +273,7 @@ export class InventarioService {
     const item = await this.prisma.orderinventario.create({
       data: {
         ...createOrderDto,
+        nombreDelAlimento: insumoActualizado ? insumoActualizado.nombre : createOrderDto.nombreDelAlimento,
         fechaYHora: new Date(),
         disponible: 'si',
         seCompro: 'no',

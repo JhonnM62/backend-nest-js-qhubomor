@@ -502,18 +502,34 @@ export class AgentToolsService {
           const esSalida = tipoStr.includes('salida') || tipoStr.includes('gasto') || tipoStr.includes('consumo');
           
           let tipoReporte = 'ambos';
+          let idsMatch: string[] = [];
+          if (args.insumo) {
+            const insumosEncontrados = await this.prisma.insumos.findMany({
+              where: { nombre: { contains: args.insumo, mode: 'insensitive' } },
+              select: { IDalimentos: true }
+            });
+            idsMatch = insumosEncontrados.map(i => i.IDalimentos);
+          }
+
           const movimientos = await this.prisma.orderinventario.findMany({
             where: {
               fechaYHora: { gte: startDate, lte: endDate },
-              ...(args.insumo ? { nombreDelAlimento: { contains: args.insumo, mode: 'insensitive' } } : {})
+              ...(args.insumo ? { 
+                OR: [
+                  { nombreDelAlimento: { contains: args.insumo, mode: 'insensitive' } },
+                  ...(idsMatch.length > 0 ? [{ nombreDelAlimento: { in: idsMatch } }] : [])
+                ]
+              } : {})
             },
             select: { 
               nombreDelAlimento: true, 
               cantidad: true, 
               seCompro: true,
               observacion: true,
+              fechaYHora: true,
               inventario: { select: { tipo: true } }
-            }
+            },
+            orderBy: { fechaYHora: 'desc' }
           });
 
           // Group by insumo
@@ -591,6 +607,36 @@ export class AgentToolsService {
                  (tipoReporte === 'ambos' && (totalEntradas > 0 || totalSalidas > 0))) {
                 resumen += text;
              }
+          }
+
+          if (args.insumo && movimientos.length > 0) {
+            resumen += `\n\n📋 LISTADO DETALLADO DE MOVIMIENTOS PARA '${args.insumo}':\n`;
+            // Limit to 50 to avoid hitting LLM context limits
+            const limit = Math.min(movimientos.length, 50);
+            for (let i = 0; i < limit; i++) {
+              const mov = movimientos[i];
+              const fechaStr = mov.fechaYHora ? mov.fechaYHora.toISOString().replace('T', ' ').substring(0, 16) : 'Fecha desconocida';
+              const tipoInv = (mov.inventario?.tipo || '').toUpperCase();
+              
+              let esEntrada = false;
+              let esSalida = false;
+              if (mov.seCompro === 'Si' || tipoInv.includes('ENTRADA')) {
+                esEntrada = true;
+              } else if (mov.seCompro === 'No' || tipoInv.includes('SALIDA')) {
+                esSalida = true;
+              }
+              
+              const obsStr = mov.observacion ? ` | Nota: ${mov.observacion}` : '';
+              
+              if (esEntrada && (tipoReporte === 'entradas' || tipoReporte === 'ambos')) {
+                resumen += ` [${fechaStr}] 🛒 Entrada: ${mov.cantidad}${obsStr}\n`;
+              } else if (esSalida && (tipoReporte === 'salidas' || tipoReporte === 'ambos')) {
+                resumen += ` [${fechaStr}] 📦 Salida: ${mov.cantidad}${obsStr}\n`;
+              }
+            }
+            if (movimientos.length > 50) {
+              resumen += `\n(Se muestran los primeros 50 movimientos de un total de ${movimientos.length})\n`;
+            }
           }
           
           return resumen;
