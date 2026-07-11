@@ -466,22 +466,27 @@ export class AgentToolsService {
     return tool(
       async (args) => {
         try {
-          // Parse dates correctly
-          const parseDate = (dateStr: string) => {
-            const str = dateStr.toLowerCase();
+          const parseDate = (dateStr: string | undefined, defaultOffsetDays: number) => {
             const d = new Date();
-            d.setHours(d.getHours() - 5);
+            d.setHours(d.getHours() - 5); // Adjust to local timezone
+            if (!dateStr) {
+              d.setDate(d.getDate() - defaultOffsetDays);
+              return d.toISOString().split('T')[0];
+            }
+            const str = dateStr.toLowerCase();
             if (str === 'hoy') return d.toISOString().split('T')[0];
             if (str === 'ayer') {
               d.setDate(d.getDate() - 1);
               return d.toISOString().split('T')[0];
             }
             if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return str;
+            // Fallback
+            d.setDate(d.getDate() - defaultOffsetDays);
             return d.toISOString().split('T')[0];
           };
 
-          const fInicio = parseDate(args.fechaInicio);
-          const fFin = parseDate(args.fechaFin);
+          const fInicio = parseDate(args.fechaInicio, 30); // Default to 30 days ago if missing
+          const fFin = parseDate(args.fechaFin, 0); // Default to today if missing
 
           const startDate = new Date(`${fInicio}T05:00:00.000Z`);
           const nextDay = new Date(`${fFin}T05:00:00.000Z`);
@@ -492,12 +497,18 @@ export class AgentToolsService {
             fechaYHora: { gte: startDate, lte: endDate }
           };
 
-          if (args.tipoMovimiento === 'entradas') {
+          const tipoStr = (args.tipoMovimiento || '').toLowerCase();
+          const esEntrada = tipoStr.includes('entrada') || tipoStr.includes('compra');
+          const esSalida = tipoStr.includes('salida') || tipoStr.includes('gasto') || tipoStr.includes('consumo');
+          
+          let tipoReporte = 'ambos';
+          if (esEntrada && !esSalida) {
             whereClause.seCompro = 'Si';
-          } else if (args.tipoMovimiento === 'salidas') {
+            tipoReporte = 'entradas';
+          } else if (esSalida && !esEntrada) {
             whereClause.seCompro = 'No';
+            tipoReporte = 'salidas';
           } else {
-            // 'ambos' includes both 'Si' and 'No' (or null if there are any old ones)
             whereClause.seCompro = { in: ['Si', 'No'] }; 
           }
 
@@ -528,20 +539,20 @@ export class AgentToolsService {
           }
 
           if (totales.size === 0) {
-             return `No se encontraron registros de ${args.tipoMovimiento}${args.insumo ? ` para '${args.insumo}'` : ''} entre el ${args.fechaInicio} y el ${args.fechaFin}.`;
+             return `No se encontraron registros de ${tipoReporte}${args.insumo ? ` para '${args.insumo}'` : ''} entre el ${fInicio} y el ${fFin}.`;
           }
 
-          let resumen = `Resumen de ${args.tipoMovimiento}${args.insumo ? ` para '${args.insumo}'` : ''} (${args.fechaInicio} a ${args.fechaFin}):\n\n`;
+          let resumen = `Resumen de ${tipoReporte}${args.insumo ? ` para '${args.insumo}'` : ''} (${fInicio} a ${fFin}):\n\n`;
           
           // Sort by name for consistency
           const sortedKeys = Array.from(totales.keys()).sort();
           for (const key of sortedKeys) {
              const { entradas, salidas } = totales.get(key)!;
-             if (args.tipoMovimiento === 'entradas' && entradas > 0) {
+             if (tipoReporte === 'entradas' && entradas > 0) {
                resumen += `- ${key}: ${entradas} comprados/ingresados\n`;
-             } else if (args.tipoMovimiento === 'salidas' && salidas > 0) {
+             } else if (tipoReporte === 'salidas' && salidas > 0) {
                resumen += `- ${key}: ${salidas} consumidos/gastados\n`;
-             } else if (args.tipoMovimiento === 'ambos') {
+             } else if (tipoReporte === 'ambos') {
                resumen += `- ${key}: Entradas: ${entradas} | Salidas: ${salidas}\n`;
              }
           }
@@ -556,9 +567,9 @@ export class AgentToolsService {
         name: 'consultar_consumo_inventario',
         description: 'Consulta los reportes de entradas (compras de insumos) y salidas (consumos/gastos de insumos) en un periodo de tiempo. Útil para "cuánto se compró" o "cuánto se consumió" de un insumo.',
         schema: z.object({
-          fechaInicio: z.string().describe('Fecha de inicio (YYYY-MM-DD)'),
-          fechaFin: z.string().describe('Fecha de fin (YYYY-MM-DD)'),
-          tipoMovimiento: z.enum(['entradas', 'salidas', 'ambos']).describe('Si el usuario quiere saber compras usa "entradas", si quiere saber consumos usa "salidas".'),
+          fechaInicio: z.string().optional().describe('Fecha de inicio (YYYY-MM-DD). Si no se provee, asume hace 30 días.'),
+          fechaFin: z.string().optional().describe('Fecha de fin (YYYY-MM-DD). Si no se provee, asume hoy.'),
+          tipoMovimiento: z.string().optional().describe('Usa palabras clave como "entradas", "compras", "salidas", "gastos", "ambos".'),
           insumo: z.string().optional().describe('Nombre del insumo si se quiere filtrar uno específico (opcional)')
         }),
       }
