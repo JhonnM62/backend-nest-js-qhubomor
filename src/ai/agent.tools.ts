@@ -502,23 +502,17 @@ export class AgentToolsService {
           const esSalida = tipoStr.includes('salida') || tipoStr.includes('gasto') || tipoStr.includes('consumo');
           
           let tipoReporte = 'ambos';
-          if (esEntrada && !esSalida) {
-            whereClause.seCompro = 'Si';
-            tipoReporte = 'entradas';
-          } else if (esSalida && !esEntrada) {
-            whereClause.seCompro = 'No';
-            tipoReporte = 'salidas';
-          } else {
-            whereClause.seCompro = { in: ['Si', 'No'] }; 
-          }
-
-          if (args.insumo) {
-            whereClause.nombreDelAlimento = { contains: args.insumo, mode: 'insensitive' };
-          }
-
           const movimientos = await this.prisma.orderinventario.findMany({
-            where: whereClause,
-            select: { nombreDelAlimento: true, cantidad: true, seCompro: true }
+            where: {
+              fechaYHora: { gte: startDate, lte: endDate },
+              ...(args.insumo ? { nombreDelAlimento: { contains: args.insumo, mode: 'insensitive' } } : {})
+            },
+            select: { 
+              nombreDelAlimento: true, 
+              cantidad: true, 
+              seCompro: true,
+              inventario: { select: { tipo: true } }
+            }
           });
 
           // Group by insumo
@@ -527,15 +521,26 @@ export class AgentToolsService {
           for (const mov of movimientos) {
             const nombre = mov.nombreDelAlimento || 'Desconocido';
             const cantidad = Number(mov.cantidad) || 0;
-            const esEntrada = mov.seCompro === 'Si';
+            
+            const tipoInv = (mov.inventario?.tipo || '').toUpperCase();
+            let movEsEntrada = false;
+            let movEsSalida = false;
+            
+            if (mov.seCompro === 'Si') {
+              movEsEntrada = true;
+            } else if (tipoInv.includes('ENTRADA')) {
+              movEsEntrada = true;
+            } else if (mov.seCompro === 'No' && (!tipoInv || tipoInv.includes('SALIDA'))) {
+              movEsSalida = true;
+            }
             
             if (!totales.has(nombre)) {
               totales.set(nombre, { entradas: 0, salidas: 0 });
             }
             
             const current = totales.get(nombre)!;
-            if (esEntrada) current.entradas += cantidad;
-            else current.salidas += cantidad;
+            if (movEsEntrada) current.entradas += cantidad;
+            if (movEsSalida) current.salidas += cantidad;
           }
 
           if (totales.size === 0) {
