@@ -29,7 +29,8 @@ export class AgentToolsService {
       this.buscarClienteTool(),
       this.analizarMovimientosInsumosTool(),
       this.consultarDescuadresCajaTool(),
-      this.aprenderReglaTool()
+      this.aprenderReglaTool(),
+      this.consultarConsumoInventarioTool()
     ];
   }
 
@@ -235,69 +236,57 @@ export class AgentToolsService {
           nextDay.setDate(nextDay.getDate() + 1);
           const endDate = new Date(nextDay.getTime() - 1);
           
-          const whereClause: any = {
-            fecha: {
-              gte: startDate,
-              lte: endDate
-            },
-            venta: {
+          let ventasQuery: any = {
+            where: {
+              fecha: { gte: startDate, lte: endDate },
               estado: { in: ['PAGADO', 'ENTREGADO'] }
+            },
+            include: {
+              ordenVentas: true
             }
           };
 
           if (args.producto) {
-            whereClause.OR = [
-              { nombre: { contains: args.producto, mode: 'insensitive' } },
-              { comentarios: { contains: args.producto, mode: 'insensitive' } },
-              { venta: { mensaje: { contains: args.producto, mode: 'insensitive' } } }
+            ventasQuery.where.OR = [
+              { mensaje: { contains: args.producto, mode: 'insensitive' } },
+              { ordenVentas: { some: { nombre: { contains: args.producto, mode: 'insensitive' } } } },
+              { ordenVentas: { some: { comentarios: { contains: args.producto, mode: 'insensitive' } } } }
             ];
           }
 
-          const ordenes = await this.prisma.orderventas.findMany({
-            where: whereClause,
-            select: { 
-              cantidad: true, 
-              precioTotal: true, 
-              nombre: true,
-              comentarios: true,
-              venta: {
-                select: {
-                  hora: true,
-                  mensaje: true
-                }
-              }
-            }
-          });
+          const ventas = await this.prisma.ventas.findMany(ventasQuery);
 
-          let totalUnidades = 0;
+          let totalTickets = ventas.length;
           let ingresosTotales = 0;
+          let totalUnidades = 0;
           
-          for (const orden of ordenes) {
-            totalUnidades += orden.cantidad || 0;
-            ingresosTotales += Number(orden.precioTotal) || 0;
+          const detallesVentas = [];
+          
+          for (const venta of ventas) {
+            ingresosTotales += Number(venta.totalInput) || 0;
+            let itemsText = [];
+            for (const orden of venta.ordenVentas) {
+               totalUnidades += orden.cantidad || 0;
+               itemsText.push(`${orden.cantidad}x ${orden.nombre}`);
+            }
+            detallesVentas.push(`- Hora: ${venta.hora || 'N/A'} | Ingreso: $${(Number(venta.totalInput)||0).toLocaleString('es-CO')} | Items: ${itemsText.join(', ')}`);
           }
 
-          if (ordenes.length === 0) {
-            return `No se encontraron ventas pagadas${args.producto ? ` con la palabra '${args.producto}'` : ''} entre el ${args.fechaInicio} y el ${args.fechaFin}.`;
+          if (totalTickets === 0) {
+            return `No se encontraron tickets pagados${args.producto ? ` con la palabra '${args.producto}'` : ''} entre el ${args.fechaInicio} y el ${args.fechaFin}.`;
           }
 
           if (args.detallado) {
-            const detalles = ordenes.slice(0, 50).map(o => {
-               let nota = '';
-               if (o.comentarios) nota += ` [Comentario: ${o.comentarios}]`;
-               if (o.venta?.mensaje) nota += ` [Mensaje: ${o.venta.mensaje}]`;
-               return `- ${o.venta?.hora || 'N/A'} | ${o.cantidad}x ${o.nombre} ($${Number(o.precioTotal).toLocaleString('es-CO')})${nota}`;
-            });
-            
-            let resumen = `Se encontraron ${ordenes.length} ventas${args.producto ? ` para '${args.producto}'` : ''}. Mostrando las primeras ${Math.min(50, ordenes.length)}:\n`;
-            resumen += detalles.join('\n');
-            resumen += `\n\nTotal ingresos: $${ingresosTotales.toLocaleString('es-CO')} | Unidades totales: ${totalUnidades}`;
+            let resumen = `Se encontraron ${totalTickets} pedidos (tickets)${args.producto ? ` para '${args.producto}'` : ''}. Mostrando los primeros ${Math.min(50, totalTickets)}:\n`;
+            resumen += detallesVentas.slice(0, 50).join('\n');
+            resumen += `\n\nTotal tickets: ${totalTickets} | Total ingresos: $${ingresosTotales.toLocaleString('es-CO')} | Unidades (items) totales: ${totalUnidades}`;
             return resumen;
           }
 
-          return `Resumen de ventas${args.producto ? ` para '${args.producto}'` : ''} (${args.fechaInicio} a ${args.fechaFin}):
-- Unidades vendidas: ${totalUnidades}
-- Ingresos generados: $${ingresosTotales.toLocaleString('es-CO')}`;
+          return `Resumen de ventas (Tickets)${args.producto ? ` para '${args.producto}'` : ''} (${args.fechaInicio} a ${args.fechaFin}):
+- Tickets/Pedidos procesados: ${totalTickets}
+- Unidades (ítems) vendidas: ${totalUnidades}
+- Ingresos totales (reales pagados): $${ingresosTotales.toLocaleString('es-CO')}`;
 
         } catch (error: any) {
           return `Ocurrió un error al consultar las ventas: ${error.message}`;
@@ -464,10 +453,113 @@ export class AgentToolsService {
       },
       {
         name: 'analizar_movimientos_insumos',
-        description: 'Consulta qué insumos se compraron más o se gastaron más en una fecha o rango de fechas (días, semanas, meses).',
+        description: 'Muestra las compras de insumos y los gastos físicos reportados en caja en un periodo. Útil para "qué se compró" o "cuánto se gastó en caja".',
+        schema: z.object({
+          fechaInicio: z.string().describe('Fecha inicial (YYYY-MM-DD)'),
+          fechaFin: z.string().describe('Fecha final (YYYY-MM-DD)'),
+        }),
+      }
+    );
+  }
+
+  private consultarConsumoInventarioTool() {
+    return tool(
+      async (args) => {
+        try {
+          // Parse dates correctly
+          const parseDate = (dateStr: string) => {
+            const str = dateStr.toLowerCase();
+            const d = new Date();
+            d.setHours(d.getHours() - 5);
+            if (str === 'hoy') return d.toISOString().split('T')[0];
+            if (str === 'ayer') {
+              d.setDate(d.getDate() - 1);
+              return d.toISOString().split('T')[0];
+            }
+            if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return str;
+            return d.toISOString().split('T')[0];
+          };
+
+          const fInicio = parseDate(args.fechaInicio);
+          const fFin = parseDate(args.fechaFin);
+
+          const startDate = new Date(`${fInicio}T05:00:00.000Z`);
+          const nextDay = new Date(`${fFin}T05:00:00.000Z`);
+          nextDay.setDate(nextDay.getDate() + 1);
+          const endDate = new Date(nextDay.getTime() - 1);
+
+          let whereClause: any = {
+            fechaYHora: { gte: startDate, lte: endDate }
+          };
+
+          if (args.tipoMovimiento === 'entradas') {
+            whereClause.seCompro = 'Si';
+          } else if (args.tipoMovimiento === 'salidas') {
+            whereClause.seCompro = 'No';
+          } else {
+            // 'ambos' includes both 'Si' and 'No' (or null if there are any old ones)
+            whereClause.seCompro = { in: ['Si', 'No'] }; 
+          }
+
+          if (args.insumo) {
+            whereClause.nombreDelAlimento = { contains: args.insumo, mode: 'insensitive' };
+          }
+
+          const movimientos = await this.prisma.orderinventario.findMany({
+            where: whereClause,
+            select: { nombreDelAlimento: true, cantidad: true, seCompro: true }
+          });
+
+          // Group by insumo
+          const totales = new Map<string, { entradas: number, salidas: number }>();
+          
+          for (const mov of movimientos) {
+            const nombre = mov.nombreDelAlimento || 'Desconocido';
+            const cantidad = Number(mov.cantidad) || 0;
+            const esEntrada = mov.seCompro === 'Si';
+            
+            if (!totales.has(nombre)) {
+              totales.set(nombre, { entradas: 0, salidas: 0 });
+            }
+            
+            const current = totales.get(nombre)!;
+            if (esEntrada) current.entradas += cantidad;
+            else current.salidas += cantidad;
+          }
+
+          if (totales.size === 0) {
+             return `No se encontraron registros de ${args.tipoMovimiento}${args.insumo ? ` para '${args.insumo}'` : ''} entre el ${args.fechaInicio} y el ${args.fechaFin}.`;
+          }
+
+          let resumen = `Resumen de ${args.tipoMovimiento}${args.insumo ? ` para '${args.insumo}'` : ''} (${args.fechaInicio} a ${args.fechaFin}):\n\n`;
+          
+          // Sort by name for consistency
+          const sortedKeys = Array.from(totales.keys()).sort();
+          for (const key of sortedKeys) {
+             const { entradas, salidas } = totales.get(key)!;
+             if (args.tipoMovimiento === 'entradas' && entradas > 0) {
+               resumen += `- ${key}: ${entradas} comprados/ingresados\n`;
+             } else if (args.tipoMovimiento === 'salidas' && salidas > 0) {
+               resumen += `- ${key}: ${salidas} consumidos/gastados\n`;
+             } else if (args.tipoMovimiento === 'ambos') {
+               resumen += `- ${key}: Entradas: ${entradas} | Salidas: ${salidas}\n`;
+             }
+          }
+          
+          return resumen;
+
+        } catch (e: any) {
+           return "Error consultando consumos de inventario: " + e.message;
+        }
+      },
+      {
+        name: 'consultar_consumo_inventario',
+        description: 'Consulta los reportes de entradas (compras de insumos) y salidas (consumos/gastos de insumos) en un periodo de tiempo. Útil para "cuánto se compró" o "cuánto se consumió" de un insumo.',
         schema: z.object({
           fechaInicio: z.string().describe('Fecha de inicio (YYYY-MM-DD)'),
           fechaFin: z.string().describe('Fecha de fin (YYYY-MM-DD)'),
+          tipoMovimiento: z.enum(['entradas', 'salidas', 'ambos']).describe('Si el usuario quiere saber compras usa "entradas", si quiere saber consumos usa "salidas".'),
+          insumo: z.string().optional().describe('Nombre del insumo si se quiere filtrar uno específico (opcional)')
         }),
       }
     );
