@@ -511,36 +511,57 @@ export class AgentToolsService {
               nombreDelAlimento: true, 
               cantidad: true, 
               seCompro: true,
+              observacion: true,
               inventario: { select: { tipo: true } }
             }
           });
 
           // Group by insumo
-          const totales = new Map<string, { entradas: number, salidas: number }>();
+          const totales = new Map<string, { 
+            entradasInventario: number, 
+            entradasManuales: number,
+            salidasVentas: number, 
+            salidasInventario: number, 
+            salidasManuales: number 
+          }>();
           
           for (const mov of movimientos) {
             const nombre = mov.nombreDelAlimento || 'Desconocido';
             const cantidad = Number(mov.cantidad) || 0;
+            const obs = (mov.observacion || '').toLowerCase();
             
             const tipoInv = (mov.inventario?.tipo || '').toUpperCase();
-            let movEsEntrada = false;
-            let movEsSalida = false;
-            
-            if (mov.seCompro === 'Si') {
-              movEsEntrada = true;
-            } else if (tipoInv.includes('ENTRADA')) {
-              movEsEntrada = true;
-            } else if (mov.seCompro === 'No' && (!tipoInv || tipoInv.includes('SALIDA'))) {
-              movEsSalida = true;
-            }
             
             if (!totales.has(nombre)) {
-              totales.set(nombre, { entradas: 0, salidas: 0 });
+              totales.set(nombre, { 
+                entradasInventario: 0, entradasManuales: 0, 
+                salidasVentas: 0, salidasInventario: 0, salidasManuales: 0 
+              });
             }
             
             const current = totales.get(nombre)!;
-            if (movEsEntrada) current.entradas += cantidad;
-            if (movEsSalida) current.salidas += cantidad;
+            
+            if (tipoInv.includes('ENTRADA')) {
+              current.entradasInventario += cantidad;
+            } else if (tipoInv.includes('SALIDA')) {
+              current.salidasInventario += cantidad;
+            } else if (mov.seCompro === 'Si') {
+              current.entradasManuales += cantidad;
+            } else if (mov.seCompro === 'No') {
+              // It's a salida with no formal IDinventario
+              if (obs.includes('venta') || obs.includes('receta')) {
+                 // The default reason is "Descontado para producción/venta" or specific recipe
+                 // Wait, manual changes from Insumos screen use "Descontado para producción/venta".
+                 // Recipe discounts use "Venta de: ProductoName" or similar.
+                 if (obs.includes('descontado para producción')) {
+                   current.salidasManuales += cantidad; // Manual via Insumos
+                 } else {
+                   current.salidasVentas += cantidad; // Automatic via sales
+                 }
+              } else {
+                 current.salidasManuales += cantidad;
+              }
+            }
           }
 
           if (totales.size === 0) {
@@ -552,13 +573,23 @@ export class AgentToolsService {
           // Sort by name for consistency
           const sortedKeys = Array.from(totales.keys()).sort();
           for (const key of sortedKeys) {
-             const { entradas, salidas } = totales.get(key)!;
-             if (tipoReporte === 'entradas' && entradas > 0) {
-               resumen += `- ${key}: ${entradas} comprados/ingresados\n`;
-             } else if (tipoReporte === 'salidas' && salidas > 0) {
-               resumen += `- ${key}: ${salidas} consumidos/gastados\n`;
-             } else if (tipoReporte === 'ambos') {
-               resumen += `- ${key}: Entradas: ${entradas} | Salidas: ${salidas}\n`;
+             const t = totales.get(key)!;
+             const totalEntradas = t.entradasInventario + t.entradasManuales;
+             const totalSalidas = t.salidasInventario + t.salidasManuales + t.salidasVentas;
+             
+             let text = `- ${key}:\n`;
+             if (tipoReporte === 'entradas' || tipoReporte === 'ambos') {
+               text += `  🛒 ENTRADAS: ${totalEntradas} (Oficiales Módulo Inventario: ${t.entradasInventario} | Ajustes Insumos: ${t.entradasManuales})\n`;
+             }
+             if (tipoReporte === 'salidas' || tipoReporte === 'ambos') {
+               text += `  📦 SALIDAS: ${totalSalidas} (Oficiales Módulo Inventario: ${t.salidasInventario} | Ventas Automáticas: ${t.salidasVentas} | Ajustes Insumos: ${t.salidasManuales})\n`;
+             }
+             
+             // Only include if there's actually > 0 for what the user requested
+             if ((tipoReporte === 'entradas' && totalEntradas > 0) || 
+                 (tipoReporte === 'salidas' && totalSalidas > 0) || 
+                 (tipoReporte === 'ambos' && (totalEntradas > 0 || totalSalidas > 0))) {
+                resumen += text;
              }
           }
           
