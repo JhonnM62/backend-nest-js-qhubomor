@@ -262,7 +262,7 @@ export class AgentToolsService {
           
           const detallesVentas = [];
           
-          for (const venta of ventas) {
+          for (const venta of (ventas as any[])) {
             ingresosTotales += Number(venta.totalInput) || 0;
             let itemsText = [];
             for (const orden of venta.ordenVentas) {
