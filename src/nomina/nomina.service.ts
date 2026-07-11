@@ -71,16 +71,20 @@ export class NominaService {
     const y = colombiaTime.getUTCFullYear();
     const m = colombiaTime.getUTCMonth();
     const d = colombiaTime.getUTCDate();
-    const offsetMs = 5 * 60 * 60 * 1000;
-    const inicioDiaLocal = new Date(Date.UTC(y, m, d, 0, 0, 0, 0) + offsetMs);
 
+    // Verificar que no haya un turno ACTIVO hoy (usando rango de fecha para evitar problemas de zona horaria)
+    // El rango cubre desde las 00:00 hasta las 23:59 hora Colombia (UTC-5)
     const fechaAInsertar = new Date(Date.UTC(y, m, d, 0, 0, 0, 0));
+    const inicioDiaUTC = new Date(Date.UTC(y, m, d, 5, 0, 0, 0));    // 00:00 Colombia = 05:00 UTC
+    const finDiaUTC    = new Date(Date.UTC(y, m, d + 1, 5, 0, 0, 0)); // 00:00 Colombia del día siguiente = 05:00 UTC del día siguiente
 
-    // Verificar que no haya NINGÚN turno hoy (activo, completado, liquidado...)
     const turnoExistenteHoy = await this.prisma.turnos.findFirst({
       where: {
         usuarioId,
-        fecha: fechaAInsertar,
+        horaEntrada: {
+          gte: inicioDiaUTC,
+          lt:  finDiaUTC,
+        },
       },
     });
 
