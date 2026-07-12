@@ -938,8 +938,14 @@ export class NominaService {
 
     const descuentosAplicados = descuentos.filter(d => !(d.concepto === 'LLEGADA_TARDE' && d.estado === 'PENDIENTE'));
 
-    const totalBruto = turnos.reduce((sum: number, t: any) => sum + Number(t.valorTurno), 0);
-    const totalDescuentos = descuentosAplicados.reduce((sum: number, d: any) => sum + Number(d.valor), 0);
+    const descuentosReales = descuentosAplicados.filter(d => !['BONO', 'PREMIO', 'HORAS_EXTRAS'].includes(d.concepto));
+    const bonosAplicados = descuentosAplicados.filter(d => ['BONO', 'PREMIO', 'HORAS_EXTRAS'].includes(d.concepto));
+
+    const totalBonificaciones = bonosAplicados.reduce((sum: number, d: any) => sum + Number(d.valor), 0);
+    const totalDeducciones = descuentosReales.reduce((sum: number, d: any) => sum + Number(d.valor), 0);
+
+    const totalBruto = turnos.reduce((sum: number, t: any) => sum + Number(t.valorTurno), 0) + totalBonificaciones;
+    const totalDescuentos = totalDeducciones;
     const totalNeto = totalBruto - totalDescuentos;
 
     const liquidacion = await this.prisma.liquidaciones.create({
