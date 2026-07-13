@@ -480,8 +480,31 @@ export class VentasService {
     const estadoToSave = venta.estado || ventaExistente.estado || 'iniciado';
     const nuevoRegistro = this.appendTiempoLog(ventaExistente.registroDeTiempo, estadoToSave);
 
+    const nuevaMesaValue = (venta.mesa === 'V.R' || venta.mesa === 'CAJA') ? null : (venta.mesa || null);
+
+    let pedidoToSave = ventaExistente.pedido;
+    if (ventaExistente.mesa !== nuevaMesaValue && ventaExistente.pedido) {
+      let mesaStr = 'V.R';
+      if (nuevaMesaValue) {
+        try {
+          const mesaObj = await this.prisma.mesas.findUnique({
+            where: { IdMesas: nuevaMesaValue },
+          });
+          if (mesaObj && mesaObj.nombre) {
+            mesaStr = mesaObj.nombre;
+          }
+        } catch (e) {}
+      }
+      const partes = ventaExistente.pedido.split('-');
+      if (partes.length >= 3) {
+        partes[0] = mesaStr;
+        pedidoToSave = partes.join('-');
+      }
+    }
+
     const ventaData = {
-      mesa: (venta.mesa === 'V.R' || venta.mesa === 'CAJA') ? null : (venta.mesa || null),
+      mesa: nuevaMesaValue,
+      pedido: pedidoToSave,
       medioDePago: venta.medioDePago,
       efectivoRecibido: venta.efectivoRecibido,
       devueltas: venta.devueltas,
