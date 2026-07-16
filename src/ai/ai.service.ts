@@ -8,7 +8,7 @@ export class AiService {
   private readonly logger = new Logger(AiService.name);
 
   // In-memory cache for catalogs to prevent DB queries on every voice request
-  private catalogCache: { productos: any[], comentarios: any[], timestamp: number } | null = null;
+  private catalogCache: { productos: any[], comentarios: any[], mesas: any[], timestamp: number } | null = null;
   private readonly CACHE_TTL = 1000 * 60 * 5; // 5 minutes cache
 
   constructor(
@@ -22,20 +22,24 @@ export class AiService {
       return this.catalogCache;
     }
 
-    const [productosRaw, comentariosRaw] = await Promise.all([
+    const [productosRaw, comentariosRaw, mesasRaw] = await Promise.all([
       this.prisma.productos.findMany({
         select: { IDproductos: true, nombre: true },
       }),
       this.prisma.comentarios.findMany({
         select: { ID: true, comentarios: true },
       }),
+      this.prisma.mesas.findMany({
+        select: { IdMesas: true, nombre: true },
+      }),
     ]);
 
     // Optimize payload size for faster TTFT (Time to First Token)
     const productos = productosRaw.map(p => ({ i: p.IDproductos, n: p.nombre }));
     const comentarios = comentariosRaw.map(c => ({ i: c.ID, n: c.comentarios }));
+    const mesas = mesasRaw.map(m => ({ i: m.IdMesas, n: m.nombre }));
 
-    this.catalogCache = { productos, comentarios, timestamp: now };
+    this.catalogCache = { productos, comentarios, mesas, timestamp: now };
     return this.catalogCache;
   }
 
@@ -117,21 +121,24 @@ export class AiService {
 
     try {
       // 1. Obtener catálogo desde Cache en memoria (0ms DB trip)
-      const { productos: catalogProductos, comentarios: catalogComentarios } = await this.getCatalogs();
+      const { productos: catalogProductos, comentarios: catalogComentarios, mesas: catalogMesas } = await this.getCatalogs();
 
       // Ultra-concise prompt to save input tokens parsing time
       const systemInstruction = `P:${JSON.stringify(catalogProductos)}
 C:${JSON.stringify(catalogComentarios)}
+M:${JSON.stringify(catalogMesas)}
 Map audio to IDs.
 Rules:
 1. productoId=ID in P
 2. comentariosIds=IDs in C
-3. If modifier not in C (e.g. "carro rojo"), put raw text in 'notasAdicionales'
-4. cantidad=number`;
+3. CRITICAL: If the user requests ANY modifier or note (e.g. "carro rojo", "sin licor", "Santorini") that is NOT found in C, you MUST put the raw text in 'notasAdicionales'. Do not ignore ANY specification.
+4. cantidad=number
+5. If the user mentions a table/mesa (e.g. "para la mesa 2", "mesa 2A"), return the corresponding ID from M in 'mesaId'.`;
 
       const responseSchema: Schema = {
         type: Type.OBJECT,
         properties: {
+          mesaId: { type: Type.STRING, description: "ID of the mesa mentioned, if any" },
           items: {
             type: Type.ARRAY,
             items: {
