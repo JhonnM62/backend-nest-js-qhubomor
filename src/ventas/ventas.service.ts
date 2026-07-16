@@ -177,6 +177,38 @@ export class VentasService {
     return localDate;
   }
 
+  private async resolveMesaOrCreate(mesaInput: string | null | undefined): Promise<string | null> {
+    if (!mesaInput || mesaInput === 'V.R' || mesaInput === 'CAJA') {
+      return null;
+    }
+    
+    // Buscar por ID
+    try {
+      const mesaById = await this.prisma.mesas.findUnique({
+        where: { IdMesas: mesaInput },
+      });
+      if (mesaById) {
+        return mesaById.IdMesas;
+      }
+    } catch (e) {
+      // Not a valid UUID
+    }
+
+    // Buscar por Nombre
+    const mesaByName = await this.prisma.mesas.findFirst({
+      where: { nombre: mesaInput },
+    });
+    if (mesaByName) {
+      return mesaByName.IdMesas;
+    }
+
+    // Crear la mesa temporal si no existe
+    const nuevaMesa = await this.prisma.mesas.create({
+      data: { nombre: mesaInput },
+    });
+    return nuevaMesa.IdMesas;
+  }
+
   async create(createVentaDto: CreateVentaDto & { fechaContableManual?: string }) {
     console.log('[DEBUG create] createVentaDto.mesa:', createVentaDto.mesa);
     console.log('[DEBUG create] createVentaDto.clienteId:', createVentaDto.clienteId);
@@ -186,10 +218,12 @@ export class VentasService {
     const fechaContable = await this.getFechaContable(now, createVentaDto.fechaContableManual);
     const pedido = await this.generatePedidoNumber(createVentaDto.mesa, undefined, fechaContable);
 
+    const validMesaId = await this.resolveMesaOrCreate(createVentaDto.mesa);
+
     const ventaData: any = {
       ...createVentaDto,
       fechaContableManual: undefined,
-      mesa: createVentaDto.mesa === 'V.R' ? null : createVentaDto.mesa,
+      mesa: validMesaId,
       pedido,
       fechaYHora: now,
       fecha: fechaContable,
@@ -246,7 +280,8 @@ export class VentasService {
     const numeroConsecutivo = siguienteNumero.toString().padStart(3, '0');
 
     let mesaStr = 'V.R';
-    if (mesaId && mesaId !== 'V.R') {
+    if (mesaId && mesaId !== 'V.R' && mesaId !== 'CAJA') {
+      mesaStr = mesaId; // Asumimos que puede ser texto libre
       try {
         const mesaObj = await this.prisma.mesas.findUnique({
           where: { IdMesas: mesaId },
@@ -255,7 +290,7 @@ export class VentasService {
           mesaStr = mesaObj.nombre;
         }
       } catch (error) {
-        // mesa not found, keep V.R
+        // mesa not found (might be a custom string or invalid UUID), keep mesaStr as mesaId
       }
     }
 
@@ -362,8 +397,10 @@ export class VentasService {
       clienteNombre = clienteData?.nombre ?? null;
     }
 
+    const validMesaId = await this.resolveMesaOrCreate(venta.mesa);
+
     const ventaData = {
-      mesa: (venta.mesa === 'V.R' || venta.mesa === 'CAJA') ? null : (venta.mesa || null),
+      mesa: validMesaId,
       medioDePago: venta.medioDePago,
       efectivoRecibido: venta.efectivoRecibido,
       devueltas: venta.devueltas,
@@ -480,11 +517,11 @@ export class VentasService {
     const estadoToSave = venta.estado || ventaExistente.estado || 'iniciado';
     const nuevoRegistro = this.appendTiempoLog(ventaExistente.registroDeTiempo, estadoToSave);
 
-    const nuevaMesaValue = (venta.mesa === 'V.R' || venta.mesa === 'CAJA') ? null : (venta.mesa || null);
+    const nuevaMesaValue = await this.resolveMesaOrCreate(venta.mesa);
 
     let pedidoToSave = ventaExistente.pedido;
     if (ventaExistente.mesa !== nuevaMesaValue && ventaExistente.pedido) {
-      let mesaStr = 'V.R';
+      let mesaStr = venta.mesa && venta.mesa !== 'V.R' && venta.mesa !== 'CAJA' ? venta.mesa : 'V.R';
       if (nuevaMesaValue) {
         try {
           const mesaObj = await this.prisma.mesas.findUnique({
