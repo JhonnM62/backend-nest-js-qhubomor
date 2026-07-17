@@ -875,8 +875,17 @@ export class NominaService {
     }
 
     const totalBruto = turnos.reduce((sum: number, t: any) => sum + Number(t.valorTurno), 0);
-    const totalDescuentos = descuentos.reduce((sum: number, d: any) => sum + (d.concepto === 'LLEGADA_TARDE' && d.estado === 'PENDIENTE' ? 0 : Number(d.valor)), 0);
-    const totalNeto = totalBruto - totalDescuentos;
+    const CONCEPTOS_BONO = ['BONO', 'PREMIO', 'HORAS_EXTRAS'];
+    const totalDescuentos = descuentos.reduce((sum: number, d: any) => {
+      if (d.concepto === 'LLEGADA_TARDE' && d.estado === 'PENDIENTE') return sum;
+      if (CONCEPTOS_BONO.includes(d.concepto)) return sum; // bonos no restan
+      return sum + Number(d.valor);
+    }, 0);
+    const totalBonos = descuentos.reduce((sum: number, d: any) => {
+      if (CONCEPTOS_BONO.includes(d.concepto)) return sum + Number(d.valor);
+      return sum;
+    }, 0);
+    const totalNeto = totalBruto - totalDescuentos + totalBonos;
 
     const confNegocio = await this.prisma.configuracionNegocio.findFirst();
     const minutosGracia = confNegocio?.minutosGraciaLlegadaTarde ?? 5;
@@ -889,6 +898,7 @@ export class NominaService {
         totalTurnos: turnos.length,
         totalBruto,
         totalDescuentos,
+        totalBonos,
         totalNeto,
         turnos,
         turnosAnteriores,
