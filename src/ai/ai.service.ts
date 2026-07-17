@@ -132,7 +132,7 @@ Rules:
 1. productoId=ID in P
 2. comentariosIds=IDs in C
 3. CRITICAL: If the user requests ANY modifier or note (e.g. "carro rojo", "sin licor", "Santorini") that is NOT found in C, you MUST put the raw text in 'notasAdicionales'. Do not ignore ANY specification.
-4. cantidad=number
+4. cantidad=integer representing the EXACT amount requested (e.g. "dos jugos" -> 2, "tres" -> 3). Default to 1 ONLY if unspecified.
 5. If the user mentions a table/mesa (e.g. "para la mesa 2", "mesa 2A"), return the corresponding ID from M in 'mesaId'.`;
 
       const responseSchema: Schema = {
