@@ -663,6 +663,7 @@ export class NominaService {
               select: {
                 nombre: true,
                 duracionDescansoMinutos: true,
+                horaSugeridaDescanso: true,
                 horaEntradaLunes: true, horaSalidaLunes: true,
                 horaEntradaMartes: true, horaSalidaMartes: true,
                 horaEntradaMiercoles: true, horaSalidaMiercoles: true,
