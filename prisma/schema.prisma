@@ -621,7 +621,8 @@ model CargosEmpleado {
   horaEntradaDomingo   String?    @map("HoraEntradaDomingo")
   horaSalidaDomingo    String?    @map("HoraSalidaDomingo")
   
-  descuentoCena        Decimal    @default(0) @map("DescuentoCena") @db.Money
+  descuentoCena           Decimal    @default(0) @map("DescuentoCena") @db.Money
+  duracionDescansoMinutos  Int        @default(0) @map("DuracionDescansoMinutos")
   createdAt            DateTime   @default(now())
   updatedAt            DateTime   @updatedAt
   usuarios             Usuarios[]
@@ -652,6 +653,8 @@ model Turnos {
   fotoSalida            String?              @map("FotoSalida")
   latitudSalida         Float?               @map("LatitudSalida")
   longitudSalida        Float?               @map("LongitudSalida")
+  inicioDescanso        DateTime?            @map("InicioDescanso")
+  finDescanso           DateTime?            @map("FinDescanso")
   descuentos            DescuentosEmpleado[]
   usuario               Usuarios             @relation(fields: [usuarioId], references: [IDusuarios], onDelete: Cascade)
 

@@ -117,6 +117,18 @@ export class NominaController {
     return this.nominaService.getTurnoActivoDelDia(req.user.id);
   }
 
+  @Post('turnos/:id/descanso/iniciar')
+  @ApiOperation({ summary: 'Iniciar el tiempo de descanso del turno' })
+  iniciarDescanso(@Param('id') id: string, @Request() req: any) {
+    return this.nominaService.iniciarDescanso(id, req.user.id);
+  }
+
+  @Post('turnos/:id/descanso/terminar')
+  @ApiOperation({ summary: 'Terminar el tiempo de descanso del turno' })
+  terminarDescanso(@Param('id') id: string, @Request() req: any) {
+    return this.nominaService.terminarDescanso(id, req.user.id);
+  }
+
   @Get('turnos')
   @UseGuards(RolesGuard)
   @Roles(...ROLES_ADMIN)

@@ -303,6 +303,34 @@ export class NominaService {
     };
   }
 
+  async iniciarDescanso(turnoId: string, usuarioId: string) {
+    const turno = await this.prisma.turnos.findUnique({ where: { IDturno: turnoId } });
+    if (!turno) throw new NotFoundException('Turno no encontrado');
+    if (turno.usuarioId !== usuarioId) throw new ForbiddenException('Solo puedes gestionar tu propio turno');
+    if (turno.estado !== 'ACTIVO') throw new BadRequestException('El turno no está activo');
+    if (turno.inicioDescanso) throw new BadRequestException('El descanso ya fue iniciado');
+
+    const updated = await this.prisma.turnos.update({
+      where: { IDturno: turnoId },
+      data: { inicioDescanso: new Date() },
+    });
+    return { success: true, data: updated, mensaje: 'Descanso iniciado correctamente' };
+  }
+
+  async terminarDescanso(turnoId: string, usuarioId: string) {
+    const turno = await this.prisma.turnos.findUnique({ where: { IDturno: turnoId } });
+    if (!turno) throw new NotFoundException('Turno no encontrado');
+    if (turno.usuarioId !== usuarioId) throw new ForbiddenException('Solo puedes gestionar tu propio turno');
+    if (!turno.inicioDescanso) throw new BadRequestException('No se ha iniciado el descanso');
+    if (turno.finDescanso) throw new BadRequestException('El descanso ya fue terminado');
+
+    const updated = await this.prisma.turnos.update({
+      where: { IDturno: turnoId },
+      data: { finDescanso: new Date() },
+    });
+    return { success: true, data: updated, mensaje: 'Descanso terminado correctamente' };
+  }
+
   async registrarSalida(turnoId: string, dto: RegistrarSalidaDto, usuarioSolicitanteId: string, esAdmin: boolean, fotoPath?: string) {
     const turno = await this.prisma.turnos.findUnique({
       where: { IDturno: turnoId },
@@ -627,7 +655,26 @@ export class NominaService {
     // UN turno ACTIVO a la vez, buscar únicamente por estado es correcto y seguro.
     const turno = await this.prisma.turnos.findFirst({
       where: { usuarioId, estado: 'ACTIVO' },
-      include: { usuario: { select: { nombre: true, cargo: { select: { nombre: true } } } } },
+      include: {
+        usuario: {
+          select: {
+            nombre: true,
+            cargo: {
+              select: {
+                nombre: true,
+                duracionDescansoMinutos: true,
+                horaEntradaLunes: true, horaSalidaLunes: true,
+                horaEntradaMartes: true, horaSalidaMartes: true,
+                horaEntradaMiercoles: true, horaSalidaMiercoles: true,
+                horaEntradaJueves: true, horaSalidaJueves: true,
+                horaEntradaViernes: true, horaSalidaViernes: true,
+                horaEntradaSabado: true, horaSalidaSabado: true,
+                horaEntradaDomingo: true, horaSalidaDomingo: true,
+              }
+            }
+          }
+        }
+      },
     });
     return { data: turno, tieneActivo: !!turno };
   }
