@@ -133,6 +133,13 @@ export class CreateCargoDto {
   @Min(0)
   @Type(() => Number)
   descuentoCena?: number;
+
+  @ApiPropertyOptional({ example: 60, description: 'Duración del descanso en minutos' })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  @Type(() => Number)
+  duracionDescansoMinutos?: number;
 }
 
 export class UpdateCargoDto {
@@ -266,6 +273,13 @@ export class UpdateCargoDto {
   @Min(0)
   @Type(() => Number)
   descuentoCena?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  @Type(() => Number)
+  duracionDescansoMinutos?: number;
 }
 
 export class CreateExcepcionHorarioDto {
