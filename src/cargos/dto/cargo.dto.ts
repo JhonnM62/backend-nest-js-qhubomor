@@ -140,6 +140,11 @@ export class CreateCargoDto {
   @Min(0)
   @Type(() => Number)
   duracionDescansoMinutos?: number;
+
+  @ApiPropertyOptional({ example: '15:00', description: 'Hora sugerida para iniciar el descanso' })
+  @IsOptional()
+  @IsString()
+  horaSugeridaDescanso?: string;
 }
 
 export class UpdateCargoDto {
@@ -280,6 +285,11 @@ export class UpdateCargoDto {
   @Min(0)
   @Type(() => Number)
   duracionDescansoMinutos?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  horaSugeridaDescanso?: string;
 }
 
 export class CreateExcepcionHorarioDto {

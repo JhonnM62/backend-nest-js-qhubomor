@@ -623,6 +623,7 @@ model CargosEmpleado {
   
   descuentoCena           Decimal    @default(0) @map("DescuentoCena") @db.Money
   duracionDescansoMinutos  Int        @default(0) @map("DuracionDescansoMinutos")
+  horaSugeridaDescanso     String?    @map("HoraSugeridaDescanso")
   createdAt            DateTime   @default(now())
   updatedAt            DateTime   @updatedAt
   usuarios             Usuarios[]
