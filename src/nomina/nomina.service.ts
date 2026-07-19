@@ -314,6 +314,9 @@ export class NominaService {
       where: { IDturno: turnoId },
       data: { inicioDescanso: new Date() },
     });
+    
+    this.appGateway.server.emit('turno_actualizado', { turnoId, tipo: 'INICIO_DESCANSO' });
+    
     return { success: true, data: updated, mensaje: 'Descanso iniciado correctamente' };
   }
 
@@ -328,6 +331,9 @@ export class NominaService {
       where: { IDturno: turnoId },
       data: { finDescanso: new Date() },
     });
+    
+    this.appGateway.server.emit('turno_actualizado', { turnoId, tipo: 'FIN_DESCANSO' });
+    
     return { success: true, data: updated, mensaje: 'Descanso terminado correctamente' };
   }
 
@@ -455,7 +461,7 @@ export class NominaService {
         where, skip, take: limit,
         orderBy: { horaEntrada: 'desc' },
         include: {
-          usuario: { select: { nombre: true, rol: true, cargo: { select: { nombre: true, descuentoCena: true } } } },
+          usuario: { select: { nombre: true, rol: true, cargo: { select: { nombre: true, descuentoCena: true, duracionDescansoMinutos: true } } } },
           descuentos: true,
           _count: { select: { descuentos: true } },
         },
