@@ -87,3 +87,64 @@ jobs:
               qhubomor-backend
             
             echo "¡Despliegue completado exitosamente!"
+
+            # =========================================================
+            # FÁBRICA DE NUEVOS CLIENTES
+            # Función reutilizable - la imagen ya fue construida arriba.
+            # Para agregar un cliente: copia la última línea y cambia
+            # los parámetros (CLIENT_ID, PUERTO, DOMINIO, SECRETO).
+            # =========================================================
+            deploy_new_client() {
+              CLIENT_ID=$1
+              PORT=$2
+              DOMAIN=$3
+              ENV_CONTENT=$4
+
+              echo "🚀 Desplegando Backend para: $CLIENT_ID en $DOMAIN:$PORT"
+
+              # Crear archivo .env exclusivo para este cliente
+              printf '%s' "$ENV_CONTENT" > /root/backend-qhubomor/.env.$CLIENT_ID
+
+              # Crear directorios de uploads exclusivos para este cliente
+              mkdir -p /root/backend-qhubomor/public/uploads/$CLIENT_ID/insumos
+              mkdir -p /root/backend-qhubomor/public/uploads/$CLIENT_ID/gastos
+              mkdir -p /root/backend-qhubomor/public/uploads/$CLIENT_ID/asistencia
+
+              # Detener y eliminar contenedor anterior de este cliente
+              docker stop backend-$CLIENT_ID || true
+              docker rm backend-$CLIENT_ID || true
+
+              # Sincronizar esquema en la BD de este cliente (sin borrar datos)
+              echo "Sincronizando BD para $CLIENT_ID..."
+              docker run --rm \
+                --env-file /root/backend-qhubomor/.env.$CLIENT_ID \
+                qhubomor-backend \
+                npx prisma db push --accept-data-loss
+
+              # Levantar contenedor de este cliente (usa la imagen ya construida arriba)
+              docker run -d \
+                --name backend-$CLIENT_ID \
+                -p $PORT:3000 \
+                -v /root/backend-qhubomor/public/uploads/$CLIENT_ID:/app/public/uploads \
+                --restart unless-stopped \
+                --env-file /root/backend-qhubomor/.env.$CLIENT_ID \
+                qhubomor-backend
+
+              # Configurar subdominio + certificado SSL automáticamente
+              DOMAIN=$DOMAIN PORT=$PORT EMAIL=jonnymejia62@gmail.com \
+                bash /root/n8n/scripts/setup-nginx.sh
+
+              echo "✅ Cliente $CLIENT_ID desplegado en https://$DOMAIN"
+            }
+
+            # ----------------------------------------------------------
+            # LISTA DE CLIENTES ACTIVOS
+            # Para agregar uno nuevo: copia la línea de abajo,
+            # cambia los valores y crea el secreto en GitHub.
+            # ----------------------------------------------------------
+            deploy_new_client \
+              "restaurante2" \
+              "8071" \
+              "api-restaurante2.autosystemprojects.site" \
+              "${{ secrets.ENV_BACKEND_RESTAURANTE2 }}"
+
