@@ -114,7 +114,7 @@ model Productos {
   combo                   String?         @map("Combo")
   llevarControlEnCaja     String?         @map("Llevar control en caja")
   orden                   Int?            @map("Orden")
-  stockFiltro             Decimal?        @map("Stock_Filtro") @db.Money
+  stockFiltro             Decimal?        @map("Stock Filtro") @db.Money
   ordenVentas             Orderventas[]
   categoriaRelacion       Categorias?     @relation(fields: [categoria], references: [IDcategoria])
   recetaInsumos           Recetainsumos[]
@@ -252,6 +252,7 @@ model Ventas {
   mesaRelacion          Mesas?               @relation(fields: [mesa], references: [IdMesas])
   usuarioRelacion       Usuarios?            @relation(fields: [usuario], references: [IDusuarios])
   aperturaCierreCaja    AperturaCierreCaja[] @relation("AperturaCierreCajaToVentas")
+  buscar                String?              @map("Buscar")
 
   @@index([fechaYHora])
   @@index([createdAt])
@@ -360,6 +361,7 @@ model AperturaCierreInsumos {
   updatedAt         DateTime?
   seUtilizaron      Int?                   @map("se utilizaron")
   paraQueProducto   Json?                  @map("Para que producto")
+  disponible        String?                @map("Disponible")
   insumo            Insumos?               @relation(fields: [nombreInsumo], references: [IDalimentos])
   historial         HistorialCajaInsumos[]
 
@@ -393,6 +395,20 @@ model Gastos {
   tipo               String?   @default("NEGOCIO") @map("Tipo")
 
   @@map("GASTOS")
+}
+
+model GastosPersonales {
+  IDgastos           String    @id @default(cuid()) @map("IDgastos")
+  concepto           String?   @map("Concepto")
+  fechaYHora         DateTime? @map("Fecha y hora")
+  fecha              DateTime? @map("Fecha") @db.Date
+  valor              Decimal?  @map("Valor") @db.Money
+  fotos              String?   @map("Fotos")
+  medioDePago        String?   @map("Medio de pago")
+  createdAt          DateTime?
+  updatedAt          DateTime?
+
+  @@map("GASTOS PERSONALES")
 }
 
 model Comentarios {
