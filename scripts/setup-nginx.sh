@@ -50,7 +50,7 @@ fi
 
 if [ -d "/etc/letsencrypt/live/$DOMAIN" ]; then
     echo "🔄 Certificado SSL ya existe. Renovando si es necesario..."
-    sudo certbot renew --quiet
+    sudo certbot renew --cert-name "$DOMAIN" --quiet || echo "⚠️ Advertencia: La renovación del certificado para $DOMAIN falló o no era necesaria. Continuando..."
 else
     echo "🔒 Obteniendo nuevo certificado SSL para $DOMAIN..."
     sudo certbot --nginx -d "$DOMAIN" --non-interactive --agree-tos -m "$EMAIL" --redirect || echo "⚠️ Advertencia: Ocurrió un error leve al ejecutar Certbot o el certificado ya existe."
