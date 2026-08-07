@@ -212,6 +212,7 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   emitToAll(event: string, data: any) {
+    this.logger.log(`Broadcasting event ${event} to all clients in namespace`);
     this.server.emit(event, { ...data, timestamp: Date.now() });
   }
 
@@ -246,6 +247,7 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   emitToVentas(event: string, data: any) {
+    this.logger.log(`Emitting to Ventas room and all clients: ${event}`);
     this.emitToRoom(Room.VENTAS, event, data);
     this.emitToAll(event, data);
   }

@@ -1,84 +1,922 @@
-Error: Cannot find module '/app/dist/src/main'
-    at Module._resolveFilename (node:internal/modules/cjs/loader:1207:15)
-    at Module._load (node:internal/modules/cjs/loader:1038:27)
-    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:164:12)
-    at node:internal/main/run_main_module:28:49 {
-  code: 'MODULE_NOT_FOUND',
-  requireStack: []
-}
-Node.js v20.20.2
 > puntodeventabackend@0.0.1 start:prod
-> node dist/src/main
-node:internal/modules/cjs/loader:1210
-
-  throw err;
-  ^
-Error: Cannot find module '/app/dist/src/main'
-    at Module._resolveFilename (node:internal/modules/cjs/loader:1207:15)
-    at Module._load (node:internal/modules/cjs/loader:1038:27)
-    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:164:12)
-    at node:internal/main/run_main_module:28:49 {
-  code: 'MODULE_NOT_FOUND',
-  requireStack: []
+> node dist/main
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [NestFactory] Starting Nest application...
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [InstanceLoader] PrismaModule dependencies initialized +23ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [InstanceLoader] PassportModule dependencies initialized +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [InstanceLoader] ConfigHostModule dependencies initialized +1ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [InstanceLoader] ThrottlerModule dependencies initialized +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [InstanceLoader] JwtModule dependencies initialized +1ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [InstanceLoader] ConfigModule dependencies initialized +1ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [InstanceLoader] CacheModule dependencies initialized +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [InstanceLoader] WebsocketModule dependencies initialized +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [InstanceLoader] ServeStaticModule dependencies initialized +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [InstanceLoader] MesasModule dependencies initialized +1ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [InstanceLoader] NotificationsModule dependencies initialized +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [InstanceLoader] ComentariosModule dependencies initialized +1ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [InstanceLoader] AppConfigModule dependencies initialized +1ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [InstanceLoader] AuthModule dependencies initialized +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [InstanceLoader] ConfiguracionModule dependencies initialized +3ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [InstanceLoader] EstadisticasModule dependencies initialized +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [InstanceLoader] PrinterConfigModule dependencies initialized +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [InstanceLoader] ReportesModule dependencies initialized +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [InstanceLoader] CargosModule dependencies initialized +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [InstanceLoader] AppModule dependencies initialized +1ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [InstanceLoader] ClientesModule dependencies initialized +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [InstanceLoader] ProveedoresModule dependencies initialized +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [InstanceLoader] CategoriasInsumosModule dependencies initialized +0ms
+✅ InventarioController Inicializado - VERSIÓN CON RUTAS PATCH CORREGIDAS
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [InstanceLoader] InsumosModule dependencies initialized +1ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [InstanceLoader] InventarioModule dependencies initialized +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [InstanceLoader] UsuariosModule dependencies initialized +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [InstanceLoader] ProductosModule dependencies initialized +1ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [InstanceLoader] CategoriasModule dependencies initialized +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [InstanceLoader] GastosModule dependencies initialized +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [InstanceLoader] NominaModule dependencies initialized +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [InstanceLoader] CajaModule dependencies initialized +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [InstanceLoader] AiModule dependencies initialized +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [InstanceLoader] VentasModule dependencies initialized +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [WebSocketsController] AppGateway subscribed to the "joinRoom" message +138ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [WebSocketsController] AppGateway subscribed to the "leaveRoom" message +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [WebSocketsController] AppGateway subscribed to the "nuevaOrden" message +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [WebSocketsController] AppGateway subscribed to the "ordenActualizada" message +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [WebSocketsController] AppGateway subscribed to the "ordenCompletada" message +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RoutesResolver] AuthController {/api/v1/auth}: +2ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/auth/register, POST} route +2ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/auth/login, POST} route +7ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/auth/refresh, POST} route +1ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RoutesResolver] UsuariosController {/api/v1/usuarios}: +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/usuarios/roles, GET} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/usuarios, POST} route +1ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/usuarios, GET} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/usuarios/:id, GET} route +1ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/usuarios/:id, PATCH} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/usuarios/:id, DELETE} route +1ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RoutesResolver] ProductosController {/api/v1/productos}: +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/productos, POST} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/productos, GET} route +4ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/productos/:id, GET} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/productos/:id, PATCH} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/productos/:id, DELETE} route +1ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RoutesResolver] CategoriasController {/api/v1/categorias}: +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/categorias, POST} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/categorias, GET} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/categorias/:id, GET} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/categorias/:id, PATCH} route +1ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/categorias/:id, DELETE} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RoutesResolver] VentasController {/api/v1/ventas}: +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/ventas, POST} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/ventas/completa, POST} route +1ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/ventas, GET} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/ventas/hoy, GET} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/ventas/mesa/:mesaId, GET} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/ventas/:id, GET} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/ventas/:id/tiempo-total, GET} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/ventas/:id, PUT} route +1ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/ventas/:id/estado, PATCH} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/ventas/:id/pago, PATCH} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/ventas/:id/productos, POST} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/ventas/:ventaId/producto/:orderVentaId, PATCH} route +1ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/ventas/bulk, DELETE} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/ventas/trash/empty, DELETE} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/ventas/bulk/hard, DELETE} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/ventas/:id, DELETE} route +1ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/ventas/:id/hard, DELETE} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/ventas/:id/restore, POST} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RoutesResolver] InsumosController {/api/v1/insumos}: +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/insumos/upload-image, POST} route +1ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/insumos, POST} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/insumos, GET} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/insumos/alertas, GET} route +1ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/insumos/estadisticas, GET} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/insumos/:id, GET} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/insumos/:id/movimientos, GET} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/insumos/:id, PATCH} route +1ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/insumos/:id, DELETE} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/insumos/:id/movimiento, POST} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/insumos/bulk, POST} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/insumos/:id/agregar, POST} route +1ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/insumos/:id/descontar, POST} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RoutesResolver] NotificationsController {/api/v1/notifications}: +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/notifications/token, POST} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/notifications/settings/:userId, GET} route +1ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/notifications/settings/:userId, PATCH} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/notifications/history/:userId, GET} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/notifications/history/:id/read, PATCH} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RoutesResolver] InventarioController {/api/v1/inventario}: +1ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/inventario, POST} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/inventario, GET} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/inventario/items, GET} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/inventario/bajo, GET} route +1ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/inventario/item/:id/update, PATCH} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/inventario/item/update/:id, PATCH} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/inventario/item/update, PATCH} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/inventario/:id, GET} route +1ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/inventario/:id, PATCH} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/inventario/:id, DELETE} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/inventario/item, POST} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/inventario/items/bulk, POST} route +1ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/inventario/item/:id, DELETE} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/inventario/item/:id/comprar, PATCH} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/inventario/items/comprar, PATCH} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/inventario/insumo/:insumoId/stock-calculado, GET} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/inventario/recalcular-stock, POST} route +1ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RoutesResolver] ClientesController {/api/v1/clientes}: +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/clientes, POST} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/clientes, GET} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/clientes/:id, GET} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/clientes/:id, PATCH} route +1ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/clientes/:id, DELETE} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RoutesResolver] ProveedoresController {/api/v1/proveedores}: +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/proveedores, POST} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/proveedores, GET} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/proveedores/:id, GET} route +1ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/proveedores/:id, PATCH} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/proveedores/:id, DELETE} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RoutesResolver] CajaController {/api/v1/caja}: +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/caja/abrir, POST} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/caja/:id, PATCH} route +1ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/caja/cerrar/:id, PATCH} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/caja/reabrir/:id, PATCH} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/caja/activa, GET} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/caja/resumen/:id, GET} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/caja, GET} route +1ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/caja/:id, GET} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/caja/:id, DELETE} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/caja/:id/verificacion-pendiente, GET} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/caja/:id/registrar-conteo, POST} route +1ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/caja/:id/posponer-verificacion, POST} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/caja/:id/insumo/:insumoId/conteo/:conteoIndex, DELETE} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/caja/:id/insumo/:insumoId/conteo/:conteoIndex, PATCH} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/caja/:id/auto-cuadre/preview, POST} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/caja/:id/auto-cuadre/execute, POST} route +1ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RoutesResolver] AiController {/api/v1/ai}: +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/ai/extract-data, POST} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/ai/voice-order, POST} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/ai/extract-text, POST} route +1ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/ai/refine-extraction, POST} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RoutesResolver] AgentController {/api/v1/agent}: +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/agent/chat, POST} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RoutesResolver] ConfiguracionController {/api/v1/configuracion}: +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/configuracion, GET} route +1ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/configuracion, PUT} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/configuracion/ia, GET} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/configuracion/ia, PUT} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/configuracion/whatsapp, GET} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/configuracion/whatsapp, PUT} route +1ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/configuracion/whatsapp/send-report, POST} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/configuracion/whatsapp/upload-and-send, POST} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RoutesResolver] EstadisticasController {/api/v1/estadisticas}: +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/estadisticas/generales, GET} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RoutesResolver] GastosController {/api/v1/gastos}: +1ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/gastos/upload-image, POST} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/gastos, POST} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/gastos/bulk, POST} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/gastos, GET} route +1ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/gastos/total, GET} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/gastos/:id, GET} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/gastos/:id, PATCH} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/gastos/:id, DELETE} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RoutesResolver] MesasController {/api/v1/mesas}: +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/mesas, POST} route +1ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/mesas, GET} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/mesas/:id, GET} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/mesas/:id, PATCH} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/mesas/:id, DELETE} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RoutesResolver] ComentariosController {/api/v1/comentarios}: +1ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/comentarios, POST} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/comentarios, GET} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/comentarios/:id, GET} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/comentarios/:id, PATCH} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/comentarios/:id, DELETE} route +1ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RoutesResolver] PrinterConfigController {/api/v1/printer-config}: +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/printer-config, GET} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/printer-config, PUT} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RoutesResolver] ReportesController {/api/v1/reportes}: +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/reportes/dinero-guardado, GET} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/reportes/dinero-guardado, POST} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/reportes/dinero-guardado/:filterId, DELETE} route +1ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/reportes/dinero-guardado/:filterId, GET} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/reportes/dinero-guardado/:filterId/retiros, POST} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/reportes/dinero-guardado/retiros/:retiroId, DELETE} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/reportes/dinero-guardado/:filterId/base, POST} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RoutesResolver] CategoriasInsumosController {/api/v1/categorias-insumos}: +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/categorias-insumos, POST} route +1ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/categorias-insumos, GET} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/categorias-insumos/:id, GET} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/categorias-insumos/:id, PATCH} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/categorias-insumos/:id, DELETE} route +1ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RoutesResolver] CargosController {/api/v1/cargos}: +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/cargos, POST} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/cargos, GET} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/cargos/:id, GET} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/cargos/:id, PATCH} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/cargos/:id, DELETE} route +1ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/cargos/excepcion-horario, POST} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/cargos/excepcion-horario/:cargoId, GET} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/cargos/excepcion-horario/:id, DELETE} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RoutesResolver] NominaController {/api/v1/nomina}: +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/nomina/turno/entrada, POST} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/nomina/turno/:id/salida, PATCH} route +1ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/nomina/turno/activo-hoy, GET} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/nomina/turnos/:id/descanso/iniciar, POST} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/nomina/turnos/:id/descanso/terminar, POST} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/nomina/turnos, GET} route +1ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/nomina/mis-turnos, GET} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/nomina/turno/:id, GET} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/nomina/turno/:id, PATCH} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/nomina/turno/manual, POST} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/nomina/llegadas-tarde/aplicar, POST} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/nomina/turno/:id, DELETE} route +1ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/nomina/descuento, POST} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/nomina/descuento/repartir, POST} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/nomina/descuentos, GET} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/nomina/mis-descuentos, GET} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/nomina/descuento/:id/visto, PATCH} route +1ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/nomina/descuento/:id, PATCH} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/nomina/descuento/:id, DELETE} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/nomina/descuentos/lote/:loteId, GET} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/nomina/descuentos/lote/:loteId, PATCH} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/nomina/descuentos/lote/:loteId, DELETE} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/nomina/resumen/mio, GET} route +1ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/nomina/resumen/:usuarioId, GET} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/nomina/recalcular/:usuarioId, POST} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/nomina/liquidar, POST} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/nomina/liquidar/:id/firmar, POST} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/nomina/liquidar/:id/firmar-admin, POST} route +1ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/nomina/liquidar/:id, DELETE} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/nomina/liquidar/:id/descuento-extra, POST} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/nomina/liquidaciones, GET} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/nomina/liquidaciones/:id, GET} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/nomina/liquidaciones/:id/pagar, PATCH} route +0ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [RouterExplorer] Mapped {/api/v1/nomina/liquidaciones/:id/reenviar-notificacion, POST} route +1ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [AgentService] PostgresSaver checkpointer configurado con éxito.
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [NestApplication] Nest application successfully started +25ms
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [Bootstrap] Application is running on: http://0.0.0.0:3000
+[Nest] 19  - 08/05/2026, 6:58:02 PM     LOG [Bootstrap] Swagger documentation: http://0.0.0.0:3000/api/docs
+[Nest] 19  - 08/05/2026, 7:00:37 PM     LOG [AuthController] Request to login user: master@restaurante2.com
+[Nest] 19  - 08/05/2026, 7:00:37 PM     LOG [AuthService] Attempting to login user: master@restaurante2.com
+[Nest] 19  - 08/05/2026, 7:00:37 PM     LOG [AuthService] User logged in successfully: master@restaurante2.com
+[Nest] 19  - 08/05/2026, 7:00:38 PM     LOG [AppGateway] Client ua4nT4X9jFH7MsJdAAAB mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/05/2026, 7:00:38 PM     LOG [AppGateway] Client ua4nT4X9jFH7MsJdAAAB joined room: kitchen
+[Nest] 19  - 08/05/2026, 7:00:38 PM     LOG [AppGateway] Client ua4nT4X9jFH7MsJdAAAB joined room: kitchen
+[Nest] 19  - 08/05/2026, 7:00:39 PM     LOG [AppGateway] Client ua4nT4X9jFH7MsJdAAAB joined room: caja
+[Nest] 19  - 08/05/2026, 7:00:41 PM     LOG [AppGateway] Client ua4nT4X9jFH7MsJdAAAB joined room: caja
+[Nest] 19  - 08/05/2026, 7:15:14 PM     LOG [AppGateway] Client disconnected: ua4nT4X9jFH7MsJdAAAB (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen, caja)
+[Nest] 19  - 08/05/2026, 7:15:20 PM     LOG [AppGateway] Client kCrLoBJEq_wCFr3RAAAD mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/05/2026, 7:15:20 PM     LOG [AppGateway] Client kCrLoBJEq_wCFr3RAAAD joined room: kitchen
+[Nest] 19  - 08/05/2026, 7:15:20 PM     LOG [AppGateway] Client kCrLoBJEq_wCFr3RAAAD joined room: kitchen
+[Nest] 19  - 08/05/2026, 7:16:54 PM     LOG [AppGateway] Client kCrLoBJEq_wCFr3RAAAD joined room: caja
+[Nest] 19  - 08/05/2026, 7:16:56 PM     LOG [AppGateway] Client kCrLoBJEq_wCFr3RAAAD joined room: caja
+[Nest] 19  - 08/05/2026, 7:46:49 PM     LOG [AppGateway] Client disconnected: kCrLoBJEq_wCFr3RAAAD (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen, caja)
+[Nest] 19  - 08/05/2026, 11:29:29 PM     LOG [AppGateway] Client i6iuqXhlgvSdGxAkAAAF mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/05/2026, 11:29:30 PM     LOG [AppGateway] Client i6iuqXhlgvSdGxAkAAAF joined room: kitchen
+[Nest] 19  - 08/05/2026, 11:29:30 PM     LOG [AppGateway] Client i6iuqXhlgvSdGxAkAAAF joined room: kitchen
+[Nest] 19  - 08/05/2026, 11:29:32 PM     LOG [AppGateway] Client i6iuqXhlgvSdGxAkAAAF joined room: caja
+[Nest] 19  - 08/05/2026, 11:29:34 PM     LOG [AppGateway] Client i6iuqXhlgvSdGxAkAAAF joined room: caja
+[Nest] 19  - 08/05/2026, 11:30:16 PM     LOG [AppGateway] Client disconnected: i6iuqXhlgvSdGxAkAAAF (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen, caja)
+[Nest] 19  - 08/05/2026, 11:41:19 PM     LOG [AppGateway] Client 7dq0hBauGA45GV-MAAAH mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/05/2026, 11:41:19 PM     LOG [AppGateway] Client disconnected: 7dq0hBauGA45GV-MAAAH (was in rooms: user_cmsducjti0001cuyw6xltgir1)
+[Nest] 19  - 08/05/2026, 11:41:41 PM     LOG [AppGateway] Client ZEQ--bw5r0N6pbRuAAAJ mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/05/2026, 11:41:42 PM     LOG [AppGateway] Client ZEQ--bw5r0N6pbRuAAAJ joined room: kitchen
+[Nest] 19  - 08/05/2026, 11:41:42 PM     LOG [AppGateway] Client ZEQ--bw5r0N6pbRuAAAJ joined room: kitchen
+[Nest] 19  - 08/05/2026, 11:41:43 PM     LOG [AppGateway] Client disconnected: ZEQ--bw5r0N6pbRuAAAJ (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen)
+[Nest] 19  - 08/06/2026, 12:20:30 AM     LOG [AppGateway] Client yYwxrQ0KInGu5pmrAAAL mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/06/2026, 12:20:30 AM     LOG [AppGateway] Client yYwxrQ0KInGu5pmrAAAL joined room: kitchen
+[Nest] 19  - 08/06/2026, 12:20:30 AM     LOG [AppGateway] Client yYwxrQ0KInGu5pmrAAAL joined room: kitchen
+[Nest] 19  - 08/06/2026, 12:20:32 AM     LOG [AppGateway] Client yYwxrQ0KInGu5pmrAAAL joined room: caja
+[Nest] 19  - 08/06/2026, 12:20:33 AM     LOG [AppGateway] Client yYwxrQ0KInGu5pmrAAAL joined room: caja
+[Nest] 19  - 08/06/2026, 12:21:11 AM     LOG [AppGateway] Client yYwxrQ0KInGu5pmrAAAL joined room: caja
+[Nest] 19  - 08/06/2026, 12:21:37 AM     LOG [AppGateway] Client yYwxrQ0KInGu5pmrAAAL joined room: caja
+[Nest] 19  - 08/06/2026, 12:21:51 AM     LOG [AppGateway] Client yYwxrQ0KInGu5pmrAAAL joined room: caja
+[Nest] 19  - 08/06/2026, 12:22:02 AM     LOG [AppGateway] Client yYwxrQ0KInGu5pmrAAAL joined room: caja
+[Nest] 19  - 08/06/2026, 12:22:06 AM     LOG [AppGateway] Client yYwxrQ0KInGu5pmrAAAL joined room: caja
+[Nest] 19  - 08/06/2026, 12:23:40 AM     LOG [AppGateway] Client disconnected: yYwxrQ0KInGu5pmrAAAL (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen, caja)
+[Nest] 19  - 08/06/2026, 12:26:49 AM     LOG [AppGateway] Client RuVK_6n4SCLBAxERAAAN mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/06/2026, 12:26:49 AM     LOG [AppGateway] Client RuVK_6n4SCLBAxERAAAN joined room: kitchen
+[Nest] 19  - 08/06/2026, 12:26:49 AM     LOG [AppGateway] Client RuVK_6n4SCLBAxERAAAN joined room: kitchen
+[Nest] 19  - 08/06/2026, 12:29:03 AM     LOG [AppGateway] Client disconnected: RuVK_6n4SCLBAxERAAAN (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen)
+[Nest] 19  - 08/06/2026, 12:29:08 AM     LOG [AppGateway] Client VZOK3kf2lejFf9NHAAAP mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/06/2026, 12:29:08 AM     LOG [AppGateway] Client VZOK3kf2lejFf9NHAAAP joined room: kitchen
+[Nest] 19  - 08/06/2026, 12:29:08 AM     LOG [AppGateway] Client VZOK3kf2lejFf9NHAAAP joined room: kitchen
+[Nest] 19  - 08/06/2026, 12:29:39 AM     LOG [AppGateway] Client disconnected: VZOK3kf2lejFf9NHAAAP (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen)
+[Nest] 19  - 08/06/2026, 12:30:02 AM     LOG [AppGateway] Client m6lH5JbOYt3si5-1AAAR mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/06/2026, 12:30:02 AM     LOG [AppGateway] Client m6lH5JbOYt3si5-1AAAR joined room: kitchen
+[Nest] 19  - 08/06/2026, 12:30:02 AM     LOG [AppGateway] Client m6lH5JbOYt3si5-1AAAR joined room: kitchen
+[Nest] 19  - 08/06/2026, 12:35:20 AM     LOG [AppGateway] Client m6lH5JbOYt3si5-1AAAR joined room: caja
+[Nest] 19  - 08/06/2026, 12:35:56 AM     LOG [AppGateway] Client disconnected: m6lH5JbOYt3si5-1AAAR (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen, caja)
+[Nest] 19  - 08/06/2026, 12:35:58 AM     LOG [AppGateway] Client K9uFRdxiNQlOuuaxAAAT mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/06/2026, 12:35:58 AM     LOG [AppGateway] Client K9uFRdxiNQlOuuaxAAAT joined room: kitchen
+[Nest] 19  - 08/06/2026, 12:35:58 AM     LOG [AppGateway] Client K9uFRdxiNQlOuuaxAAAT joined room: kitchen
+[Nest] 19  - 08/06/2026, 12:36:23 AM     LOG [AppGateway] Nueva orden received: cmsgscewb003dd7ocintqjlro
+[Nest] 19  - 08/06/2026, 12:36:46 AM     LOG [AppGateway] Client disconnected: K9uFRdxiNQlOuuaxAAAT (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen)
+[Nest] 19  - 08/06/2026, 2:10:54 AM     LOG [AppGateway] Client cpdIWC4ruFThB5XKAAAV mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/06/2026, 2:10:54 AM     LOG [AppGateway] Client cpdIWC4ruFThB5XKAAAV joined room: kitchen
+[Nest] 19  - 08/06/2026, 2:10:54 AM     LOG [AppGateway] Client cpdIWC4ruFThB5XKAAAV joined room: kitchen
+[Nest] 19  - 08/06/2026, 2:11:10 AM     LOG [AppGateway] Orden actualizada received: cmsgscewb003dd7ocintqjlro
+[Nest] 19  - 08/06/2026, 2:11:17 AM     LOG [AppGateway] Client cpdIWC4ruFThB5XKAAAV joined room: caja
+[Nest] 19  - 08/06/2026, 2:11:18 AM     LOG [AppGateway] Client cpdIWC4ruFThB5XKAAAV joined room: caja
+[Nest] 19  - 08/06/2026, 2:14:37 AM     LOG [AppGateway] Client disconnected: cpdIWC4ruFThB5XKAAAV (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen, caja)
+[Nest] 19  - 08/06/2026, 2:15:15 AM     LOG [AppGateway] Client h5pI4fkykG60M4Y3AAAX mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/06/2026, 2:15:16 AM     LOG [AppGateway] Client h5pI4fkykG60M4Y3AAAX joined room: kitchen
+[Nest] 19  - 08/06/2026, 2:15:16 AM     LOG [AppGateway] Client h5pI4fkykG60M4Y3AAAX joined room: kitchen
+[Nest] 19  - 08/06/2026, 2:18:22 AM     LOG [AppGateway] Client disconnected: h5pI4fkykG60M4Y3AAAX (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen)
+[Nest] 19  - 08/06/2026, 2:18:43 AM     LOG [AppGateway] Client faC2uItI5hkHLESsAAAZ mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/06/2026, 2:18:43 AM     LOG [AppGateway] Client faC2uItI5hkHLESsAAAZ joined room: kitchen
+[Nest] 19  - 08/06/2026, 2:18:43 AM     LOG [AppGateway] Client faC2uItI5hkHLESsAAAZ joined room: kitchen
+[Nest] 19  - 08/06/2026, 2:20:08 AM     LOG [AppGateway] Client disconnected: faC2uItI5hkHLESsAAAZ (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen)
+[Nest] 19  - 08/06/2026, 3:19:11 AM     LOG [AppGateway] Client 9a2kMYWR3P0rfDTrAAAb mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/06/2026, 3:19:11 AM     LOG [AppGateway] Client 9a2kMYWR3P0rfDTrAAAb joined room: kitchen
+[Nest] 19  - 08/06/2026, 3:19:11 AM     LOG [AppGateway] Client 9a2kMYWR3P0rfDTrAAAb joined room: kitchen
+[Nest] 19  - 08/06/2026, 3:20:10 AM     LOG [AppGateway] Client disconnected: 9a2kMYWR3P0rfDTrAAAb (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen)
+[Nest] 19  - 08/06/2026, 3:33:53 AM     LOG [AppGateway] Client lhIFrtpvdl8J74MMAAAd mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/06/2026, 3:33:53 AM     LOG [AppGateway] Client lhIFrtpvdl8J74MMAAAd joined room: kitchen
+[Nest] 19  - 08/06/2026, 3:33:53 AM     LOG [AppGateway] Client lhIFrtpvdl8J74MMAAAd joined room: kitchen
+[Nest] 19  - 08/06/2026, 3:50:36 AM     LOG [AppGateway] Client disconnected: lhIFrtpvdl8J74MMAAAd (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen)
+[Nest] 19  - 08/06/2026, 1:38:22 PM     LOG [AppGateway] Client m31IN4uQVD85CYacAAAf mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/06/2026, 1:38:23 PM     LOG [AppGateway] Client m31IN4uQVD85CYacAAAf joined room: kitchen
+[Nest] 19  - 08/06/2026, 1:38:23 PM     LOG [AppGateway] Client m31IN4uQVD85CYacAAAf joined room: kitchen
+[Nest] 19  - 08/06/2026, 1:38:33 PM     LOG [AppGateway] Client m31IN4uQVD85CYacAAAf joined room: caja
+[Nest] 19  - 08/06/2026, 1:38:34 PM     LOG [AppGateway] Client m31IN4uQVD85CYacAAAf joined room: caja
+[Nest] 19  - 08/06/2026, 1:39:02 PM     LOG [AppGateway] Client m31IN4uQVD85CYacAAAf joined room: caja
+[Nest] 19  - 08/06/2026, 1:39:58 PM     LOG [AppGateway] Client m31IN4uQVD85CYacAAAf joined room: caja
+[Nest] 19  - 08/06/2026, 1:57:32 PM     LOG [AppGateway] Client disconnected: m31IN4uQVD85CYacAAAf (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen, caja)
+[Nest] 19  - 08/06/2026, 2:03:36 PM     LOG [AppGateway] Client nCuFHCBgdRRZRSALAAAh mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/06/2026, 2:03:36 PM     LOG [AppGateway] Client nCuFHCBgdRRZRSALAAAh joined room: kitchen
+[Nest] 19  - 08/06/2026, 2:03:36 PM     LOG [AppGateway] Client nCuFHCBgdRRZRSALAAAh joined room: kitchen
+[Nest] 19  - 08/06/2026, 2:03:57 PM     LOG [AppGateway] Client nCuFHCBgdRRZRSALAAAh joined room: caja
+[Nest] 19  - 08/06/2026, 2:03:58 PM     LOG [AppGateway] Client nCuFHCBgdRRZRSALAAAh joined room: caja
+[Nest] 19  - 08/06/2026, 2:06:52 PM     LOG [AppGateway] Client disconnected: nCuFHCBgdRRZRSALAAAh (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen, caja)
+[Nest] 19  - 08/06/2026, 2:17:23 PM     LOG [AppGateway] Client N-bImLe-JcJoSXmOAAAj mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/06/2026, 2:17:23 PM     LOG [AppGateway] Client N-bImLe-JcJoSXmOAAAj joined room: kitchen
+[Nest] 19  - 08/06/2026, 2:17:23 PM     LOG [AppGateway] Client N-bImLe-JcJoSXmOAAAj joined room: kitchen
+[Nest] 19  - 08/06/2026, 2:17:50 PM     LOG [AppGateway] Client disconnected: N-bImLe-JcJoSXmOAAAj (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen)
+[Nest] 19  - 08/06/2026, 2:18:03 PM     LOG [AppGateway] Client 825PLZeMWwG9HUbrAAAl mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/06/2026, 2:18:03 PM     LOG [AppGateway] Client 825PLZeMWwG9HUbrAAAl joined room: kitchen
+[Nest] 19  - 08/06/2026, 2:18:03 PM     LOG [AppGateway] Client 825PLZeMWwG9HUbrAAAl joined room: kitchen
+[Nest] 19  - 08/06/2026, 2:18:06 PM     LOG [AppGateway] Client 825PLZeMWwG9HUbrAAAl joined room: caja
+[Nest] 19  - 08/06/2026, 2:18:10 PM     LOG [AppGateway] Client 825PLZeMWwG9HUbrAAAl joined room: caja
+[Nest] 19  - 08/06/2026, 2:18:13 PM     LOG [AppGateway] Client disconnected: 825PLZeMWwG9HUbrAAAl (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen, caja)
+[Nest] 19  - 08/06/2026, 2:18:18 PM     LOG [AppGateway] Client yKfvjjPhx5K8W6x7AAAn mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/06/2026, 2:18:18 PM     LOG [AppGateway] Client yKfvjjPhx5K8W6x7AAAn joined room: kitchen
+[Nest] 19  - 08/06/2026, 2:18:18 PM     LOG [AppGateway] Client yKfvjjPhx5K8W6x7AAAn joined room: kitchen
+[Nest] 19  - 08/06/2026, 2:18:19 PM     LOG [AppGateway] Client yKfvjjPhx5K8W6x7AAAn joined room: caja
+[Nest] 19  - 08/06/2026, 2:18:24 PM     LOG [AppGateway] Client NHH2uH4j3CDcWQYVAAAp mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/06/2026, 2:18:24 PM     LOG [AppGateway] Client NHH2uH4j3CDcWQYVAAAp joined room: kitchen
+[Nest] 19  - 08/06/2026, 2:18:24 PM     LOG [AppGateway] Client NHH2uH4j3CDcWQYVAAAp joined room: kitchen
+[Nest] 19  - 08/06/2026, 2:18:25 PM     LOG [AppGateway] Client NHH2uH4j3CDcWQYVAAAp joined room: caja
+[Nest] 19  - 08/06/2026, 2:18:31 PM     LOG [AppGateway] Client NHH2uH4j3CDcWQYVAAAp joined room: caja
+[Nest] 19  - 08/06/2026, 2:18:36 PM     LOG [AppGateway] Client yKfvjjPhx5K8W6x7AAAn joined room: caja
+[Nest] 19  - 08/06/2026, 2:19:02 PM     LOG [AppGateway] Client disconnected: yKfvjjPhx5K8W6x7AAAn (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen, caja)
+[Nest] 19  - 08/06/2026, 2:19:09 PM     LOG [AppGateway] Client 8ekJWPVkDvj-sDHhAAAr mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/06/2026, 2:19:09 PM     LOG [AppGateway] Client 8ekJWPVkDvj-sDHhAAAr joined room: kitchen
+[Nest] 19  - 08/06/2026, 2:19:09 PM     LOG [AppGateway] Client 8ekJWPVkDvj-sDHhAAAr joined room: kitchen
+[Nest] 19  - 08/06/2026, 2:19:37 PM     LOG [AppGateway] Client disconnected: NHH2uH4j3CDcWQYVAAAp (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen, caja)
+[Nest] 19  - 08/06/2026, 2:19:53 PM     LOG [AppGateway] Client disconnected: 8ekJWPVkDvj-sDHhAAAr (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen)
+[Nest] 19  - 08/06/2026, 2:20:58 PM     LOG [AppGateway] Client qOxlxIiRm5gnW08YAAAt mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/06/2026, 2:20:58 PM     LOG [AppGateway] Client qOxlxIiRm5gnW08YAAAt joined room: kitchen
+[Nest] 19  - 08/06/2026, 2:20:58 PM     LOG [AppGateway] Client qOxlxIiRm5gnW08YAAAt joined room: kitchen
+[Nest] 19  - 08/06/2026, 2:21:00 PM     LOG [AppGateway] Client qOxlxIiRm5gnW08YAAAt joined room: caja
+[Nest] 19  - 08/06/2026, 2:21:08 PM     LOG [AppGateway] Client disconnected: qOxlxIiRm5gnW08YAAAt (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen, caja)
+[Nest] 19  - 08/06/2026, 2:21:31 PM     LOG [AppGateway] Client jWiCx_7zZeHSyHsoAAAv mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/06/2026, 2:21:31 PM     LOG [AppGateway] Client jWiCx_7zZeHSyHsoAAAv joined room: kitchen
+[Nest] 19  - 08/06/2026, 2:21:31 PM     LOG [AppGateway] Client jWiCx_7zZeHSyHsoAAAv joined room: kitchen
+[Nest] 19  - 08/06/2026, 2:23:40 PM     LOG [AppGateway] Client disconnected: jWiCx_7zZeHSyHsoAAAv (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen)
+[Nest] 19  - 08/06/2026, 2:24:21 PM     LOG [AppGateway] Client ISgJaQQI3wukgpyJAAAx mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/06/2026, 2:24:21 PM     LOG [AppGateway] Client ISgJaQQI3wukgpyJAAAx joined room: kitchen
+[Nest] 19  - 08/06/2026, 2:24:21 PM     LOG [AppGateway] Client ISgJaQQI3wukgpyJAAAx joined room: kitchen
+[Nest] 19  - 08/06/2026, 2:24:28 PM     LOG [AppGateway] Client ISgJaQQI3wukgpyJAAAx joined room: caja
+[Nest] 19  - 08/06/2026, 2:24:44 PM     LOG [AppGateway] Client disconnected: ISgJaQQI3wukgpyJAAAx (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen, caja)
+[Nest] 19  - 08/06/2026, 2:26:21 PM     LOG [AppGateway] Client AYM5GY0017x0iALCAAAz mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/06/2026, 2:26:21 PM     LOG [AppGateway] Client AYM5GY0017x0iALCAAAz joined room: kitchen
+[Nest] 19  - 08/06/2026, 2:26:21 PM     LOG [AppGateway] Client AYM5GY0017x0iALCAAAz joined room: kitchen
+[Nest] 19  - 08/06/2026, 2:33:23 PM     LOG [AppGateway] Client disconnected: AYM5GY0017x0iALCAAAz (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen)
+[Nest] 19  - 08/06/2026, 2:33:37 PM     LOG [AppGateway] Client hUDOvaq_vDI72BXpAAA1 mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/06/2026, 2:33:37 PM     LOG [AppGateway] Client hUDOvaq_vDI72BXpAAA1 joined room: kitchen
+[Nest] 19  - 08/06/2026, 2:33:37 PM     LOG [AppGateway] Client hUDOvaq_vDI72BXpAAA1 joined room: kitchen
+[Nest] 19  - 08/06/2026, 2:36:29 PM     LOG [AppGateway] Client hUDOvaq_vDI72BXpAAA1 joined room: caja
+[Nest] 19  - 08/06/2026, 2:36:31 PM     LOG [AppGateway] Client hUDOvaq_vDI72BXpAAA1 joined room: caja
+[Nest] 19  - 08/06/2026, 2:37:18 PM     LOG [AppGateway] Client disconnected: hUDOvaq_vDI72BXpAAA1 (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen, caja)
+[Nest] 19  - 08/06/2026, 2:38:46 PM     LOG [AppGateway] Client JQwyJSmMhNkiB2diAAA3 mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/06/2026, 2:38:47 PM     LOG [AppGateway] Client JQwyJSmMhNkiB2diAAA3 joined room: kitchen
+[Nest] 19  - 08/06/2026, 2:38:47 PM     LOG [AppGateway] Client JQwyJSmMhNkiB2diAAA3 joined room: kitchen
+[Nest] 19  - 08/06/2026, 2:40:21 PM     LOG [AppGateway] Client Zk3jUUWONKnumq1CAAA5 mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/06/2026, 2:40:21 PM     LOG [AppGateway] Client Zk3jUUWONKnumq1CAAA5 joined room: kitchen
+[Nest] 19  - 08/06/2026, 2:40:21 PM     LOG [AppGateway] Client Zk3jUUWONKnumq1CAAA5 joined room: kitchen
+[Nest] 19  - 08/06/2026, 2:41:15 PM     LOG [AppGateway] Client disconnected: Zk3jUUWONKnumq1CAAA5 (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen)
+[Nest] 19  - 08/06/2026, 2:45:07 PM     LOG [AppGateway] Client xUdaN6Wy2jEg8bGfAAA7 mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/06/2026, 2:45:07 PM     LOG [AppGateway] Client xUdaN6Wy2jEg8bGfAAA7 joined room: kitchen
+[Nest] 19  - 08/06/2026, 2:45:07 PM     LOG [AppGateway] Client xUdaN6Wy2jEg8bGfAAA7 joined room: kitchen
+[Nest] 19  - 08/06/2026, 2:45:09 PM     LOG [AppGateway] Client xUdaN6Wy2jEg8bGfAAA7 joined room: caja
+[Nest] 19  - 08/06/2026, 2:45:40 PM     LOG [AppGateway] Nueva orden received: cmshmoll40041d7ocjrpxp14e
+[Nest] 19  - 08/06/2026, 2:46:36 PM     LOG [AppGateway] Nueva orden received: cmshmpsze004ld7oc4g993pwp
+[Nest] 19  - 08/06/2026, 2:47:05 PM     LOG [AppGateway] Nueva orden received: cmshmqfhw005ad7ocxl8lp85k
+[Nest] 19  - 08/06/2026, 2:47:20 PM     LOG [AppGateway] Nueva orden received: cmshmqqyg005od7octid1oziw
+[Nest] 19  - 08/06/2026, 2:47:42 PM     LOG [AppGateway] Nueva orden received: cmshmr7qq0060d7ocb8qkge1k
+[Nest] 19  - 08/06/2026, 2:48:05 PM     LOG [AppGateway] Nueva orden received: cmshmrpx5006gd7oc8gnylija
+[Nest] 19  - 08/06/2026, 2:48:33 PM     LOG [AppGateway] Nueva orden received: cmshmsbjt006wd7occdmqfa20
+[Nest] 19  - 08/06/2026, 2:49:46 PM     LOG [AppGateway] Client disconnected: xUdaN6Wy2jEg8bGfAAA7 (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen, caja)
+[Nest] 19  - 08/06/2026, 2:55:32 PM     LOG [AppGateway] Client disconnected: JQwyJSmMhNkiB2diAAA3 (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen)
+[Nest] 19  - 08/06/2026, 3:03:08 PM     LOG [AppGateway] Client 20cFs00xYjrdhsZMAAA9 mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/06/2026, 3:03:09 PM     LOG [AppGateway] Client 20cFs00xYjrdhsZMAAA9 joined room: kitchen
+[Nest] 19  - 08/06/2026, 3:03:09 PM     LOG [AppGateway] Client 20cFs00xYjrdhsZMAAA9 joined room: kitchen
+[Nest] 19  - 08/06/2026, 3:04:55 PM     LOG [AppGateway] Client 20cFs00xYjrdhsZMAAA9 joined room: caja
+[Nest] 19  - 08/06/2026, 3:04:55 PM     LOG [AppGateway] Orden actualizada received: cmshmqfhw005ad7ocxl8lp85k
+[Nest] 19  - 08/06/2026, 3:05:15 PM     LOG [AppGateway] Orden actualizada received: cmshmqfhw005ad7ocxl8lp85k
+[Nest] 19  - 08/06/2026, 3:05:46 PM     LOG [AppGateway] Client 20cFs00xYjrdhsZMAAA9 joined room: caja
+[Nest] 19  - 08/06/2026, 3:05:46 PM     LOG [AppGateway] Orden actualizada received: cmshmqqyg005od7octid1oziw
+[Nest] 19  - 08/06/2026, 3:06:00 PM     LOG [AppGateway] Orden actualizada received: cmshmqqyg005od7octid1oziw
+[Nest] 19  - 08/06/2026, 3:06:54 PM     LOG [AppGateway] Client 20cFs00xYjrdhsZMAAA9 joined room: kitchen
+[Nest] 19  - 08/06/2026, 3:06:54 PM     LOG [AppGateway] Client 20cFs00xYjrdhsZMAAA9 joined room: caja
+[Nest] 19  - 08/06/2026, 3:07:09 PM     LOG [AppGateway] Client FbQVBbyDBKgue30MAAA_ mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/06/2026, 3:07:09 PM     LOG [AppGateway] Client FbQVBbyDBKgue30MAAA_ joined room: kitchen
+[Nest] 19  - 08/06/2026, 3:07:09 PM     LOG [AppGateway] Client FbQVBbyDBKgue30MAAA_ joined room: kitchen
+[Nest] 19  - 08/06/2026, 3:07:13 PM     LOG [AppGateway] Client FbQVBbyDBKgue30MAAA_ joined room: kitchen
+[Nest] 19  - 08/06/2026, 3:07:13 PM     LOG [AppGateway] Client FbQVBbyDBKgue30MAAA_ joined room: caja
+[Nest] 19  - 08/06/2026, 3:08:58 PM     LOG [AppGateway] Client disconnected: 20cFs00xYjrdhsZMAAA9 (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen, caja)
+[Nest] 19  - 08/06/2026, 3:47:28 PM     LOG [AppGateway] Client 3g5waCN1X3EYWrWuAABB mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/06/2026, 3:47:28 PM     LOG [AppGateway] Client 3g5waCN1X3EYWrWuAABB joined room: kitchen
+[Nest] 19  - 08/06/2026, 3:47:28 PM     LOG [AppGateway] Client 3g5waCN1X3EYWrWuAABB joined room: kitchen
+[Nest] 19  - 08/06/2026, 3:47:31 PM     LOG [AppGateway] Client disconnected: 3g5waCN1X3EYWrWuAABB (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen)
+[Nest] 19  - 08/06/2026, 3:47:35 PM     LOG [AppGateway] Client kHK0dIF2DuQtCySmAABD mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/06/2026, 3:47:36 PM     LOG [AppGateway] Client kHK0dIF2DuQtCySmAABD joined room: kitchen
+[Nest] 19  - 08/06/2026, 3:47:36 PM     LOG [AppGateway] Client kHK0dIF2DuQtCySmAABD joined room: kitchen
+[Nest] 19  - 08/06/2026, 3:47:42 PM     LOG [AppGateway] Client disconnected: kHK0dIF2DuQtCySmAABD (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen)
+[Nest] 19  - 08/06/2026, 3:47:48 PM     LOG [AppGateway] Client disconnected: FbQVBbyDBKgue30MAAA_ (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen, caja)
+[Nest] 19  - 08/06/2026, 4:12:45 PM     LOG [AppGateway] Client 2EFn1TwmbTfBVKKBAABF mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/06/2026, 4:12:45 PM     LOG [AppGateway] Client 2EFn1TwmbTfBVKKBAABF joined room: kitchen
+[Nest] 19  - 08/06/2026, 4:12:45 PM     LOG [AppGateway] Client 2EFn1TwmbTfBVKKBAABF joined room: kitchen
+[Nest] 19  - 08/06/2026, 4:12:47 PM     LOG [AppGateway] Client disconnected: 2EFn1TwmbTfBVKKBAABF (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen)
+[Nest] 19  - 08/06/2026, 4:18:48 PM     LOG [AuthController] Request to login user: master@restaurante2.com
+[Nest] 19  - 08/06/2026, 4:18:48 PM     LOG [AuthService] Attempting to login user: master@restaurante2.com
+[Nest] 19  - 08/06/2026, 4:18:48 PM    WARN [AuthService] Login failed: Invalid password for email master@restaurante2.com
+[Nest] 19  - 08/06/2026, 4:19:01 PM     LOG [AuthController] Request to login user: master@restaurante2.com
+[Nest] 19  - 08/06/2026, 4:19:01 PM     LOG [AuthService] Attempting to login user: master@restaurante2.com
+[Nest] 19  - 08/06/2026, 4:19:01 PM     LOG [AuthService] User logged in successfully: master@restaurante2.com
+[Nest] 19  - 08/06/2026, 4:19:02 PM     LOG [AppGateway] Client b1vJ-00l0ZsrnCBIAABH mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/06/2026, 4:19:03 PM     LOG [AppGateway] Client b1vJ-00l0ZsrnCBIAABH joined room: kitchen
+[Nest] 19  - 08/06/2026, 4:19:03 PM     LOG [AppGateway] Client b1vJ-00l0ZsrnCBIAABH joined room: kitchen
+[Nest] 19  - 08/06/2026, 4:20:36 PM     LOG [AppGateway] Client disconnected: b1vJ-00l0ZsrnCBIAABH (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen)
+[Nest] 19  - 08/06/2026, 4:22:37 PM     LOG [AppGateway] Client C1n_GTKXg8XN4XCiAABJ mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/06/2026, 4:22:37 PM     LOG [AppGateway] Client C1n_GTKXg8XN4XCiAABJ joined room: kitchen
+[Nest] 19  - 08/06/2026, 4:22:37 PM     LOG [AppGateway] Client C1n_GTKXg8XN4XCiAABJ joined room: kitchen
+[Nest] 19  - 08/06/2026, 4:22:38 PM     LOG [AppGateway] Client C1n_GTKXg8XN4XCiAABJ joined room: caja
+[Nest] 19  - 08/06/2026, 4:23:42 PM     LOG [AppGateway] Nueva orden received: cmshq6omw00apd7oczkgxbbho
+[Nest] 19  - 08/06/2026, 4:23:47 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/06/2026, 4:23:47 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/06/2026, 4:23:47 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/06/2026, 4:23:47 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/06/2026, 4:23:47 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/06/2026, 4:23:47 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/06/2026, 4:23:47 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/06/2026, 4:23:47 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/06/2026, 4:23:50 PM     LOG [AppGateway] Client disconnected: C1n_GTKXg8XN4XCiAABJ (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen, caja)
+[Nest] 19  - 08/06/2026, 4:24:29 PM     LOG [AppGateway] Client LcV3pRvxiS8gffyTAABL mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/06/2026, 4:24:29 PM     LOG [AppGateway] Client LcV3pRvxiS8gffyTAABL joined room: kitchen
+[Nest] 19  - 08/06/2026, 4:24:30 PM     LOG [AppGateway] Client LcV3pRvxiS8gffyTAABL joined room: kitchen
+[Nest] 19  - 08/06/2026, 4:25:09 PM     LOG [AppGateway] Nueva orden received: cmshq8jqp00bed7ocf6jmpglv
+[Nest] 19  - 08/06/2026, 4:25:14 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/06/2026, 4:25:14 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/06/2026, 4:25:14 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/06/2026, 4:25:14 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/06/2026, 4:25:14 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/06/2026, 4:25:14 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/06/2026, 4:25:34 PM     LOG [AppGateway] Nueva orden received: cmshq93aw00bwd7ocs1ghnrz2
+[Nest] 19  - 08/06/2026, 4:25:39 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/06/2026, 4:25:39 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/06/2026, 4:25:39 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/06/2026, 4:25:40 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/06/2026, 4:25:41 PM     LOG [AppGateway] Client disconnected: LcV3pRvxiS8gffyTAABL (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen)
+[Nest] 19  - 08/06/2026, 4:26:57 PM     LOG [AppGateway] Client xIF7uXPSwEXdNZZ8AABN mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/06/2026, 4:26:57 PM     LOG [AppGateway] Client xIF7uXPSwEXdNZZ8AABN joined room: kitchen
+[Nest] 19  - 08/06/2026, 4:26:57 PM     LOG [AppGateway] Client xIF7uXPSwEXdNZZ8AABN joined room: kitchen
+[Nest] 19  - 08/06/2026, 4:27:11 PM     LOG [AppGateway] Client xIF7uXPSwEXdNZZ8AABN joined room: caja
+[Nest] 19  - 08/06/2026, 4:27:20 PM     LOG [AppGateway] Nueva orden received: cmshqbcso00cbd7ocmserbmmv
+[Nest] 19  - 08/06/2026, 4:27:25 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/06/2026, 4:27:25 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/06/2026, 4:27:25 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/06/2026, 4:27:25 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/06/2026, 4:27:25 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/06/2026, 4:27:25 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/06/2026, 4:27:42 PM     LOG [AppGateway] Nueva orden received: cmshqbtf200crd7ocpb8pkto4
+[Nest] 19  - 08/06/2026, 4:27:47 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/06/2026, 4:27:47 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/06/2026, 4:27:47 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/06/2026, 4:27:47 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/06/2026, 4:27:47 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/06/2026, 4:27:56 PM     LOG [AppGateway] Orden actualizada received: cmshqbtf200crd7ocpb8pkto4
+[Nest] 19  - 08/06/2026, 4:28:02 PM     LOG [AppGateway] Client xIF7uXPSwEXdNZZ8AABN joined room: caja
+[Nest] 19  - 08/06/2026, 4:28:29 PM     LOG [AppGateway] Nueva orden received: cmshqctn600d7d7oczzfncey2
+[Nest] 19  - 08/06/2026, 4:28:34 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/06/2026, 4:28:34 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/06/2026, 4:28:34 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/06/2026, 4:28:34 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/06/2026, 4:28:34 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/06/2026, 4:28:34 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/06/2026, 4:28:34 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/06/2026, 4:29:18 PM     LOG [AppGateway] Nueva orden received: cmshqdvj600drd7ocsn9jwtfi
+[Nest] 19  - 08/06/2026, 4:29:23 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/06/2026, 4:29:23 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/06/2026, 4:29:23 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/06/2026, 4:29:23 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/06/2026, 4:29:23 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/06/2026, 4:29:23 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/06/2026, 4:29:23 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/06/2026, 4:29:41 PM     LOG [AppGateway] Client xIF7uXPSwEXdNZZ8AABN joined room: caja
+[Nest] 19  - 08/06/2026, 4:30:00 PM     LOG [AppGateway] Nueva orden received: cmshqes7500efd7ocyckwsqv6
+[Nest] 19  - 08/06/2026, 4:30:03 PM     LOG [AppGateway] Client xIF7uXPSwEXdNZZ8AABN joined room: caja
+[Nest] 19  - 08/06/2026, 4:30:05 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/06/2026, 4:30:05 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/06/2026, 4:30:05 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/06/2026, 4:30:05 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/06/2026, 4:30:05 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/06/2026, 4:30:05 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/06/2026, 4:30:05 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/06/2026, 4:31:08 PM     LOG [AppGateway] Client xIF7uXPSwEXdNZZ8AABN joined room: caja
+[Nest] 19  - 08/06/2026, 4:33:04 PM     LOG [AppGateway] Client disconnected: xIF7uXPSwEXdNZZ8AABN (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen, caja)
+[Nest] 19  - 08/06/2026, 4:33:14 PM     LOG [AppGateway] Client N4_68sV-mKfl9SKnAABP mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/06/2026, 4:33:15 PM     LOG [AppGateway] Client N4_68sV-mKfl9SKnAABP joined room: kitchen
+[Nest] 19  - 08/06/2026, 4:33:15 PM     LOG [AppGateway] Client N4_68sV-mKfl9SKnAABP joined room: kitchen
+[Nest] 19  - 08/06/2026, 4:37:21 PM     LOG [AppGateway] Client disconnected: N4_68sV-mKfl9SKnAABP (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen)
+[Nest] 19  - 08/06/2026, 4:57:22 PM     LOG [AppGateway] Client dHvY2qWa4FSJp3wpAABR mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/06/2026, 4:57:22 PM     LOG [AppGateway] Client dHvY2qWa4FSJp3wpAABR joined room: kitchen
+[Nest] 19  - 08/06/2026, 4:57:22 PM     LOG [AppGateway] Client dHvY2qWa4FSJp3wpAABR joined room: kitchen
+[Nest] 19  - 08/06/2026, 4:57:25 PM     LOG [AppGateway] Client dHvY2qWa4FSJp3wpAABR joined room: caja
+[Nest] 19  - 08/06/2026, 4:57:26 PM     LOG [AppGateway] Client dHvY2qWa4FSJp3wpAABR joined room: caja
+[Nest] 19  - 08/06/2026, 4:57:40 PM     LOG [AppGateway] Client disconnected: dHvY2qWa4FSJp3wpAABR (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen, caja)
+[Nest] 19  - 08/06/2026, 4:57:41 PM     LOG [AppGateway] Client SD342IXv2vAT2qliAABT mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/06/2026, 4:57:41 PM     LOG [AppGateway] Client SD342IXv2vAT2qliAABT joined room: kitchen
+[Nest] 19  - 08/06/2026, 4:57:41 PM     LOG [AppGateway] Client SD342IXv2vAT2qliAABT joined room: kitchen
+[Nest] 19  - 08/06/2026, 4:58:05 PM     LOG [AppGateway] Client SD342IXv2vAT2qliAABT joined room: caja
+[Nest] 19  - 08/06/2026, 4:58:05 PM     LOG [AppGateway] Client SD342IXv2vAT2qliAABT joined room: caja
+[Nest] 19  - 08/06/2026, 4:59:20 PM     LOG [AppGateway] Client disconnected: SD342IXv2vAT2qliAABT (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen, caja)
+[Nest] 19  - 08/06/2026, 5:00:01 PM     LOG [AppGateway] Client hUFqtErBct_euxvKAABV mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/06/2026, 5:00:01 PM     LOG [AppGateway] Client hUFqtErBct_euxvKAABV joined room: kitchen
+[Nest] 19  - 08/06/2026, 5:00:01 PM     LOG [AppGateway] Client hUFqtErBct_euxvKAABV joined room: kitchen
+[Nest] 19  - 08/06/2026, 5:00:04 PM     LOG [AppGateway] Client disconnected: hUFqtErBct_euxvKAABV (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen)
+[Nest] 19  - 08/06/2026, 5:22:34 PM     LOG [AppGateway] Client h0z7VA5g7t5qarI-AABX mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/06/2026, 5:22:34 PM     LOG [AppGateway] Client h0z7VA5g7t5qarI-AABX joined room: kitchen
+[Nest] 19  - 08/06/2026, 5:22:35 PM     LOG [AppGateway] Client h0z7VA5g7t5qarI-AABX joined room: kitchen
+[Nest] 19  - 08/06/2026, 5:23:40 PM     LOG [AppGateway] Client disconnected: h0z7VA5g7t5qarI-AABX (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen)
+[Nest] 19  - 08/06/2026, 5:24:03 PM     LOG [AppGateway] Client yLdz9tnMpb4COjNrAABZ mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/06/2026, 5:24:04 PM     LOG [AppGateway] Client yLdz9tnMpb4COjNrAABZ joined room: kitchen
+[Nest] 19  - 08/06/2026, 5:24:05 PM     LOG [AppGateway] Client yLdz9tnMpb4COjNrAABZ joined room: kitchen
+[Nest] 19  - 08/06/2026, 5:27:57 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/06/2026, 5:28:07 PM     LOG [AppGateway] Client disconnected: yLdz9tnMpb4COjNrAABZ (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen)
+[Nest] 19  - 08/06/2026, 5:28:11 PM     LOG [AppGateway] Client pCw7VyINd72y0JByAABb mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/06/2026, 5:28:13 PM     LOG [AppGateway] Client pCw7VyINd72y0JByAABb joined room: kitchen
+[Nest] 19  - 08/06/2026, 5:28:13 PM     LOG [AppGateway] Client pCw7VyINd72y0JByAABb joined room: kitchen
+[Nest] 19  - 08/06/2026, 5:28:23 PM     LOG [AppGateway] Client disconnected: pCw7VyINd72y0JByAABb (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen)
+[Nest] 19  - 08/06/2026, 5:29:30 PM     LOG [AppGateway] Client ATc6hIIoSVS_0oOdAABd mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/06/2026, 5:29:31 PM     LOG [AppGateway] Client ATc6hIIoSVS_0oOdAABd joined room: kitchen
+[Nest] 19  - 08/06/2026, 5:29:32 PM     LOG [AppGateway] Client ATc6hIIoSVS_0oOdAABd joined room: kitchen
+[Nest] 19  - 08/06/2026, 5:31:21 PM     LOG [AppGateway] Client ATc6hIIoSVS_0oOdAABd joined room: kitchen
+[Nest] 19  - 08/06/2026, 5:31:21 PM     LOG [AppGateway] Client ATc6hIIoSVS_0oOdAABd joined room: caja
+[Nest] 19  - 08/06/2026, 5:32:23 PM     LOG [AppGateway] Client ATc6hIIoSVS_0oOdAABd joined room: caja
+[Nest] 19  - 08/06/2026, 5:32:25 PM     LOG [AppGateway] Client ATc6hIIoSVS_0oOdAABd joined room: caja
+[Nest] 19  - 08/06/2026, 5:32:26 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/06/2026, 5:32:26 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/06/2026, 5:32:26 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/06/2026, 5:32:26 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/06/2026, 5:32:26 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/06/2026, 5:32:26 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/06/2026, 5:32:26 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/06/2026, 5:33:45 PM     LOG [AppGateway] Client disconnected: ATc6hIIoSVS_0oOdAABd (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen, caja)
+[Nest] 19  - 08/06/2026, 5:33:55 PM     LOG [AppGateway] Client P-Pk4KJnP6nM8KZuAABf mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/06/2026, 5:33:56 PM     LOG [AppGateway] Client P-Pk4KJnP6nM8KZuAABf joined room: kitchen
+[Nest] 19  - 08/06/2026, 5:33:56 PM     LOG [AppGateway] Client P-Pk4KJnP6nM8KZuAABf joined room: kitchen
+[Nest] 19  - 08/06/2026, 5:34:12 PM     LOG [AppGateway] Client disconnected: P-Pk4KJnP6nM8KZuAABf (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen)
+[Nest] 19  - 08/06/2026, 5:34:19 PM     LOG [AppGateway] Client 7HX4ul6c0Sd1CxXaAABh mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/06/2026, 5:34:19 PM     LOG [AppGateway] Client 7HX4ul6c0Sd1CxXaAABh joined room: kitchen
+[Nest] 19  - 08/06/2026, 5:34:20 PM     LOG [AppGateway] Client 7HX4ul6c0Sd1CxXaAABh joined room: kitchen
+[Nest] 19  - 08/06/2026, 5:34:29 PM     LOG [AppGateway] Client 7HX4ul6c0Sd1CxXaAABh joined room: caja
+[Nest] 19  - 08/06/2026, 5:34:30 PM     LOG [AppGateway] Client 7HX4ul6c0Sd1CxXaAABh joined room: caja
+[Nest] 19  - 08/06/2026, 5:35:27 PM     LOG [AppGateway] Client disconnected: 7HX4ul6c0Sd1CxXaAABh (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen, caja)
+[Nest] 19  - 08/06/2026, 5:38:57 PM     LOG [AppGateway] Client _oj0Z_BG2N55qSZCAABj mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/06/2026, 5:38:58 PM     LOG [AppGateway] Client _oj0Z_BG2N55qSZCAABj joined room: kitchen
+[Nest] 19  - 08/06/2026, 5:38:58 PM     LOG [AppGateway] Client _oj0Z_BG2N55qSZCAABj joined room: kitchen
+[Nest] 19  - 08/06/2026, 5:41:46 PM     LOG [AppGateway] Client disconnected: _oj0Z_BG2N55qSZCAABj (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen)
+[Nest] 19  - 08/06/2026, 5:59:48 PM     LOG [AppGateway] Client bs-p2Pm393GB0m3zAABl mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/06/2026, 5:59:48 PM     LOG [AppGateway] Client bs-p2Pm393GB0m3zAABl joined room: kitchen
+[Nest] 19  - 08/06/2026, 5:59:48 PM     LOG [AppGateway] Client bs-p2Pm393GB0m3zAABl joined room: kitchen
+[Nest] 19  - 08/06/2026, 5:59:58 PM     LOG [AppGateway] Client disconnected: bs-p2Pm393GB0m3zAABl (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen)
+[Nest] 19  - 08/06/2026, 6:00:09 PM     LOG [AppGateway] Client 3vW5PGJSTT349uNMAABn mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/06/2026, 6:00:09 PM     LOG [AppGateway] Client 3vW5PGJSTT349uNMAABn joined room: kitchen
+[Nest] 19  - 08/06/2026, 6:00:09 PM     LOG [AppGateway] Client 3vW5PGJSTT349uNMAABn joined room: kitchen
+[Nest] 19  - 08/06/2026, 6:00:10 PM     LOG [AppGateway] Client 3vW5PGJSTT349uNMAABn joined room: caja
+[Nest] 19  - 08/06/2026, 6:00:14 PM     LOG [AppGateway] Nueva orden received: cmshtmtki00gqd7oclo6ejvy6
+[Nest] 19  - 08/06/2026, 6:00:19 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/06/2026, 6:00:19 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/06/2026, 6:00:19 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/06/2026, 6:00:24 PM     LOG [AppGateway] Client 3vW5PGJSTT349uNMAABn joined room: kitchen
+[Nest] 19  - 08/06/2026, 6:00:25 PM     LOG [AppGateway] Client 3vW5PGJSTT349uNMAABn joined room: caja
+[Nest] 19  - 08/06/2026, 6:00:34 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/06/2026, 6:00:34 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/06/2026, 6:00:34 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/06/2026, 6:00:48 PM     LOG [AppGateway] Client disconnected: 3vW5PGJSTT349uNMAABn (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen, caja)
+[Nest] 19  - 08/06/2026, 6:52:48 PM     LOG [AppGateway] Client 9aE1qjsw2U5Mz5KpAABp mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/06/2026, 6:52:48 PM     LOG [AppGateway] Client 9aE1qjsw2U5Mz5KpAABp joined room: kitchen
+[Nest] 19  - 08/06/2026, 6:52:48 PM     LOG [AppGateway] Client 9aE1qjsw2U5Mz5KpAABp joined room: kitchen
+[Nest] 19  - 08/06/2026, 6:52:52 PM     LOG [AppGateway] Client 9aE1qjsw2U5Mz5KpAABp joined room: caja
+[Nest] 19  - 08/06/2026, 6:52:53 PM     LOG [AppGateway] Client 9aE1qjsw2U5Mz5KpAABp joined room: caja
+[Nest] 19  - 08/06/2026, 6:53:07 PM     LOG [AppGateway] Client 9aE1qjsw2U5Mz5KpAABp joined room: caja
+[Nest] 19  - 08/06/2026, 6:53:08 PM     LOG [AppGateway] Client 9aE1qjsw2U5Mz5KpAABp joined room: caja
+[Nest] 19  - 08/06/2026, 6:53:28 PM     LOG [AppGateway] Client disconnected: 9aE1qjsw2U5Mz5KpAABp (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen, caja)
+[Nest] 19  - 08/06/2026, 6:56:28 PM     LOG [AppGateway] Client JKPiJeiihsOmuxRhAABr mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/06/2026, 6:56:28 PM     LOG [AppGateway] Client JKPiJeiihsOmuxRhAABr joined room: kitchen
+[Nest] 19  - 08/06/2026, 6:56:29 PM     LOG [AppGateway] Client JKPiJeiihsOmuxRhAABr joined room: kitchen
+[Nest] 19  - 08/06/2026, 6:56:45 PM     LOG [AppGateway] Client disconnected: JKPiJeiihsOmuxRhAABr (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen)
+[Nest] 19  - 08/06/2026, 6:58:05 PM     LOG [AppGateway] Client Y4ZpkTvZIMF_tkRWAABt mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/06/2026, 6:58:05 PM     LOG [AppGateway] Client Y4ZpkTvZIMF_tkRWAABt joined room: kitchen
+[Nest] 19  - 08/06/2026, 6:58:05 PM     LOG [AppGateway] Client Y4ZpkTvZIMF_tkRWAABt joined room: kitchen
+[Nest] 19  - 08/06/2026, 6:58:12 PM     LOG [AppGateway] Client disconnected: Y4ZpkTvZIMF_tkRWAABt (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen)
+[Nest] 19  - 08/06/2026, 6:58:58 PM     LOG [AppGateway] Client QMbya72gkBz66zK5AABv mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/06/2026, 6:58:58 PM     LOG [AppGateway] Client QMbya72gkBz66zK5AABv joined room: kitchen
+[Nest] 19  - 08/06/2026, 6:58:58 PM     LOG [AppGateway] Client QMbya72gkBz66zK5AABv joined room: kitchen
+[Nest] 19  - 08/06/2026, 6:59:16 PM     LOG [AppGateway] Client disconnected: QMbya72gkBz66zK5AABv (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen)
+[Nest] 19  - 08/06/2026, 6:59:32 PM     LOG [AppGateway] Client _Sc-KpIVqzGsl8qUAABx mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/06/2026, 6:59:33 PM     LOG [AppGateway] Client _Sc-KpIVqzGsl8qUAABx joined room: kitchen
+[Nest] 19  - 08/06/2026, 6:59:33 PM     LOG [AppGateway] Client _Sc-KpIVqzGsl8qUAABx joined room: kitchen
+[Nest] 19  - 08/06/2026, 6:59:37 PM     LOG [AppGateway] Client _Sc-KpIVqzGsl8qUAABx joined room: caja
+[Nest] 19  - 08/06/2026, 6:59:38 PM     LOG [AppGateway] Client _Sc-KpIVqzGsl8qUAABx joined room: caja
+[Nest] 19  - 08/06/2026, 7:00:06 PM     LOG [AppGateway] Orden actualizada received: cmsgscewb003dd7ocintqjlro
+[Nest] 19  - 08/06/2026, 7:00:09 PM     LOG [AppGateway] Client _Sc-KpIVqzGsl8qUAABx joined room: caja
+[Nest] 19  - 08/06/2026, 7:00:10 PM     LOG [AppGateway] Client _Sc-KpIVqzGsl8qUAABx joined room: caja
+[Nest] 19  - 08/06/2026, 7:00:38 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/06/2026, 7:00:56 PM     LOG [AppGateway] Client disconnected: _Sc-KpIVqzGsl8qUAABx (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen, caja)
+[Nest] 19  - 08/06/2026, 7:01:22 PM     LOG [AppGateway] Client ztnAQE-4MKDHijN_AABz mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/06/2026, 7:01:23 PM     LOG [AppGateway] Client ztnAQE-4MKDHijN_AABz joined room: kitchen
+[Nest] 19  - 08/06/2026, 7:01:23 PM     LOG [AppGateway] Client ztnAQE-4MKDHijN_AABz joined room: kitchen
+[Nest] 19  - 08/06/2026, 7:01:28 PM     LOG [AppGateway] Client disconnected: ztnAQE-4MKDHijN_AABz (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen)
+[Nest] 19  - 08/06/2026, 7:02:13 PM     LOG [AppGateway] Client byujQtGyfVWVXgC-AAB1 mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/06/2026, 7:02:13 PM     LOG [AppGateway] Client byujQtGyfVWVXgC-AAB1 joined room: kitchen
+[Nest] 19  - 08/06/2026, 7:02:13 PM     LOG [AppGateway] Client byujQtGyfVWVXgC-AAB1 joined room: kitchen
+[Nest] 19  - 08/06/2026, 7:03:33 PM     LOG [AppGateway] Client disconnected: byujQtGyfVWVXgC-AAB1 (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen)
+[Nest] 19  - 08/06/2026, 7:03:48 PM     LOG [AppGateway] Client WYrKe7Hrs1kQVnYRAAB3 mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/06/2026, 7:03:49 PM     LOG [AppGateway] Client WYrKe7Hrs1kQVnYRAAB3 joined room: kitchen
+[Nest] 19  - 08/06/2026, 7:03:49 PM     LOG [AppGateway] Client WYrKe7Hrs1kQVnYRAAB3 joined room: kitchen
+[Nest] 19  - 08/06/2026, 7:03:54 PM     LOG [AppGateway] Client disconnected: WYrKe7Hrs1kQVnYRAAB3 (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen)
+[Nest] 19  - 08/06/2026, 10:03:38 PM     LOG [AppGateway] Client P92nzM7KObZ613RbAAB5 mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/06/2026, 10:03:38 PM     LOG [AppGateway] Client P92nzM7KObZ613RbAAB5 joined room: kitchen
+[Nest] 19  - 08/06/2026, 10:03:38 PM     LOG [AppGateway] Client P92nzM7KObZ613RbAAB5 joined room: kitchen
+[Nest] 19  - 08/06/2026, 10:04:53 PM     LOG [AppGateway] Client vfkux_N6oKiC_nnJAAB7 mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/06/2026, 10:04:53 PM     LOG [AppGateway] Client vfkux_N6oKiC_nnJAAB7 joined room: kitchen
+[Nest] 19  - 08/06/2026, 10:04:53 PM     LOG [AppGateway] Client vfkux_N6oKiC_nnJAAB7 joined room: kitchen
+[Nest] 19  - 08/06/2026, 10:05:33 PM     LOG [AppGateway] Client disconnected: vfkux_N6oKiC_nnJAAB7 (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen)
+[Nest] 19  - 08/06/2026, 10:07:19 PM     LOG [AppGateway] Client disconnected: P92nzM7KObZ613RbAAB5 (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen)
+[Nest] 19  - 08/06/2026, 10:07:30 PM     LOG [AppGateway] Client VL5Z8poJbf1rSQ9DAAB9 mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/06/2026, 10:07:30 PM     LOG [AppGateway] Client VL5Z8poJbf1rSQ9DAAB9 joined room: kitchen
+[Nest] 19  - 08/06/2026, 10:07:30 PM     LOG [AppGateway] Client VL5Z8poJbf1rSQ9DAAB9 joined room: kitchen
+[Nest] 19  - 08/06/2026, 10:10:49 PM     LOG [AppGateway] Client disconnected: VL5Z8poJbf1rSQ9DAAB9 (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen)
+[Nest] 19  - 08/06/2026, 10:11:07 PM     LOG [AppGateway] Client ns5X5n-dmjdukuqkAAB_ mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/06/2026, 10:11:08 PM     LOG [AppGateway] Client ns5X5n-dmjdukuqkAAB_ joined room: kitchen
+[Nest] 19  - 08/06/2026, 10:11:08 PM     LOG [AppGateway] Client ns5X5n-dmjdukuqkAAB_ joined room: kitchen
+[InventarioController] PATCH /inventario/item/cmsi2lk9o00isd7oc1dzig6zl/update UpdateOrderInventarioDto {
+  cantidad: 24,
+  precio: 5130,
+  precioActual: undefined,
+  nombreDelAlimento: undefined,
+  observacion: undefined,
+  subtotal: undefined,
+  precioAnterior: undefined
 }
-Node.js v20.20.2
-> puntodeventabackend@0.0.1 start:prod
-> node dist/src/main
-node:internal/modules/cjs/loader:1210
-
-  throw err;
-  ^
-Error: Cannot find module '/app/dist/src/main'
-    at Module._resolveFilename (node:internal/modules/cjs/loader:1207:15)
-    at Module._load (node:internal/modules/cjs/loader:1038:27)
-    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:164:12)
-    at node:internal/main/run_main_module:28:49 {
-  code: 'MODULE_NOT_FOUND',
-  requireStack: []
+[Nest] 19  - 08/06/2026, 10:14:34 PM     LOG [AppGateway] Client disconnected: ns5X5n-dmjdukuqkAAB_ (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen)
+[Nest] 19  - 08/06/2026, 10:14:43 PM     LOG [AppGateway] Client BliRkKcv5kSeDsVuAACB mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/06/2026, 10:14:44 PM     LOG [AppGateway] Client BliRkKcv5kSeDsVuAACB joined room: kitchen
+[Nest] 19  - 08/06/2026, 10:14:45 PM     LOG [AppGateway] Client BliRkKcv5kSeDsVuAACB joined room: kitchen
+[Nest] 19  - 08/06/2026, 10:14:58 PM     LOG [AppGateway] Client disconnected: BliRkKcv5kSeDsVuAACB (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen)
+[Nest] 19  - 08/06/2026, 10:15:54 PM     LOG [AppGateway] Client KFYffDoeQ3Uf6BuGAACD mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/06/2026, 10:15:54 PM     LOG [AppGateway] Client KFYffDoeQ3Uf6BuGAACD joined room: kitchen
+[Nest] 19  - 08/06/2026, 10:15:55 PM     LOG [AppGateway] Client KFYffDoeQ3Uf6BuGAACD joined room: kitchen
+[Nest] 19  - 08/06/2026, 10:18:41 PM     LOG [AppGateway] Client disconnected: KFYffDoeQ3Uf6BuGAACD (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen)
+[Nest] 19  - 08/06/2026, 10:25:31 PM     LOG [AppGateway] Client xs2OWHOhrPzCoUDZAACF mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/06/2026, 10:25:32 PM     LOG [AppGateway] Client xs2OWHOhrPzCoUDZAACF joined room: kitchen
+[Nest] 19  - 08/06/2026, 10:25:32 PM     LOG [AppGateway] Client xs2OWHOhrPzCoUDZAACF joined room: kitchen
+[InventarioController] PATCH /inventario/item/cmsi2uu9v00jud7ocwne1glgd/update UpdateOrderInventarioDto {
+  cantidad: undefined,
+  precio: undefined,
+  precioActual: undefined,
+  nombreDelAlimento: 'f4f23a39',
+  observacion: undefined,
+  subtotal: undefined,
+  precioAnterior: undefined
 }
-Node.js v20.20.2
-> puntodeventabackend@0.0.1 start:prod
-> node dist/src/main
-node:internal/modules/cjs/loader:1210
-
-  throw err;
-  ^
-Error: Cannot find module '/app/dist/src/main'
-    at Module._resolveFilename (node:internal/modules/cjs/loader:1207:15)
-    at Module._load (node:internal/modules/cjs/loader:1038:27)
-    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:164:12)
-    at node:internal/main/run_main_module:28:49 {
-  code: 'MODULE_NOT_FOUND',
-  requireStack: []
+[InventarioController] PATCH /inventario/item/cmsi2nj0v00iwd7ocboh78pyd/update UpdateOrderInventarioDto {
+  cantidad: undefined,
+  precio: undefined,
+  precioActual: undefined,
+  nombreDelAlimento: '29c8a066',
+  observacion: undefined,
+  subtotal: undefined,
+  precioAnterior: undefined
 }
-Node.js v20.20.2
-> puntodeventabackend@0.0.1 start:prod
-> node dist/src/main
-node:internal/modules/cjs/loader:1210
-
-  throw err;
-  ^
-Error: Cannot find module '/app/dist/src/main'
-    at Module._resolveFilename (node:internal/modules/cjs/loader:1207:15)
-    at Module._load (node:internal/modules/cjs/loader:1038:27)
-    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:164:12)
-    at node:internal/main/run_main_module:28:49 {
-  code: 'MODULE_NOT_FOUND',
-  requireStack: []
+[InventarioController] PATCH /inventario/item/cmsi2lk9o00isd7oc1dzig6zl/update UpdateOrderInventarioDto {
+  cantidad: undefined,
+  precio: undefined,
+  precioActual: undefined,
+  nombreDelAlimento: '733547cc',
+  observacion: undefined,
+  subtotal: undefined,
+  precioAnterior: undefined
 }
-Node.js v20.20.2
-> puntodeventabackend@0.0.1 start:prod
-> node dist/src/main
-node:internal/modules/cjs/loader:1210
-
-  throw err;
-  ^
-Error: Cannot find module '/app/dist/src/main'
-    at Module._resolveFilename (node:internal/modules/cjs/loader:1207:15)
-    at Module._load (node:internal/modules/cjs/loader:1038:27)
-    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:164:12)
-    at node:internal/main/run_main_module:28:49 {
-  code: 'MODULE_NOT_FOUND',
-  requireStack: []
+[Nest] 19  - 08/06/2026, 10:27:24 PM     LOG [AppGateway] Client disconnected: xs2OWHOhrPzCoUDZAACF (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen)
+[Nest] 19  - 08/06/2026, 10:28:21 PM     LOG [AppGateway] Client fVowWF2cv4u2UobMAACH mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/06/2026, 10:28:24 PM     LOG [AppGateway] Client fVowWF2cv4u2UobMAACH joined room: kitchen
+[Nest] 19  - 08/06/2026, 10:28:24 PM     LOG [AppGateway] Client fVowWF2cv4u2UobMAACH joined room: kitchen
+[InventarioController] PATCH /inventario/item/cmsi2nj0j00iud7oc1l5a3etv/update UpdateOrderInventarioDto {
+  cantidad: 40,
+  precio: 213,
+  precioActual: undefined,
+  nombreDelAlimento: undefined,
+  observacion: undefined,
+  subtotal: undefined,
+  precioAnterior: undefined
 }
-Node.js v20.20.2
+[InventarioController] PATCH /inventario/item/cmsi2uua100jwd7ocypb3fvxf/update UpdateOrderInventarioDto {
+  cantidad: 20,
+  precio: 1100,
+  precioActual: undefined,
+  nombreDelAlimento: undefined,
+  observacion: undefined,
+  subtotal: undefined,
+  precioAnterior: undefined
+}
+[InventarioController] PATCH /inventario/item/cmsi2nj2d00j8d7ochhnmtjhg/update UpdateOrderInventarioDto {
+  cantidad: 20,
+  precio: 395,
+  precioActual: undefined,
+  nombreDelAlimento: undefined,
+  observacion: undefined,
+  subtotal: undefined,
+  precioAnterior: undefined
+}
+[Nest] 19  - 08/06/2026, 10:30:45 PM     LOG [AppGateway] Client disconnected: fVowWF2cv4u2UobMAACH (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen)
+[Nest] 19  - 08/06/2026, 10:30:50 PM     LOG [AppGateway] Client p8PGGPl2whKUEzIXAACJ mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/06/2026, 10:30:52 PM     LOG [AppGateway] Client p8PGGPl2whKUEzIXAACJ joined room: kitchen
+[Nest] 19  - 08/06/2026, 10:30:52 PM     LOG [AppGateway] Client p8PGGPl2whKUEzIXAACJ joined room: kitchen
+[InventarioController] PATCH /inventario/item/cmsi2p5n600jgd7ocj6zohdm2/update UpdateOrderInventarioDto {
+  cantidad: 20,
+  precio: 395,
+  precioActual: undefined,
+  nombreDelAlimento: undefined,
+  observacion: undefined,
+  subtotal: undefined,
+  precioAnterior: undefined
+}
+[InventarioController] PATCH /inventario/item/cmsi2p5nf00jid7occtryq8kz/update UpdateOrderInventarioDto {
+  cantidad: 20,
+  precio: 395,
+  precioActual: undefined,
+  nombreDelAlimento: undefined,
+  observacion: undefined,
+  subtotal: undefined,
+  precioAnterior: undefined
+}
+[InventarioController] PATCH /inventario/item/cmsi2nj2d00j8d7ochhnmtjhg/update UpdateOrderInventarioDto {
+  cantidad: undefined,
+  precio: undefined,
+  precioActual: undefined,
+  nombreDelAlimento: '4abbe7ea',
+  observacion: undefined,
+  subtotal: undefined,
+  precioAnterior: undefined
+}
+[InventarioController] PATCH /inventario/item/cmsi2p5nf00jid7occtryq8kz/update UpdateOrderInventarioDto {
+  cantidad: undefined,
+  precio: undefined,
+  precioActual: undefined,
+  nombreDelAlimento: '4abbe7ea',
+  observacion: undefined,
+  subtotal: undefined,
+  precioAnterior: undefined
+}
+[InventarioController] PATCH /inventario/item/cmsi2uu9v00jud7ocwne1glgd/update UpdateOrderInventarioDto {
+  cantidad: 20,
+  precio: 1250,
+  precioActual: undefined,
+  nombreDelAlimento: undefined,
+  observacion: undefined,
+  subtotal: undefined,
+  precioAnterior: undefined
+}
+[InventarioController] PATCH /inventario/item/cmsi2uuaf00k0d7oceq9mg7hh/update UpdateOrderInventarioDto {
+  cantidad: 5,
+  precio: 2700,
+  precioActual: undefined,
+  nombreDelAlimento: undefined,
+  observacion: undefined,
+  subtotal: undefined,
+  precioAnterior: undefined
+}
+[Nest] 19  - 08/06/2026, 10:35:00 PM     LOG [AppGateway] Client disconnected: p8PGGPl2whKUEzIXAACJ (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen)
+[Nest] 19  - 08/06/2026, 10:35:05 PM     LOG [AppGateway] Client 2HOSV2f8QF7rmK9NAACL mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/06/2026, 10:35:11 PM     LOG [AppGateway] Client disconnected: 2HOSV2f8QF7rmK9NAACL (was in rooms: user_cmsducjti0001cuyw6xltgir1)
+[Nest] 19  - 08/06/2026, 10:35:28 PM     LOG [AppGateway] Client D9RHxCT0Yr3FpvMPAACN mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/06/2026, 10:35:29 PM     LOG [AppGateway] Client D9RHxCT0Yr3FpvMPAACN joined room: kitchen
+[Nest] 19  - 08/06/2026, 10:35:29 PM     LOG [AppGateway] Client D9RHxCT0Yr3FpvMPAACN joined room: kitchen
+[Nest] 19  - 08/06/2026, 10:38:04 PM     LOG [AppGateway] Client disconnected: D9RHxCT0Yr3FpvMPAACN (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen)
+[Nest] 19  - 08/06/2026, 10:38:34 PM     LOG [AppGateway] Client I7xo6WZZMaESzJyPAACP mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/06/2026, 10:38:35 PM     LOG [AppGateway] Client I7xo6WZZMaESzJyPAACP joined room: kitchen
+[Nest] 19  - 08/06/2026, 10:38:35 PM     LOG [AppGateway] Client I7xo6WZZMaESzJyPAACP joined room: kitchen
+[Nest] 19  - 08/06/2026, 10:39:44 PM     LOG [AppGateway] Client disconnected: I7xo6WZZMaESzJyPAACP (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen)
+[Nest] 19  - 08/06/2026, 10:39:51 PM     LOG [AppGateway] Client UGOmt5m_tF9wWGlgAACR mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/06/2026, 10:39:51 PM     LOG [AppGateway] Client UGOmt5m_tF9wWGlgAACR joined room: kitchen
+[Nest] 19  - 08/06/2026, 10:39:51 PM     LOG [AppGateway] Client UGOmt5m_tF9wWGlgAACR joined room: kitchen
+[Nest] 19  - 08/06/2026, 10:39:55 PM     LOG [AppGateway] Client 31M7PHkChPrbz9BZAACT mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/06/2026, 10:39:55 PM     LOG [AppGateway] Client 31M7PHkChPrbz9BZAACT joined room: kitchen
+[Nest] 19  - 08/06/2026, 10:39:55 PM     LOG [AppGateway] Client 31M7PHkChPrbz9BZAACT joined room: kitchen
+[Nest] 19  - 08/06/2026, 10:41:22 PM     LOG [AppGateway] Client disconnected: UGOmt5m_tF9wWGlgAACR (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen)
+[Nest] 19  - 08/06/2026, 10:42:39 PM     LOG [AppGateway] Client JHf1YHW7_Mbr-bNyAACV mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/06/2026, 10:42:39 PM     LOG [AppGateway] Client JHf1YHW7_Mbr-bNyAACV joined room: kitchen
+[Nest] 19  - 08/06/2026, 10:42:40 PM     LOG [AppGateway] Client JHf1YHW7_Mbr-bNyAACV joined room: kitchen
+[Nest] 19  - 08/06/2026, 10:44:32 PM     LOG [AppGateway] Client JHf1YHW7_Mbr-bNyAACV joined room: caja
+[Nest] 19  - 08/06/2026, 10:45:11 PM     LOG [AppGateway] Client JHf1YHW7_Mbr-bNyAACV joined room: caja
+[Nest] 19  - 08/06/2026, 10:45:32 PM     LOG [AppGateway] Nueva orden received: cmsi3tpym00kad7occq5q5ik6
+[Nest] 19  - 08/06/2026, 10:45:37 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/06/2026, 10:45:37 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/06/2026, 10:45:37 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/06/2026, 10:45:37 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/06/2026, 10:45:42 PM     LOG [AppGateway] Client disconnected: JHf1YHW7_Mbr-bNyAACV (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen, caja)
+[Nest] 19  - 08/06/2026, 10:45:42 PM     LOG [AppGateway] Client disconnected: 31M7PHkChPrbz9BZAACT (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen)
+[Nest] 19  - 08/06/2026, 10:46:35 PM     LOG [AppGateway] Client TKiLz2XOPn37oj4KAACX mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/06/2026, 10:46:35 PM     LOG [AppGateway] Client TKiLz2XOPn37oj4KAACX joined room: kitchen
+[Nest] 19  - 08/06/2026, 10:46:35 PM     LOG [AppGateway] Client TKiLz2XOPn37oj4KAACX joined room: kitchen
+[Nest] 19  - 08/06/2026, 10:49:17 PM     LOG [AppGateway] Client LPE7Biuqsgk4kUNlAACZ mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/06/2026, 10:49:17 PM     LOG [AppGateway] Client LPE7Biuqsgk4kUNlAACZ joined room: kitchen
+[Nest] 19  - 08/06/2026, 10:49:17 PM     LOG [AppGateway] Client LPE7Biuqsgk4kUNlAACZ joined room: kitchen
+[Nest] 19  - 08/06/2026, 10:51:06 PM     LOG [AppGateway] Client disconnected: TKiLz2XOPn37oj4KAACX (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen)
+[Nest] 19  - 08/06/2026, 10:51:14 PM     LOG [AuthController] Request to login user: celcajaarriba@gmail.com
+[Nest] 19  - 08/06/2026, 10:51:14 PM     LOG [AuthService] Attempting to login user: celcajaarriba@gmail.com
+[Nest] 19  - 08/06/2026, 10:51:14 PM     LOG [AuthService] User logged in successfully: celcajaarriba@gmail.com
+[Nest] 19  - 08/06/2026, 10:51:15 PM     LOG [AppGateway] Client ZPsb76AFKSrinI5vAACb mapped to user cmsi402g000kpd7oclpbv65o3 and joined user_cmsi402g000kpd7oclpbv65o3
+[Nest] 19  - 08/06/2026, 10:51:16 PM     LOG [AppGateway] Client ZPsb76AFKSrinI5vAACb joined room: kitchen
+[Nest] 19  - 08/06/2026, 10:51:16 PM     LOG [AppGateway] Client ZPsb76AFKSrinI5vAACb joined room: kitchen
+[Nest] 19  - 08/06/2026, 10:53:43 PM     LOG [AppGateway] Client ZPsb76AFKSrinI5vAACb joined room: caja
+[Nest] 19  - 08/06/2026, 10:53:51 PM     LOG [AppGateway] Nueva orden received: cmsi44f3600krd7ocnjf8b2rh
+[Nest] 19  - 08/06/2026, 10:53:56 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/06/2026, 10:53:56 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/06/2026, 10:54:09 PM     LOG [AppGateway] Client disconnected: LPE7Biuqsgk4kUNlAACZ (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen)
+[Nest] 19  - 08/06/2026, 10:54:16 PM     LOG [AppGateway] Client qVW2S2NI0QnQML93AACd mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/06/2026, 10:54:16 PM     LOG [AppGateway] Client qVW2S2NI0QnQML93AACd joined room: kitchen
+[Nest] 19  - 08/06/2026, 10:54:16 PM     LOG [AppGateway] Client qVW2S2NI0QnQML93AACd joined room: kitchen
+[Nest] 19  - 08/06/2026, 10:54:17 PM     LOG [AppGateway] Client qVW2S2NI0QnQML93AACd joined room: kitchen
+[Nest] 19  - 08/06/2026, 10:54:18 PM     LOG [AppGateway] Client qVW2S2NI0QnQML93AACd joined room: caja
+[Nest] 19  - 08/06/2026, 10:54:30 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/06/2026, 10:54:30 PM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/06/2026, 10:55:12 PM     LOG [AppGateway] Client disconnected: qVW2S2NI0QnQML93AACd (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen, caja)
+[Nest] 19  - 08/06/2026, 11:24:12 PM     LOG [AppGateway] Client disconnected: ZPsb76AFKSrinI5vAACb (was in rooms: user_cmsi402g000kpd7oclpbv65o3, kitchen, caja)
+[Nest] 19  - 08/06/2026, 11:37:19 PM     LOG [AppGateway] Client 1vMCI7CVOWtAhUvGAACf mapped to user cmsi402g000kpd7oclpbv65o3 and joined user_cmsi402g000kpd7oclpbv65o3
+[Nest] 19  - 08/06/2026, 11:37:20 PM     LOG [AppGateway] Client 1vMCI7CVOWtAhUvGAACf joined room: kitchen
+[Nest] 19  - 08/06/2026, 11:37:20 PM     LOG [AppGateway] Client 1vMCI7CVOWtAhUvGAACf joined room: kitchen
+[Nest] 19  - 08/06/2026, 11:37:58 PM     LOG [AppGateway] Client disconnected: 1vMCI7CVOWtAhUvGAACf (was in rooms: user_cmsi402g000kpd7oclpbv65o3, kitchen)
+[Nest] 19  - 08/06/2026, 11:40:45 PM     LOG [AppGateway] Client pdLe30TTBhdBKfihAACh mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/06/2026, 11:40:46 PM     LOG [AppGateway] Client pdLe30TTBhdBKfihAACh joined room: kitchen
+[Nest] 19  - 08/06/2026, 11:40:46 PM     LOG [AppGateway] Client pdLe30TTBhdBKfihAACh joined room: kitchen
+[Nest] 19  - 08/06/2026, 11:41:29 PM     LOG [AppGateway] Client disconnected: pdLe30TTBhdBKfihAACh (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen)
+[Nest] 19  - 08/06/2026, 11:41:40 PM     LOG [AppGateway] Client sZClACg2S6KrmzqwAACj mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/06/2026, 11:41:41 PM     LOG [AppGateway] Client sZClACg2S6KrmzqwAACj joined room: kitchen
+[Nest] 19  - 08/06/2026, 11:41:41 PM     LOG [AppGateway] Client sZClACg2S6KrmzqwAACj joined room: kitchen
+[Nest] 19  - 08/06/2026, 11:41:59 PM     LOG [AppGateway] Client disconnected: sZClACg2S6KrmzqwAACj (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen)
+[Nest] 19  - 08/06/2026, 11:42:12 PM     LOG [AppGateway] Client gyCMijNwA0n79DgwAACl mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/06/2026, 11:42:12 PM     LOG [AppGateway] Client gyCMijNwA0n79DgwAACl joined room: kitchen
+[Nest] 19  - 08/06/2026, 11:42:13 PM     LOG [AppGateway] Client gyCMijNwA0n79DgwAACl joined room: kitchen
+[Nest] 19  - 08/06/2026, 11:42:21 PM     LOG [AppGateway] Client disconnected: gyCMijNwA0n79DgwAACl (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen)
+[Nest] 19  - 08/06/2026, 11:42:53 PM     LOG [AppGateway] Client _4ZvtfsnFQKp0pQnAACn mapped to user cmsi402g000kpd7oclpbv65o3 and joined user_cmsi402g000kpd7oclpbv65o3
+[Nest] 19  - 08/06/2026, 11:42:53 PM     LOG [AppGateway] Client _4ZvtfsnFQKp0pQnAACn joined room: kitchen
+[Nest] 19  - 08/06/2026, 11:42:53 PM     LOG [AppGateway] Client _4ZvtfsnFQKp0pQnAACn joined room: kitchen
+[Nest] 19  - 08/06/2026, 11:43:09 PM     LOG [AppGateway] Orden actualizada received: cmsi3tpym00kad7occq5q5ik6
+[Nest] 19  - 08/06/2026, 11:43:23 PM     LOG [AppGateway] Client disconnected: _4ZvtfsnFQKp0pQnAACn (was in rooms: user_cmsi402g000kpd7oclpbv65o3, kitchen)
+[Nest] 19  - 08/07/2026, 12:02:32 AM     LOG [AppGateway] Client l4JeW2Kmv73SBcGSAACp mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/07/2026, 12:02:32 AM     LOG [AppGateway] Client l4JeW2Kmv73SBcGSAACp joined room: kitchen
+[Nest] 19  - 08/07/2026, 12:02:33 AM     LOG [AppGateway] Client l4JeW2Kmv73SBcGSAACp joined room: kitchen
+[Nest] 19  - 08/07/2026, 12:05:05 AM     LOG [AppGateway] Client disconnected: l4JeW2Kmv73SBcGSAACp (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen)
+[Nest] 19  - 08/07/2026, 12:09:39 AM     LOG [AppGateway] Client abDH4k-blMfTxhVEAACr mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/07/2026, 12:09:40 AM     LOG [AppGateway] Client abDH4k-blMfTxhVEAACr joined room: kitchen
+[Nest] 19  - 08/07/2026, 12:09:40 AM     LOG [AppGateway] Client abDH4k-blMfTxhVEAACr joined room: kitchen
+[Nest] 19  - 08/07/2026, 12:09:45 AM     LOG [AppGateway] Client disconnected: abDH4k-blMfTxhVEAACr (was in rooms: user_cmsducjti0001cuyw6xltgir1, kitchen)
+[Nest] 19  - 08/07/2026, 12:10:26 AM     LOG [AppGateway] Client aQGrPisewJ4Fkb0WAACt mapped to user cmsi402g000kpd7oclpbv65o3 and joined user_cmsi402g000kpd7oclpbv65o3
+[Nest] 19  - 08/07/2026, 12:10:27 AM     LOG [AppGateway] Client aQGrPisewJ4Fkb0WAACt joined room: kitchen
+[Nest] 19  - 08/07/2026, 12:10:27 AM     LOG [AppGateway] Client aQGrPisewJ4Fkb0WAACt joined room: kitchen
+[Nest] 19  - 08/07/2026, 12:10:43 AM     LOG [AppGateway] Client aQGrPisewJ4Fkb0WAACt joined room: caja
+[Nest] 19  - 08/07/2026, 12:11:09 AM     LOG [AppGateway] Client aQGrPisewJ4Fkb0WAACt joined room: caja
+[Nest] 19  - 08/07/2026, 12:11:38 AM     LOG [AppGateway] Nueva orden received: cmsi6wg4400lhd7oc4bkqxz5u
+[Nest] 19  - 08/07/2026, 12:11:43 AM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/07/2026, 12:11:43 AM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/07/2026, 12:12:00 AM     LOG [AppGateway] Nueva orden received: cmsi6wwsw00lrd7oc1pju4n8z
+[Nest] 19  - 08/07/2026, 12:12:05 AM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/07/2026, 12:12:05 AM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/07/2026, 12:12:21 AM     LOG [AppGateway] Client cmBa--GIyqBuyuaFAACv mapped to user cmsducjti0001cuyw6xltgir1 and joined user_cmsducjti0001cuyw6xltgir1
+[Nest] 19  - 08/07/2026, 12:12:22 AM     LOG [AppGateway] Client cmBa--GIyqBuyuaFAACv joined room: kitchen
+[Nest] 19  - 08/07/2026, 12:12:22 AM     LOG [AppGateway] Client cmBa--GIyqBuyuaFAACv joined room: kitchen
+[Nest] 19  - 08/07/2026, 12:12:31 AM     LOG [AppGateway] Client cmBa--GIyqBuyuaFAACv joined room: kitchen
+[Nest] 19  - 08/07/2026, 12:12:31 AM     LOG [AppGateway] Client cmBa--GIyqBuyuaFAACv joined room: caja
+[Nest] 19  - 08/07/2026, 12:12:52 AM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/07/2026, 12:12:52 AM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/07/2026, 12:13:20 AM     LOG [AppGateway] Client disconnected: aQGrPisewJ4Fkb0WAACt (was in rooms: user_cmsi402g000kpd7oclpbv65o3, kitchen, caja)
+[Nest] 19  - 08/07/2026, 12:15:37 AM     LOG [AppGateway] Client cmBa--GIyqBuyuaFAACv joined room: caja
+[Nest] 19  - 08/07/2026, 12:15:38 AM     LOG [AppGateway] Orden actualizada received: cmsi6wg4400lhd7oc4bkqxz5u
+[Nest] 19  - 08/07/2026, 12:16:15 AM     LOG [AppGateway] Orden actualizada received: cmsi6wg4400lhd7oc4bkqxz5u
+[Nest] 19  - 08/07/2026, 12:16:20 AM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/07/2026, 12:16:20 AM   ERROR [NotificationsService] Error en ticket para ExponentPushToken[LLgIUZEEYR5IXm3BVvDR3A]: Unable to retrieve the FCM server key for the recipient's app. Make sure you have provided a server key as directed by the Expo FCM documentation.
+[Nest] 19  - 08/07/2026, 12:16:29 AM     LOG [AppGateway] Client J9dOwAwakvyJnXwFAACx mapped to user cmsi402g000kpd7oclpbv65o3 and joined user_cmsi402g000kpd7oclpbv65o3
+[Nest] 19  - 08/07/2026, 12:16:30 AM     LOG [AppGateway] Client J9dOwAwakvyJnXwFAACx joined room: kitchen
+[Nest] 19  - 08/07/2026, 12:16:30 AM     LOG [AppGateway] Client J9dOwAwakvyJnXwFAACx joined room: kitchen
