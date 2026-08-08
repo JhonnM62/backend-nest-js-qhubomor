@@ -15,7 +15,7 @@ export type NotificationEventType =
 @Injectable()
 export class NotificationsService {
   private readonly logger = new Logger(NotificationsService.name);
-  private expo = new Expo();
+  private expo = new Expo({ accessToken: process.env.EXPO_ACCESS_TOKEN });
 
   constructor(private prisma: PrismaService) {}
 
