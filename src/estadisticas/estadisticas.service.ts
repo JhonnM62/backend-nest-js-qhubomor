@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CajaService } from '../caja/caja.service';
 import { startOfDay, endOfDay, addHours } from 'date-fns';
@@ -7,7 +7,7 @@ import { startOfDay, endOfDay, addHours } from 'date-fns';
 export class EstadisticasService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly cajaService: CajaService
+    @Inject(forwardRef(() => CajaService)) private readonly cajaService: CajaService
   ) {}
 
   async getEstadisticasGenerales(startDate?: string, endDate?: string, categoriaProducto?: string, vendedorId?: string) {
