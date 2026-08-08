@@ -1,10 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { CajaService } from '../caja/caja.service';
 import { startOfDay, endOfDay, addHours } from 'date-fns';
 
 @Injectable()
 export class EstadisticasService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly cajaService: CajaService
+  ) {}
 
   async getEstadisticasGenerales(startDate?: string, endDate?: string, categoriaProducto?: string, vendedorId?: string) {
     // Las fechas enviadas por el front ("2025-12-01") deben ser tratadas como límites exactos del día en la zona horaria local
@@ -197,6 +201,93 @@ export class EstadisticasService {
         mensual: sortAndMap(ventasPorMesMap)
       },
       productos
+    };
+  }
+
+  async getInsumosDescuadres(startDate: string, endDate: string) {
+    let start = new Date(startDate);
+    start.setUTCHours(0, 0, 0, 0);
+    
+    let end = new Date(endDate);
+    end.setUTCHours(23, 59, 59, 999);
+
+    // Buscar todas las cajas en ese rango
+    // Se usa fechaYHora como referencia.
+    const cajas = await this.prisma.aperturaCierreCaja.findMany({
+      where: {
+        cierre: 'cerrada',
+        fechaDeCierre: {
+          gte: start,
+          lte: end,
+        },
+      },
+      select: { IDcaja: true }
+    });
+
+    const insumosMap = new Map<string, any>();
+
+    for (const caja of cajas) {
+      try {
+        const resumen = await this.cajaService.getResumenCaja(caja.IDcaja);
+        
+        if (resumen && resumen.insumos) {
+          for (const ins of resumen.insumos) {
+            const diff = ins.diferencia || 0;
+            // Solo contabilizamos si hubo movimiento o diferencia
+            if (diff !== 0 || ins.ventasEnSistema > 0 || (ins.seUtilizaron || 0) > 0) {
+              const id = ins.nombreInsumo || '';
+              if (!insumosMap.has(id)) {
+                insumosMap.set(id, {
+                  id,
+                  nombre: ins.nombreReal || id,
+                  totalFaltantes: 0,
+                  totalSobrantes: 0,
+                  frecuenciaDescuadre: 0,
+                  ventasSistema: 0,
+                  gastadoFisico: 0
+                });
+              }
+              
+              const current = insumosMap.get(id);
+              current.ventasSistema += ins.ventasEnSistema || 0;
+              current.gastadoFisico += ins.seUtilizaron || 0;
+              
+              if (diff < 0) {
+                current.totalFaltantes += Math.abs(diff); // Faltan
+                current.frecuenciaDescuadre += 1;
+              } else if (diff > 0) {
+                current.totalSobrantes += diff; // Sobran
+                current.frecuenciaDescuadre += 1;
+              }
+            }
+          }
+        }
+      } catch (e) {
+        console.error(`Error procesando resumen de caja ${caja.IDcaja}`, e);
+      }
+    }
+
+    const resultados = Array.from(insumosMap.values());
+    
+    // Calcular netos
+    resultados.forEach(r => {
+      r.diferenciaNeta = r.totalSobrantes - r.totalFaltantes; 
+      r.totalDescuadresAbsoluto = r.totalFaltantes + r.totalSobrantes;
+    });
+
+    // Ordenar por defecto alfabéticamente
+    resultados.sort((a, b) => a.nombre.localeCompare(b.nombre));
+
+    // Generar el ranking (top 5 de insumos con más descuadres absolutos)
+    const ranking = [...resultados]
+      .filter(r => r.totalDescuadresAbsoluto > 0)
+      .sort((a, b) => b.totalDescuadresAbsoluto - a.totalDescuadresAbsoluto)
+      .slice(0, 5);
+
+    return {
+      success: true,
+      data: resultados,
+      ranking
     };
   }
 }

@@ -24,4 +24,17 @@ export class EstadisticasController {
   ) {
     return this.estadisticasService.getEstadisticasGenerales(startDate, endDate, categoriaProducto, vendedorId);
   }
+
+  @Get('insumos-descuadres')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Obtener auditoría de descuadres de insumos por rango de fechas' })
+  @ApiQuery({ name: 'startDate', required: true, description: 'Fecha inicio (YYYY-MM-DD)' })
+  @ApiQuery({ name: 'endDate', required: true, description: 'Fecha fin (YYYY-MM-DD)' })
+  getInsumosDescuadres(
+    @Query('startDate') startDate: string,
+    @Query('endDate') endDate: string,
+  ) {
+    return this.estadisticasService.getInsumosDescuadres(startDate, endDate);
+  }
 }
