@@ -221,7 +221,7 @@ export class EstadisticasService {
           lte: end,
         },
       },
-      select: { IDcaja: true }
+      select: { IDcaja: true, fechaDeCierre: true }
     });
 
     const insumosMap = new Map<string, any>();
@@ -244,7 +244,8 @@ export class EstadisticasService {
                   totalSobrantes: 0,
                   frecuenciaDescuadre: 0,
                   ventasSistema: 0,
-                  gastadoFisico: 0
+                  gastadoFisico: 0,
+                  detalles: []
                 });
               }
               
@@ -252,12 +253,23 @@ export class EstadisticasService {
               current.ventasSistema += ins.ventasEnSistema || 0;
               current.gastadoFisico += ins.seUtilizaron || 0;
               
-              if (diff < 0) {
-                current.totalFaltantes += Math.abs(diff); // Faltan
+              if (diff !== 0) {
                 current.frecuenciaDescuadre += 1;
-              } else if (diff > 0) {
-                current.totalSobrantes += diff; // Sobran
-                current.frecuenciaDescuadre += 1;
+                // Si la diferencia es > 0, significa que se utilizó más de lo esperado en sistema = FALTANTE
+                // Si la diferencia es < 0, significa que se utilizó menos de lo esperado = SOBRANTE
+                current.detalles.push({
+                  fecha: caja.fechaDeCierre,
+                  diferencia: diff,
+                  tipo: diff > 0 ? 'FALTANTE' : 'SOBRANTE',
+                  ventasSistema: ins.ventasEnSistema || 0,
+                  gastadoFisico: ins.seUtilizaron || 0
+                });
+
+                if (diff > 0) {
+                  current.totalFaltantes += diff; 
+                } else {
+                  current.totalSobrantes += Math.abs(diff); 
+                }
               }
             }
           }
