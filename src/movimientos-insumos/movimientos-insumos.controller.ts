@@ -3,7 +3,7 @@ import { MovimientosInsumosService } from './movimientos-insumos.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
-import { AbrirPaqueteDto, DescuentoProduccionDto } from './dto/movimientos.dto';
+import { AbrirPaqueteDto, DescuentoProduccionDto, EntradaLibreDto } from './dto/movimientos.dto';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 
 @ApiTags('Movimientos Insumos')
@@ -34,5 +34,13 @@ export class MovimientosInsumosController {
   descuentoProduccion(@Body() dto: DescuentoProduccionDto, @Request() req: any) {
     const usuario = req.user?.username || req.user?.nombre || 'Usuario Desconocido';
     return this.movimientosInsumosService.descuentoProduccion(dto, usuario);
+  }
+
+  @Post('entrada-libre')
+  @Roles('Admin app', 'Admin negocio', 'Cajero', 'Inventarista')
+  @ApiOperation({ summary: 'Agregar cantidad libre a un insumo (y a su caja si aplica)' })
+  entradaLibre(@Body() dto: EntradaLibreDto, @Request() req: any) {
+    const usuario = req.user?.username || req.user?.nombre || 'Usuario Desconocido';
+    return this.movimientosInsumosService.entradaLibre(dto, usuario);
   }
 }

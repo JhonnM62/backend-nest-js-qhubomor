@@ -305,13 +305,25 @@ export class InsumosService {
     }
 
     const ajuste = insumo.ultimoAjustePendiente as any;
-    const delta = ajuste.delta || 0;
-    const nuevoStock = (insumo.cantidad || 0) + delta;
+    const delta = Number(ajuste.delta) || 0;
+    const cantidadAnterior = Number(insumo.cantidad) || 0;
+    const nuevoStock = Math.max(0, cantidadAnterior + delta); // Prevent negative stock
+
+    let nuevoPrecio = insumo.precio;
+    // Si hay una reducción de stock (merma) y tenemos cantidad anterior y precio
+    // Recalculamos el precio unitario para absorber la pérdida
+    if (delta < 0 && cantidadAnterior > 0 && insumo.precio) {
+      const valorTotalInventario = Number(insumo.precio) * cantidadAnterior;
+      if (nuevoStock > 0) {
+        nuevoPrecio = new Prisma.Decimal(valorTotalInventario / nuevoStock);
+      }
+    }
 
     const insumoActualizado = await this.prisma.insumos.update({
       where: { IDalimentos: id },
       data: {
         cantidad: nuevoStock,
+        precio: nuevoPrecio,
         ultimoAjustePendiente: Prisma.DbNull,
         updatedAt: new Date(),
       }

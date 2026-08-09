@@ -41,3 +41,26 @@ export class DescuentoProduccionDto {
   @IsString()
   observacion?: string;
 }
+
+export class EntradaLibreDto {
+  @ApiProperty({ description: 'ID del insumo' })
+  @IsNotEmpty()
+  @IsString()
+  insumoId: string;
+
+  @ApiPropertyOptional({ description: 'ID de la caja activa' })
+  @IsOptional()
+  @IsString()
+  cajaId?: string;
+
+  @ApiProperty({ description: 'Cantidad a ingresar' })
+  @IsNotEmpty()
+  @IsNumber()
+  @Min(1)
+  cantidadAgregada: number;
+
+  @ApiPropertyOptional({ description: 'Observación opcional' })
+  @IsOptional()
+  @IsString()
+  observacion?: string;
+}

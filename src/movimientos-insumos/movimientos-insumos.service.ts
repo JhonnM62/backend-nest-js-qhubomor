@@ -3,7 +3,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { Prisma } from '@prisma/client';
 import { AppGateway } from '../websocket/app.gateway';
 import { SocketEvent } from '../websocket/types/socket.types';
-import { AbrirPaqueteDto, DescuentoProduccionDto } from './dto/movimientos.dto';
+import { AbrirPaqueteDto, DescuentoProduccionDto, EntradaLibreDto } from './dto/movimientos.dto';
 
 @Injectable()
 export class MovimientosInsumosService {
@@ -140,6 +140,60 @@ export class MovimientosInsumosService {
     return {
       success: true,
       message: 'Stock deducido correctamente',
+      data: insumoActualizado,
+    };
+  }
+
+  async entradaLibre(dto: EntradaLibreDto, usuario: string) {
+    const { insumoId, cajaId, cantidadAgregada, observacion } = dto;
+
+    const insumo = await this.prisma.insumos.findUnique({
+      where: { IDalimentos: insumoId },
+    });
+
+    if (!insumo) {
+      throw new NotFoundException(`Insumo con ID ${insumoId} no encontrado`);
+    }
+
+    const cantidadAnterior = insumo.cantidad || 0;
+    const nuevoStock = cantidadAnterior + cantidadAgregada;
+
+    let nuevosPaquetes = insumo.paquetesEnBodega || 0;
+    if (insumo.cantidadPorPaquete && insumo.cantidadPorPaquete > 0) {
+      // Calculate how many packages this new quantity corresponds to
+      // For instance, if they add exactly the package size, that's +1 package.
+      const addedPackages = Math.floor(cantidadAgregada / insumo.cantidadPorPaquete);
+      nuevosPaquetes += addedPackages;
+    }
+
+    const insumoActualizado = await this.prisma.insumos.update({
+      where: { IDalimentos: insumoId },
+      data: {
+        cantidad: nuevoStock,
+        paquetesEnBodega: nuevosPaquetes,
+        updatedAt: new Date(),
+      }
+    });
+
+    // Registrar el movimiento
+    await this.prisma.movimientosInsumos.create({
+      data: {
+        IDinsumo: insumoId,
+        tipo: 'entrada_libre',
+        cantidadDelta: cantidadAgregada,
+        cantidadAntes: cantidadAnterior,
+        cantidadDespues: nuevoStock,
+        usuario,
+        cajaId,
+        observacion: observacion || 'Entrada manual (botón +)',
+      }
+    });
+
+    this.appGateway.emitToInsumos(SocketEvent.REFRESH_INSUMOS, { action: 'update', data: insumoActualizado });
+
+    return {
+      success: true,
+      message: 'Stock agregado correctamente',
       data: insumoActualizado,
     };
   }
