@@ -145,6 +145,22 @@ export class InsumosController {
     return this.insumosService.remove(id);
   }
 
+  @Patch(':id/aprobar-ajuste')
+  @UseGuards(RolesGuard)
+  @Roles('Admin app', 'Admin negocio')
+  @ApiOperation({ summary: 'Aprobar el último ajuste pendiente de un insumo' })
+  aprobarAjuste(@Param('id') id: string) {
+    return this.insumosService.aprobarAjustePendiente(id);
+  }
+
+  @Patch(':id/rechazar-ajuste')
+  @UseGuards(RolesGuard)
+  @Roles('Admin app', 'Admin negocio')
+  @ApiOperation({ summary: 'Rechazar el último ajuste pendiente de un insumo' })
+  rechazarAjuste(@Param('id') id: string) {
+    return this.insumosService.rechazarAjustePendiente(id);
+  }
+
   @Post(':id/movimiento')
   @UseGuards(RolesGuard)
   @Roles('Admin app', 'Admin negocio', 'Inventarista', 'Cocina')

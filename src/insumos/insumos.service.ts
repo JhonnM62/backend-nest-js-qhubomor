@@ -65,6 +65,10 @@ export class InsumosService {
       contador2: createInsumoDto.contador2,
       imagencard: createInsumoDto.imagencard,
       fecha: createInsumoDto.fecha ? new Date(createInsumoDto.fecha) : new Date(),
+      cantidadPorPaquete: createInsumoDto.cantidadPorPaquete,
+      paquetesEnBodega: createInsumoDto.paquetesEnBodega,
+      ajusteRequiereAprobacion: createInsumoDto.ajusteRequiereAprobacion,
+      ultimoAjustePendiente: createInsumoDto.ultimoAjustePendiente || null,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -226,6 +230,10 @@ export class InsumosService {
     if (updateInsumoDto.contador2 !== undefined) data.contador2 = updateInsumoDto.contador2;
     if (updateInsumoDto.fecha !== undefined) data.fecha = new Date(updateInsumoDto.fecha);
     if (updateInsumoDto.cuadrarInsumos !== undefined) data.cuadrarInsumos = updateInsumoDto.cuadrarInsumos;
+    if (updateInsumoDto.cantidadPorPaquete !== undefined) data.cantidadPorPaquete = updateInsumoDto.cantidadPorPaquete;
+    if (updateInsumoDto.paquetesEnBodega !== undefined) data.paquetesEnBodega = updateInsumoDto.paquetesEnBodega;
+    if (updateInsumoDto.ajusteRequiereAprobacion !== undefined) data.ajusteRequiereAprobacion = updateInsumoDto.ajusteRequiereAprobacion;
+    if (updateInsumoDto.ultimoAjustePendiente !== undefined) data.ultimoAjustePendiente = updateInsumoDto.ultimoAjustePendiente;
     
     data.updatedAt = new Date();
 
@@ -283,6 +291,71 @@ export class InsumosService {
     };
   }
 
+  async aprobarAjustePendiente(id: string) {
+    const insumo = await this.prisma.insumos.findUnique({
+      where: { IDalimentos: id },
+    });
+
+    if (!insumo) {
+      throw new NotFoundException(`Insumo con ID ${id} no encontrado`);
+    }
+
+    if (!insumo.ultimoAjustePendiente) {
+      throw new BadRequestException('No hay ajustes pendientes para este insumo');
+    }
+
+    const ajuste = insumo.ultimoAjustePendiente as any;
+    const delta = ajuste.delta || 0;
+    const nuevoStock = (insumo.cantidad || 0) + delta;
+
+    const insumoActualizado = await this.prisma.insumos.update({
+      where: { IDalimentos: id },
+      data: {
+        cantidad: nuevoStock,
+        ultimoAjustePendiente: Prisma.DbNull,
+        updatedAt: new Date(),
+      }
+    });
+
+    this.appGateway.emitToInsumos(SocketEvent.REFRESH_INSUMOS, { action: 'update', data: insumoActualizado });
+
+    return {
+      success: true,
+      message: 'Ajuste pendiente aprobado y stock actualizado',
+      data: insumoActualizado
+    };
+  }
+
+  async rechazarAjustePendiente(id: string) {
+    const insumo = await this.prisma.insumos.findUnique({
+      where: { IDalimentos: id },
+    });
+
+    if (!insumo) {
+      throw new NotFoundException(`Insumo con ID ${id} no encontrado`);
+    }
+
+    if (!insumo.ultimoAjustePendiente) {
+      throw new BadRequestException('No hay ajustes pendientes para este insumo');
+    }
+
+    const insumoActualizado = await this.prisma.insumos.update({
+      where: { IDalimentos: id },
+      data: {
+        ultimoAjustePendiente: Prisma.DbNull,
+        updatedAt: new Date(),
+      }
+    });
+
+    this.appGateway.emitToInsumos(SocketEvent.REFRESH_INSUMOS, { action: 'update', data: insumoActualizado });
+
+    return {
+      success: true,
+      message: 'Ajuste pendiente rechazado (el stock no cambió)',
+      data: insumoActualizado
+    };
+  }
+
   async movimientoStock(
     id: string,
     tipo: 'entrada' | 'salida' | 'ajuste',
@@ -306,10 +379,19 @@ export class InsumosService {
     const cantidadActual = Number(insumo.disponible) || 0;
     let nuevaCantidad = cantidadActual;
     let nuevaCantidadHist = insumo.cantidad || 0;
+    const data: Prisma.InsumosUpdateInput = {};
 
     if (tipo === 'entrada') {
       nuevaCantidad += cantidad;
       nuevaCantidadHist += cantidad;
+      
+      if (insumo.cantidadPorPaquete && insumo.cantidadPorPaquete > 0) {
+        const paquetesNuevos = Math.floor(cantidad / insumo.cantidadPorPaquete);
+        if (paquetesNuevos > 0) {
+          data.paquetesEnBodega = (insumo.paquetesEnBodega || 0) + paquetesNuevos;
+          motivo += ` (Se agregaron ${paquetesNuevos} paquetes auto)`;
+        }
+      }
     } else if (tipo === 'salida') {
       if (!allowNegative && nuevaCantidad < cantidad) {
         throw new BadRequestException(
@@ -321,12 +403,12 @@ export class InsumosService {
       nuevaCantidad = cantidad;
     }
 
+    data.disponible = nuevaCantidad;
+    data.cantidad = nuevaCantidadHist;
+
     const insumoActualizado = await this.prisma.insumos.update({
       where: { IDalimentos: id },
-      data: { 
-        disponible: nuevaCantidad,
-        cantidad: nuevaCantidadHist
-      },
+      data,
     });
 
     await this.registrarMovimiento(id, tipo, cantidad, motivo);
@@ -587,12 +669,22 @@ export class InsumosService {
     const nuevaCantidad = cantidadDisponible + cantidad;
     const nuevaCantidadHist = (insumo.cantidad || 0) + cantidad;
 
+    const dataToUpdate: Prisma.InsumosUpdateInput = { 
+      disponible: nuevaCantidad,
+      cantidad: nuevaCantidadHist
+    };
+
+    if (insumo.cantidadPorPaquete && insumo.cantidadPorPaquete > 0) {
+      const paquetesNuevos = Math.floor(cantidad / insumo.cantidadPorPaquete);
+      if (paquetesNuevos > 0) {
+        dataToUpdate.paquetesEnBodega = (insumo.paquetesEnBodega || 0) + paquetesNuevos;
+        observacion += ` (Auto: +${paquetesNuevos} paquetes)`;
+      }
+    }
+
     const insumoActualizado = await this.prisma.insumos.update({
       where: { IDalimentos: insumoId },
-      data: { 
-        disponible: nuevaCantidad,
-        cantidad: nuevaCantidadHist
-      },
+      data: dataToUpdate,
     });
 
     await this.registrarMovimiento(insumoId, 'entrada', cantidad, observacion);

@@ -105,6 +105,27 @@ export class CreateInsumoDto {
   @ApiPropertyOptional()
   @IsOptional()
   @IsNumber()
+  @Min(0)
+  cantidadPorPaquete?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  paquetesEnBodega?: number;
+
+  @ApiPropertyOptional({ default: false })
+  @IsOptional()
+  @IsBoolean()
+  ajusteRequiereAprobacion?: boolean;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  ultimoAjustePendiente?: any;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
   contador?: number;
 
   @ApiPropertyOptional()
@@ -259,6 +280,27 @@ export class UpdateInsumoDto {
   @IsOptional()
   @IsBoolean()
   cuadrarInsumos?: boolean;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  cantidadPorPaquete?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  paquetesEnBodega?: number;
+
+  @ApiPropertyOptional({ default: false })
+  @IsOptional()
+  @IsBoolean()
+  ajusteRequiereAprobacion?: boolean;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  ultimoAjustePendiente?: any;
 
   @ApiPropertyOptional()
   @IsOptional()

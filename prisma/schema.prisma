@@ -153,8 +153,33 @@ model Insumos {
   aperturaCierreInsumos    AperturaCierreInsumos[]
   categoriaInsumosRelacion CategoriasInsumos?      @relation(fields: [categoria], references: [IDcategoriainsumos])
   recetaInsumos            Recetainsumos[]
+  movimientosInsumos       MovimientosInsumos[]
+
+  // Campos para control de paquetes y ajustes
+  cantidadPorPaquete       Int?                    @map("Cantidad por paquete")
+  paquetesEnBodega         Int?                    @map("Paquetes en bodega")
+  ajusteRequiereAprobacion Boolean                 @default(false) @map("Ajuste requiere aprobacion")
+  ultimoAjustePendiente    Json?                   @map("Ultimo ajuste pendiente")
 
   @@map("INSUMOS")
+}
+
+model MovimientosInsumos {
+  IDmovimiento    String    @id @default(cuid()) @map("IDmovimiento")
+  IDinsumo        String    @map("IDinsumo")
+  tipo            String    @map("Tipo")
+  cantidadDelta   Int       @map("Cantidad Delta")
+  cantidadAntes   Int       @map("Cantidad Antes")
+  cantidadDespues Int       @map("Cantidad Despues")
+  usuario         String    @map("Usuario")
+  cajaId          String?   @map("Caja Id")
+  insumoCajaId    String?   @map("Insumo Caja Id")
+  observacion     String?   @map("Observacion")
+  fechaYHora      DateTime  @default(now()) @map("Fecha y hora")
+  
+  insumo          Insumos   @relation(fields: [IDinsumo], references: [IDalimentos], onDelete: Cascade)
+
+  @@map("MOVIMIENTOS INSUMOS")
 }
 
 model Recetainsumos {

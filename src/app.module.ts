@@ -32,6 +32,7 @@ import { AiModule } from './ai/ai.module'; // IMPORT AI MODULE
 import { CategoriasInsumosModule } from './categorias-insumos/categorias-insumos.module';
 import { CargosModule } from './cargos/cargos.module';
 import { NominaModule } from './nomina/nomina.module';
+import { MovimientosInsumosModule } from './movimientos-insumos/movimientos-insumos.module';
 @Module({
   imports: [
     AppConfigModule,
@@ -82,6 +83,7 @@ import { NominaModule } from './nomina/nomina.module';
     CategoriasInsumosModule,
     CargosModule,
     NominaModule,
+    MovimientosInsumosModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: AllExceptionsFilter },
