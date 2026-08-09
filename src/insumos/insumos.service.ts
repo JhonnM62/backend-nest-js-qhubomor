@@ -387,9 +387,11 @@ export class InsumosService {
       
       if (insumo.cantidadPorPaquete && insumo.cantidadPorPaquete > 0) {
         const paquetesNuevos = Math.floor(cantidad / insumo.cantidadPorPaquete);
-        if (paquetesNuevos > 0) {
+        if (paquetesNuevos > 0 || insumo.paquetesEnBodega == null) {
           data.paquetesEnBodega = (insumo.paquetesEnBodega || 0) + paquetesNuevos;
-          motivo += ` (Se agregaron ${paquetesNuevos} paquetes auto)`;
+          if (paquetesNuevos > 0) {
+            motivo += ` (Se agregaron ${paquetesNuevos} paquetes auto)`;
+          }
         }
       }
     } else if (tipo === 'salida') {
@@ -676,9 +678,11 @@ export class InsumosService {
 
     if (insumo.cantidadPorPaquete && insumo.cantidadPorPaquete > 0) {
       const paquetesNuevos = Math.floor(cantidad / insumo.cantidadPorPaquete);
-      if (paquetesNuevos > 0) {
+      if (paquetesNuevos > 0 || insumo.paquetesEnBodega == null) {
         dataToUpdate.paquetesEnBodega = (insumo.paquetesEnBodega || 0) + paquetesNuevos;
-        observacion += ` (Auto: +${paquetesNuevos} paquetes)`;
+        if (paquetesNuevos > 0) {
+          observacion += ` (Auto: +${paquetesNuevos} paquetes)`;
+        }
       }
     }
 
