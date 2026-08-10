@@ -230,8 +230,28 @@ export class InsumosService {
     if (updateInsumoDto.contador2 !== undefined) data.contador2 = updateInsumoDto.contador2;
     if (updateInsumoDto.fecha !== undefined) data.fecha = new Date(updateInsumoDto.fecha);
     if (updateInsumoDto.cuadrarInsumos !== undefined) data.cuadrarInsumos = updateInsumoDto.cuadrarInsumos;
-    if (updateInsumoDto.cantidadPorPaquete !== undefined) data.cantidadPorPaquete = updateInsumoDto.cantidadPorPaquete;
-    if (updateInsumoDto.paquetesEnBodega !== undefined) data.paquetesEnBodega = updateInsumoDto.paquetesEnBodega;
+    
+    if (updateInsumoDto.cantidadPorPaquete !== undefined && updateInsumoDto.cantidadPorPaquete !== null) {
+      // Si llega como string vacío se evalúa como falso/NaN
+      const cant = Number(updateInsumoDto.cantidadPorPaquete);
+      data.cantidadPorPaquete = isNaN(cant) || cant === 0 ? null : cant;
+    } else if (updateInsumoDto.cantidadPorPaquete === null) {
+      data.cantidadPorPaquete = null;
+    }
+
+    if (updateInsumoDto.paquetesEnBodega !== undefined && updateInsumoDto.paquetesEnBodega !== null) {
+      const paq = Number(updateInsumoDto.paquetesEnBodega);
+      data.paquetesEnBodega = isNaN(paq) ? null : paq;
+    } else if (updateInsumoDto.paquetesEnBodega === null) {
+      // Auto-calcular si se dejó vacío (enviaron explícitamente nulo)
+      const cantPaquete = data.cantidadPorPaquete !== undefined ? data.cantidadPorPaquete : insumo.cantidadPorPaquete;
+      if (cantPaquete && Number(cantPaquete) > 0) {
+        data.paquetesEnBodega = Math.floor(cantidadNueva / Number(cantPaquete));
+      } else {
+        data.paquetesEnBodega = null;
+      }
+    }
+
     if (updateInsumoDto.ajusteRequiereAprobacion !== undefined) data.ajusteRequiereAprobacion = updateInsumoDto.ajusteRequiereAprobacion;
     if (updateInsumoDto.ultimoAjustePendiente !== undefined) data.ultimoAjustePendiente = updateInsumoDto.ultimoAjustePendiente;
     
