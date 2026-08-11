@@ -22,7 +22,7 @@ export class MovimientosInsumosService {
   }
 
   async abrirPaquete(dto: AbrirPaqueteDto, usuario: string) {
-    const { insumoId, cajaId, cantidadReal } = dto;
+    const { insumoId, cajaId, cantidadReal, syncGlobalStock = true } = dto;
 
     const insumo = await this.prisma.insumos.findUnique({
       where: { IDalimentos: insumoId },
@@ -39,72 +39,69 @@ export class MovimientosInsumosService {
     const cantidadAnterior = insumo.cantidad || 0;
     const diferencia = cantidadReal - insumo.cantidadPorPaquete;
     
-    // Si requiere aprobación y hay diferencia (faltante o sobrante), queda pendiente.
-    // Si no requiere, se aprueba automáticamente sumando al stock actual.
-    // OJO: Si sumamos al stock, sumamos `cantidadReal`.
-
     let nuevoStock = cantidadAnterior;
     let pendiente = null;
-    let nuevoPrecio = insumo.precio; // Keep current price by default
+    let nuevoPrecio = insumo.precio;
+    let insumoActualizado = null;
 
-    if (insumo.ajusteRequiereAprobacion && diferencia !== 0) {
-      // Queda pendiente el ajuste de la diferencia
-      pendiente = {
-        cantidadReportada: cantidadReal,
-        cantidadTeorica: insumo.cantidadPorPaquete,
-        delta: diferencia,
-        motivo: 'Diferencia en apertura de paquete',
-        fechaYHora: new Date(),
-        usuario,
-      };
-      // No modificamos el stock por la diferencia aún
-    } else {
-      // Automático: sumamos la diferencia al stock global (ej: 102 + (-2) = 100)
-      nuevoStock += diferencia;
+    if (syncGlobalStock) {
+      if (insumo.ajusteRequiereAprobacion && diferencia !== 0) {
+        pendiente = {
+          cantidadReportada: cantidadReal,
+          cantidadTeorica: insumo.cantidadPorPaquete,
+          delta: diferencia,
+          motivo: 'Diferencia en apertura de paquete',
+          fechaYHora: new Date(),
+          usuario,
+        };
+      } else {
+        nuevoStock += diferencia;
 
-      // Recalcular precio si hubo diferencia hacia abajo o arriba (absorbe el costo de la diferencia)
-      if (diferencia !== 0 && insumo.precio && insumo.cantidadPorPaquete) {
-        // Costo del paquete teórico = cantidadPorPaquete * precioActual
-        const precioActual = Number(insumo.precio || 0);
-        const costoPaquete = insumo.cantidadPorPaquete * precioActual;
-        // Nuevo precio = costoPaquete / cantidadReal
-        if (cantidadReal > 0) {
-          nuevoPrecio = (costoPaquete / cantidadReal) as any;
+        if (diferencia !== 0 && insumo.precio && insumo.cantidadPorPaquete) {
+          const precioActual = Number(insumo.precio || 0);
+          const costoPaquete = insumo.cantidadPorPaquete * precioActual;
+          if (cantidadReal > 0) {
+            nuevoPrecio = (costoPaquete / cantidadReal) as any;
+          }
         }
       }
-    }
 
-    const insumoActualizado = await this.prisma.insumos.update({
-      where: { IDalimentos: insumoId },
-      data: {
-        cantidad: nuevoStock,
-        disponible: String(nuevoStock),
-        precio: nuevoPrecio,
-        paquetesEnBodega: insumo.paquetesEnBodega - 1, // Descontamos 1 paquete
-        ultimoAjustePendiente: pendiente ? (pendiente as any) : Prisma.DbNull,
-        updatedAt: new Date(),
-      }
-    });
+      insumoActualizado = await this.prisma.insumos.update({
+        where: { IDalimentos: insumoId },
+        data: {
+          cantidad: nuevoStock,
+          disponible: String(nuevoStock),
+          precio: nuevoPrecio,
+          paquetesEnBodega: insumo.paquetesEnBodega - 1,
+          ultimoAjustePendiente: pendiente ? (pendiente as any) : Prisma.DbNull,
+          updatedAt: new Date(),
+        }
+      });
+    }
 
     // Registrar el movimiento
     await this.prisma.movimientosInsumos.create({
       data: {
         IDinsumo: insumoId,
-        tipo: 'apertura_paquete',
+        tipo: syncGlobalStock ? 'apertura_paquete' : 'apertura_paquete_local',
         cantidadDelta: cantidadReal,
         cantidadAntes: cantidadAnterior,
         cantidadDespues: nuevoStock,
         usuario,
         cajaId,
-        observacion: diferencia !== 0 ? `Abrió paquete (Teórico: ${insumo.cantidadPorPaquete}, Real: ${cantidadReal})` : `Abrió paquete (Completo)`,
+        observacion: syncGlobalStock 
+          ? (diferencia !== 0 ? `Abrió paquete (Teórico: ${insumo.cantidadPorPaquete}, Real: ${cantidadReal})` : `Abrió paquete (Completo)`)
+          : `Abrió paquete en caja sin afectar stock global (Real: ${cantidadReal})`,
       }
     });
 
-    this.appGateway.emitToInsumos(SocketEvent.REFRESH_INSUMOS, { action: 'update', data: insumoActualizado });
+    if (syncGlobalStock && insumoActualizado) {
+      this.appGateway.emitToInsumos(SocketEvent.REFRESH_INSUMOS, { action: 'update', data: insumoActualizado });
+    }
 
     return {
       success: true,
-      message: 'Paquete abierto y stock actualizado',
+      message: syncGlobalStock ? 'Paquete abierto y stock actualizado' : 'Paquete abierto exitosamente',
       data: insumoActualizado,
     };
   }

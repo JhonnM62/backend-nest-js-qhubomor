@@ -1,4 +1,4 @@
-import { IsString, IsNumber, IsOptional, IsNotEmpty, Min } from 'class-validator';
+import { IsString, IsNumber, IsOptional, IsNotEmpty, Min, IsBoolean } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class AbrirPaqueteDto {
@@ -17,6 +17,11 @@ export class AbrirPaqueteDto {
   @IsNumber()
   @Min(0)
   cantidadReal: number;
+
+  @ApiPropertyOptional({ description: 'Indica si se debe sincronizar la diferencia con el stock global' })
+  @IsOptional()
+  @IsBoolean()
+  syncGlobalStock?: boolean;
 }
 
 export class DescuentoProduccionDto {
