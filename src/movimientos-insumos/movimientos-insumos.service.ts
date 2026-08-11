@@ -45,6 +45,7 @@ export class MovimientosInsumosService {
 
     let nuevoStock = cantidadAnterior;
     let pendiente = null;
+    let nuevoPrecio = insumo.precio; // Keep current price by default
 
     if (insumo.ajusteRequiereAprobacion && diferencia !== 0) {
       // Queda pendiente el ajuste de la diferencia
@@ -56,20 +57,29 @@ export class MovimientosInsumosService {
         fechaYHora: new Date(),
         usuario,
       };
-      // El nuevo stock solo suma lo teórico si la política es esperar a aprobar
-      // O podemos sumar lo real y el ajuste es para "alertar".
-      // Según diseño: si requiere aprobación, el stock global NO asume la diferencia hasta aprobar.
-      // Así que sumamos la cantidadPorPaquete (el teórico) al stock, y dejamos la diferencia pendiente.
-      nuevoStock += insumo.cantidadPorPaquete;
+      // No modificamos el stock por la diferencia aún
     } else {
-      // Automático: sumamos la cantidad real al stock global
-      nuevoStock += cantidadReal;
+      // Automático: sumamos la diferencia al stock global (ej: 102 + (-2) = 100)
+      nuevoStock += diferencia;
+
+      // Recalcular precio si hubo diferencia hacia abajo o arriba (absorbe el costo de la diferencia)
+      if (diferencia !== 0 && insumo.precio && insumo.cantidadPorPaquete) {
+        // Costo del paquete teórico = cantidadPorPaquete * precioActual
+        const precioActual = Number(insumo.precio || 0);
+        const costoPaquete = insumo.cantidadPorPaquete * precioActual;
+        // Nuevo precio = costoPaquete / cantidadReal
+        if (cantidadReal > 0) {
+          nuevoPrecio = (costoPaquete / cantidadReal) as any;
+        }
+      }
     }
 
     const insumoActualizado = await this.prisma.insumos.update({
       where: { IDalimentos: insumoId },
       data: {
         cantidad: nuevoStock,
+        disponible: String(nuevoStock),
+        precio: nuevoPrecio,
         paquetesEnBodega: insumo.paquetesEnBodega - 1, // Descontamos 1 paquete
         ultimoAjustePendiente: pendiente ? (pendiente as any) : Prisma.DbNull,
         updatedAt: new Date(),
@@ -117,6 +127,7 @@ export class MovimientosInsumosService {
       where: { IDalimentos: insumoId },
       data: {
         cantidad: nuevoStock,
+        disponible: String(nuevoStock),
         updatedAt: new Date(),
       }
     });
@@ -170,6 +181,7 @@ export class MovimientosInsumosService {
       where: { IDalimentos: insumoId },
       data: {
         cantidad: nuevoStock,
+        disponible: String(nuevoStock),
         paquetesEnBodega: nuevosPaquetes,
         updatedAt: new Date(),
       }

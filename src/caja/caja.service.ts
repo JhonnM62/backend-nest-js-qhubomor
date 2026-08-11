@@ -1818,5 +1818,83 @@ export class CajaService {
       data: updatedCaja
     };
   }
+
+  async arquearInsumos(cajaId: string, usuario: string) {
+    const caja = await this.prisma.aperturaCierreCaja.findUnique({
+      where: { IDcaja: cajaId }
+    });
+
+    if (!caja) {
+      throw new NotFoundException(`Caja con ID ${cajaId} no encontrada`);
+    }
+
+    const insumosCaja = await this.prisma.aperturaCierreInsumos.findMany({
+      where: { IDcaja: cajaId },
+      include: {
+        insumo: true
+      }
+    });
+
+    let ajustesRealizados = 0;
+
+    await this.prisma.$transaction(async (tx) => {
+      for (const insumoCaja of insumosCaja) {
+        // Solo arquear si hay una cantidad de cierre definida
+        if (insumoCaja.cantDeCierre === null || insumoCaja.cantDeCierre === undefined) {
+          continue;
+        }
+
+        const insumo = insumoCaja.insumo;
+        if (!insumo) continue;
+
+        // Calcular stock cerrado
+        let closedStock = 0;
+        if (insumo.paquetesEnBodega && insumo.cantidadPorPaquete) {
+          closedStock = insumo.paquetesEnBodega * insumo.cantidadPorPaquete;
+        }
+
+        const stockFisicoTotal = closedStock + Number(insumoCaja.cantDeCierre);
+        const stockSistemaTotal = insumo.cantidad || 0;
+        const diferencia = stockFisicoTotal - stockSistemaTotal;
+
+        if (diferencia !== 0) {
+          // Actualizar inventario global
+          await tx.insumos.update({
+            where: { IDalimentos: insumo.IDalimentos },
+            data: {
+              cantidad: stockFisicoTotal,
+              disponible: String(stockFisicoTotal),
+              updatedAt: new Date()
+            }
+          });
+
+          // Registrar movimiento
+          await tx.movimientosInsumos.create({
+            data: {
+              IDinsumo: insumo.IDalimentos,
+              tipo: 'ajuste_cierre',
+              cantidadDelta: diferencia,
+              cantidadAntes: stockSistemaTotal,
+              cantidadDespues: stockFisicoTotal,
+              usuario,
+              cajaId: cajaId,
+              observacion: `Ajuste por cierre de caja (Físico: ${stockFisicoTotal}, Sistema: ${stockSistemaTotal})`,
+            }
+          });
+
+          ajustesRealizados++;
+        }
+      }
+    });
+
+    // Avisar al socket para refrescar inventarios
+    this.appGateway.emitToInsumos(SocketEvent.REFRESH_INSUMOS, { action: 'update', message: 'Arqueo realizado' });
+
+    return { 
+      success: true, 
+      message: `Arqueo completado. Se ajustaron ${ajustesRealizados} insumos.`,
+      ajustesRealizados
+    };
+  }
 }
 

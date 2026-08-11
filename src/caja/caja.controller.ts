@@ -8,6 +8,7 @@ import {
   Query,
   UseGuards,
   Delete,
+  Req,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { CajaService } from './caja.service';
@@ -164,5 +165,14 @@ export class CajaController {
   @ApiOperation({ summary: 'Ejecutar un plan de auto-cuadre con IA' })
   executeAutoCuadre(@Param('id') id: string, @Body() planIA: any) {
     return this.cajaService.executeAutoCuadre(id, planIA);
+  }
+
+  @Post(':id/arquear-insumos')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Arquear insumos físicos de la caja contra el inventario global' })
+  arquearInsumos(@Param('id') id: string, @Req() req: any) {
+    const usuario = req.user?.username || 'Sistema';
+    return this.cajaService.arquearInsumos(id, usuario);
   }
 }
