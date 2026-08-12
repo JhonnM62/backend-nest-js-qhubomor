@@ -1822,7 +1822,59 @@ export class CajaService {
     };
   }
 
-  async arquearInsumos(cajaId: string, usuario: string) {
+  async previewArquearInsumos(cajaId: string) {
+    const caja = await this.prisma.aperturaCierreCaja.findUnique({
+      where: { IDcaja: cajaId }
+    });
+
+    if (!caja) {
+      throw new NotFoundException(`Caja con ID ${cajaId} no encontrada`);
+    }
+
+    const insumosCaja = await this.prisma.aperturaCierreInsumos.findMany({
+      where: { IDcaja: cajaId },
+      include: {
+        insumo: true
+      }
+    });
+
+    const preview = [];
+
+    for (const insumoCaja of insumosCaja) {
+      if (insumoCaja.cantDeCierre === null || insumoCaja.cantDeCierre === undefined) {
+        continue;
+      }
+
+      const insumo = insumoCaja.insumo;
+      if (!insumo) continue;
+
+      let closedStock = 0;
+      if (insumo.paquetesEnBodega && insumo.cantidadPorPaquete) {
+        closedStock = insumo.paquetesEnBodega * insumo.cantidadPorPaquete;
+      }
+
+      const stockFisicoTotal = closedStock + Number(insumoCaja.cantDeCierre);
+      const stockSistemaTotal = insumo.cantidad || 0;
+      const diferencia = stockFisicoTotal - stockSistemaTotal;
+
+      if (diferencia !== 0) {
+        preview.push({
+          IDalimentos: insumo.IDalimentos,
+          nombre: insumo.nombre,
+          stockSistema: stockSistemaTotal,
+          stockFisico: stockFisicoTotal,
+          diferencia: diferencia
+        });
+      }
+    }
+
+    return {
+      success: true,
+      data: preview
+    };
+  }
+
+  async arquearInsumos(cajaId: string, usuario: string, insumosIds?: string[]) {
     const caja = await this.prisma.aperturaCierreCaja.findUnique({
       where: { IDcaja: cajaId }
     });
@@ -1849,6 +1901,11 @@ export class CajaService {
 
         const insumo = insumoCaja.insumo;
         if (!insumo) continue;
+        
+        // Si se proporcionaron IDs específicos, omitir los que no estén en la lista
+        if (insumosIds && insumosIds.length > 0 && !insumosIds.includes(insumo.IDalimentos)) {
+          continue;
+        }
 
         // Calcular stock cerrado
         let closedStock = 0;

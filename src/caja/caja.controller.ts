@@ -167,12 +167,20 @@ export class CajaController {
     return this.cajaService.executeAutoCuadre(id, planIA);
   }
 
+  @Get(':id/arquear-insumos-preview')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Obtener la vista previa de diferencias para arquear insumos' })
+  previewArquearInsumos(@Param('id') id: string) {
+    return this.cajaService.previewArquearInsumos(id);
+  }
+
   @Post(':id/arquear-insumos')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Arquear insumos físicos de la caja contra el inventario global' })
-  arquearInsumos(@Param('id') id: string, @Req() req: any) {
+  arquearInsumos(@Param('id') id: string, @Req() req: any, @Body() body: { insumosIds?: string[] }) {
     const usuario = req.user?.username || 'Sistema';
-    return this.cajaService.arquearInsumos(id, usuario);
+    return this.cajaService.arquearInsumos(id, usuario, body?.insumosIds);
   }
 }
