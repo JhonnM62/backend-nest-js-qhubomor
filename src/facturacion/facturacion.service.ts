@@ -69,12 +69,13 @@ export class FacturacionService {
       
       const data = response.data?.data;
       if (!data || data.length === 0) {
-        throw new Error('No hay rangos de numeración activos');
+        throw new HttpException('No hay rangos de numeración activos (Crea uno en Factus)', HttpStatus.BAD_REQUEST);
       }
       return data[0].id;
     } catch (error: any) {
+      if (error instanceof HttpException) throw error;
       this.logger.error('Error al obtener rango de numeración', error?.response?.data || error);
-      throw new HttpException('Error al obtener rangos de Factus', HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException('Error al obtener rangos de Factus. Revisa tu cuenta', HttpStatus.BAD_REQUEST);
     }
   }
 
