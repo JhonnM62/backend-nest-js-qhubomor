@@ -63,12 +63,17 @@ export class FacturacionService {
       const baseUrl = this.getBaseUrl(config.factusEntorno);
       
       // Intentar primero traer los rangos ya configurados por el usuario
-      let response = await firstValueFrom(
-        this.httpService.get(`${baseUrl}/v2/numbering-ranges`, {
-          headers: { Authorization: `Bearer ${token}` }
-        })
-      );
-      let data = response.data?.data;
+      let data: any[] = [];
+      try {
+        let response = await firstValueFrom(
+          this.httpService.get(`${baseUrl}/v2/numbering-ranges`, {
+            headers: { Authorization: `Bearer ${token}` }
+          })
+        );
+        data = response.data?.data || [];
+      } catch (err: any) {
+        this.logger.warn('Fallo al obtener rangos manuales (puede estar vacío):', err?.response?.data || err.message);
+      }
       
       // Si no hay rangos manuales, intentar traer los rangos automáticos de la DIAN asociados al software
       if (!data || data.length === 0) {
@@ -79,9 +84,10 @@ export class FacturacionService {
               headers: { Authorization: `Bearer ${token}` }
             })
           );
-          data = dianResponse.data?.data;
+          data = dianResponse.data?.data || [];
         } catch (dianError: any) {
           this.logger.warn('Fallo al obtener rangos de la DIAN:', dianError?.response?.data || dianError.message);
+          throw dianError; // Si ambos fallan, propagamos el último error para verlo
         }
       }
 
@@ -98,8 +104,9 @@ export class FacturacionService {
       return rangeId;
     } catch (error: any) {
       if (error instanceof HttpException) throw error;
-      this.logger.error('Error al obtener rango de numeración', error?.response?.data || error);
-      throw new HttpException('Error al obtener rangos de Factus. Revisa tu cuenta', HttpStatus.BAD_REQUEST);
+      const errorMsg = error?.response?.data?.message || JSON.stringify(error?.response?.data) || error.message;
+      this.logger.error('Error al obtener rango de numeración', errorMsg);
+      throw new HttpException(`Error Factus al obtener rangos: ${errorMsg}`, HttpStatus.BAD_REQUEST);
     }
   }
 
