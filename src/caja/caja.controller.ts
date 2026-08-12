@@ -179,8 +179,9 @@ export class CajaController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Arquear insumos físicos de la caja contra el inventario global' })
-  arquearInsumos(@Param('id') id: string, @Req() req: any, @Body() body: { insumosIds?: string[] }) {
+  arquearInsumos(@Param('id') id: string, @Req() req: any, @Body() body: { insumosIds?: string[], syncGlobalStock?: boolean }) {
     const usuario = req.user?.username || 'Sistema';
-    return this.cajaService.arquearInsumos(id, usuario, body?.insumosIds);
+    const syncGlobalStock = body?.syncGlobalStock !== undefined ? body.syncGlobalStock : true;
+    return this.cajaService.arquearInsumos(id, usuario, body?.insumosIds, syncGlobalStock);
   }
 }

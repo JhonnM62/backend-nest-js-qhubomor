@@ -1874,7 +1874,7 @@ export class CajaService {
     };
   }
 
-  async arquearInsumos(cajaId: string, usuario: string, insumosIds?: string[]) {
+  async arquearInsumos(cajaId: string, usuario: string, insumosIds?: string[], syncGlobalStock: boolean = true) {
     const caja = await this.prisma.aperturaCierreCaja.findUnique({
       where: { IDcaja: cajaId }
     });
@@ -1918,15 +1918,17 @@ export class CajaService {
         const diferencia = stockFisicoTotal - stockSistemaTotal;
 
         if (diferencia !== 0) {
-          // Actualizar inventario global
-          await tx.insumos.update({
-            where: { IDalimentos: insumo.IDalimentos },
-            data: {
-              cantidad: stockFisicoTotal,
-              disponible: String(stockFisicoTotal),
-              updatedAt: new Date()
-            }
-          });
+          if (syncGlobalStock) {
+            // Actualizar inventario global
+            await tx.insumos.update({
+              where: { IDalimentos: insumo.IDalimentos },
+              data: {
+                cantidad: stockFisicoTotal,
+                disponible: String(stockFisicoTotal),
+                updatedAt: new Date()
+              }
+            });
+          }
 
           // Registrar movimiento
           await tx.movimientosInsumos.create({
