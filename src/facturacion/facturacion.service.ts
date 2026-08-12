@@ -61,17 +61,41 @@ export class FacturacionService {
   private async getNumberingRange(config: any, token: string): Promise<number> {
     try {
       const baseUrl = this.getBaseUrl(config.factusEntorno);
-      const response = await firstValueFrom(
+      
+      // Intentar primero traer los rangos ya configurados por el usuario
+      let response = await firstValueFrom(
         this.httpService.get(`${baseUrl}/v2/numbering-ranges`, {
           headers: { Authorization: `Bearer ${token}` }
         })
       );
+      let data = response.data?.data;
       
-      const data = response.data?.data;
+      // Si no hay rangos manuales, intentar traer los rangos automáticos de la DIAN asociados al software
       if (!data || data.length === 0) {
-        throw new HttpException('No hay rangos de numeración activos (Crea uno en Factus)', HttpStatus.BAD_REQUEST);
+        this.logger.log('No se encontraron rangos manuales, intentando obtener los asociados al software (DIAN)...');
+        try {
+          const dianResponse = await firstValueFrom(
+            this.httpService.get(`${baseUrl}/v2/numbering-ranges/dian`, {
+              headers: { Authorization: `Bearer ${token}` }
+            })
+          );
+          data = dianResponse.data?.data;
+        } catch (dianError: any) {
+          this.logger.warn('Fallo al obtener rangos de la DIAN:', dianError?.response?.data || dianError.message);
+        }
       }
-      return data[0].id;
+
+      if (!data || data.length === 0) {
+        throw new HttpException('No hay rangos de numeración activos ni asociados al software (Crea uno en Factus o asocia el software en la DIAN)', HttpStatus.BAD_REQUEST);
+      }
+      
+      // Tomamos el primero disponible. Factus suele devolver un array, cada uno con un 'id'
+      const rangeId = data[0].id || data[0].numbering_range_id;
+      if (!rangeId) {
+         // Si por alguna razón el endpoint /dian no devuelve id, lanzamos error detallando qué trajo
+         throw new HttpException(`El rango de la DIAN no incluye un ID válido. Respuesta: ${JSON.stringify(data[0])}`, HttpStatus.BAD_REQUEST);
+      }
+      return rangeId;
     } catch (error: any) {
       if (error instanceof HttpException) throw error;
       this.logger.error('Error al obtener rango de numeración', error?.response?.data || error);
