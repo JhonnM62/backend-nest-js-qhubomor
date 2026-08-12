@@ -91,15 +91,20 @@ export class FacturacionService {
         }
       }
 
-      if (!data || data.length === 0) {
+      // Normalizamos data para que siempre sea un array
+      let ranges = Array.isArray(data) ? data : [data];
+      
+      if (!ranges || ranges.length === 0 || (ranges.length === 1 && !ranges[0])) {
         throw new HttpException('No hay rangos de numeración activos ni asociados al software (Crea uno en Factus o asocia el software en la DIAN)', HttpStatus.BAD_REQUEST);
       }
       
-      // Tomamos el primero disponible. Factus suele devolver un array, cada uno con un 'id'
-      const rangeId = data[0].id || data[0].numbering_range_id;
+      // Tomamos el primero disponible. Factus puede devolver 'id' o 'numbering_range_id'
+      const range = ranges[0];
+      const rangeId = range?.id || range?.numbering_range_id;
+      
       if (!rangeId) {
          // Si por alguna razón el endpoint /dian no devuelve id, lanzamos error detallando qué trajo
-         throw new HttpException(`El rango de la DIAN no incluye un ID válido. Respuesta: ${JSON.stringify(data[0])}`, HttpStatus.BAD_REQUEST);
+         throw new HttpException(`El rango de la DIAN no incluye un ID válido. Respuesta: ${JSON.stringify(range)}`, HttpStatus.BAD_REQUEST);
       }
       return rangeId;
     } catch (error: any) {
