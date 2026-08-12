@@ -33,6 +33,8 @@ import { CategoriasInsumosModule } from './categorias-insumos/categorias-insumos
 import { CargosModule } from './cargos/cargos.module';
 import { NominaModule } from './nomina/nomina.module';
 import { MovimientosInsumosModule } from './movimientos-insumos/movimientos-insumos.module';
+import { FacturacionModule } from './facturacion/facturacion.module';
+
 @Module({
   imports: [
     AppConfigModule,
@@ -84,6 +86,7 @@ import { MovimientosInsumosModule } from './movimientos-insumos/movimientos-insu
     CargosModule,
     NominaModule,
     MovimientosInsumosModule,
+    FacturacionModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: AllExceptionsFilter },

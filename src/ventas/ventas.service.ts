@@ -6,6 +6,7 @@ import { NotificationsService } from '../notifications/notifications.service';
 import { InsumosService } from '../insumos/insumos.service';
 import { AppGateway } from '../websocket/app.gateway';
 import { SocketEvent } from '../websocket/types/socket.types';
+import { FacturacionService } from '../facturacion/facturacion.service';
 
 @Injectable()
 export class VentasService {
@@ -14,6 +15,7 @@ export class VentasService {
     private notificationsService: NotificationsService,
     private insumosService: InsumosService,
     private appGateway: AppGateway,
+    private facturacionService: FacturacionService,
   ) {}
 
   private formatDuration(diffMs: number): string {
@@ -154,6 +156,13 @@ export class VentasService {
         radioGeocercaM: 100,
         minutosGraciaLlegadaTarde: 5,
         updatedAt: new Date(),
+        emitirFacturaAutomatica: false,
+        factusEmail: null,
+        factusPassword: null,
+        factusClientId: null,
+        factusClientSecret: null,
+        factusMunicipioCodigo: '52356',
+        factusEntorno: 'SANDBOX',
       };
     }
     
@@ -1026,6 +1035,16 @@ export class VentasService {
     });
 
     this.appGateway.emitToVentas(SocketEvent.REFRESH_VENTAS, { action: 'updateEstado', venta: updated });
+    
+    if (updated && (updateData.estado === 'PAGADO' || (!updateData.estado && updated.estado === 'PAGADO'))) {
+      const config = await this.prisma.configuracionNegocio.findFirst();
+      if (config?.emitirFacturaAutomatica) {
+        this.facturacionService.emitirFactura(id).catch(err => {
+          console.error('Error en emisión automática de factura', err);
+        });
+      }
+    }
+
     return updated;
   }
 

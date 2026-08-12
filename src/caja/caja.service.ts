@@ -26,7 +26,7 @@ export class CajaService {
 
     let config = await this.prisma.configuracionNegocio.findUnique({ where: { id: 1 } });
     if (!config) {
-      config = { id: 1, nombreComercial: 'Q HUBO MOR', nit: null, direccion: null, telefono: null, horaCorteDia: '00:00', modoOperacion: 'GENERAL', latitudNegocio: null, longitudNegocio: null, radioGeocercaM: 100, minutosGraciaLlegadaTarde: 5, updatedAt: new Date() };
+      config = { id: 1, nombreComercial: 'Q HUBO MOR', nit: null, direccion: null, telefono: null, horaCorteDia: '00:00', modoOperacion: 'GENERAL', latitudNegocio: null, longitudNegocio: null, radioGeocercaM: 100, minutosGraciaLlegadaTarde: 5, updatedAt: new Date(), emitirFacturaAutomatica: false, factusEmail: null, factusPassword: null, factusClientId: null, factusClientSecret: null, factusMunicipioCodigo: '52356', factusEntorno: 'SANDBOX' };
     }
     
     const [corteHours, corteMinutes] = config!.horaCorteDia.split(':').map(Number);
@@ -150,12 +150,15 @@ export class CajaService {
             // Find existing to compare
             const existing = await tx.aperturaCierreInsumos.findUnique({ where: { Idcierreyapertura: insumo.Idcierreyapertura }});
             
-            const gastadoFisico = (insumo.cantApertura || 0) - (insumo.cantDeCierre || 0);
+            const newApertura = insumo.cantApertura !== undefined ? insumo.cantApertura : existing?.cantApertura;
+            const newCierre = insumo.cantDeCierre !== undefined ? insumo.cantDeCierre : existing?.cantDeCierre;
+            const gastadoFisico = (Number(newApertura) || 0) - (Number(newCierre) || 0);
+            
             await tx.aperturaCierreInsumos.update({
               where: { Idcierreyapertura: insumo.Idcierreyapertura },
               data: {
-                cantApertura: insumo.cantApertura,
-                cantDeCierre: insumo.cantDeCierre,
+                cantApertura: insumo.cantApertura !== undefined ? insumo.cantApertura : undefined,
+                cantDeCierre: insumo.cantDeCierre !== undefined ? insumo.cantDeCierre : undefined,
                 seUtilizaron: gastadoFisico,
                 observacion: insumo.observacion,
                 paraQueProducto: insumo.paraQueProducto,

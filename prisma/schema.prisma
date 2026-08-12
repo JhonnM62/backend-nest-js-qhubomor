@@ -72,6 +72,11 @@ model Clientes {
   whatsapp                   String?   @map("Whatsapp")
   observaciones              String?   @map("Observaciones")
   isActive                   Boolean   @default(true) @map("isActive")
+  tipoDocumento              String?   @map("TipoDocumento")
+  direccion                  String?   @map("Direccion")
+  municipio                  String?   @map("Municipio")
+  email                      String?   @map("Email")
+  responsabilidadTributaria  String?   @default("R-99-PN") @map("ResponsabilidadTributaria")
   ventas                     Ventas[]
 
   @@map("CLIENTES")
@@ -278,6 +283,7 @@ model Ventas {
   usuarioRelacion       Usuarios?            @relation(fields: [usuario], references: [IDusuarios])
   aperturaCierreCaja    AperturaCierreCaja[] @relation("AperturaCierreCajaToVentas")
   buscar                String?              @map("Buscar")
+  facturaElectronica    FacturasElectronicas?
 
   @@index([fechaYHora])
   @@index([createdAt])
@@ -544,6 +550,31 @@ model ConfiguracionNegocio {
   latitudNegocio  Float?
   longitudNegocio Float?
   radioGeocercaM  Int      @default(100)
+  emitirFacturaAutomatica Boolean @default(false)
+  factusEmail             String?
+  factusPassword          String?
+  factusClientId          String?
+  factusClientSecret      String?
+  factusMunicipioCodigo   String  @default("52356")
+  factusEntorno           String  @default("SANDBOX")
+}
+
+model FacturasElectronicas {
+  IDfactura      String    @id @default(cuid()) @map("IDfactura")
+  ventaId        String    @unique @map("VentaId")
+  factusId       String?   @map("FactusId")
+  numeroFactura  String?   @map("NumeroFactura")
+  cufe           String?   @map("Cufe")
+  qrImage        String?   @map("QrImage")
+  pdfUrl         String?   @map("PdfUrl")
+  estado         String?   @map("Estado")
+  jsonRespuesta  Json?     @map("JsonRespuesta")
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  venta          Ventas    @relation(fields: [ventaId], references: [IDventas], onDelete: Cascade)
+
+  @@map("FACTURAS_ELECTRONICAS")
 }
 
 model ConfiguracionIA {
