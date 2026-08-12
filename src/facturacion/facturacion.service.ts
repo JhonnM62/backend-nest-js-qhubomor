@@ -91,20 +91,33 @@ export class FacturacionService {
         }
       }
 
-      // Normalizamos data para que siempre sea un array
-      let ranges = Array.isArray(data) ? data : [data];
-      
-      if (!ranges || ranges.length === 0 || (ranges.length === 1 && !ranges[0])) {
+      // Dependiendo de cómo Factus envuelva la respuesta, la lista real de rangos puede estar en data, o data.data
+      let actualRanges: any[] = [];
+      if (Array.isArray(data)) {
+        actualRanges = data;
+      } else if (data && Array.isArray((data as any).data)) {
+        actualRanges = (data as any).data;
+      } else if (data) {
+        actualRanges = [data];
+      }
+
+      if (!actualRanges || actualRanges.length === 0) {
         throw new HttpException('No hay rangos de numeración activos ni asociados al software (Crea uno en Factus o asocia el software en la DIAN)', HttpStatus.BAD_REQUEST);
       }
       
-      // Tomamos el primero disponible. Factus puede devolver 'id' o 'numbering_range_id'
-      const range = ranges[0];
+      // Buscar el rango específico para facturas de venta
+      // En la DIAN el documento suele llamarse "Factura de Venta"
+      let range = actualRanges.find(r => r.document === 'Factura de Venta' || r.document?.toLowerCase().includes('factura'));
+      
+      // Si no se encuentra uno específico, usamos el primero que tenga ID
+      if (!range) {
+        range = actualRanges.find(r => r.id || r.numbering_range_id) || actualRanges[0];
+      }
+      
       const rangeId = range?.id || range?.numbering_range_id;
       
       if (!rangeId) {
-         // Si por alguna razón el endpoint /dian no devuelve id, lanzamos error detallando qué trajo
-         throw new HttpException(`El rango de la DIAN no incluye un ID válido. Respuesta: ${JSON.stringify(range)}`, HttpStatus.BAD_REQUEST);
+         throw new HttpException(`El rango de la DIAN no incluye un ID válido. Respuesta extraida: ${JSON.stringify(range)}`, HttpStatus.BAD_REQUEST);
       }
       return rangeId;
     } catch (error: any) {
