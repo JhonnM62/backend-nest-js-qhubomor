@@ -1919,15 +1919,48 @@ export class CajaService {
 
         if (diferencia !== 0) {
           if (syncGlobalStock) {
+            let nuevoPrecio = insumo.precio;
+            if (insumo.precio && stockSistemaTotal > 0 && stockFisicoTotal > 0) {
+                const totalValue = stockSistemaTotal * Number(insumo.precio);
+                nuevoPrecio = (totalValue / stockFisicoTotal) as any;
+            }
+
             // Actualizar inventario global
             await tx.insumos.update({
               where: { IDalimentos: insumo.IDalimentos },
               data: {
                 cantidad: stockFisicoTotal,
                 disponible: String(stockFisicoTotal),
+                precio: nuevoPrecio,
+                total: Number(nuevoPrecio || 0) * stockFisicoTotal,
                 updatedAt: new Date()
               }
             });
+
+            // Actualizar el último registro de entrada si hubo un cambio de precio
+            if (nuevoPrecio !== insumo.precio) {
+              const ultimaOrden = await tx.orderinventario.findFirst({
+                where: {
+                  OR: [{ nombreDelAlimento: insumo.IDalimentos }, { nombreDelAlimento: insumo.nombre }],
+                  inventario: {
+                    tipo: { contains: 'ENTRADA', mode: 'insensitive' }
+                  },
+                  seCompro: 'Si'
+                },
+                orderBy: { fechaYHora: 'desc' }
+              });
+
+              if (ultimaOrden) {
+                await tx.orderinventario.update({
+                  where: { IDorderinventario: ultimaOrden.IDorderinventario },
+                  data: {
+                    precioActual: nuevoPrecio,
+                    precio: nuevoPrecio,
+                    subtotal: Number(ultimaOrden.cantidad || 0) * Number(nuevoPrecio)
+                  }
+                });
+              }
+            }
           }
 
           // Registrar movimiento

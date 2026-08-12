@@ -72,11 +72,37 @@ export class MovimientosInsumosService {
           cantidad: nuevoStock,
           disponible: String(nuevoStock),
           precio: nuevoPrecio,
+          total: Number(nuevoPrecio || 0) * nuevoStock,
           paquetesEnBodega: insumo.paquetesEnBodega - 1,
           ultimoAjustePendiente: pendiente ? (pendiente as any) : Prisma.DbNull,
           updatedAt: new Date(),
         }
       });
+      
+      // Actualizar el último registro de entrada si hubo un cambio de precio
+      if (diferencia !== 0 && !pendiente && nuevoPrecio !== insumo.precio) {
+        const ultimaOrden = await this.prisma.orderinventario.findFirst({
+          where: {
+            OR: [{ nombreDelAlimento: insumoId }, { nombreDelAlimento: insumo.nombre }],
+            inventario: {
+              tipo: { contains: 'ENTRADA', mode: 'insensitive' }
+            },
+            seCompro: 'Si'
+          },
+          orderBy: { fechaYHora: 'desc' }
+        });
+        
+        if (ultimaOrden) {
+          await this.prisma.orderinventario.update({
+            where: { IDorderinventario: ultimaOrden.IDorderinventario },
+            data: {
+              precioActual: nuevoPrecio,
+              precio: nuevoPrecio,
+              subtotal: Number(ultimaOrden.cantidad || 0) * Number(nuevoPrecio)
+            }
+          });
+        }
+      }
     }
 
     // Registrar el movimiento
