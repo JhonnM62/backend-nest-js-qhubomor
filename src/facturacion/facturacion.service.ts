@@ -54,7 +54,7 @@ export class FacturacionService {
       return this.token as string;
     } catch (error: any) {
       this.logger.error('Error al obtener token de Factus', error?.response?.data || error);
-      throw new HttpException('Error de autenticación con Factus', HttpStatus.UNAUTHORIZED);
+      throw new HttpException('Error de autenticación con Factus: Revisa tus credenciales', HttpStatus.BAD_REQUEST);
     }
   }
 
