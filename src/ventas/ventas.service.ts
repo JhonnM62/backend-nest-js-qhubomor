@@ -901,7 +901,8 @@ export class VentasService {
           },
           clienteRelacion: {
             select: { IDcliente: true, nombre: true, cedula: true, whatsapp: true, compras: true, contador: true }
-          }
+          },
+          facturaElectronica: true,
         },
       }),
       this.prisma.ventas.count({ where }),
@@ -930,6 +931,7 @@ export class VentasService {
           },
         },
         usuarioRelacion: true,
+        facturaElectronica: true,
       },
     });
 
@@ -966,6 +968,7 @@ export class VentasService {
       include: {
         ordenVentas: true,
         usuarioRelacion: { select: { IDusuarios: true, nombre: true, email: true } },
+        facturaElectronica: true,
       },
     });
 
@@ -1031,6 +1034,7 @@ export class VentasService {
       include: {
         ordenVentas: true,
         usuarioRelacion: { select: { IDusuarios: true, nombre: true, email: true } },
+        facturaElectronica: true,
       },
     });
 
@@ -1105,6 +1109,7 @@ export class VentasService {
       },
       include: {
         ordenVentas: true,
+        facturaElectronica: true,
       },
       orderBy: { fechaYHora: 'desc' },
     });
@@ -1127,6 +1132,7 @@ export class VentasService {
             },
           },
         },
+        facturaElectronica: true,
       },
     });
   }
