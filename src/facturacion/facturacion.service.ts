@@ -163,7 +163,7 @@ export class FacturacionService {
         tribute_code: 'ZZ',
         country_code: 'CO',
         responsibilities: [venta.clienteRelacion.responsabilidadTributaria || 'R-99-PN'],
-        municipality_code: venta.clienteRelacion.municipio || config.factusMunicipioCodigo,
+        municipality_code: venta.clienteRelacion.municipio || config.factusMunicipioCodigo || '11001',
         names: venta.clienteRelacion.nombre || 'Sin Nombre',
         address: venta.clienteRelacion.direccion || 'Sin Dirección',
         email: venta.clienteRelacion.email || config.factusEmail,
@@ -179,7 +179,7 @@ export class FacturacionService {
         tribute_code: 'ZZ',
         country_code: 'CO',
         responsibilities: ['R-99-PN'],
-        municipality_code: config.factusMunicipioCodigo,
+        municipality_code: config.factusMunicipioCodigo || '11001',
         email: config.factusEmail,
         phone: '0000000000',
       };
@@ -298,5 +298,41 @@ export class FacturacionService {
         HttpStatus.BAD_REQUEST
       );
     }
+  }
+
+  async eliminarFactura(ventaId: string) {
+    const config = await this.getConfig();
+    const token = await this.getToken(config);
+
+    const factura = await this.prisma.facturasElectronicas.findUnique({
+      where: { ventaId }
+    });
+
+    if (!factura) {
+      throw new HttpException('No hay factura electrónica para esta venta', HttpStatus.NOT_FOUND);
+    }
+
+    // Intentar eliminar en Factus si tiene reference_code (factusId)
+    if (factura.factusId) {
+      try {
+        const baseUrl = this.getBaseUrl(config.factusEntorno);
+        await firstValueFrom(
+          this.httpService.delete(`${baseUrl}/v2/bills/destroy/reference/${factura.factusId}`, {
+            headers: { 
+              Authorization: `Bearer ${token}`
+            }
+          })
+        );
+      } catch (error: any) {
+        this.logger.warn(`No se pudo eliminar en Factus (puede estar validada): ${error?.response?.data?.message || error.message}`);
+      }
+    }
+
+    // Eliminar localmente
+    await this.prisma.facturasElectronicas.delete({
+      where: { ventaId }
+    });
+
+    return { message: 'Factura eliminada localmente (y en Factus si era posible)' };
   }
 }
