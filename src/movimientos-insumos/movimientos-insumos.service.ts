@@ -98,7 +98,8 @@ export class MovimientosInsumosService {
             data: {
               precioActual: nuevoPrecio,
               precio: nuevoPrecio,
-              subtotal: Number(ultimaOrden.cantidad || 0) * Number(nuevoPrecio)
+              subtotal: Number(ultimaOrden.cantidad || 0) * Number(nuevoPrecio),
+              cantInsumos: cantidadReal
             }
           });
         }
