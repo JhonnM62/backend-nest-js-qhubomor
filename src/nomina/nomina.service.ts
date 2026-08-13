@@ -537,6 +537,7 @@ export class NominaService {
       // Create local date around noon to avoid timezone shift on the date part
       const [y, m, d] = fechaStr.split('-');
       const fecha = new Date(Number(y), Number(m) - 1, Number(d), 12, 0, 0);
+      const fechaDB = new Date(Date.UTC(Number(y), Number(m) - 1, Number(d)));
 
       // Parse times
       const parseTime = (timeStr: string, dateObj: Date) => {
@@ -559,6 +560,12 @@ export class NominaService {
       if (dto.horaSalida) {
         hSalida = parseTime(dto.horaSalida, fecha);
         estado = 'COMPLETADO';
+        
+        // Si la hora de salida es menor a la de entrada, significa que salió al día siguiente
+        if (hSalida < hEntrada) {
+          hSalida.setDate(hSalida.getDate() + 1);
+        }
+        
         const horasTrabajadas = (hSalida.getTime() - hEntrada.getTime()) / (1000 * 60 * 60);
 
         const diaSemana = fecha.getDay();
@@ -569,7 +576,7 @@ export class NominaService {
       const t = await this.prisma.turnos.create({
         data: {
           usuarioId: dto.usuarioId,
-          fecha,
+          fecha: fechaDB,
           horaEntrada: hEntrada,
           horaSalida: hSalida,
           estado,
@@ -593,7 +600,12 @@ export class NominaService {
     const turno = await this.getTurno(turnoId);
     const updateData: any = { ...dto };
     if (dto.horaSalida) updateData.horaSalida = new Date(dto.horaSalida);
-    if (dto.horaEntrada) updateData.horaEntrada = new Date(dto.horaEntrada);
+    if (dto.horaEntrada) {
+      const dt = new Date(dto.horaEntrada);
+      updateData.horaEntrada = dt;
+      // Actualizar la fecha lógica (agrupación) basada en la fecha local de la entrada
+      updateData.fecha = new Date(Date.UTC(dt.getFullYear(), dt.getMonth(), dt.getDate()));
+    }
     // Si se está cerrando el turno (COMPLETADO o FINALIZADO) y aún no tiene horaSalida, asignamos la hora actual
     if (dto.estado === 'COMPLETADO' && !dto.horaSalida && !updateData.horaSalida) {
       updateData.horaSalida = new Date();
