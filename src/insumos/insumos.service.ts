@@ -665,17 +665,24 @@ export class InsumosService {
     }
 
     const cantidadDisponible = Number(insumo.disponible) || 0;
-    if (cantidadDisponible < cantidad) {
+    const cantidadHist = insumo.cantidad || 0;
+    
+    // Si ambos están en 0, no lanzar error si permiten descontar a negativo (o validar contra ambos)
+    if (cantidadDisponible < cantidad && cantidadHist < cantidad) {
       throw new BadRequestException(
-        `Stock insuficiente. Disponible: ${cantidadDisponible}, Solicitado: ${cantidad}`
+        `Stock insuficiente. Disponible: ${Math.max(cantidadDisponible, cantidadHist)}, Solicitado: ${cantidad}`
       );
     }
 
     const nuevaCantidad = cantidadDisponible - cantidad;
+    const nuevaCantidadHist = cantidadHist - cantidad;
 
     const insumoActualizado = await this.prisma.insumos.update({
       where: { IDalimentos: insumoId },
-      data: { disponible: nuevaCantidad },
+      data: { 
+        disponible: nuevaCantidad,
+        cantidad: nuevaCantidadHist
+      },
     });
 
     await this.registrarMovimiento(insumoId, 'salida', cantidad, observacion);

@@ -255,7 +255,7 @@ export class InventarioService {
             where: { IDalimentos: insumo.IDalimentos },
             data: {
               disponible: disponibleActual - cantidad,
-              cantidad: cantidadHist,
+              cantidad: cantidadHist - cantidad,
             },
           });
         }
