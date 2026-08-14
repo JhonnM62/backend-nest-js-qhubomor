@@ -25,6 +25,11 @@ export class CategoriasInsumosService {
 
   async findAll() {
     return this.prisma.categoriasInsumos.findMany({
+      include: {
+        _count: {
+          select: { insumos: true }
+        }
+      },
       orderBy: {
         nombre: 'asc',
       },
