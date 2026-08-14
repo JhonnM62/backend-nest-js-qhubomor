@@ -534,41 +534,43 @@ export class NominaService {
     const turnosCreados = [];
 
     for (const fechaStr of dto.fechas) {
-      // Create local date around noon to avoid timezone shift on the date part
-      const [y, m, d] = fechaStr.split('-');
-      const fecha = new Date(Number(y), Number(m) - 1, Number(d), 12, 0, 0);
-      const fechaDB = new Date(Date.UTC(Number(y), Number(m) - 1, Number(d)));
+      const [y, m, d] = fechaStr.split('-').map(Number);
+      const fechaDB = new Date(Date.UTC(y, m - 1, d));
 
-      // Parse times
-      const parseTime = (timeStr: string, dateObj: Date) => {
-        // timeStr like "08:00 AM" or "14:30"
+      // Parse times — the user enters times in Colombia local time (UTC-5).
+      // We must store them as proper UTC: add 5 hours to convert COT → UTC.
+      const COLOMBIA_OFFSET_HOURS = 5;
+
+      const parseTime = (timeStr: string, year: number, month: number, day: number) => {
+        // timeStr like "08:00 AM" or "02:00 PM"
         const [time, modifier] = timeStr.split(' ');
-        let [hours, minutes] = time.split(':');
+        const [hours, minutes] = time.split(':');
         let h = parseInt(hours, 10);
         if (modifier === 'PM' && h < 12) h += 12;
         if (modifier === 'AM' && h === 12) h = 0;
-        const dt = new Date(dateObj);
-        dt.setHours(h, parseInt(minutes, 10), 0, 0);
-        return dt;
+        // Build UTC date: Colombia hour + 5 = UTC hour
+        return new Date(Date.UTC(year, month - 1, day, h + COLOMBIA_OFFSET_HOURS, parseInt(minutes, 10), 0, 0));
       };
 
-      const hEntrada = parseTime(dto.horaEntrada, fecha);
+      const hEntrada = parseTime(dto.horaEntrada, y, m, d);
       let hSalida = null;
       let estado = 'ACTIVO';
       let valorTurno = 0;
 
       if (dto.horaSalida) {
-        hSalida = parseTime(dto.horaSalida, fecha);
+        hSalida = parseTime(dto.horaSalida, y, m, d);
         estado = 'COMPLETADO';
         
         // Si la hora de salida es menor a la de entrada, significa que salió al día siguiente
         if (hSalida < hEntrada) {
-          hSalida.setDate(hSalida.getDate() + 1);
+          hSalida = new Date(hSalida.getTime() + 24 * 60 * 60 * 1000);
         }
         
         const horasTrabajadas = (hSalida.getTime() - hEntrada.getTime()) / (1000 * 60 * 60);
 
-        const diaSemana = fecha.getDay();
+        // Use UTC day for Colombia by subtracting the offset back
+        const fechaColombia = new Date(hEntrada.getTime() - (COLOMBIA_OFFSET_HOURS * 60 * 60 * 1000));
+        const diaSemana = fechaColombia.getUTCDay();
         const campoDia = TARIFA_POR_DIA[diaSemana];
         valorTurno = Number(usuario.cargo?.[campoDia] ?? 0);
       }
