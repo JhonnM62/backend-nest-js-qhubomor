@@ -22,6 +22,11 @@ export class AbrirPaqueteDto {
   @IsOptional()
   @IsBoolean()
   syncGlobalStock?: boolean;
+  @ApiPropertyOptional({ description: 'Cantidad de paquetes a abrir simultáneamente (por defecto 1)' })
+  @IsOptional()
+  @IsNumber()
+  @Min(1)
+  cantidadDePaquetes?: number;
 }
 
 export class DescuentoProduccionDto {
@@ -58,11 +63,17 @@ export class EntradaLibreDto {
   @IsString()
   cajaId?: string;
 
-  @ApiProperty({ description: 'Cantidad a ingresar' })
+  @ApiProperty({ description: 'Cantidad a ingresar (Real)' })
   @IsNotEmpty()
   @IsNumber()
   @Min(1)
   cantidadAgregada: number;
+
+  @ApiPropertyOptional({ description: 'Cantidad teórica esperada (para calcular mermas/ajustes)' })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  cantidadTeorica?: number;
 
   @ApiPropertyOptional({ description: 'Observación opcional' })
   @IsOptional()

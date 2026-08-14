@@ -330,14 +330,8 @@ export class InsumosService {
     const nuevoStock = Math.max(0, cantidadAnterior + delta); // Prevent negative stock
 
     let nuevoPrecio = insumo.precio;
-    // Si hay una reducción de stock (merma) y tenemos cantidad anterior y precio
-    // Recalculamos el precio unitario para absorber la pérdida
-    if (delta < 0 && cantidadAnterior > 0 && insumo.precio) {
-      const valorTotalInventario = Number(insumo.precio) * cantidadAnterior;
-      if (nuevoStock > 0) {
-        nuevoPrecio = new Prisma.Decimal(valorTotalInventario / nuevoStock);
-      }
-    }
+    // El precio unitario no debe cambiar durante ajustes manuales o mermas.
+    // Absorber la pérdida en el precio unitario arruina el costeo de las recetas.
 
     const insumoActualizado = await this.prisma.insumos.update({
       where: { IDalimentos: id },

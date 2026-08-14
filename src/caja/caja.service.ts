@@ -1920,10 +1920,11 @@ export class CajaService {
         if (diferencia !== 0) {
           if (syncGlobalStock) {
             let nuevoPrecio = insumo.precio;
-            if (insumo.precio && stockSistemaTotal > 0 && stockFisicoTotal > 0) {
-                const totalValue = stockSistemaTotal * Number(insumo.precio);
-                nuevoPrecio = (totalValue / stockFisicoTotal) as any;
-            }
+            
+            // El precio unitario promedio no debe cambiar durante un cuadre físico (arqueo).
+            // Solo cambia cuando se ingresan nuevas compras a un precio diferente.
+            // La línea comentada causaba que el precio unitario se inflara o desinflara erróneamente:
+            // if (insumo.precio && stockSistemaTotal > 0 && stockFisicoTotal > 0) { ... }
 
             // Actualizar inventario global
             await tx.insumos.update({
