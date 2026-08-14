@@ -30,8 +30,223 @@ export class AgentToolsService {
       this.analizarMovimientosInsumosTool(),
       this.consultarDescuadresCajaTool(),
       this.aprenderReglaTool(),
-      this.consultarConsumoInventarioTool()
+      this.consultarConsumoInventarioTool(),
+      this.getRealCashflowTool(),
+      this.getSalesByCategoryTool(),
+      this.projectEndOfMonthCashTool(),
+      this.getTheoreticalCostTool()
     ];
+  }
+
+  private getRealCashflowTool() {
+    return tool(
+      async (args) => {
+        try {
+          const start = new Date(`${args.fechaInicio}T05:00:00.000Z`);
+          const end = new Date(`${args.fechaFin}T05:00:00.000Z`);
+          end.setUTCHours(23, 59, 59, 999);
+
+          // Ingresos Reales
+          const ventas = await this.prisma.ventas.aggregate({
+            where: {
+              fecha: { gte: start, lte: end },
+              estado: { in: ['PAGADO', 'ENTREGADO'] }
+            },
+            _sum: { totalInput: true }
+          });
+          const ingresosTotales = Number(ventas._sum.totalInput || 0);
+
+          // Egresos por Compras de Insumos (Inventario)
+          const inventario = await this.prisma.orderinventario.aggregate({
+             where: { fecha: { gte: start, lte: end } },
+             _sum: { subtotal: true }
+          });
+          const gastosInventario = Number(inventario._sum.subtotal || 0);
+
+          // Egresos Operativos y Fijos (Gastos)
+          const gastos = await this.prisma.gastos.aggregate({
+             where: { fecha: { gte: start, lte: end } },
+             _sum: { valor: true }
+          });
+          const gastosGenerales = Number(gastos._sum.valor || 0);
+
+          const flujoCaja = ingresosTotales - gastosInventario - gastosGenerales;
+
+          return JSON.stringify({
+             ingresos: ingresosTotales,
+             gastosInventario: gastosInventario,
+             gastosGenerales: gastosGenerales,
+             flujoCajaReal: flujoCaja,
+             nota: "Calculado usando ingresos totales reales y restando dinero físico gastado en compras de insumos y gastos operativos."
+          });
+        } catch (e: any) {
+          return "Error calculando flujo de caja: " + e.message;
+        }
+      },
+      {
+        name: 'get_real_cashflow',
+        description: 'Calcula el flujo de caja real (plata libre) sumando ingresos y restando compras físicas de inventario y gastos operativos. Útil para "cuánto dinero quedó", "rentabilidad real". REQUIERE ROL ADMIN.',
+        schema: z.object({
+          fechaInicio: z.string().describe('Fecha inicial (YYYY-MM-DD)'),
+          fechaFin: z.string().describe('Fecha final (YYYY-MM-DD)'),
+        }),
+      }
+    );
+  }
+
+  private getSalesByCategoryTool() {
+    return tool(
+      async (args) => {
+        try {
+          const start = new Date(`${args.fechaInicio}T05:00:00.000Z`);
+          const end = new Date(`${args.fechaFin}T05:00:00.000Z`);
+          end.setUTCHours(23, 59, 59, 999);
+
+          const ventas = await this.prisma.ventas.findMany({
+             where: { fecha: { gte: start, lte: end }, estado: { in: ['PAGADO', 'ENTREGADO'] } },
+             include: { ordenVentas: true }
+          });
+
+          const ventasPorCategoria: Record<string, number> = {};
+
+          for (const v of ventas) {
+             for (const o of v.ordenVentas) {
+                const cat = o.categoriaProducto || o.categoria || 'Sin Categoría';
+                ventasPorCategoria[cat] = (ventasPorCategoria[cat] || 0) + (o.cantidad || 0);
+             }
+          }
+
+          return JSON.stringify({
+             ventasPorCategoria,
+             nota: "La herramienta devuelve la cantidad vendida por cada categoría registrada dinámicamente en la base de datos. Usa tu razonamiento para sumar cuáles de estas categorías corresponden a comida (platos) y cuáles a bebidas o adicionales según lo que pregunte el usuario."
+          });
+        } catch (e: any) {
+          return "Error consultando ventas por categoría: " + e.message;
+        }
+      },
+      {
+        name: 'get_sales_by_category',
+        description: 'Cuenta cuántas unidades se han vendido en un periodo, agrupadas por la categoría del producto desde la base de datos. Útil para separar platos de bebidas dinámicamente. REQUIERE ROL ADMIN.',
+        schema: z.object({
+          fechaInicio: z.string().describe('Fecha inicial (YYYY-MM-DD)'),
+          fechaFin: z.string().describe('Fecha final (YYYY-MM-DD)'),
+        }),
+      }
+    );
+  }
+
+  private projectEndOfMonthCashTool() {
+    return tool(
+      async (args) => {
+        try {
+          const d = new Date();
+          d.setHours(d.getHours() - 5);
+          const mes = args.mes ? parseInt(args.mes) : (d.getMonth() + 1);
+          const anio = args.anio ? parseInt(args.anio) : d.getFullYear();
+
+          const startDate = new Date(`${anio}-${mes.toString().padStart(2, '0')}-01T05:00:00.000Z`);
+          const endOfMonth = new Date(anio, mes, 0); // Last day of month
+          const endDate = new Date(`${anio}-${mes.toString().padStart(2, '0')}-${endOfMonth.getDate()}T05:00:00.000Z`);
+          endDate.setUTCHours(23, 59, 59, 999);
+
+          // Use the current day if we are in the same month to find operated days
+          let limitDate = new Date();
+          limitDate.setHours(limitDate.getHours() - 5);
+          if (limitDate > endDate) limitDate = endDate;
+
+          // Find distinct days with sales
+          const ventas = await this.prisma.ventas.findMany({
+             where: { fecha: { gte: startDate, lte: limitDate }, estado: { in: ['PAGADO', 'ENTREGADO'] } },
+             select: { fecha: true, totalInput: true }
+          });
+
+          const distinctDays = new Set(ventas.map(v => v.fecha?.toISOString().split('T')[0]));
+          const diasOperados = distinctDays.size || 1; // avoid division by zero
+
+          const ingresosTotales = ventas.reduce((acc, v) => acc + Number(v.totalInput || 0), 0);
+
+          const inventario = await this.prisma.orderinventario.aggregate({
+             where: { fecha: { gte: startDate, lte: limitDate } },
+             _sum: { subtotal: true }
+          });
+          const gastosInventario = Number(inventario._sum.subtotal || 0);
+
+          const gastos = await this.prisma.gastos.aggregate({
+             where: { fecha: { gte: startDate, lte: limitDate } },
+             _sum: { valor: true }
+          });
+          const gastosGenerales = Number(gastos._sum.valor || 0);
+
+          const margenOperativoAcumulado = ingresosTotales - gastosInventario - gastosGenerales;
+          const promedioDiario = margenOperativoAcumulado / diasOperados;
+          const totalDaysInMonth = endOfMonth.getDate();
+          const diasRestantes = totalDaysInMonth - diasOperados;
+
+          const proyeccionRestante = promedioDiario * diasRestantes;
+          const proyeccionTotal = margenOperativoAcumulado + proyeccionRestante;
+
+          return JSON.stringify({
+             diasOperados,
+             diasRestantes,
+             promedioDiarioMargen: promedioDiario,
+             margenActual: margenOperativoAcumulado,
+             proyeccionFinDeMes: proyeccionTotal,
+             nota: "Proyección basada en el margen operativo promedio diario de los días operados en el mes. Asume que los gastos fijos ya están siendo capturados en los días operados, o se distribuirán a la misma tasa promedio."
+          });
+        } catch (e: any) {
+          return "Error proyectando fin de mes: " + e.message;
+        }
+      },
+      {
+        name: 'project_end_of_month_cash',
+        description: 'Proyecta cuánto dinero quedará a final de mes basado en el flujo de caja diario promedio de los días operados. REQUIERE ROL ADMIN.',
+        schema: z.object({
+          mes: z.string().optional().describe('Mes en formato MM, asume el mes actual si no se provee.'),
+          anio: z.string().optional().describe('Año en formato YYYY, asume el actual si no se provee.')
+        }),
+      }
+    );
+  }
+
+  private getTheoreticalCostTool() {
+    return tool(
+      async (args) => {
+        try {
+          const productos = await this.prisma.productos.findMany({
+             where: { nombre: { contains: args.nombreProducto, mode: 'insensitive' } },
+             include: { 
+                recetaInsumos: {
+                   include: { insumoRelacion: true }
+                } 
+             },
+             take: 5
+          });
+
+          if (productos.length === 0) return `No se encontraron productos con el nombre ${args.nombreProducto}`;
+          
+          return JSON.stringify(productos.map(p => ({
+             producto: p.nombre,
+             precioVenta: p.precioUnitario,
+             receta: p.recetaInsumos.map(r => ({
+                insumo: r.insumoRelacion?.nombre || 'Desconocido',
+                cantidadUsada: r.cantidad,
+                unidadMedidaReceta: r.tipoDeMedida,
+                precioCompraInsumo: r.insumoRelacion?.precio,
+                unidadesPorPrecioCompra: r.insumoRelacion?.unidades
+             }))
+          })));
+        } catch (e: any) {
+          return "Error consultando costo teórico: " + e.message;
+        }
+      },
+      {
+        name: 'get_theoretical_cost',
+        description: 'Consulta la receta y el costo teórico de un producto cruzando Productos, RecetaInsumos e Insumos. Útil para responder "¿cuánto me gano en una hamburguesa?" o "¿cuál es el costo de un producto?".',
+        schema: z.object({
+          nombreProducto: z.string().describe('Nombre o porción del nombre del producto (ej. "hamburguesa")'),
+        }),
+      }
+    );
   }
 
   private listarInsumosCriticosTool() {
