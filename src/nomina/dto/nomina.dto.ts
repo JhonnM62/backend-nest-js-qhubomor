@@ -292,4 +292,8 @@ export class LiquidarEmpleadoDto {
   @IsOptional()
   @IsString()
   observaciones?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  guardarComoGasto?: boolean;
 }
