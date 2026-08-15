@@ -128,16 +128,16 @@ export class InventarioController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Marcar item como comprado' })
-  marcarComprado(@Param('id') id: string) {
-    return this.inventarioService.marcarComprado(id);
+  marcarComprado(@Param('id') id: string, @Body() body: { seCompro?: string, updateStock?: boolean }) {
+    return this.inventarioService.marcarComprado(id, body?.updateStock ?? false, body?.seCompro);
   }
 
   @Patch('items/comprar')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Marcar múltiples items como comprados' })
-  marcarVariosComprado(@Body() body: { ids: string[] }) {
-    return this.inventarioService.marcarVariosComprado(body.ids);
+  marcarVariosComprado(@Body() body: { ids: string[], updateStock?: boolean }) {
+    return this.inventarioService.marcarVariosComprado(body.ids, body?.updateStock ?? true);
   }
 
   @Get('insumo/:insumoId/stock-calculado')

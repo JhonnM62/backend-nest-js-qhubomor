@@ -539,7 +539,7 @@ export class InventarioService {
     return deleted;
   }
 
-  async marcarComprado(id: string) {
+  async marcarComprado(id: string, updateStock: boolean = false, forceStatus?: string) {
     const item = await this.prisma.orderinventario.findUnique({
       where: { IDorderinventario: id },
       include: { inventario: true }
@@ -549,66 +549,79 @@ export class InventarioService {
       throw new NotFoundException(`Item con ID ${id} no encontrado`);
     }
 
-    const newStatus = item.seCompro?.toLowerCase() === 'si' ? 'no' : 'si';
+    const currentStatus = item.seCompro?.toLowerCase() === 'si' ? 'si' : 'no';
+    let newStatus = '';
+    
+    if (forceStatus) {
+      newStatus = forceStatus.toLowerCase() === 'si' ? 'si' : 'no';
+    } else {
+      newStatus = currentStatus === 'si' ? 'no' : 'si';
+    }
+
     const isEntrada = item.inventario?.tipo?.toUpperCase().includes('ENTRADA');
+    const alreadyAdded = item.agregarAInsumos?.toLowerCase() === 'si';
 
     await this.prisma.orderinventario.update({
       where: { IDorderinventario: id },
       data: { 
         seCompro: newStatus === 'si' ? 'Si' : 'No',
-        agregarAInsumos: newStatus === 'si' ? 'Si' : 'No'
+        agregarAInsumos: (updateStock && newStatus === 'si') || alreadyAdded ? 'Si' : 'No'
       },
     });
 
-    if (item.nombreDelAlimento) {
-      const insumo = await this.prisma.insumos.findFirst({
-        where: {
-          OR: [
-            { IDalimentos: item.nombreDelAlimento },
-            { nombre: item.nombreDelAlimento },
-          ],
-        },
-      });
-
-      if (insumo) {
-        let nuevaCantidadHist = insumo.cantidad || 0;
-        let nuevoDisponible = Number(insumo.disponible) || 0;
-        
-        if (isEntrada) {
-          if (newStatus === 'si') {
-            nuevaCantidadHist += (item.cantidad || 0);
-            nuevoDisponible += (item.cantidad || 0);
-          } else {
-            nuevaCantidadHist -= (item.cantidad || 0);
-            nuevoDisponible -= (item.cantidad || 0);
-            if (nuevaCantidadHist < 0) nuevaCantidadHist = 0;
-          }
-        } else {
-          // Es una salida (Salida)
-          if (newStatus === 'si') {
-            nuevoDisponible -= (item.cantidad || 0);
-          } else {
-            nuevoDisponible += (item.cantidad || 0);
-          }
-        }
-
-        await this.prisma.insumos.update({
-          where: { IDalimentos: insumo.IDalimentos },
-          data: { 
-            cantidad: nuevaCantidadHist,
-            disponible: nuevoDisponible,
-            ...(newStatus === 'si' && isEntrada && item.precioActual ? { precio: item.precioActual } : {})
+    if (item.nombreDelAlimento && updateStock) {
+      const shouldApplyToStock = (newStatus === 'si' && !alreadyAdded) || (newStatus === 'no' && alreadyAdded);
+      
+      if (shouldApplyToStock) {
+        const insumo = await this.prisma.insumos.findFirst({
+          where: {
+            OR: [
+              { IDalimentos: item.nombreDelAlimento },
+              { nombre: item.nombreDelAlimento },
+            ],
           },
         });
 
-        // Guardamos en el item del inventario el stock disponible actual que quedó en ese momento
-        await this.prisma.orderinventario.update({
-          where: { IDorderinventario: id },
-          data: { cantInsumos: nuevoDisponible }
-        });
+        if (insumo) {
+          let nuevaCantidadHist = insumo.cantidad || 0;
+          let nuevoDisponible = Number(insumo.disponible) || 0;
+          
+          if (isEntrada) {
+            if (newStatus === 'si') {
+              nuevaCantidadHist += (item.cantidad || 0);
+              nuevoDisponible += (item.cantidad || 0);
+            } else {
+              nuevaCantidadHist -= (item.cantidad || 0);
+              nuevoDisponible -= (item.cantidad || 0);
+              if (nuevaCantidadHist < 0) nuevaCantidadHist = 0;
+            }
+          } else {
+            // Es una salida (Salida)
+            if (newStatus === 'si') {
+              nuevoDisponible -= (item.cantidad || 0);
+            } else {
+              nuevoDisponible += (item.cantidad || 0);
+            }
+          }
 
-        // Emitir cambio de insumo para reflejar en el inventario real-time
-        this.appGateway.emitToInsumos(SocketEvent.REFRESH_INSUMOS, { action: 'update_stock' });
+          await this.prisma.insumos.update({
+            where: { IDalimentos: insumo.IDalimentos },
+            data: { 
+              cantidad: nuevaCantidadHist,
+              disponible: nuevoDisponible,
+              ...(newStatus === 'si' && isEntrada && item.precioActual ? { precio: item.precioActual } : {})
+            },
+          });
+
+          // Guardamos en el item del inventario el stock disponible actual que quedó en ese momento
+          await this.prisma.orderinventario.update({
+            where: { IDorderinventario: id },
+            data: { cantInsumos: nuevoDisponible }
+          });
+
+          // Emitir cambio de insumo para reflejar en el inventario real-time
+          this.appGateway.emitToInsumos(SocketEvent.REFRESH_INSUMOS, { action: 'update_stock' });
+        }
       }
     }
 
@@ -619,11 +632,11 @@ export class InventarioService {
     return updatedItem;
   }
 
-  async marcarVariosComprado(ids: string[]) {
+  async marcarVariosComprado(ids: string[], updateStock: boolean = true) {
     const resultados = [];
     for (const id of ids) {
       try {
-        const result = await this.marcarComprado(id);
+        const result = await this.marcarComprado(id, updateStock, 'si');
         resultados.push({ id, success: true, data: result });
       } catch (error) {
         resultados.push({ id, success: false, error: error.message });
