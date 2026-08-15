@@ -778,7 +778,7 @@ export class CajaService {
           if (ov.producto && ov.producto.recetaInsumos) {
             ov.producto.recetaInsumos.forEach(receta => {
               if (receta.insumo === insumoId) {
-                const cant = (receta.cantidad || 1) * (ov.cantidad || 1);
+                const cant = (Number(receta.cantidad) || 1) * (ov.cantidad || 1);
                 ventasEnSistema += cant;
                 const pNombre = ov.producto?.nombre || ov.nombreProducto || 'N/A';
                 ventasPorProducto[pNombre] = (ventasPorProducto[pNombre] || 0) + (ov.cantidad || 1);

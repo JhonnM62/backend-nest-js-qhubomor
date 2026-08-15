@@ -193,7 +193,7 @@ model Recetainsumos {
   categoria      String?    @map("Categoria")
   insumo         String     @map("Insumo")
   tipoDeMedida   String?    @map("Tipo de medida")
-  cantidad       Int?       @map("Cantidad")
+  cantidad       Decimal?   @map("Cantidad") @db.Decimal(10, 2)
   producto       Productos? @relation(fields: [IDproductos], references: [IDproductos], onDelete: Cascade)
   insumoRelacion Insumos    @relation(fields: [insumo], references: [IDalimentos], onDelete: Cascade)
 

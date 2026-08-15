@@ -403,43 +403,47 @@ export class InsumosService {
     }
 
     const cantidadActual = Number(insumo.disponible) || 0;
+    const decimalCantidad = Number(cantidad);
+    const intCantidad = Math.round(decimalCantidad);
+    
     let nuevaCantidad = cantidadActual;
-    let nuevaCantidadHist = insumo.cantidad || 0;
     const data: Prisma.InsumosUpdateInput = {};
 
     if (tipo === 'entrada') {
-      nuevaCantidad += cantidad;
-      nuevaCantidadHist += cantidad;
+      data.disponible = { increment: decimalCantidad };
+      data.cantidad = { increment: intCantidad };
+      nuevaCantidad += decimalCantidad;
       
       if (insumo.cantidadPorPaquete && insumo.cantidadPorPaquete > 0) {
-        const paquetesNuevos = Math.floor(cantidad / insumo.cantidadPorPaquete);
+        const paquetesNuevos = Math.floor(decimalCantidad / insumo.cantidadPorPaquete);
         if (paquetesNuevos > 0 || insumo.paquetesEnBodega == null) {
-          data.paquetesEnBodega = (insumo.paquetesEnBodega || 0) + paquetesNuevos;
+          data.paquetesEnBodega = insumo.paquetesEnBodega == null ? paquetesNuevos : { increment: paquetesNuevos };
           if (paquetesNuevos > 0) {
             motivo += ` (Se agregaron ${paquetesNuevos} paquetes auto)`;
           }
         }
       }
     } else if (tipo === 'salida') {
-      if (!allowNegative && nuevaCantidad < cantidad) {
+      if (!allowNegative && cantidadActual < decimalCantidad) {
         throw new BadRequestException(
-          `Stock insuficiente. Disponible: ${nuevaCantidad}, Solicitado: ${cantidad}`
+          `Stock insuficiente. Disponible: ${cantidadActual}, Solicitado: ${decimalCantidad}`
         );
       }
-      nuevaCantidad -= cantidad;
+      data.disponible = { decrement: decimalCantidad };
+      data.cantidad = { decrement: intCantidad };
+      nuevaCantidad -= decimalCantidad;
     } else if (tipo === 'ajuste') {
-      nuevaCantidad = cantidad;
+      data.disponible = decimalCantidad;
+      data.cantidad = intCantidad;
+      nuevaCantidad = decimalCantidad;
     }
-
-    data.disponible = nuevaCantidad;
-    data.cantidad = nuevaCantidadHist;
 
     const insumoActualizado = await this.prisma.insumos.update({
       where: { IDalimentos: id },
       data,
     });
 
-    await this.registrarMovimiento(id, tipo, cantidad, motivo);
+    await this.registrarMovimiento(id, tipo, decimalCantidad, motivo);
 
     this.appGateway.emitToInsumos(SocketEvent.REFRESH_INSUMOS, { action: 'movimientoStock', data: insumoActualizado });
     this.verificarAlertasStock(insumoActualizado);
@@ -659,27 +663,26 @@ export class InsumosService {
     }
 
     const cantidadDisponible = Number(insumo.disponible) || 0;
-    const cantidadHist = insumo.cantidad || 0;
-    
-    // Si ambos están en 0, no lanzar error si permiten descontar a negativo (o validar contra ambos)
-    if (cantidadDisponible < cantidad && cantidadHist < cantidad) {
+    const decimalCantidad = Number(cantidad);
+    const intCantidad = Math.round(decimalCantidad);
+    const nuevaCantidad = cantidadDisponible - decimalCantidad;
+
+    // Permitimos negativos si así lo deciden, o validamos
+    if (cantidadDisponible < decimalCantidad) {
       throw new BadRequestException(
-        `Stock insuficiente. Disponible: ${Math.max(cantidadDisponible, cantidadHist)}, Solicitado: ${cantidad}`
+        `Stock insuficiente. Disponible: ${cantidadDisponible}, Solicitado: ${decimalCantidad}`
       );
     }
-
-    const nuevaCantidad = cantidadDisponible - cantidad;
-    const nuevaCantidadHist = cantidadHist - cantidad;
 
     const insumoActualizado = await this.prisma.insumos.update({
       where: { IDalimentos: insumoId },
       data: { 
-        disponible: nuevaCantidad,
-        cantidad: nuevaCantidadHist
+        disponible: { decrement: decimalCantidad },
+        cantidad: { decrement: intCantidad }
       },
     });
 
-    await this.registrarMovimiento(insumoId, 'salida', cantidad, observacion);
+    await this.registrarMovimiento(insumoId, 'salida', decimalCantidad, observacion);
 
     this.appGateway.emitToInsumos(SocketEvent.REFRESH_INSUMOS, { action: 'descontarStock', id: insumoId, cantidadActual: nuevaCantidad });
     this.verificarAlertasStock(insumoActualizado);
@@ -701,18 +704,19 @@ export class InsumosService {
     }
 
     const cantidadDisponible = Number(insumo.disponible) || 0;
-    const nuevaCantidad = cantidadDisponible + cantidad;
-    const nuevaCantidadHist = (insumo.cantidad || 0) + cantidad;
+    const decimalCantidad = Number(cantidad);
+    const intCantidad = Math.round(decimalCantidad);
+    const nuevaCantidad = cantidadDisponible + decimalCantidad;
 
     const dataToUpdate: Prisma.InsumosUpdateInput = { 
-      disponible: nuevaCantidad,
-      cantidad: nuevaCantidadHist
+      disponible: { increment: decimalCantidad },
+      cantidad: { increment: intCantidad }
     };
 
     if (insumo.cantidadPorPaquete && insumo.cantidadPorPaquete > 0) {
-      const paquetesNuevos = Math.floor(cantidad / insumo.cantidadPorPaquete);
+      const paquetesNuevos = Math.floor(decimalCantidad / insumo.cantidadPorPaquete);
       if (paquetesNuevos > 0 || insumo.paquetesEnBodega == null) {
-        dataToUpdate.paquetesEnBodega = (insumo.paquetesEnBodega || 0) + paquetesNuevos;
+        dataToUpdate.paquetesEnBodega = insumo.paquetesEnBodega == null ? paquetesNuevos : { increment: paquetesNuevos };
         if (paquetesNuevos > 0) {
           observacion += ` (Auto: +${paquetesNuevos} paquetes)`;
         }
@@ -724,7 +728,7 @@ export class InsumosService {
       data: dataToUpdate,
     });
 
-    await this.registrarMovimiento(insumoId, 'entrada', cantidad, observacion);
+    await this.registrarMovimiento(insumoId, 'entrada', decimalCantidad, observacion);
 
     this.appGateway.emitToInsumos(SocketEvent.REFRESH_INSUMOS, { action: 'agregarStock', id: insumoId, cantidadActual: nuevaCantidad });
     this.verificarAlertasStock(insumoActualizado);

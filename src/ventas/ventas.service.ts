@@ -109,10 +109,14 @@ export class VentasService {
       for (const receta of recetas) {
         const insumo = receta.insumoRelacion;
         const descontarVal = insumo?.descontarCantDeVentas?.trim().toLowerCase();
-        const descontarFlag = descontarVal === 'si' || descontarVal === 'sí';
+        // Descontamos siempre a menos que explícitamente diga 'no'
+        const descontarFlag = descontarVal !== 'no' && descontarVal !== 'falso' && descontarVal !== 'false';
         
-        if (insumo && descontarFlag && receta.cantidad) {
-          const cantidadTotal = cantidadVendida * receta.cantidad;
+        // Si receta.cantidad es nula, asumimos 1 por defecto; si es Decimal, lo convertimos
+        const recetaCantidad = receta.cantidad ? Number(receta.cantidad) : 1;
+        
+        if (insumo && descontarFlag) {
+          const cantidadTotal = cantidadVendida * recetaCantidad;
           if (cantidadTotal > 0) {
             try {
               await this.insumosService.movimientoStock(
