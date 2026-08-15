@@ -108,7 +108,8 @@ export class VentasService {
 
       for (const receta of recetas) {
         const insumo = receta.insumoRelacion;
-        const descontarFlag = insumo?.descontarCantDeVentas?.toLowerCase() === 'si';
+        const descontarVal = insumo?.descontarCantDeVentas?.trim().toLowerCase();
+        const descontarFlag = descontarVal === 'si' || descontarVal === 'sí';
         
         if (insumo && descontarFlag && receta.cantidad) {
           const cantidadTotal = cantidadVendida * receta.cantidad;
@@ -1095,6 +1096,9 @@ export class VentasService {
       data: { totalInput: newTotal > 0 ? newTotal : 0 },
       include: { ordenVentas: true },
     });
+
+    // DEDUCCIÓN DE INVENTARIO PARA PRODUCTOS AGREGADOS
+    await this.applyRecipeDeductions(productos, 'salida', 'Descuento por agregar producto');
 
     this.appGateway.emitToVentas(SocketEvent.REFRESH_VENTAS, { action: 'updateEstado', venta: updatedVenta });
     return updatedVenta;
