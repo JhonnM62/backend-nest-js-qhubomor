@@ -98,6 +98,7 @@ export class CategoriasService {
       where: { IDcategoria: id },
     });
     this.appGateway.emitToCategorias(SocketEvent.REFRESH_CATEGORIAS, { action: 'delete', categoriaId: id });
+    this.appGateway.emitToProductos(SocketEvent.REFRESH_PRODUCTOS, { action: 'bulk_update' });
     return deleted;
   }
 

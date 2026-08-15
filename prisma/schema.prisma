@@ -121,7 +121,7 @@ model Productos {
   orden                   Int?            @map("Orden")
   stockFiltro             Decimal?        @map("Stock Filtro") @db.Money
   ordenVentas             Orderventas[]
-  categoriaRelacion       Categorias?     @relation(fields: [categoria], references: [IDcategoria])
+  categoriaRelacion       Categorias?     @relation(fields: [categoria], references: [IDcategoria], onDelete: Cascade)
   recetaInsumos           Recetainsumos[]
 
   @@map("PRODUCTOS")
@@ -156,7 +156,7 @@ model Insumos {
   cuadrarInsumos           Boolean                 @default(false) @map("Cuadrar Insumos")
   ultimosConteos           Json?                   @map("Ultimos Conteos")
   aperturaCierreInsumos    AperturaCierreInsumos[]
-  categoriaInsumosRelacion CategoriasInsumos?      @relation(fields: [categoria], references: [IDcategoriainsumos])
+  categoriaInsumosRelacion CategoriasInsumos?      @relation(fields: [categoria], references: [IDcategoriainsumos], onDelete: Cascade)
   recetaInsumos            Recetainsumos[]
   movimientosInsumos       MovimientosInsumos[]
 
