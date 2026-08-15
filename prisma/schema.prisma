@@ -424,6 +424,7 @@ model Gastos {
   createdAt          DateTime?
   updatedAt          DateTime?
   tipo               String?   @default("NEGOCIO") @map("Tipo")
+  liquidacionId      String?   @map("LiquidacionId")
 
   @@map("GASTOS")
 }

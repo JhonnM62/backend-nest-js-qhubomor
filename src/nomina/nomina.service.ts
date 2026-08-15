@@ -1061,6 +1061,18 @@ export class NominaService {
       });
     }
 
+    // Crear el gasto automático de negocio
+    const gasto = await this.prisma.gastos.create({
+      data: {
+        concepto: `Liquidación nómina - ${usuario.nombre}`,
+        valor: totalBruto,
+        medioDePago: 'EFECTIVO',
+        tipo: 'NEGOCIO',
+        liquidacionId: liquidacion.IDliquidacion
+      }
+    });
+    this.appGateway.emitToGastos('refresh_gastos', { action: 'create', gasto });
+
     // Emit websocket event to the specific user's room
     this.appGateway.server.to(`user_${dto.usuarioId}`).emit('nueva_liquidacion', {
       liquidacionId: liquidacion.IDliquidacion,
@@ -1115,6 +1127,20 @@ export class NominaService {
         where: { IDdescuento: { in: descuentoIds } },
         data: { estado: 'APROBADO' }
       });
+    }
+
+    // Encontrar y borrar el gasto asociado
+    const gastosAsociados = await this.prisma.gastos.findMany({
+      where: { liquidacionId: id }
+    });
+    
+    if (gastosAsociados.length > 0) {
+      await this.prisma.gastos.deleteMany({
+        where: { liquidacionId: id }
+      });
+      for (const gasto of gastosAsociados) {
+        this.appGateway.emitToGastos('refresh_gastos', { action: 'delete', gastoId: gasto.IDgastos });
+      }
     }
 
     await this.prisma.liquidaciones.delete({
