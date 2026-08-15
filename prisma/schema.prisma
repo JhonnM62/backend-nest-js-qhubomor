@@ -194,8 +194,8 @@ model Recetainsumos {
   insumo         String     @map("Insumo")
   tipoDeMedida   String?    @map("Tipo de medida")
   cantidad       Int?       @map("Cantidad")
-  producto       Productos? @relation(fields: [IDproductos], references: [IDproductos])
-  insumoRelacion Insumos    @relation(fields: [insumo], references: [IDalimentos])
+  producto       Productos? @relation(fields: [IDproductos], references: [IDproductos], onDelete: Cascade)
+  insumoRelacion Insumos    @relation(fields: [insumo], references: [IDalimentos], onDelete: Cascade)
 
   @@map("RECETAINSUMOS")
 }
@@ -313,7 +313,7 @@ model Orderventas {
   updatedAt         DateTime?
   usuarioId         String?
   venta             Ventas?    @relation(fields: [IDventas], references: [IDventas])
-  producto          Productos? @relation(fields: [productoId], references: [IDproductos])
+  producto          Productos? @relation(fields: [productoId], references: [IDproductos], onDelete: SetNull)
   usuario           Usuarios?  @relation(fields: [usuarioId], references: [IDusuarios])
 
   @@map("ORDERVENTAS")
@@ -393,7 +393,7 @@ model AperturaCierreInsumos {
   seUtilizaron      Int?                   @map("se utilizaron")
   paraQueProducto   Json?                  @map("Para que producto")
   disponible        String?                @map("Disponible")
-  insumo            Insumos?               @relation(fields: [nombreInsumo], references: [IDalimentos])
+  insumo            Insumos?               @relation(fields: [nombreInsumo], references: [IDalimentos], onDelete: SetNull)
   historial         HistorialCajaInsumos[]
 
   @@map("APERTURA Y CIERRE INSUMOS")
