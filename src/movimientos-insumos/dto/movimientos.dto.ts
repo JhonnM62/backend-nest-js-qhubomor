@@ -75,6 +75,11 @@ export class EntradaLibreDto {
   @Min(0)
   cantidadTeorica?: number;
 
+  @ApiPropertyOptional({ description: 'Indica si se debe sincronizar la entrada con el stock global' })
+  @IsOptional()
+  @IsBoolean()
+  syncGlobalStock?: boolean;
+
   @ApiPropertyOptional({ description: 'Observación opcional' })
   @IsOptional()
   @IsString()
