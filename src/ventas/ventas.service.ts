@@ -87,18 +87,21 @@ export class VentasService {
   }
 
   private async applyRecipeDeductions(
-    productos: CreateOrderVentaDto[] | Prisma.OrderventasGetPayload<{}>[], 
-    tipo: 'entrada' | 'salida', 
+    productos: CreateOrderVentaDto[] | Prisma.OrderventasGetPayload<{}>[],
+    tipo: 'entrada' | 'salida',
     motivoPrefijo: string
   ) {
     if (!productos || productos.length === 0) return;
 
     for (const producto of productos) {
       const productoId = producto.productoId || (producto as any).IDproductos;
-      const cantidadVendida = producto.cantidad || 0;
+      const cantidadVendida = Number(producto.cantidad) || 0;
       const nombreProd = producto.nombre || producto.nombreProducto || 'Producto';
 
-      if (!productoId || cantidadVendida <= 0) continue;
+      if (!productoId || cantidadVendida <= 0) {
+        console.log(`[RECETA-SKIP] Producto "${nombreProd}" sin productoId o cantidad<=0 (productoId=${productoId}, cantidad=${cantidadVendida})`);
+        continue;
+      }
 
       // Buscar la receta de este producto
       const recetas = await this.prisma.recetainsumos.findMany({
@@ -106,31 +109,41 @@ export class VentasService {
         include: { insumoRelacion: true },
       });
 
+      if (recetas.length === 0) {
+        console.log(`[RECETA-INFO] Producto "${nombreProd}" (${productoId}) no tiene receta de insumos.`);
+        continue;
+      }
+
+      console.log(`[RECETA-${tipo.toUpperCase()}] Producto: "${nombreProd}" x${cantidadVendida} → ${recetas.length} insumo(s) en receta`);
+
       for (const receta of recetas) {
         const insumo = receta.insumoRelacion;
         const descontarVal = insumo?.descontarCantDeVentas?.trim().toLowerCase();
         // Descontamos siempre a menos que explícitamente diga 'no'
         const descontarFlag = descontarVal !== 'no' && descontarVal !== 'falso' && descontarVal !== 'false';
-        
+
         // Si receta.cantidad es nula, asumimos 1 por defecto; si es Decimal, lo convertimos
         const recetaCantidad = receta.cantidad ? Number(receta.cantidad) : 1;
-        
+
         if (insumo && descontarFlag) {
           const cantidadTotal = cantidadVendida * recetaCantidad;
           if (cantidadTotal > 0) {
             try {
+              console.log(`[RECETA-${tipo.toUpperCase()}]   └─ Insumo: "${insumo.nombre}" (${insumo.IDalimentos}) | receta=${recetaCantidad} x vendido=${cantidadVendida} = ${cantidadTotal} a ${tipo === 'salida' ? 'descontar' : 'devolver'}`);
               await this.insumosService.movimientoStock(
                 insumo.IDalimentos,
                 tipo,
                 cantidadTotal,
-                `${motivoPrefijo}: ${nombreProd}`,
+                `${motivoPrefijo}: ${nombreProd} (x${cantidadVendida})`,
                 undefined,
                 true // allowNegative
               );
             } catch (error) {
-              console.error(`Error aplicando descuento de receta para insumo ${insumo.nombre}:`, error);
+              console.error(`[RECETA-ERROR] Error aplicando ${tipo} de receta para insumo "${insumo.nombre}" (${insumo.IDalimentos}):`, error);
             }
           }
+        } else if (insumo && !descontarFlag) {
+          console.log(`[RECETA-SKIP]   └─ Insumo: "${insumo.nombre}" tiene descontarCantDeVentas="${insumo.descontarCantDeVentas}", omitido.`);
         }
       }
     }

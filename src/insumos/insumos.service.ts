@@ -326,7 +326,7 @@ export class InsumosService {
 
     const ajuste = insumo.ultimoAjustePendiente as any;
     const delta = Number(ajuste.delta) || 0;
-    const cantidadAnterior = Number(insumo.cantidad) || 0;
+    const cantidadAnterior = Number(insumo.disponible) || 0;
     const nuevoStock = Math.max(0, cantidadAnterior + delta); // Prevent negative stock
 
     let nuevoPrecio = insumo.precio;
@@ -336,8 +336,7 @@ export class InsumosService {
     const insumoActualizado = await this.prisma.insumos.update({
       where: { IDalimentos: id },
       data: {
-        cantidad: nuevoStock,
-        precio: nuevoPrecio,
+        disponible: nuevoStock,
         ultimoAjustePendiente: Prisma.DbNull,
         updatedAt: new Date(),
       }
@@ -394,66 +393,66 @@ export class InsumosService {
       throw new BadRequestException('La cantidad debe ser mayor a 0');
     }
 
-    const insumo = await this.prisma.insumos.findUnique({
-      where: { IDalimentos: id },
-    });
-
-    if (!insumo) {
-      throw new NotFoundException(`Insumo con ID ${id} no encontrado`);
-    }
-
-    const cantidadActual = Number(insumo.disponible) || 0;
     const decimalCantidad = Number(cantidad);
-    const intCantidad = Math.round(decimalCantidad);
-    
-    let nuevaCantidad = cantidadActual;
-    const data: Prisma.InsumosUpdateInput = {};
 
-    if (tipo === 'entrada') {
-      data.disponible = { increment: decimalCantidad };
-      data.cantidad = { increment: intCantidad };
-      nuevaCantidad += decimalCantidad;
-      
-      if (insumo.cantidadPorPaquete && insumo.cantidadPorPaquete > 0) {
-        const paquetesNuevos = Math.floor(decimalCantidad / insumo.cantidadPorPaquete);
-        if (paquetesNuevos > 0 || insumo.paquetesEnBodega == null) {
-          data.paquetesEnBodega = insumo.paquetesEnBodega == null ? paquetesNuevos : { increment: paquetesNuevos };
-          if (paquetesNuevos > 0) {
-            motivo += ` (Se agregaron ${paquetesNuevos} paquetes auto)`;
+    const result = await this.prisma.$transaction(async (tx) => {
+      const insumo = await tx.insumos.findUnique({
+        where: { IDalimentos: id },
+      });
+
+      if (!insumo) {
+        throw new NotFoundException(`Insumo con ID ${id} no encontrado`);
+      }
+
+      const cantidadActual = Number(insumo.disponible) || 0;
+      let nuevaCantidad = cantidadActual;
+      const data: Prisma.InsumosUpdateInput = {};
+
+      if (tipo === 'entrada') {
+        data.disponible = { increment: decimalCantidad };
+        nuevaCantidad += decimalCantidad;
+        
+        if (insumo.cantidadPorPaquete && insumo.cantidadPorPaquete > 0) {
+          const paquetesNuevos = Math.floor(decimalCantidad / insumo.cantidadPorPaquete);
+          if (paquetesNuevos > 0 || insumo.paquetesEnBodega == null) {
+            data.paquetesEnBodega = insumo.paquetesEnBodega == null ? paquetesNuevos : { increment: paquetesNuevos };
+            if (paquetesNuevos > 0) {
+              motivo += ` (Se agregaron ${paquetesNuevos} paquetes auto)`;
+            }
           }
         }
+      } else if (tipo === 'salida') {
+        if (!allowNegative && cantidadActual < decimalCantidad) {
+          throw new BadRequestException(
+            `Stock insuficiente. Disponible: ${cantidadActual}, Solicitado: ${decimalCantidad}`
+          );
+        }
+        data.disponible = { decrement: decimalCantidad };
+        nuevaCantidad -= decimalCantidad;
+      } else if (tipo === 'ajuste') {
+        data.disponible = decimalCantidad;
+        nuevaCantidad = decimalCantidad;
       }
-    } else if (tipo === 'salida') {
-      if (!allowNegative && cantidadActual < decimalCantidad) {
-        throw new BadRequestException(
-          `Stock insuficiente. Disponible: ${cantidadActual}, Solicitado: ${decimalCantidad}`
-        );
-      }
-      data.disponible = { decrement: decimalCantidad };
-      data.cantidad = { decrement: intCantidad };
-      nuevaCantidad -= decimalCantidad;
-    } else if (tipo === 'ajuste') {
-      data.disponible = decimalCantidad;
-      data.cantidad = intCantidad;
-      nuevaCantidad = decimalCantidad;
-    }
 
-    const insumoActualizado = await this.prisma.insumos.update({
-      where: { IDalimentos: id },
-      data,
+      const insumoActualizado = await tx.insumos.update({
+        where: { IDalimentos: id },
+        data,
+      });
+
+      return { insumoActualizado, nuevaCantidad, motivo };
     });
 
-    await this.registrarMovimiento(id, tipo, decimalCantidad, motivo);
+    await this.registrarMovimiento(id, tipo, decimalCantidad, result.motivo);
 
-    this.appGateway.emitToInsumos(SocketEvent.REFRESH_INSUMOS, { action: 'movimientoStock', data: insumoActualizado });
-    this.verificarAlertasStock(insumoActualizado);
+    this.appGateway.emitToInsumos(SocketEvent.REFRESH_INSUMOS, { action: 'movimientoStock', data: result.insumoActualizado });
+    this.verificarAlertasStock(result.insumoActualizado);
 
     return {
       success: true,
-      message: `Movimiento de stock registrado. Nueva cantidad: ${nuevaCantidad}`,
+      message: `Movimiento de stock registrado. Nueva cantidad: ${result.nuevaCantidad}`,
       data: {
-        ...insumoActualizado,
-        estadoStock: this.calcularEstadoStock(insumoActualizado),
+        ...result.insumoActualizado,
+        estadoStock: this.calcularEstadoStock(result.insumoActualizado),
       },
     };
   }
@@ -664,7 +663,6 @@ export class InsumosService {
 
     const cantidadDisponible = Number(insumo.disponible) || 0;
     const decimalCantidad = Number(cantidad);
-    const intCantidad = Math.round(decimalCantidad);
     const nuevaCantidad = cantidadDisponible - decimalCantidad;
 
     // Permitimos negativos si así lo deciden, o validamos
@@ -678,7 +676,6 @@ export class InsumosService {
       where: { IDalimentos: insumoId },
       data: { 
         disponible: { decrement: decimalCantidad },
-        cantidad: { decrement: intCantidad }
       },
     });
 
@@ -705,12 +702,10 @@ export class InsumosService {
 
     const cantidadDisponible = Number(insumo.disponible) || 0;
     const decimalCantidad = Number(cantidad);
-    const intCantidad = Math.round(decimalCantidad);
     const nuevaCantidad = cantidadDisponible + decimalCantidad;
 
     const dataToUpdate: Prisma.InsumosUpdateInput = { 
       disponible: { increment: decimalCantidad },
-      cantidad: { increment: intCantidad }
     };
 
     if (insumo.cantidadPorPaquete && insumo.cantidadPorPaquete > 0) {
