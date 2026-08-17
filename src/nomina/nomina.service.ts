@@ -989,17 +989,25 @@ export class NominaService {
 
     // Obtener turnos completados en el período y los extra seleccionados
     const extraTurnosIds = Array.isArray(dto.extraTurnosIds) ? dto.extraTurnosIds : [];
+    const ignoredTurnosIds = Array.isArray(dto.ignoredTurnosIds) ? dto.ignoredTurnosIds : [];
     
     const turnos = await this.prisma.turnos.findMany({
       where: {
         usuarioId: dto.usuarioId,
-        OR: [
+        AND: [
           {
-            estado: { in: ['COMPLETADO', 'FINALIZADO'] },
-            fecha: { gte: fechaInicio, lte: fechaFin },
+            IDturno: { notIn: ignoredTurnosIds }
           },
           {
-            IDturno: { in: extraTurnosIds }
+            OR: [
+              {
+                estado: { in: ['COMPLETADO', 'FINALIZADO'] },
+                fecha: { gte: fechaInicio, lte: fechaFin },
+              },
+              {
+                IDturno: { in: extraTurnosIds }
+              }
+            ]
           }
         ]
       },
