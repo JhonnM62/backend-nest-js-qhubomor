@@ -318,6 +318,8 @@ export class CajaService {
             });
             const gastadoFisico = (insumoCierre.cantApertura !== undefined ? insumoCierre.cantApertura : (existing?.cantApertura || 0)) - (insumoCierre.cantDeCierre || 0);
 
+            const globalInsumo = insumoCierre.nombreInsumo ? await tx.insumos.findUnique({ where: { IDalimentos: insumoCierre.nombreInsumo } }) : null;
+
             await tx.aperturaCierreInsumos.update({
               where: { Idcierreyapertura: insumoCierre.Idcierreyapertura },
               data: {
@@ -326,6 +328,7 @@ export class CajaService {
                 observacion: insumoCierre.observacion,
                 seUtilizaron: gastadoFisico,
                 paraQueProducto: insumoCierre.paraQueProducto,
+                disponible: globalInsumo ? String(globalInsumo.disponible) : null,
               },
             });
 
@@ -354,6 +357,7 @@ export class CajaService {
             }
           } else {
             // Es un insumo nuevo agregado en el momento del cierre
+            const globalInsumo = insumoCierre.nombreInsumo ? await tx.insumos.findUnique({ where: { IDalimentos: insumoCierre.nombreInsumo } }) : null;
             await tx.aperturaCierreInsumos.create({
               data: {
                 IDcaja: id,
@@ -363,6 +367,7 @@ export class CajaService {
                 seUtilizaron: (insumoCierre.cantApertura || 0) - (insumoCierre.cantDeCierre || 0),
                 observacion: insumoCierre.observacion || '',
                 paraQueProducto: insumoCierre.paraQueProducto || '',
+                disponible: globalInsumo ? String(globalInsumo.disponible) : null,
               }
             });
           }
