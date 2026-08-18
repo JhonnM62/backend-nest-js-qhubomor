@@ -48,11 +48,20 @@ export class EstadisticasService {
         totalInput: true,
         fecha: true,
         valorDeTransferencia: true,
+        medioDePago: true,
       }
     });
 
     const ventasTotal = ventasRaw.reduce((sum, v) => sum + Number(v.totalInput || 0), 0);
-    const totalTransferencias = ventasRaw.reduce((sum, v) => sum + Number(v.valorDeTransferencia || 0), 0);
+    const totalTransferencias = ventasRaw.reduce((sum, v) => {
+      const medio = (v.medioDePago || '').toUpperCase();
+      // Si el medio de pago es transferencia (o sus variantes bancarias directas), todo el monto es transferencia.
+      if (['TRANSFERENCIA', 'NEQUI', 'DAVIPLATA', 'BANCOLOMBIA', 'TARJETA'].includes(medio)) {
+        return sum + Number(v.totalInput || 0);
+      }
+      // Si es EFECTIVO Y OTROS o repartido, se suma el valor asignado específicamente a transferencia.
+      return sum + Number(v.valorDeTransferencia || 0);
+    }, 0);
 
     // 2. Obtener Gastos
     // NOTA: El campo `fechaYHora` es nullable. Muchos registros usan solo el campo `fecha` (@db.Date).
