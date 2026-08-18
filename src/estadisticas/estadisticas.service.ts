@@ -47,10 +47,12 @@ export class EstadisticasService {
       select: {
         totalInput: true,
         fecha: true,
+        valorDeTransferencia: true,
       }
     });
 
     const ventasTotal = ventasRaw.reduce((sum, v) => sum + Number(v.totalInput || 0), 0);
+    const totalTransferencias = ventasRaw.reduce((sum, v) => sum + Number(v.valorDeTransferencia || 0), 0);
 
     // 2. Obtener Gastos
     // NOTA: El campo `fechaYHora` es nullable. Muchos registros usan solo el campo `fecha` (@db.Date).
@@ -106,6 +108,24 @@ export class EstadisticasService {
 
     // Utilidad Neta definitiva: descontar también el inventario
     const utilidadNeta = utilidadNegocio - gastosPersonales - inventarioTotal;
+
+    // 3b. Apertura y Cierre de Caja: plata guardada y transferencias contadas
+    const cajasRaw = await this.prisma.aperturaCierreCaja.findMany({
+      where: {
+        OR: [
+          { fechaDeCierre: { gte: start, lte: end } },
+          { fechaDeApertura: { gte: start, lte: end } },
+        ]
+      },
+      select: {
+        plataGuardada: true,
+        transferenciasContadas: true,
+        fechaDeCierre: true,
+        fechaDeApertura: true,
+      }
+    });
+    const totalPlataGuardada = cajasRaw.reduce((sum, c) => sum + Number(c.plataGuardada || 0), 0);
+    const totalTransferenciasContadas = cajasRaw.reduce((sum, c) => sum + Number(c.transferenciasContadas || 0), 0);
 
     // 4. Datos para los gráficos de barras (Diario, Semanal, Mensual)
     const ventasPorDiaMap = new Map<string, number>();
@@ -194,7 +214,7 @@ export class EstadisticasService {
       .sort((a, b) => b.total - a.total);
 
     return {
-      totales: { ventas: ventasTotal, gastosNegocio, gastosPersonales, utilidadNegocio, utilidadNeta, inventarioTotal },
+      totales: { ventas: ventasTotal, gastosNegocio, gastosPersonales, utilidadNegocio, utilidadNeta, inventarioTotal, totalTransferencias, totalPlataGuardada, totalTransferenciasContadas },
       graficos: {
         diario: sortAndMap(ventasPorDiaMap),
         semanal: sortAndMap(ventasPorSemanaMap),
