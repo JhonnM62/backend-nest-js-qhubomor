@@ -321,17 +321,97 @@ export class NominaService {
   }
 
   async terminarDescanso(turnoId: string, usuarioId: string) {
-    const turno = await this.prisma.turnos.findUnique({ where: { IDturno: turnoId } });
+    const turno = await this.prisma.turnos.findUnique({ 
+      where: { IDturno: turnoId },
+      include: { usuario: { include: { cargo: true } } }
+    });
     if (!turno) throw new NotFoundException('Turno no encontrado');
     if (turno.usuarioId !== usuarioId) throw new ForbiddenException('Solo puedes gestionar tu propio turno');
     if (!turno.inicioDescanso) throw new BadRequestException('No se ha iniciado el descanso');
     if (turno.finDescanso) throw new BadRequestException('El descanso ya fue terminado');
 
+    const now = new Date();
     const updated = await this.prisma.turnos.update({
       where: { IDturno: turnoId },
-      data: { finDescanso: new Date() },
+      data: { finDescanso: now },
     });
     
+    // Penalización por exceso de descanso
+    const inicioDescanso = turno.inicioDescanso;
+    const duracionPermitidaMinutos = turno.usuario?.cargo?.duracionDescansoMinutos || 0;
+    
+    if (inicioDescanso && duracionPermitidaMinutos > 0) {
+      const durRealMinutos = Math.floor((now.getTime() - inicioDescanso.getTime()) / 60000);
+      const minutosExceso = durRealMinutos - duracionPermitidaMinutos;
+      
+      if (minutosExceso > 0) {
+        // Calcular valor del minuto
+        let minutosTotalesEsperados = 480; // fallback 8 horas
+        
+        if (turno.usuario?.cargo) {
+          const colombiaTime = new Date(turno.fecha.toLocaleString("en-US", {timeZone: "America/Bogota"}));
+          const dayOfWeek = colombiaTime.getDay();
+          const mapDays = [
+            { e: turno.usuario.cargo.horaEntradaDomingo, s: turno.usuario.cargo.horaSalidaDomingo },
+            { e: turno.usuario.cargo.horaEntradaLunes, s: turno.usuario.cargo.horaSalidaLunes },
+            { e: turno.usuario.cargo.horaEntradaMartes, s: turno.usuario.cargo.horaSalidaMartes },
+            { e: turno.usuario.cargo.horaEntradaMiercoles, s: turno.usuario.cargo.horaSalidaMiercoles },
+            { e: turno.usuario.cargo.horaEntradaJueves, s: turno.usuario.cargo.horaSalidaJueves },
+            { e: turno.usuario.cargo.horaEntradaViernes, s: turno.usuario.cargo.horaSalidaViernes },
+            { e: turno.usuario.cargo.horaEntradaSabado, s: turno.usuario.cargo.horaSalidaSabado },
+          ];
+          const horarioHoy = mapDays[dayOfWeek];
+          
+          if (horarioHoy && horarioHoy.e && horarioHoy.s) {
+            const parseTimeStr = (t: string) => {
+              const match = t.trim().match(/^(\d{1,2}):(\d{2})(?:\s*(AM|PM|am|pm))?$/);
+              if (!match) return { h: 0, m: 0 };
+              let h = parseInt(match[1], 10);
+              const m = parseInt(match[2], 10);
+              const p = match[3] ? match[3].toUpperCase() : null;
+              if (p === 'PM' && h < 12) h += 12;
+              if (p === 'AM' && h === 12) h = 0;
+              return { h, m };
+            };
+            
+            const { h: hE, m: mE } = parseTimeStr(horarioHoy.e);
+            const { h: hS, m: mS } = parseTimeStr(horarioHoy.s);
+            let esperados = (hS * 60 + mS) - (hE * 60 + mE);
+            if (esperados < 0) esperados += (24 * 60);
+            
+            // Restar el tiempo de descanso del total esperado para obtener horas netas trabajadas
+            esperados -= duracionPermitidaMinutos;
+            if (esperados > 0) minutosTotalesEsperados = esperados;
+          }
+        }
+        
+        const valorTurno = Number(turno.valorTurno || 0);
+        if (valorTurno > 0) {
+          const valorPorMinuto = valorTurno / minutosTotalesEsperados;
+          const valorDescuento = Math.round(minutosExceso * valorPorMinuto);
+          
+          if (valorDescuento > 0) {
+            const tarifaMin = valorPorMinuto.toLocaleString('es-CO', { maximumFractionDigits: 1 });
+            const tarifaHora = Math.round(valorPorMinuto * 60).toLocaleString('es-CO');
+            const fechaStr = turno.fecha.toLocaleDateString('es-CO', { day: '2-digit', month: '2-digit', year: 'numeric' });
+            
+            await this.prisma.descuentosEmpleado.create({
+              data: {
+                usuarioId: turno.usuarioId,
+                turnoId: turno.IDturno,
+                concepto: 'EXCESO_DESCANSO',
+                descripcion: `Exceso de descanso de ${minutosExceso} mins el ${fechaStr}. (Permitido: ${duracionPermitidaMinutos} min). Tarifa: $${tarifaMin}/min.`,
+                valor: valorDescuento,
+                estado: 'PENDIENTE',
+                creadoPor: 'Sistema (automático)',
+                fecha: new Date()
+              }
+            });
+          }
+        }
+      }
+    }
+
     this.appGateway.server.emit('turno_actualizado', { turnoId, tipo: 'FIN_DESCANSO' });
     
     return { success: true, data: updated, mensaje: 'Descanso terminado correctamente' };
