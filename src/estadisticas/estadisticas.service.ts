@@ -35,7 +35,9 @@ export class EstadisticasService {
 
     // Construir where para Ventas
     const ventasWhere: any = {
-      fecha: { gte: start, lte: end }
+      fecha: { gte: start, lte: end },
+      estado: { in: ['PAGADO', 'ENTREGADO'] },
+      deletedAt: null
     };
     if (vendedorId) {
       ventasWhere.usuario = vendedorId;
@@ -48,19 +50,24 @@ export class EstadisticasService {
         totalInput: true,
         fecha: true,
         valorDeTransferencia: true,
+        efectivoRecibido: true,
         medioDePago: true,
       }
     });
 
     const ventasTotal = ventasRaw.reduce((sum, v) => sum + Number(v.totalInput || 0), 0);
     const totalTransferencias = ventasRaw.reduce((sum, v) => {
-      const medio = (v.medioDePago || '').toUpperCase();
-      // Si el medio de pago es transferencia (o sus variantes bancarias directas), todo el monto es transferencia.
-      if (['TRANSFERENCIA', 'NEQUI', 'DAVIPLATA', 'BANCOLOMBIA', 'TARJETA'].includes(medio)) {
+      const medio = (v.medioDePago || '').toUpperCase().replace(/_/g, ' ').trim();
+      
+      if (['TRANSFERENCIA', 'TRASNFERENCIA', 'NEQUI', 'DAVIPLATA', 'BANCOLOMBIA', 'TARJETA'].includes(medio)) {
         return sum + Number(v.totalInput || 0);
+      } else if (medio === 'MIXTO' || medio === 'EFECTIVO Y OTROS') {
+        const efectivoR = Number(v.efectivoRecibido || 0);
+        const total = Number(v.totalInput || 0);
+        const tr = total - efectivoR;
+        return sum + tr;
       }
-      // Si es EFECTIVO Y OTROS o repartido, se suma el valor asignado específicamente a transferencia.
-      return sum + Number(v.valorDeTransferencia || 0);
+      return sum;
     }, 0);
 
     // 2. Obtener Gastos
