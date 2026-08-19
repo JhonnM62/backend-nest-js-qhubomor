@@ -121,10 +121,7 @@ export class EstadisticasService {
     // 3b. Apertura y Cierre de Caja: plata guardada y transferencias contadas
     const cajasRaw = await this.prisma.aperturaCierreCaja.findMany({
       where: {
-        OR: [
-          { fechaDeCierre: { gte: start, lte: end } },
-          { fechaDeApertura: { gte: start, lte: end } },
-        ]
+        fechaDeApertura: { gte: start, lte: end }
       },
       select: {
         plataGuardada: true,
