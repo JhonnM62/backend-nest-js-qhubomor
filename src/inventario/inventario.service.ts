@@ -95,13 +95,51 @@ export class InventarioService {
     }
 
     if (categoria) {
-      where.categoria = { contains: categoria, mode: 'insensitive' };
+      const matchingInsumosCat = await this.prisma.insumos.findMany({
+        where: {
+          OR: [
+            { nombreCategoria: { equals: categoria, mode: 'insensitive' } },
+            { categoria: { equals: categoria, mode: 'insensitive' } },
+          ]
+        },
+        select: { IDalimentos: true }
+      });
+      const insumoIdsCat = matchingInsumosCat.map(i => i.IDalimentos);
+
+      where.AND = [
+        ...(where.AND ? (Array.isArray(where.AND) ? where.AND : [where.AND]) : []),
+        {
+          OR: [
+            { categoria: { equals: categoria, mode: 'insensitive' } },
+            { nombreCategoria: { equals: categoria, mode: 'insensitive' } },
+            { nombreDelAlimento: { in: insumoIdsCat } }
+          ]
+        }
+      ];
     }
 
     if (tipo) {
-      where.inventario = {
-        tipo: { contains: tipo, mode: 'insensitive' },
-      };
+      if (tipo.toLowerCase() === 'entrada') {
+        where.AND = [
+          ...(where.AND ? (Array.isArray(where.AND) ? where.AND : [where.AND]) : []),
+          {
+            OR: [
+              { inventario: { tipo: { contains: 'entrada', mode: 'insensitive' } } },
+              { inventario: null, seCompro: { in: ['Si', 'si', 'SI'] } }
+            ]
+          }
+        ];
+      } else if (tipo.toLowerCase() === 'salida') {
+        where.AND = [
+          ...(where.AND ? (Array.isArray(where.AND) ? where.AND : [where.AND]) : []),
+          {
+            OR: [
+              { inventario: { tipo: { contains: 'salida', mode: 'insensitive' } } },
+              { inventario: null, seCompro: { notIn: ['Si', 'si', 'SI'] } }
+            ]
+          }
+        ];
+      }
     }
 
     if (fechaInicio || fechaFin) {
