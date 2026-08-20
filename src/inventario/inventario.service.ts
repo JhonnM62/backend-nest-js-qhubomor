@@ -95,16 +95,24 @@ export class InventarioService {
     }
 
     if (categoria) {
+      const catRecord = await this.prisma.categoriasInsumos.findFirst({
+        where: { nombre: { equals: categoria, mode: 'insensitive' } }
+      });
+      const categoryId = catRecord?.IDcategoriainsumos;
+
       const matchingInsumosCat = await this.prisma.insumos.findMany({
         where: {
           OR: [
             { nombreCategoria: { equals: categoria, mode: 'insensitive' } },
             { categoria: { equals: categoria, mode: 'insensitive' } },
+            ...(categoryId ? [{ categoria: categoryId }] : [])
           ]
         },
-        select: { IDalimentos: true }
+        select: { IDalimentos: true, nombre: true }
       });
+      
       const insumoIdsCat = matchingInsumosCat.map(i => i.IDalimentos);
+      const insumoNamesCat = matchingInsumosCat.map(i => i.nombre).filter(n => n);
 
       where.AND = [
         ...(where.AND ? (Array.isArray(where.AND) ? where.AND : [where.AND]) : []),
@@ -112,7 +120,10 @@ export class InventarioService {
           OR: [
             { categoria: { equals: categoria, mode: 'insensitive' } },
             { nombreCategoria: { equals: categoria, mode: 'insensitive' } },
-            { nombreDelAlimento: { in: insumoIdsCat } }
+            ...(categoryId ? [{ categoria: categoryId }] : []),
+            ...(insumoIdsCat.length > 0 ? [{ nombreDelAlimento: { in: insumoIdsCat } }] : []),
+            ...(insumoNamesCat.length > 0 ? [{ nombreDelAlimento: { in: insumoNamesCat } }] : []),
+            { nombreDelAlimento: { equals: 'NO_MATCH' } } // Fallback to ensure OR works if others are empty
           ]
         }
       ];
