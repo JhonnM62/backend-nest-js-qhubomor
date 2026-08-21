@@ -71,6 +71,7 @@ jobs:
             mkdir -p /root/backend-qhubomor/public/uploads/insumos
             mkdir -p /root/backend-qhubomor/public/uploads/gastos
             mkdir -p /root/backend-qhubomor/public/uploads/asistencia
+            mkdir -p /root/backend-qhubomor/public/uploads/productos
             
             # 5.5 Aplicar migraciones/push de Prisma a la base de datos remotamente (sin borrar data)
             echo "Sincronizando esquema de base de datos..."
@@ -109,6 +110,7 @@ jobs:
               mkdir -p /root/backend-qhubomor/public/uploads/$CLIENT_ID/insumos
               mkdir -p /root/backend-qhubomor/public/uploads/$CLIENT_ID/gastos
               mkdir -p /root/backend-qhubomor/public/uploads/$CLIENT_ID/asistencia
+              mkdir -p /root/backend-qhubomor/public/uploads/$CLIENT_ID/productos
 
               # Detener y eliminar contenedor anterior de este cliente
               docker stop backend-$CLIENT_ID || true
