@@ -15,7 +15,7 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiConsumes, ApiBody } from '@nestjs/swagger';
 import { memoryStorage } from 'multer';
-import * as sharp from 'sharp';
+import sharp from 'sharp';
 import * as fs from 'fs';
 import { join } from 'path';
 import { ProductosService } from './productos.service';
