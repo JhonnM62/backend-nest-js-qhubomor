@@ -11,6 +11,11 @@ export class MesasService {
     return this.prisma.mesas.create({
       data: {
         nombre: createMesaDto.nombre,
+        posX: createMesaDto.posX ?? 0,
+        posY: createMesaDto.posY ?? 0,
+        width: createMesaDto.width ?? 100,
+        height: createMesaDto.height ?? 100,
+        tipo: createMesaDto.tipo ?? 'MESA',
       },
     });
   }

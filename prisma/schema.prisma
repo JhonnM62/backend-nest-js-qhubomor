@@ -95,6 +95,11 @@ model Proveedores {
 model Mesas {
   IdMesas String   @id @default(cuid()) @map("IdMesas")
   nombre  String?  @map("Nombre")
+  posX    Float    @default(0) @map("PosX")
+  posY    Float    @default(0) @map("PosY")
+  width   Float    @default(100) @map("Width")
+  height  Float    @default(100) @map("Height")
+  tipo    String   @default("MESA") @map("Tipo")
   ventas  Ventas[]
 
   @@map("MESAS")
