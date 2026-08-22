@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException, ForbiddenException, Inject, forwardRef } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, ForbiddenException, Inject, forwardRef, OnModuleInit } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { AppGateway } from '../websocket/app.gateway';
@@ -52,12 +52,56 @@ function calcularDistancia(lat1: number, lon1: number, lat2: number, lon2: numbe
 }
 
 @Injectable()
-export class NominaService {
+export class NominaService implements OnModuleInit {
   constructor(
     private readonly prisma: PrismaService,
     private readonly notificationsService: NotificationsService,
     @Inject(forwardRef(() => AppGateway)) private readonly appGateway: AppGateway
   ) {}
+
+  onModuleInit() {
+    setInterval(() => this.checkDescansosExcedidos(), 60000);
+  }
+
+  private async checkDescansosExcedidos() {
+    try {
+      const turnosEnDescanso = await this.prisma.turnos.findMany({
+        where: {
+          estado: 'ACTIVO',
+          inicioDescanso: { not: null },
+          finDescanso: null,
+          alertaDescansoEnviada: false,
+        },
+        include: {
+          usuario: { select: { nombre: true, cargo: { select: { duracionDescansoMinutos: true } } } }
+        }
+      });
+
+      const now = new Date();
+      for (const turno of turnosEnDescanso) {
+        const duracionPermitida = turno.usuario?.cargo?.duracionDescansoMinutos || 0;
+        if (duracionPermitida > 0 && turno.inicioDescanso) {
+          const durRealMinutos = Math.floor((now.getTime() - turno.inicioDescanso.getTime()) / 60000);
+          if (durRealMinutos > duracionPermitida) {
+            await this.prisma.turnos.update({
+              where: { IDturno: turno.IDturno },
+              data: { alertaDescansoEnviada: true },
+            });
+
+            const minsExcedidos = durRealMinutos - duracionPermitida;
+            await this.notificationsService.sendNotification(
+              'TURNO_DESCANSO_EXCEEDED',
+              'Descanso Excedido',
+              `El empleado ${turno.usuario.nombre} se ha excedido ${minsExcedidos} minutos de su descanso.`,
+              { turnoId: turno.IDturno, usuarioId: turno.usuarioId }
+            );
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error al verificar descansos excedidos:', error);
+    }
+  }
 
   // ─────────────────────────────────────────────
   // TURNOS
@@ -313,9 +357,17 @@ export class NominaService {
     const updated = await this.prisma.turnos.update({
       where: { IDturno: turnoId },
       data: { inicioDescanso: new Date() },
+      include: { usuario: true }
     });
     
     this.appGateway.server.emit('turno_actualizado', { turnoId, tipo: 'INICIO_DESCANSO' });
+    
+    await this.notificationsService.sendNotification(
+      'TURNO_DESCANSO_STARTED',
+      'Descanso Iniciado',
+      `El empleado ${updated.usuario.nombre} ha iniciado su descanso.`,
+      { turnoId, usuarioId }
+    );
     
     return { success: true, data: updated, mensaje: 'Descanso iniciado correctamente' };
   }
@@ -413,6 +465,13 @@ export class NominaService {
     }
 
     this.appGateway.server.emit('turno_actualizado', { turnoId, tipo: 'FIN_DESCANSO' });
+    
+    await this.notificationsService.sendNotification(
+      'TURNO_DESCANSO_ENDED',
+      'Descanso Finalizado',
+      `El empleado ${turno.usuario.nombre} ha finalizado su descanso.`,
+      { turnoId, usuarioId }
+    );
     
     return { success: true, data: updated, mensaje: 'Descanso terminado correctamente' };
   }

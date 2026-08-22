@@ -10,7 +10,8 @@ export type NotificationEventType =
   | 'ORDER_INVENTARIO_UPDATED'
   | 'DINERO_RETIRADO'
   | 'GASTO_CREATED' | 'GASTO_DELETED' | 'GASTOS_BULK_CREATED'
-  | 'TURNO_OPENED' | 'TURNO_CLOSED';
+  | 'TURNO_OPENED' | 'TURNO_CLOSED'
+  | 'TURNO_DESCANSO_STARTED' | 'TURNO_DESCANSO_ENDED' | 'TURNO_DESCANSO_EXCEEDED';
 
 @Injectable()
 export class NotificationsService {
@@ -264,6 +265,9 @@ export class NotificationsService {
       'GASTOS_BULK_CREATED': 'notifyGastoCreated', // Reuse the same setting column
       'TURNO_OPENED': 'notifyTurnoOpened',
       'TURNO_CLOSED': 'notifyTurnoClosed',
+      'TURNO_DESCANSO_STARTED': 'notifyTurnoDescanso',
+      'TURNO_DESCANSO_ENDED': 'notifyTurnoDescanso',
+      'TURNO_DESCANSO_EXCEEDED': 'notifyTurnoDescansoExceso',
     };
     return map[eventType] || null;
   }

@@ -643,6 +643,8 @@ model NotificationSetting {
   notifyGastoDeleted           Boolean  @default(false)
   notifyTurnoOpened            Boolean  @default(true)
   notifyTurnoClosed            Boolean  @default(true)
+  notifyTurnoDescanso          Boolean  @default(true)
+  notifyTurnoDescansoExceso    Boolean  @default(true)
   createdAt                    DateTime @default(now())
   updatedAt                    DateTime @updatedAt
   usuario                      Usuarios @relation(fields: [userId], references: [IDusuarios], onDelete: Cascade)
@@ -730,6 +732,7 @@ model Turnos {
   longitudSalida        Float?               @map("LongitudSalida")
   inicioDescanso        DateTime?            @map("InicioDescanso")
   finDescanso           DateTime?            @map("FinDescanso")
+  alertaDescansoEnviada Boolean?             @default(false) @map("AlertaDescansoEnviada")
   descuentos            DescuentosEmpleado[]
   usuario               Usuarios             @relation(fields: [usuarioId], references: [IDusuarios], onDelete: Cascade)
 
