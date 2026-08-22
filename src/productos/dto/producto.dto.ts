@@ -93,6 +93,11 @@ export class CreateProductoDto {
   @IsNumber()
   orden?: number;
 
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsBoolean()
+  mostrarDisponibilidad?: boolean;
+
   @ApiPropertyOptional({ type: [RecetaInsumoDto] })
   @IsOptional()
   @IsArray()
