@@ -14,7 +14,7 @@ export class CajaService {
     private appGateway: AppGateway,
     private notificationsService: NotificationsService,
     private aiService: AiService,
-  ) {}
+  ) { }
 
   private async getFechaContable(date: Date = new Date(), manualDate?: string): Promise<Date> {
     if (manualDate) {
@@ -28,7 +28,7 @@ export class CajaService {
     if (!config) {
       config = { id: 1, nombreComercial: 'Q HUBO MOR', nit: null, direccion: null, telefono: null, horaCorteDia: '00:00', modoOperacion: 'GENERAL', latitudNegocio: null, longitudNegocio: null, radioGeocercaM: 100, minutosGraciaLlegadaTarde: 5, updatedAt: new Date(), emitirFacturaAutomatica: false, factusEmail: null, factusPassword: null, factusClientId: null, factusClientSecret: null, factusMunicipioCodigo: '52356', factusEntorno: 'SANDBOX' };
     }
-    
+
     const [corteHours, corteMinutes] = config!.horaCorteDia.split(':').map(Number);
     const localDate = new Date(date.getTime() - (5 * 60 * 60 * 1000));
     const currentMinutes = (localDate.getUTCHours() * 60) + localDate.getUTCMinutes();
@@ -46,13 +46,13 @@ export class CajaService {
 
     // Whitelist fields for aperturaCierreCaja creation
     const allowedFields = [
-        'nombre', 'apertura', 'fechaDeApertura', 'horaDeApertura',
-        'efectivoDeApertura', 'fechaDeCierre', 'horaDeCierre',
-        'efectivoDeCierre', 'resumen', 'pdf', 'pdfcount', 'observaciones',
-        'cierre', 'total12Onz', 'total24Onz', 'productos', 'tipoDeVaso',
-        'cantAAgregar', 'plataGuardada', 'cuadroCaja', 'valorFaltante',
-        'valorExcedente', 'transferenciasContadas', 'horaCongelada', 'contador', 'contador2'
-      ];
+      'nombre', 'apertura', 'fechaDeApertura', 'horaDeApertura',
+      'efectivoDeApertura', 'fechaDeCierre', 'horaDeCierre',
+      'efectivoDeCierre', 'resumen', 'pdf', 'pdfcount', 'observaciones',
+      'cierre', 'total12Onz', 'total24Onz', 'productos', 'tipoDeVaso',
+      'cantAAgregar', 'plataGuardada', 'cuadroCaja', 'valorFaltante',
+      'valorExcedente', 'transferenciasContadas', 'horaCongelada', 'contador', 'contador2'
+    ];
     const decimalFieldsSet = new Set([
       'plataGuardada', 'valorFaltante', 'valorExcedente',
       'efectivoDeCierre', 'efectivoDeApertura', 'transferenciasContadas', 'cantAAgregar'
@@ -72,8 +72,8 @@ export class CajaService {
       }
     }
 
-    const fechaContableFinal = parsedData.fechaDeApertura 
-      ? parsedData.fechaDeApertura 
+    const fechaContableFinal = parsedData.fechaDeApertura
+      ? parsedData.fechaDeApertura
       : await this.getFechaContable();
 
     const cajaCreada = await this.prisma.$transaction(async (tx) => {
@@ -107,9 +107,9 @@ export class CajaService {
       return caja;
     });
 
-    this.appGateway.emitToCaja(SocketEvent.REFRESH_CAJA, { 
-      action: 'abrir', 
-      cajaId: cajaCreada.IDcaja 
+    this.appGateway.emitToCaja(SocketEvent.REFRESH_CAJA, {
+      action: 'abrir',
+      cajaId: cajaCreada.IDcaja
     });
 
     this.notificationsService.sendNotification(
@@ -148,12 +148,12 @@ export class CajaService {
         for (const insumo of insumos) {
           if (insumo.Idcierreyapertura) {
             // Find existing to compare
-            const existing = await tx.aperturaCierreInsumos.findUnique({ where: { Idcierreyapertura: insumo.Idcierreyapertura }});
-            
+            const existing = await tx.aperturaCierreInsumos.findUnique({ where: { Idcierreyapertura: insumo.Idcierreyapertura } });
+
             const newApertura = insumo.cantApertura !== undefined ? insumo.cantApertura : existing?.cantApertura;
             const newCierre = insumo.cantDeCierre !== undefined ? insumo.cantDeCierre : existing?.cantDeCierre;
             const gastadoFisico = (Number(newApertura) || 0) - (Number(newCierre) || 0);
-            
+
             await tx.aperturaCierreInsumos.update({
               where: { Idcierreyapertura: insumo.Idcierreyapertura },
               data: {
@@ -213,13 +213,13 @@ export class CajaService {
       if (Object.keys(cajaData).length > 0) {
         // Whitelist: only pass fields that exist in the Prisma schema
         const allowedFields = [
-            'nombre', 'apertura', 'fechaDeApertura', 'horaDeApertura',
-            'efectivoDeApertura', 'fechaDeCierre', 'horaDeCierre', 'efectivoDeCierre', 
-            'resumen', 'pdf', 'pdfcount', 'observaciones',
-            'cierre', 'total12Onz', 'total24Onz', 'productos', 'tipoDeVaso',
-            'cantAAgregar', 'plataGuardada', 'cuadroCaja', 'valorFaltante',
-            'valorExcedente', 'transferenciasContadas', 'horaCongelada', 'horaEnLaQueSeActualizo', 'contador', 'contador2'
-          ];
+          'nombre', 'apertura', 'fechaDeApertura', 'horaDeApertura',
+          'efectivoDeApertura', 'fechaDeCierre', 'horaDeCierre', 'efectivoDeCierre',
+          'resumen', 'pdf', 'pdfcount', 'observaciones',
+          'cierre', 'total12Onz', 'total24Onz', 'productos', 'tipoDeVaso',
+          'cantAAgregar', 'plataGuardada', 'cuadroCaja', 'valorFaltante',
+          'valorExcedente', 'transferenciasContadas', 'horaCongelada', 'horaEnLaQueSeActualizo', 'contador', 'contador2'
+        ];
         const decimalFields = new Set([
           'plataGuardada', 'valorFaltante', 'valorExcedente',
           'efectivoDeCierre', 'efectivoDeApertura', 'transferenciasContadas', 'cantAAgregar'
@@ -253,12 +253,12 @@ export class CajaService {
           data: parsedData,
         });
       }
-      
+
       return tx.aperturaCierreCaja.findUnique({ where: { IDcaja: id } });
     }, { timeout: 30000 }); // 30 seconds timeout
 
-    this.appGateway.emitToCaja(SocketEvent.REFRESH_CAJA, { 
-      action: 'update', 
+    this.appGateway.emitToCaja(SocketEvent.REFRESH_CAJA, {
+      action: 'update',
       cajaId: id,
       updaterName
     });
@@ -299,7 +299,7 @@ export class CajaService {
       );
     }
 
-      const { insumos, updaterName, ...cajaData } = updateCierreDto as any;
+    const { insumos, updaterName, ...cajaData } = updateCierreDto as any;
 
     const closedCaja = await this.prisma.$transaction(async (tx) => {
       // 0. Eliminar insumos si es necesario (para que no quede rastro en la base de datos si el usuario los quitó del UI)
@@ -376,13 +376,13 @@ export class CajaService {
 
       // 2. Actualizar Caja
       const allowedFields = [
-          'nombre', 'apertura', 'fechaDeApertura', 'horaDeApertura',
-          'efectivoDeApertura', 'fechaDeCierre', 'horaDeCierre',
-          'efectivoDeCierre', 'resumen', 'pdf', 'pdfcount', 'observaciones',
-          'cierre', 'total12Onz', 'total24Onz', 'productos', 'tipoDeVaso',
-          'cantAAgregar', 'plataGuardada', 'cuadroCaja', 'valorFaltante',
-          'valorExcedente', 'transferenciasContadas', 'horaCongelada', 'horaEnLaQueSeActualizo', 'contador', 'contador2'
-        ];
+        'nombre', 'apertura', 'fechaDeApertura', 'horaDeApertura',
+        'efectivoDeApertura', 'fechaDeCierre', 'horaDeCierre',
+        'efectivoDeCierre', 'resumen', 'pdf', 'pdfcount', 'observaciones',
+        'cierre', 'total12Onz', 'total24Onz', 'productos', 'tipoDeVaso',
+        'cantAAgregar', 'plataGuardada', 'cuadroCaja', 'valorFaltante',
+        'valorExcedente', 'transferenciasContadas', 'horaCongelada', 'horaEnLaQueSeActualizo', 'contador', 'contador2'
+      ];
       const decimalCierreFields = new Set([
         'plataGuardada', 'valorFaltante', 'valorExcedente',
         'efectivoDeCierre', 'efectivoDeApertura', 'transferenciasContadas', 'cantAAgregar'
@@ -416,14 +416,14 @@ export class CajaService {
       return result;
     }, { timeout: 30000 });
 
-    this.appGateway.emitToCaja(SocketEvent.REFRESH_CAJA, { 
-      action: 'cerrar', 
+    this.appGateway.emitToCaja(SocketEvent.REFRESH_CAJA, {
+      action: 'cerrar',
       cajaId: id,
       updaterName
     });
 
     const hasMismatch = Number(closedCaja.valorFaltante || 0) > 0 || Number(closedCaja.valorExcedente || 0) > 0;
-    
+
     if (hasMismatch) {
       this.notificationsService.sendNotification(
         'CAJA_CLOSED_MISMATCH',
@@ -561,7 +561,7 @@ export class CajaService {
     const { fechaInicio, fechaFin } = await this.getCajaTimeBounds(caja, horaCorteSnapshot);
 
     const allVentas = await this.prisma.ventas.findMany({
-      where: { 
+      where: {
         estado: { in: ['PAGADO', 'ENTREGADO'] }, // SOLO COBRADOS O CERRADOS
         deletedAt: null, // IGNORAR LAS VENTAS ELIMINADAS (SOFT DELETE)
         fecha: caja.fechaDeApertura, // Utilizar el día contable exacto (horaCorteDia)
@@ -589,7 +589,7 @@ export class CajaService {
 
     let primerPedido = 'N/A';
     let ultimoPedido = 'N/A';
-    
+
     const ventasOrdenadas = [...validVentas].sort((a, b) => {
       const timeA = new Date(a.fechaYHora || 0).getTime();
       const timeB = new Date(b.fechaYHora || 0).getTime();
@@ -617,7 +617,7 @@ export class CajaService {
             const parsed = JSON.parse((ov as any).comentarios);
             if (Array.isArray(parsed) && parsed.length > 0) {
               ventaHasNotes = true;
-              
+
               // Normalizar las notas para que siempre tengan nombre y precio
               const normalizedNotas = parsed.map(n => {
                 if (typeof n === 'string') return { nombre: n, precio: 0, cantidad: 1 };
@@ -713,7 +713,7 @@ export class CajaService {
         const total = Number(v.totalInput || 0);
         // Transferencia repartida es el restante (Total - Efectivo)
         const tr = total - efectivoR;
-        
+
         // Si es mixto y hay banco especificado como Nequi, lo sumamos a Nequi
         const bancoRaw = ((v as any).banco || '').toUpperCase().trim();
         if (bancoRaw === 'NEQUI') {
@@ -723,7 +723,7 @@ export class CajaService {
         }
 
         totalEfectivo += efectivoR;
-        
+
         // LAS ÓRDENES REPARTIDAS SON LAS DE MEDIO DE PAGO "EFECTIVO Y OTROS" (MIXTO)
         transferenciasRepartidas += tr;
         efectivoRepartido += efectivoR;
@@ -778,41 +778,22 @@ export class CajaService {
               pid === ovProdId || pid === ovProdNombre
             );
             if (!matches) return;
+          }
 
-            let hasRecetaForInsumo = false;
-            if (ov.producto && Array.isArray(ov.producto.recetaInsumos)) {
-              ov.producto.recetaInsumos.forEach(receta => {
-                if (receta.insumo === insumoId) {
-                  hasRecetaForInsumo = true;
-                  const cant = (Number(receta.cantidad) || 1) * (ov.cantidad || 1);
-                  ventasEnSistema += cant;
-                  const pNombre = ov.producto?.nombre || ov.nombreProducto || 'N/A';
-                  ventasPorProducto[pNombre] = (ventasPorProducto[pNombre] || 0) + (ov.cantidad || 1);
-                }
-              });
-            }
-
-            if (!hasRecetaForInsumo) {
-              ventasEnSistema += (ov.cantidad || 1);
-              const pNombre = ov.producto?.nombre || ov.nombreProducto || 'N/A';
-              ventasPorProducto[pNombre] = (ventasPorProducto[pNombre] || 0) + (ov.cantidad || 1);
-            }
-          } else {
-            if (ov.producto && ov.producto.recetaInsumos) {
-              ov.producto.recetaInsumos.forEach(receta => {
-                if (receta.insumo === insumoId) {
-                  const cant = (Number(receta.cantidad) || 1) * (ov.cantidad || 1);
-                  ventasEnSistema += cant;
-                  const pNombre = ov.producto?.nombre || ov.nombreProducto || 'N/A';
-                  ventasPorProducto[pNombre] = (ventasPorProducto[pNombre] || 0) + (ov.cantidad || 1);
-                }
-              });
-            } else {
-              if (ov.producto?.IDproductos === insumoId || ov.nombreProducto === insumoId) {
-                ventasEnSistema += (ov.cantidad || 1);
+          if (ov.producto && ov.producto.recetaInsumos) {
+            ov.producto.recetaInsumos.forEach(receta => {
+              if (receta.insumo === insumoId) {
+                const cant = (Number(receta.cantidad) || 1) * (ov.cantidad || 1);
+                ventasEnSistema += cant;
                 const pNombre = ov.producto?.nombre || ov.nombreProducto || 'N/A';
                 ventasPorProducto[pNombre] = (ventasPorProducto[pNombre] || 0) + (ov.cantidad || 1);
               }
+            });
+          } else {
+            if (ov.producto?.IDproductos === insumoId || ov.nombreProducto === insumoId) {
+              ventasEnSistema += (ov.cantidad || 1);
+              const pNombre = ov.producto?.nombre || ov.nombreProducto || 'N/A';
+              ventasPorProducto[pNombre] = (ventasPorProducto[pNombre] || 0) + (ov.cantidad || 1);
             }
           }
         });
@@ -932,9 +913,9 @@ export class CajaService {
         where: { IDcaja: id },
       });
 
-      this.appGateway.emitToCaja(SocketEvent.REFRESH_CAJA, { 
-        action: 'delete', 
-        cajaId: id 
+      this.appGateway.emitToCaja(SocketEvent.REFRESH_CAJA, {
+        action: 'delete',
+        cajaId: id
       });
 
       this.notificationsService.sendNotification(
@@ -979,16 +960,16 @@ export class CajaService {
     }
 
     const { fechaInicio, fechaFin } = await this.getCajaTimeBounds(caja);
-    
+
     const ventasEfectivo = await this.prisma.ventas.findMany({
       where: {
         estado: { in: ['PAGADO', 'ENTREGADO'] },
         deletedAt: null,
         medioDePago: { in: ['EFECTIVO', 'TRANSFERENCIA', 'NEQUI', 'TRASNFERENCIA', 'DAVIPLATA'] },
         fecha: caja.fechaDeApertura, // Matchear con el día contable exacto (horaCorteDia)
-        fechaYHora: { 
+        fechaYHora: {
           gte: fechaInicio,
-          lte: fechaFin 
+          lte: fechaFin
         }
       },
       include: {
@@ -1053,7 +1034,7 @@ export class CajaService {
     for (const d of insumosDescuadrados) {
       differenceTracker.set(d.productoAsociado, Math.abs(d.diferencia));
     }
-    
+
     // Hacemos una copia profunda de ventasEligibles para simular cambios de dinero
     const simulatedVentas = JSON.parse(JSON.stringify(ventasEligibles));
 
@@ -1109,23 +1090,23 @@ export class CajaService {
             // Simular el ADD
             const simVenta = simulatedVentas.find((v: any) => v.ventaId === accion.ventaId);
             if (simVenta) {
-               let unitPrice = 0;
-               const existingProd = simVenta.productos.find((p: any) => p.productoId === matchingDescuadre.productoId || p.nombre === matchingDescuadre.productoAsociado);
-               if (existingProd && existingProd.cantidad > 0) {
-                 unitPrice = existingProd.precioTotal / existingProd.cantidad;
-                 existingProd.cantidad += applyQuantity;
-                 existingProd.precioTotal += unitPrice * applyQuantity;
-               } else {
-                 simVenta.productos.push({
-                   productoId: matchingDescuadre.productoId || accion.productoId,
-                   nombre: matchingDescuadre.productoAsociado || accion.nombreProducto,
-                   cantidad: applyQuantity,
-                   precioTotal: 0 
-                 });
-               }
-               recalcVentaTotal(simVenta);
+              let unitPrice = 0;
+              const existingProd = simVenta.productos.find((p: any) => p.productoId === matchingDescuadre.productoId || p.nombre === matchingDescuadre.productoAsociado);
+              if (existingProd && existingProd.cantidad > 0) {
+                unitPrice = existingProd.precioTotal / existingProd.cantidad;
+                existingProd.cantidad += applyQuantity;
+                existingProd.precioTotal += unitPrice * applyQuantity;
+              } else {
+                simVenta.productos.push({
+                  productoId: matchingDescuadre.productoId || accion.productoId,
+                  nombre: matchingDescuadre.productoAsociado || accion.nombreProducto,
+                  cantidad: applyQuantity,
+                  precioTotal: 0
+                });
+              }
+              recalcVentaTotal(simVenta);
             }
-            
+
             correctedAcciones.push({
               ...accion,
               action: 'add_product',
@@ -1139,14 +1120,14 @@ export class CajaService {
             // SYSTEM > PHYSICAL → must REMOVE products from system
             const simVenta = simulatedVentas.find((v: any) => v.ventaId === accion.ventaId);
             if (simVenta) {
-               const targetProduct = simVenta.productos.find((p: any) => p.productoId === matchingDescuadre.productoId || p.nombre === matchingDescuadre.productoAsociado);
-               if (targetProduct) {
-                 const actualRemove = Math.min(applyQuantity, targetProduct.cantidad);
-                 const unitPrice = targetProduct.cantidad > 0 ? targetProduct.precioTotal / targetProduct.cantidad : 0;
-                 targetProduct.cantidad -= actualRemove;
-                 targetProduct.precioTotal -= unitPrice * actualRemove;
-                 recalcVentaTotal(simVenta);
-               }
+              const targetProduct = simVenta.productos.find((p: any) => p.productoId === matchingDescuadre.productoId || p.nombre === matchingDescuadre.productoAsociado);
+              if (targetProduct) {
+                const actualRemove = Math.min(applyQuantity, targetProduct.cantidad);
+                const unitPrice = targetProduct.cantidad > 0 ? targetProduct.precioTotal / targetProduct.cantidad : 0;
+                targetProduct.cantidad -= actualRemove;
+                targetProduct.precioTotal -= unitPrice * actualRemove;
+                recalcVentaTotal(simVenta);
+              }
             }
 
             correctedAcciones.push({
@@ -1179,7 +1160,7 @@ export class CajaService {
             precioTotal: 0
           });
           recalcVentaTotal(targetSale);
-          
+
           correctedAcciones.push({
             action: 'add_product',
             ventaId: targetSale.ventaId,
@@ -1199,21 +1180,21 @@ export class CajaService {
             (p: any) => (p.productoId === desc.productoId || p.nombre === desc.productoAsociado) && p.cantidad > 0
           );
           if (targetProduct) {
-             const actualRemove = Math.min(remaining, targetProduct.cantidad);
-             const unitPrice = targetProduct.cantidad > 0 ? targetProduct.precioTotal / targetProduct.cantidad : 0;
-             targetProduct.cantidad -= actualRemove;
-             targetProduct.precioTotal -= unitPrice * actualRemove;
-             recalcVentaTotal(targetSale);
+            const actualRemove = Math.min(remaining, targetProduct.cantidad);
+            const unitPrice = targetProduct.cantidad > 0 ? targetProduct.precioTotal / targetProduct.cantidad : 0;
+            targetProduct.cantidad -= actualRemove;
+            targetProduct.precioTotal -= unitPrice * actualRemove;
+            recalcVentaTotal(targetSale);
 
-             correctedAcciones.push({
-               action: 'remove_product',
-               ventaId: targetSale.ventaId,
-               ordenId: targetProduct.ordenId,
-               productoId: desc.productoId,
-               nombreProducto: desc.productoAsociado,
-               cantidadARemover: remaining,
-               motivo: `El sistema registró ${remaining} unidades más que el consumo físico de ${desc.productoAsociado}. Se remueve del pedido ${targetSale.pedido || targetSale.ventaId} para cuadrar.`,
-             });
+            correctedAcciones.push({
+              action: 'remove_product',
+              ventaId: targetSale.ventaId,
+              ordenId: targetProduct.ordenId,
+              productoId: desc.productoId,
+              nombreProducto: desc.productoAsociado,
+              cantidadARemover: remaining,
+              motivo: `El sistema registró ${remaining} unidades más que el consumo físico de ${desc.productoAsociado}. Se remueve del pedido ${targetSale.pedido || targetSale.ventaId} para cuadrar.`,
+            });
           }
         }
       }
@@ -1228,131 +1209,131 @@ export class CajaService {
       if (!originalVenta) continue;
 
       if (originalVenta.metodo && ['TRANSFERENCIA', 'NEQUI', 'DAVIPLATA', 'BANCOLOMBIA'].includes(originalVenta.metodo)) {
-         // Si la venta era transferencia original, un cambio en su total afecta las transferencias esperadas.
-         // Un aumento en esperado = reducción en faltante (Contadas - Esperadas).
-         const deltaTotal = simVenta.total - originalVenta.total;
-         actualDiferenciaTransferencia -= deltaTotal; 
+        // Si la venta era transferencia original, un cambio en su total afecta las transferencias esperadas.
+        // Un aumento en esperado = reducción en faltante (Contadas - Esperadas).
+        const deltaTotal = simVenta.total - originalVenta.total;
+        actualDiferenciaTransferencia -= deltaTotal;
       }
     }
 
     // Evaluar los change_payment propuestos por la IA
     if (plan.acciones && Array.isArray(plan.acciones)) {
       for (const accion of plan.acciones) {
-         if (accion.action !== 'change_payment') continue;
-         
-         const simVenta = simulatedVentas.find((v: any) => v.ventaId === accion.ventaId);
-         if (!simVenta) continue;
+        if (accion.action !== 'change_payment') continue;
 
-         const currentTotal = simVenta.total;
+        const simVenta = simulatedVentas.find((v: any) => v.ventaId === accion.ventaId);
+        if (!simVenta) continue;
 
-         if (accion.method === 'EFECTIVO Y OTROS') {
-            let ef = Number(accion.efectivoRecibido || 0);
-            let tr = Number(accion.transferenciaRecibida || 0);
-            
-            if (ef + tr !== currentTotal) {
-               if (tr > 0 && tr <= currentTotal) {
-                 ef = currentTotal - tr;
-               } else if (ef > 0 && ef <= currentTotal) {
-                 tr = currentTotal - ef;
-               } else {
-                 tr = currentTotal;
-                 ef = 0;
-               }
-               accion.efectivoRecibido = ef;
-               accion.transferenciaRecibida = tr;
-               accion.motivo = (accion.motivo || '') + ` (Ajuste Backend: Sumas corregidas al nuevo total de $${currentTotal})`;
+        const currentTotal = simVenta.total;
+
+        if (accion.method === 'EFECTIVO Y OTROS') {
+          let ef = Number(accion.efectivoRecibido || 0);
+          let tr = Number(accion.transferenciaRecibida || 0);
+
+          if (ef + tr !== currentTotal) {
+            if (tr > 0 && tr <= currentTotal) {
+              ef = currentTotal - tr;
+            } else if (ef > 0 && ef <= currentTotal) {
+              tr = currentTotal - ef;
+            } else {
+              tr = currentTotal;
+              ef = 0;
             }
+            accion.efectivoRecibido = ef;
+            accion.transferenciaRecibida = tr;
+            accion.motivo = (accion.motivo || '') + ` (Ajuste Backend: Sumas corregidas al nuevo total de $${currentTotal})`;
+          }
 
-            if (['TRANSFERENCIA', 'NEQUI', 'DAVIPLATA', 'BANCOLOMBIA'].includes(simVenta.metodo)) {
-               actualDiferenciaTransferencia += currentTotal; // Remove old
-               actualDiferenciaTransferencia -= tr; // Add new
-            } else if (simVenta.metodo === 'EFECTIVO') {
-               actualDiferenciaTransferencia -= tr; // Add new
-            }
+          if (['TRANSFERENCIA', 'NEQUI', 'DAVIPLATA', 'BANCOLOMBIA'].includes(simVenta.metodo)) {
+            actualDiferenciaTransferencia += currentTotal; // Remove old
+            actualDiferenciaTransferencia -= tr; // Add new
+          } else if (simVenta.metodo === 'EFECTIVO') {
+            actualDiferenciaTransferencia -= tr; // Add new
+          }
 
-            simVenta.metodo = 'EFECTIVO Y OTROS';
+          simVenta.metodo = 'EFECTIVO Y OTROS';
+          correctedAcciones.push(accion);
+
+        } else if (['TRANSFERENCIA', 'NEQUI', 'DAVIPLATA', 'BANCOLOMBIA'].includes(accion.method)) {
+          if (simVenta.metodo !== 'TRANSFERENCIA' && !['NEQUI', 'DAVIPLATA', 'BANCOLOMBIA'].includes(simVenta.metodo)) {
+            actualDiferenciaTransferencia -= currentTotal;
+            simVenta.metodo = 'TRANSFERENCIA';
             correctedAcciones.push(accion);
-
-         } else if (['TRANSFERENCIA', 'NEQUI', 'DAVIPLATA', 'BANCOLOMBIA'].includes(accion.method)) {
-            if (simVenta.metodo !== 'TRANSFERENCIA' && !['NEQUI', 'DAVIPLATA', 'BANCOLOMBIA'].includes(simVenta.metodo)) {
-               actualDiferenciaTransferencia -= currentTotal;
-               simVenta.metodo = 'TRANSFERENCIA';
-               correctedAcciones.push(accion);
-            }
-         } else if (accion.method === 'EFECTIVO') {
-            if (['TRANSFERENCIA', 'NEQUI', 'DAVIPLATA', 'BANCOLOMBIA'].includes(simVenta.metodo)) {
-               actualDiferenciaTransferencia += currentTotal;
-               simVenta.metodo = 'EFECTIVO';
-               correctedAcciones.push(accion);
-            }
-         }
+          }
+        } else if (accion.method === 'EFECTIVO') {
+          if (['TRANSFERENCIA', 'NEQUI', 'DAVIPLATA', 'BANCOLOMBIA'].includes(simVenta.metodo)) {
+            actualDiferenciaTransferencia += currentTotal;
+            simVenta.metodo = 'EFECTIVO';
+            correctedAcciones.push(accion);
+          }
+        }
       }
     }
 
     // Step 4: Auto-fill change_payment si actualDiferenciaTransferencia !== 0
     if (actualDiferenciaTransferencia !== 0) {
       if (actualDiferenciaTransferencia > 0) {
-         // Faltante en transferencia en sistema (Físico > Sistema). Convertir Efectivo -> Transferencia
-         let restantesParaPasarATransferencia = actualDiferenciaTransferencia;
-         for (const simVenta of simulatedVentas) {
-            if (restantesParaPasarATransferencia <= 0) break;
-            if (simVenta.metodo === 'EFECTIVO' && simVenta.total > 0) {
-               if (simVenta.total <= restantesParaPasarATransferencia) {
-                  restantesParaPasarATransferencia -= simVenta.total;
-                  simVenta.metodo = 'TRANSFERENCIA';
-                  correctedAcciones.push({
-                     action: 'change_payment',
-                     ventaId: simVenta.ventaId,
-                     method: 'TRANSFERENCIA',
-                     motivo: `Ajuste automático Backend: Se encontró un excedente físico en Transferencias. Esta venta en Efectivo se cambia a Transferencia para nivelar.`
-                  });
-               } else {
-                  const parteEfectivo = simVenta.total - restantesParaPasarATransferencia;
-                  const parteTransferencia = restantesParaPasarATransferencia;
-                  restantesParaPasarATransferencia = 0;
-                  simVenta.metodo = 'EFECTIVO Y OTROS';
-                  correctedAcciones.push({
-                     action: 'change_payment',
-                     ventaId: simVenta.ventaId,
-                     method: 'EFECTIVO Y OTROS',
-                     efectivoRecibido: parteEfectivo,
-                     transferenciaRecibida: parteTransferencia,
-                     motivo: `Ajuste automático Backend: Se fracciona este pago para cubrir el monto exacto faltante en Transferencias en el sistema.`
-                  });
-               }
+        // Faltante en transferencia en sistema (Físico > Sistema). Convertir Efectivo -> Transferencia
+        let restantesParaPasarATransferencia = actualDiferenciaTransferencia;
+        for (const simVenta of simulatedVentas) {
+          if (restantesParaPasarATransferencia <= 0) break;
+          if (simVenta.metodo === 'EFECTIVO' && simVenta.total > 0) {
+            if (simVenta.total <= restantesParaPasarATransferencia) {
+              restantesParaPasarATransferencia -= simVenta.total;
+              simVenta.metodo = 'TRANSFERENCIA';
+              correctedAcciones.push({
+                action: 'change_payment',
+                ventaId: simVenta.ventaId,
+                method: 'TRANSFERENCIA',
+                motivo: `Ajuste automático Backend: Se encontró un excedente físico en Transferencias. Esta venta en Efectivo se cambia a Transferencia para nivelar.`
+              });
+            } else {
+              const parteEfectivo = simVenta.total - restantesParaPasarATransferencia;
+              const parteTransferencia = restantesParaPasarATransferencia;
+              restantesParaPasarATransferencia = 0;
+              simVenta.metodo = 'EFECTIVO Y OTROS';
+              correctedAcciones.push({
+                action: 'change_payment',
+                ventaId: simVenta.ventaId,
+                method: 'EFECTIVO Y OTROS',
+                efectivoRecibido: parteEfectivo,
+                transferenciaRecibida: parteTransferencia,
+                motivo: `Ajuste automático Backend: Se fracciona este pago para cubrir el monto exacto faltante en Transferencias en el sistema.`
+              });
             }
-         }
+          }
+        }
       } else {
-         // Excedente en transferencia en sistema (Físico < Sistema). Convertir Transferencia -> Efectivo
-         let restantesParaPasarAEfectivo = Math.abs(actualDiferenciaTransferencia);
-         for (const simVenta of simulatedVentas) {
-            if (restantesParaPasarAEfectivo <= 0) break;
-            if (['TRANSFERENCIA', 'NEQUI', 'DAVIPLATA', 'BANCOLOMBIA'].includes(simVenta.metodo) && simVenta.total > 0) {
-               if (simVenta.total <= restantesParaPasarAEfectivo) {
-                  restantesParaPasarAEfectivo -= simVenta.total;
-                  simVenta.metodo = 'EFECTIVO';
-                  correctedAcciones.push({
-                     action: 'change_payment',
-                     ventaId: simVenta.ventaId,
-                     method: 'EFECTIVO',
-                     motivo: `Ajuste automático Backend: Se detectó un faltante físico en Transferencias. Esta venta en Transferencia se pasa a Efectivo para nivelar.`
-                  });
-               } else {
-                  const parteTransferencia = simVenta.total - restantesParaPasarAEfectivo;
-                  const parteEfectivo = restantesParaPasarAEfectivo;
-                  restantesParaPasarAEfectivo = 0;
-                  simVenta.metodo = 'EFECTIVO Y OTROS';
-                  correctedAcciones.push({
-                     action: 'change_payment',
-                     ventaId: simVenta.ventaId,
-                     method: 'EFECTIVO Y OTROS',
-                     efectivoRecibido: parteEfectivo,
-                     transferenciaRecibida: parteTransferencia,
-                     motivo: `Ajuste automático Backend: Se fracciona este pago para cubrir el monto exacto faltante físico en Transferencias.`
-                  });
-               }
+        // Excedente en transferencia en sistema (Físico < Sistema). Convertir Transferencia -> Efectivo
+        let restantesParaPasarAEfectivo = Math.abs(actualDiferenciaTransferencia);
+        for (const simVenta of simulatedVentas) {
+          if (restantesParaPasarAEfectivo <= 0) break;
+          if (['TRANSFERENCIA', 'NEQUI', 'DAVIPLATA', 'BANCOLOMBIA'].includes(simVenta.metodo) && simVenta.total > 0) {
+            if (simVenta.total <= restantesParaPasarAEfectivo) {
+              restantesParaPasarAEfectivo -= simVenta.total;
+              simVenta.metodo = 'EFECTIVO';
+              correctedAcciones.push({
+                action: 'change_payment',
+                ventaId: simVenta.ventaId,
+                method: 'EFECTIVO',
+                motivo: `Ajuste automático Backend: Se detectó un faltante físico en Transferencias. Esta venta en Transferencia se pasa a Efectivo para nivelar.`
+              });
+            } else {
+              const parteTransferencia = simVenta.total - restantesParaPasarAEfectivo;
+              const parteEfectivo = restantesParaPasarAEfectivo;
+              restantesParaPasarAEfectivo = 0;
+              simVenta.metodo = 'EFECTIVO Y OTROS';
+              correctedAcciones.push({
+                action: 'change_payment',
+                ventaId: simVenta.ventaId,
+                method: 'EFECTIVO Y OTROS',
+                efectivoRecibido: parteEfectivo,
+                transferenciaRecibida: parteTransferencia,
+                motivo: `Ajuste automático Backend: Se fracciona este pago para cubrir el monto exacto faltante físico en Transferencias.`
+              });
             }
-         }
+          }
+        }
       }
     }
 
@@ -1391,7 +1372,7 @@ export class CajaService {
     return this.prisma.$transaction(async (tx) => {
       let observacionesNuevas = "\n\n--- AUTO-CUADRE IA ---\n";
       let accionesEjecutadas = 0;
-      
+
       for (let i = 0; i < planIA.acciones.length; i++) {
         const accion = planIA.acciones[i];
         console.log(`[ExecuteAutoCuadre] Acción ${i + 1}:`, JSON.stringify(accion));
@@ -1406,7 +1387,7 @@ export class CajaService {
           if (orden) {
             console.log(`[ExecuteAutoCuadre] → Orden encontrada: ${orden.nombreProducto}, cant: ${orden.cantidad}`);
             const nuevaCantidad = Math.max(0, Number(orden.cantidad) - Number(accion.cantidadARemover));
-            
+
             if (nuevaCantidad <= 0) {
               await tx.orderventas.delete({ where: { IDorderventas: accion.ordenId } });
               observacionesNuevas += `- Eliminado: ${orden.nombreProducto || 'Producto'} del Pedido #${orden.venta?.pedido}.\n`;
@@ -1414,10 +1395,10 @@ export class CajaService {
             } else {
               const unitPrice = Number(orden.precioTotal) / Number(orden.cantidad);
               const nuevoPrecioTotal = unitPrice * nuevaCantidad;
-              
+
               await tx.orderventas.update({
                 where: { IDorderventas: accion.ordenId },
-                data: { 
+                data: {
                   cantidad: nuevaCantidad,
                   precioTotal: nuevoPrecioTotal
                 }
@@ -1430,7 +1411,7 @@ export class CajaService {
             if (orden.IDventas) {
               const restante = await tx.orderventas.findMany({ where: { IDventas: orden.IDventas } });
               const nuevoTotal = restante.reduce((acc, curr) => acc + Number(curr.precioTotal), 0);
-              
+
               await tx.ventas.update({
                 where: { IDventas: orden.IDventas },
                 data: { totalInput: nuevoTotal, mensaje: '🤖 Modificado por Auto-Cuadre IA' }
@@ -1443,7 +1424,7 @@ export class CajaService {
           }
         } else if (accion.action === 'add_product' && accion.ventaId && accion.productoId) {
           console.log(`[ExecuteAutoCuadre] → ADD_PRODUCT: ventaId=${accion.ventaId}, productoId=${accion.productoId}, cantidad=${accion.cantidadAAnadir}`);
-          
+
           // Verify the venta exists first
           const ventaExiste = await tx.ventas.findUnique({ where: { IDventas: accion.ventaId } });
           if (!ventaExiste) {
@@ -1462,7 +1443,7 @@ export class CajaService {
             const unitPrice = Number(ordenExistente.precioTotal) / Number(ordenExistente.cantidad);
             const nuevaCantidad = Number(ordenExistente.cantidad) + Number(accion.cantidadAAnadir);
             const nuevoPrecioTotal = unitPrice * nuevaCantidad;
-            
+
             await tx.orderventas.update({
               where: { IDorderventas: ordenExistente.IDorderventas },
               data: { cantidad: nuevaCantidad, precioTotal: nuevoPrecioTotal }
@@ -1516,7 +1497,7 @@ export class CajaService {
           const venta = await tx.ventas.findUnique({ where: { IDventas: accion.ventaId } });
           if (venta) {
             let updateData: any = { medioDePago: accion.method, mensaje: '🤖 Modificado por Auto-Cuadre IA' };
-            
+
             if (accion.method === 'EFECTIVO Y OTROS') {
               updateData.efectivoRecibido = Number(accion.efectivoRecibido || 0);
               updateData.valorDeTransferencia = Number(accion.transferenciaRecibida || 0);
@@ -1528,7 +1509,7 @@ export class CajaService {
               updateData.efectivoRecibido = 0;
               updateData.valorDeTransferencia = Number(venta.totalInput || 0);
             }
-            
+
             await tx.ventas.update({
               where: { IDventas: accion.ventaId },
               data: updateData
@@ -1571,7 +1552,7 @@ export class CajaService {
       const conteos = (insumo.ultimosConteos as any[]) || [];
       const conteosDeEstaCaja = conteos.filter(c => c.cajaId === id);
       const ultimoConteo = conteosDeEstaCaja.length > 0 ? conteosDeEstaCaja[conteosDeEstaCaja.length - 1] : null;
-      
+
       let verificado = false;
       if (ultimoConteo) {
         verificado = true;
@@ -1588,7 +1569,7 @@ export class CajaService {
     });
 
     const pendientesSinVerificar = pendientes.filter(p => !p.conteoVerificado);
-    
+
     const isAdmin = user?.rol === 'Admin app' || user?.rol === 'Admin negocio';
     const maxPosposiciones = isAdmin ? -1 : 5;
     const posposicionesRestantes = isAdmin ? -1 : Math.max(0, maxPosposiciones - (caja.contador || 0));
@@ -1620,7 +1601,7 @@ export class CajaService {
     const isAdmin = user?.rol === 'Admin app' || user?.rol === 'Admin negocio';
     const maxPosposiciones = isAdmin ? -1 : 5;
     const contadorActual = caja.contador || 0;
-    
+
     if (!isAdmin && contadorActual >= maxPosposiciones) {
       throw new BadRequestException(`Ya no puedes posponer más. Has alcanzado el límite de ${maxPosposiciones} veces. Debes hacer la verificación.`);
     }
@@ -1739,11 +1720,11 @@ export class CajaService {
 
     let conteos = [];
     if (typeof insumo.ultimosConteos === 'string') {
-      try { conteos = JSON.parse(insumo.ultimosConteos); } catch(e) { conteos = []; }
+      try { conteos = JSON.parse(insumo.ultimosConteos); } catch (e) { conteos = []; }
     } else {
       conteos = (insumo.ultimosConteos as any[]) || [];
     }
-    
+
     if (conteoIndex < 0 || conteoIndex >= conteos.length) {
       throw new BadRequestException('Índice de conteo inválido');
     }
@@ -1778,7 +1759,7 @@ export class CajaService {
 
     let conteos = [];
     if (typeof insumo.ultimosConteos === 'string') {
-      try { conteos = JSON.parse(insumo.ultimosConteos); } catch(e) { conteos = []; }
+      try { conteos = JSON.parse(insumo.ultimosConteos); } catch (e) { conteos = []; }
     } else {
       conteos = (insumo.ultimosConteos as any[]) || [];
     }
@@ -1925,7 +1906,7 @@ export class CajaService {
 
         const insumo = insumoCaja.insumo;
         if (!insumo) continue;
-        
+
         // Si se proporcionaron IDs específicos, omitir los que no estén en la lista
         if (insumosIds && insumosIds.length > 0 && !insumosIds.includes(insumo.IDalimentos)) {
           continue;
@@ -1944,7 +1925,7 @@ export class CajaService {
         if (diferencia !== 0) {
           if (syncGlobalStock) {
             let nuevoPrecio = insumo.precio;
-            
+
             // El precio unitario promedio no debe cambiar durante un cuadre físico (arqueo).
             // Solo cambia cuando se ingresan nuevas compras a un precio diferente.
             // La línea comentada causaba que el precio unitario se inflara o desinflara erróneamente:
@@ -2010,8 +1991,8 @@ export class CajaService {
     // Avisar al socket para refrescar inventarios
     this.appGateway.emitToInsumos(SocketEvent.REFRESH_INSUMOS, { action: 'update', message: 'Arqueo realizado' });
 
-    return { 
-      success: true, 
+    return {
+      success: true,
       message: `Arqueo completado. Se ajustaron ${ajustesRealizados} insumos.`,
       ajustesRealizados
     };
