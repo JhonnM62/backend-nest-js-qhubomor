@@ -74,15 +74,44 @@ export class ProductosService {
             categoriaRelacion: {
               select: { IDcategoria: true, nombre: true, image: true },
             },
+            recetaInsumos: {
+              include: { insumoRelacion: true }
+            }
           },
         }),
         this.prisma.productos.count({ where }),
       ]);
 
-      const dataPlain = data.map((p) => ({
-        ...p,
-        categoriaNombre: p.categoriaRelacion?.nombre || p.categoriaNombre,
-      }));
+      const dataPlain = data.map((p) => {
+        let disponibilidadCalculada = null;
+
+        if ((p as any).mostrarDisponibilidad) {
+          if (p.recetaInsumos && p.recetaInsumos.length > 0) {
+            let maxPossible = Infinity;
+            for (const receta of p.recetaInsumos) {
+              const cantRequerida = Number(receta.cantidad) || 0;
+              if (cantRequerida > 0 && receta.insumoRelacion) {
+                const stockGlobal = Number(receta.insumoRelacion.disponible) || receta.insumoRelacion.cantidad || 0;
+                const possible = Math.floor(stockGlobal / cantRequerida);
+                if (possible < maxPossible) maxPossible = possible;
+              }
+            }
+            disponibilidadCalculada = maxPossible === Infinity ? 0 : Math.max(0, maxPossible);
+          } else {
+            // Si el producto no tiene receta, el stock global disponible es el suyo propio
+            disponibilidadCalculada = Math.max(0, p.cantidad || 0);
+          }
+        }
+
+        // Se elimina la receta del payload final para evitar sobrecarga de red
+        const { recetaInsumos, ...rest } = p;
+
+        return {
+          ...rest,
+          disponibilidadCalculada,
+          categoriaNombre: p.categoriaRelacion?.nombre || p.categoriaNombre,
+        };
+      });
 
       return {
         data: dataPlain,

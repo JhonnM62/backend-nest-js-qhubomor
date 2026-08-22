@@ -123,6 +123,7 @@ model Productos {
   ordenVentas             Orderventas[]
   categoriaRelacion       Categorias?     @relation(fields: [categoria], references: [IDcategoria], onDelete: Cascade)
   recetaInsumos           Recetainsumos[]
+  mostrarDisponibilidad   Boolean?        @default(false) @map("Mostrar Disponibilidad")
 
   @@map("PRODUCTOS")
 }
