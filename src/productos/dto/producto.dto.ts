@@ -176,6 +176,11 @@ export class UpdateProductoDto {
   @IsNumber()
   orden?: number;
 
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsBoolean()
+  mostrarDisponibilidad?: boolean;
+
   @ApiPropertyOptional({ type: [RecetaInsumoDto] })
   @IsOptional()
   @IsArray()
