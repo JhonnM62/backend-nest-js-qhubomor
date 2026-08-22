@@ -36,7 +36,7 @@ export class MovimientosInsumosService {
       throw new BadRequestException('El insumo no tiene paquetes configurados o suficientes en bodega para esta apertura');
     }
 
-    const cantidadAnterior = insumo.cantidad || 0;
+    const cantidadAnterior = Number(insumo.disponible) || insumo.cantidad || 0;
     const teorico = insumo.cantidadPorPaquete * cantidadDePaquetes;
     const diferencia = cantidadReal - teorico;
     
@@ -141,7 +141,7 @@ export class MovimientosInsumosService {
       throw new NotFoundException(`Insumo con ID ${insumoId} no encontrado`);
     }
 
-    const cantidadAnterior = insumo.cantidad || 0;
+    const cantidadAnterior = Number(insumo.disponible) || insumo.cantidad || 0;
     const nuevoStock = cantidadAnterior - cantidadDescontada;
 
     const insumoActualizado = await this.prisma.insumos.update({
@@ -187,7 +187,7 @@ export class MovimientosInsumosService {
       throw new NotFoundException(`Insumo con ID ${insumoId} no encontrado`);
     }
 
-    const cantidadAnterior = insumo.cantidad || 0;
+    const cantidadAnterior = Number(insumo.disponible) || insumo.cantidad || 0;
     
     // Si no se envía cantidadTeorica o es 0, asumimos que es un "Ingreso Nuevo" (diferencia = toda la cantidadAgregada)
     const teorico = cantidadTeorica || 0;
