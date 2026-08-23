@@ -18,15 +18,13 @@ export class InsumosService {
     const term = categoria || nombreCategoria;
     if (!term || term.trim() === '') return null;
     
-    // Verificar si es un CUID (suele tener 25 caracteres, empezamos a checar si es ID)
-    if (term.length >= 20) {
-      const existeId = await this.prisma.categoriasInsumos.findUnique({
-        where: { IDcategoriainsumos: term }
-      });
-      if (existeId) return existeId.IDcategoriainsumos;
-    }
+    // Verificar si existe el ID directamente
+    const existeId = await this.prisma.categoriasInsumos.findUnique({
+      where: { IDcategoriainsumos: term }
+    });
+    if (existeId) return existeId.IDcategoriainsumos;
 
-    // Buscar por nombre (insensible a mayúsculas si es posible, pero usaremos findFirst)
+    // Buscar por nombre (insensible a mayúsculas)
     const existeNombre = await this.prisma.categoriasInsumos.findFirst({
       where: { nombre: { equals: term, mode: 'insensitive' } }
     });
