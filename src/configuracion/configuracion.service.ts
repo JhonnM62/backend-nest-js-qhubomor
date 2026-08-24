@@ -33,6 +33,13 @@ async updateConfiguracion(data: {
   latitudNegocio?: number;
   longitudNegocio?: number;
   radioGeocercaM?: number;
+  emitirFacturaAutomatica?: boolean;
+  factusEmail?: string;
+  factusPassword?: string;
+  factusClientId?: string;
+  factusClientSecret?: string;
+  factusMunicipioCodigo?: string;
+  factusEntorno?: string;
 }) {
   return this.prisma.configuracionNegocio.upsert({
     where: { id: 1 },
@@ -48,6 +55,13 @@ async updateConfiguracion(data: {
       latitudNegocio: data.latitudNegocio,
       longitudNegocio: data.longitudNegocio,
       radioGeocercaM: data.radioGeocercaM ?? 100,
+      emitirFacturaAutomatica: data.emitirFacturaAutomatica || false,
+      factusEmail: data.factusEmail,
+      factusPassword: data.factusPassword,
+      factusClientId: data.factusClientId,
+      factusClientSecret: data.factusClientSecret,
+      factusMunicipioCodigo: data.factusMunicipioCodigo || '52356',
+      factusEntorno: data.factusEntorno || 'SANDBOX'
     }
   });
 }

@@ -27,6 +27,13 @@ export class ConfiguracionController {
     nit?: string;
     direccion?: string;
     telefono?: string;
+    emitirFacturaAutomatica?: boolean;
+    factusEmail?: string;
+    factusPassword?: string;
+    factusClientId?: string;
+    factusClientSecret?: string;
+    factusMunicipioCodigo?: string;
+    factusEntorno?: string;
   }) {
     return this.configuracionService.updateConfiguracion(data);
   }
