@@ -5,6 +5,11 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
+  // Parche para que JSON.stringify pueda serializar BigInt (como la cédula de Cliente)
+  (BigInt.prototype as any).toJSON = function () {
+    return this.toString();
+  };
+
   const logger = new Logger('Bootstrap');
 
   const app = await NestFactory.create(AppModule);
