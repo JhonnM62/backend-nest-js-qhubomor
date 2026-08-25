@@ -43,7 +43,24 @@ async updateConfiguracion(data: {
 }) {
   return this.prisma.configuracionNegocio.upsert({
     where: { id: 1 },
-    update: data,
+    update: {
+      horaCorteDia: data.horaCorteDia,
+      modoOperacion: data.modoOperacion,
+      nombreComercial: data.nombreComercial,
+      nit: data.nit,
+      direccion: data.direccion,
+      telefono: data.telefono,
+      latitudNegocio: data.latitudNegocio,
+      longitudNegocio: data.longitudNegocio,
+      radioGeocercaM: data.radioGeocercaM,
+      emitirFacturaAutomatica: data.emitirFacturaAutomatica,
+      factusEmail: data.factusEmail,
+      factusPassword: data.factusPassword,
+      factusClientId: data.factusClientId,
+      factusClientSecret: data.factusClientSecret,
+      factusMunicipioCodigo: data.factusMunicipioCodigo,
+      factusEntorno: data.factusEntorno
+    },
     create: {
       id: 1,
       horaCorteDia: data.horaCorteDia || '00:00',
