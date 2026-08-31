@@ -952,4 +952,38 @@ export class AgentToolsService {
       }
     );
   }
+
+  private consultarPreciosInsumosTool() {
+    return tool(
+      async (args) => {
+        try {
+          const nombres = args.nombres || [];
+          if (nombres.length === 0) return "Debes proporcionar al menos un nombre de insumo.";
+          
+          const insumos = await this.prisma.insumos.findMany({
+            where: {
+              nombre: {
+                in: nombres,
+                mode: 'insensitive',
+              }
+            },
+            select: { nombre: true, precio: true, unidades: true }
+          });
+          
+          if (!insumos.length) return `No se encontraron insumos con esos nombres: ${nombres.join(', ')}`;
+          
+          return JSON.stringify(insumos);
+        } catch (e: any) {
+          return "Error consultando precios de insumos: " + e.message;
+        }
+      },
+      {
+        name: 'consultar_precios_insumos',
+        description: 'Consulta los precios de compra o costo de una lista de insumos. Útil cuando el usuario pregunta "cuál es el precio de..." o "necesito saber el precio de estos insumos".',
+        schema: z.object({
+          nombres: z.array(z.string()).describe('Lista de nombres de insumos a consultar (ej. ["Carne Cerdo", "Alitas X5"])'),
+        }),
+      }
+    );
+  }
 }
