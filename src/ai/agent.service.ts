@@ -165,11 +165,21 @@ REGLA DE ORO PARA HERRAMIENTAS: Si llamas a una herramienta y esta devuelve "[]"
       } else {
          let messageContent: any = message;
          if (file) {
-             const base64Img = file.buffer.toString('base64');
-             messageContent = [
-                 { type: 'text', text: message || "Describe esta imagen." },
-                 { type: 'image_url', image_url: `data:${file.mimetype};base64,${base64Img}` }
-             ];
+             if (file.mimetype === 'application/pdf') {
+                 // Importación dinámica para procesar PDFs
+                 const pdfParse = require('pdf-parse');
+                 const data = await pdfParse(file.buffer);
+                 const pdfText = data.text;
+                 messageContent = [
+                     { type: 'text', text: `${message || "Analiza el siguiente documento PDF:"}\n\n--- INICIO DEL DOCUMENTO ---\n${pdfText}\n--- FIN DEL DOCUMENTO ---` }
+                 ];
+             } else {
+                 const base64Img = file.buffer.toString('base64');
+                 messageContent = [
+                     { type: 'text', text: message || "Describe esta imagen." },
+                     { type: 'image_url', image_url: `data:${file.mimetype};base64,${base64Img}` }
+                 ];
+             }
          }
          result = await this.graph.invoke({ messages: [new HumanMessage({ content: messageContent })] }, config);
       }
