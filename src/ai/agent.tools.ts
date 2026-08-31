@@ -34,7 +34,8 @@ export class AgentToolsService {
       this.getRealCashflowTool(),
       this.getSalesByCategoryTool(),
       this.projectEndOfMonthCashTool(),
-      this.getTheoreticalCostTool()
+      this.getTheoreticalCostTool(),
+      this.consultarPreciosInsumosTool()
     ];
   }
 
