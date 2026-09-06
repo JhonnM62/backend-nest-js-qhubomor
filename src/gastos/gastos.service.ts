@@ -134,9 +134,19 @@ export class GastosService {
       throw new NotFoundException(`Gasto con ID ${id} no encontrado`);
     }
 
+    const { fecha, ...restDto } = updateGastoDto;
+    const dataToUpdate: any = { ...restDto };
+
+    if (fecha) {
+      const parsedDate = new Date(fecha);
+      dataToUpdate.fecha = parsedDate;
+      // También actualizamos fechaYHora para mantener consistencia y ordenamientos
+      dataToUpdate.fechaYHora = parsedDate;
+    }
+
     return this.prisma.gastos.update({
       where: { IDgastos: id },
-      data: updateGastoDto,
+      data: dataToUpdate,
     }).then(updated => {
       this.appGateway.emitToGastos(SocketEvent.REFRESH_GASTOS, { action: 'update', gasto: updated });
       return updated;
