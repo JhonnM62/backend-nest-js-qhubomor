@@ -42,7 +42,7 @@ import { FacturacionModule } from './facturacion/facturacion.module';
       rootPath: join(process.cwd(), 'public'),
       serveRoot: '/api/v1',
       serveStaticOptions: {
-        fallthrough: false, // Evita buscar index.html y devuelve 404 directo si no existe el archivo
+        fallthrough: true, // Se requiere en true para que la petición pase al router si no es un archivo estático
       },
     }),
     CacheModule.register({
