@@ -249,12 +249,12 @@ export class EstadisticasService {
     const cajas = await this.prisma.aperturaCierreCaja.findMany({
       where: {
         cierre: 'cerrada',
-        fechaDeCierre: {
+        fechaDeApertura: {
           gte: start,
           lte: end,
         },
       },
-      select: { IDcaja: true, fechaDeCierre: true }
+      select: { IDcaja: true, fechaDeApertura: true }
     });
 
     const insumosMap = new Map<string, any>();
@@ -291,7 +291,7 @@ export class EstadisticasService {
                 // Si la diferencia es > 0, significa que se utilizó más de lo esperado en sistema = FALTANTE
                 // Si la diferencia es < 0, significa que se utilizó menos de lo esperado = SOBRANTE
                 current.detalles.push({
-                  fecha: caja.fechaDeCierre,
+                  fecha: caja.fechaDeApertura,
                   diferencia: diff,
                   tipo: diff > 0 ? 'FALTANTE' : 'SOBRANTE',
                   ventasSistema: ins.ventasEnSistema || 0,
