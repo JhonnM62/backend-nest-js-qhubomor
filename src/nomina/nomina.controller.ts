@@ -13,7 +13,7 @@ import { NominaService } from './nomina.service';
 import {
   RegistrarEntradaDto, RegistrarSalidaDto, UpdateTurnoAdminDto, TurnosQueryDto,
   CreateDescuentoDto, RepartirDescuentoDto, UpdateDescuentoDto, DescuentosQueryDto,
-  LiquidarEmpleadoDto, CreateTurnoManualDto, FirmarLiquidacionDto
+  LiquidarEmpleadoDto, CreateTurnoManualDto, FirmarLiquidacionDto, DescansoDto
 } from './dto/nomina.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
@@ -119,14 +119,80 @@ export class NominaController {
 
   @Post('turnos/:id/descanso/iniciar')
   @ApiOperation({ summary: 'Iniciar el tiempo de descanso del turno' })
-  iniciarDescanso(@Param('id') id: string, @Request() req: any) {
-    return this.nominaService.iniciarDescanso(id, req.user.id);
+  @UseInterceptors(FileInterceptor('foto', {
+    fileFilter: (req, file, cb) => {
+      if (!file.mimetype.match(/\/(jpg|jpeg|png|webp)$/)) {
+        return cb(new BadRequestException('Solo se permiten imágenes JPG, PNG o WebP'), false);
+      }
+      cb(null, true);
+    },
+    limits: { fileSize: 15 * 1024 * 1024 }, // 15MB
+  }))
+  async iniciarDescanso(
+    @Param('id') id: string,
+    @Request() req: any,
+    @Body() dto: DescansoDto,
+    @UploadedFile() foto?: Express.Multer.File,
+  ) {
+    let fotoPath: string | undefined;
+
+    if (foto) {
+      const isProd = process.env.NODE_ENV === 'production';
+      const destFolder = isProd ? '/app/public/uploads/asistencia' : './public/uploads/asistencia';
+      if (!fs.existsSync(destFolder)) fs.mkdirSync(destFolder, { recursive: true });
+
+      const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+      const finalFilename = `${uniqueSuffix}.jpg`;
+      const filePath = join(destFolder, finalFilename);
+
+      await sharp(foto.buffer)
+        .resize(800)
+        .jpeg({ quality: 60 })
+        .toFile(filePath);
+
+      fotoPath = `/uploads/asistencia/${finalFilename}`;
+    }
+
+    return this.nominaService.iniciarDescanso(id, req.user.id, dto, fotoPath);
   }
 
   @Post('turnos/:id/descanso/terminar')
   @ApiOperation({ summary: 'Terminar el tiempo de descanso del turno' })
-  terminarDescanso(@Param('id') id: string, @Request() req: any) {
-    return this.nominaService.terminarDescanso(id, req.user.id);
+  @UseInterceptors(FileInterceptor('foto', {
+    fileFilter: (req, file, cb) => {
+      if (!file.mimetype.match(/\/(jpg|jpeg|png|webp)$/)) {
+        return cb(new BadRequestException('Solo se permiten imágenes JPG, PNG o WebP'), false);
+      }
+      cb(null, true);
+    },
+    limits: { fileSize: 15 * 1024 * 1024 }, // 15MB
+  }))
+  async terminarDescanso(
+    @Param('id') id: string,
+    @Request() req: any,
+    @Body() dto: DescansoDto,
+    @UploadedFile() foto?: Express.Multer.File,
+  ) {
+    let fotoPath: string | undefined;
+
+    if (foto) {
+      const isProd = process.env.NODE_ENV === 'production';
+      const destFolder = isProd ? '/app/public/uploads/asistencia' : './public/uploads/asistencia';
+      if (!fs.existsSync(destFolder)) fs.mkdirSync(destFolder, { recursive: true });
+
+      const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+      const finalFilename = `${uniqueSuffix}.jpg`;
+      const filePath = join(destFolder, finalFilename);
+
+      await sharp(foto.buffer)
+        .resize(800)
+        .jpeg({ quality: 60 })
+        .toFile(filePath);
+
+      fotoPath = `/uploads/asistencia/${finalFilename}`;
+    }
+
+    return this.nominaService.terminarDescanso(id, req.user.id, dto, fotoPath);
   }
 
   @Get('turnos')

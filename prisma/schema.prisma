@@ -559,6 +559,7 @@ model ConfiguracionNegocio {
   latitudNegocio  Float?
   longitudNegocio Float?
   radioGeocercaM  Int      @default(100)
+  radioGeocercaDescansoM Int @default(50)
   emitirFacturaAutomatica Boolean @default(false)
   factusEmail             String?
   factusPassword          String?
@@ -738,7 +739,17 @@ model Turnos {
   latitudSalida         Float?               @map("LatitudSalida")
   longitudSalida        Float?               @map("LongitudSalida")
   inicioDescanso        DateTime?            @map("InicioDescanso")
+  fotoInicioDescanso    String?              @map("FotoInicioDescanso")
+  latitudInicioDescanso Float?               @map("LatitudInicioDescanso")
+  longitudInicioDescanso Float?              @map("LongitudInicioDescanso")
+  distanciaMetrosInicioDescanso Float?       @map("DistanciaMetrosInicioDescanso")
+  dentroGeocercaInicioDescanso Boolean?      @map("DentroGeocercaInicioDescanso")
   finDescanso           DateTime?            @map("FinDescanso")
+  fotoFinDescanso       String?              @map("FotoFinDescanso")
+  latitudFinDescanso    Float?               @map("LatitudFinDescanso")
+  longitudFinDescanso   Float?               @map("LongitudFinDescanso")
+  distanciaMetrosFinDescanso Float?          @map("DistanciaMetrosFinDescanso")
+  dentroGeocercaFinDescanso Boolean?         @map("DentroGeocercaFinDescanso")
   alertaDescansoEnviada Boolean?             @default(false) @map("AlertaDescansoEnviada")
   descuentos            DescuentosEmpleado[]
   usuario               Usuarios             @relation(fields: [usuarioId], references: [IDusuarios], onDelete: Cascade)

@@ -87,6 +87,16 @@ export class UpdateTurnoAdminDto {
 
   @ApiPropertyOptional()
   @IsOptional()
+  @IsDateString()
+  inicioDescanso?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsDateString()
+  finDescanso?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
   @IsString()
   observacion?: string;
 
@@ -296,4 +306,16 @@ export class LiquidarEmpleadoDto {
   @ApiPropertyOptional()
   @IsOptional()
   guardarComoGasto?: boolean;
+}
+
+export class DescansoDto {
+  @ApiPropertyOptional({ description: 'Latitud GPS al hacer descanso' })
+  @IsOptional()
+  @IsNumber()
+  latitud?: number;
+
+  @ApiPropertyOptional({ description: 'Longitud GPS al hacer descanso' })
+  @IsOptional()
+  @IsNumber()
+  longitud?: number;
 }

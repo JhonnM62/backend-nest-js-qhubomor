@@ -181,6 +181,7 @@ export class VentasService {
         factusClientSecret: null,
         factusMunicipioCodigo: '52356',
         factusEntorno: 'SANDBOX',
+        radioGeocercaDescansoM: 50,
       };
     }
     
@@ -1039,7 +1040,7 @@ export class VentasService {
 
     const nuevoRegistro = this.appendTiempoLog(venta.registroDeTiempo, estado);
 
-    if (estado === 'ENTREGADO' || estado === 'LISTO_PARA_ENTREGA') {
+    if (estado === 'ENTREGADO' || estado === 'LISTO_PARA_ENTREGA' || estado === 'PAGADO') {
       const orderItems = await this.prisma.orderventas.findMany({ where: { IDventas: id } });
       if (orderItems.length > 0) {
         await Promise.all(
@@ -1093,10 +1094,32 @@ export class VentasService {
     const log: any[] = Array.isArray(venta.registroDeTiempo) ? venta.registroDeTiempo : [];
     if (log.length === 0) return { tiempoTotalFormat: '00:00:00:00', estadoActual: venta.estado };
 
-    const inicio = new Date(log[0].fecha_hora);
-    const fin = log.length > 1 ? new Date(log[log.length - 1].fecha_hora) : new Date();
+    let totalMs = 0;
+    let activeStart: number | null = null;
+    const activeStates = ['TOMADO', 'PREPARANDO', 'LISTO_PARA_ENTREGA', 'LISTO'];
+
+    for (let i = 0; i < log.length; i++) {
+      const entry = log[i];
+      const time = new Date(entry.fecha_hora).getTime();
+      
+      if (activeStates.includes(entry.estado)) {
+        if (activeStart === null) {
+          activeStart = time;
+        }
+      } else {
+        if (activeStart !== null) {
+          totalMs += Math.max(0, time - activeStart);
+          activeStart = null;
+        }
+      }
+    }
     
-    const diffMs = fin.getTime() - inicio.getTime();
+    if (activeStart !== null) {
+      const endTime = log.length > 1 ? new Date(log[log.length - 1].fecha_hora).getTime() : Date.now();
+      totalMs += Math.max(0, endTime - activeStart);
+    }
+    
+    const diffMs = totalMs;
 
     return {
       tiempoTotalFormat: this.formatDuration(diffMs),

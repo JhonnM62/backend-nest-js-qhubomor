@@ -5,7 +5,7 @@ import { AppGateway } from '../websocket/app.gateway';
 import {
   RegistrarEntradaDto, RegistrarSalidaDto, UpdateTurnoAdminDto, TurnosQueryDto,
   CreateDescuentoDto, RepartirDescuentoDto, UpdateDescuentoDto, DescuentosQueryDto,
-  LiquidarEmpleadoDto, CreateTurnoManualDto
+  LiquidarEmpleadoDto, CreateTurnoManualDto, DescansoDto
 } from './dto/nomina.dto';
 import { Prisma } from '@prisma/client';
 import * as path from 'path';
@@ -347,16 +347,47 @@ export class NominaService implements OnModuleInit {
     };
   }
 
-  async iniciarDescanso(turnoId: string, usuarioId: string) {
+  async iniciarDescanso(turnoId: string, usuarioId: string, dto: DescansoDto, fotoPath?: string) {
     const turno = await this.prisma.turnos.findUnique({ where: { IDturno: turnoId } });
     if (!turno) throw new NotFoundException('Turno no encontrado');
     if (turno.usuarioId !== usuarioId) throw new ForbiddenException('Solo puedes gestionar tu propio turno');
     if (turno.estado !== 'ACTIVO') throw new BadRequestException('El turno no está activo');
     if (turno.inicioDescanso) throw new BadRequestException('El descanso ya fue iniciado');
 
+    let distanciaMetros: number | undefined;
+    let dentroGeocerca = true;
+
+    const config = await this.prisma.configuracionNegocio.findFirst();
+    if (config?.latitudNegocio && config?.longitudNegocio) {
+      if (dto.latitud !== undefined && dto.longitud !== undefined) {
+        distanciaMetros = calcularDistancia(
+          dto.latitud, dto.longitud,
+          config.latitudNegocio, config.longitudNegocio
+        );
+        const radioPermitido = config.radioGeocercaDescansoM || 50;
+        dentroGeocerca = distanciaMetros <= radioPermitido;
+        if (!dentroGeocerca) {
+          throw new BadRequestException(`Estás fuera del rango permitido para descansos (${Math.round(distanciaMetros)}m > ${radioPermitido}m)`);
+        }
+      } else {
+        throw new BadRequestException('La ubicación es obligatoria para iniciar el descanso.');
+      }
+    }
+
+    if (!fotoPath) {
+      throw new BadRequestException('La foto es obligatoria para iniciar el descanso.');
+    }
+
     const updated = await this.prisma.turnos.update({
       where: { IDturno: turnoId },
-      data: { inicioDescanso: new Date() },
+      data: {
+        inicioDescanso: new Date(),
+        fotoInicioDescanso: fotoPath,
+        latitudInicioDescanso: dto.latitud,
+        longitudInicioDescanso: dto.longitud,
+        distanciaMetrosInicioDescanso: distanciaMetros,
+        dentroGeocercaInicioDescanso: dentroGeocerca
+      },
       include: { usuario: true }
     });
     
@@ -372,7 +403,7 @@ export class NominaService implements OnModuleInit {
     return { success: true, data: updated, mensaje: 'Descanso iniciado correctamente' };
   }
 
-  async terminarDescanso(turnoId: string, usuarioId: string) {
+  async terminarDescanso(turnoId: string, usuarioId: string, dto: DescansoDto, fotoPath?: string) {
     const turno = await this.prisma.turnos.findUnique({ 
       where: { IDturno: turnoId },
       include: { usuario: { include: { cargo: true } } }
@@ -382,10 +413,41 @@ export class NominaService implements OnModuleInit {
     if (!turno.inicioDescanso) throw new BadRequestException('No se ha iniciado el descanso');
     if (turno.finDescanso) throw new BadRequestException('El descanso ya fue terminado');
 
+    let distanciaMetros: number | undefined;
+    let dentroGeocerca = true;
+
+    const config = await this.prisma.configuracionNegocio.findFirst();
+    if (config?.latitudNegocio && config?.longitudNegocio) {
+      if (dto.latitud !== undefined && dto.longitud !== undefined) {
+        distanciaMetros = calcularDistancia(
+          dto.latitud, dto.longitud,
+          config.latitudNegocio, config.longitudNegocio
+        );
+        const radioPermitido = config.radioGeocercaDescansoM || 50;
+        dentroGeocerca = distanciaMetros <= radioPermitido;
+        if (!dentroGeocerca) {
+          throw new BadRequestException(`Estás fuera del rango permitido para descansos (${Math.round(distanciaMetros)}m > ${radioPermitido}m)`);
+        }
+      } else {
+        throw new BadRequestException('La ubicación es obligatoria para terminar el descanso.');
+      }
+    }
+
+    if (!fotoPath) {
+      throw new BadRequestException('La foto es obligatoria para terminar el descanso.');
+    }
+
     const now = new Date();
     const updated = await this.prisma.turnos.update({
       where: { IDturno: turnoId },
-      data: { finDescanso: now },
+      data: {
+        finDescanso: now,
+        fotoFinDescanso: fotoPath,
+        latitudFinDescanso: dto.latitud,
+        longitudFinDescanso: dto.longitud,
+        distanciaMetrosFinDescanso: distanciaMetros,
+        dentroGeocercaFinDescanso: dentroGeocerca
+      },
     });
     
     // Penalización por exceso de descanso
@@ -747,6 +809,8 @@ export class NominaService implements OnModuleInit {
       // Actualizar la fecha lógica (agrupación) basada en la fecha local de la entrada
       updateData.fecha = new Date(Date.UTC(dt.getFullYear(), dt.getMonth(), dt.getDate()));
     }
+    if (dto.inicioDescanso) updateData.inicioDescanso = new Date(dto.inicioDescanso);
+    if (dto.finDescanso) updateData.finDescanso = new Date(dto.finDescanso);
     // Si se está cerrando el turno (COMPLETADO o FINALIZADO) y aún no tiene horaSalida, asignamos la hora actual
     if (dto.estado === 'COMPLETADO' && !dto.horaSalida && !updateData.horaSalida) {
       updateData.horaSalida = new Date();
