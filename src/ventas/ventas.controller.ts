@@ -134,6 +134,19 @@ export class VentasController {
     return this.ventasService.ajustarProductoEnVenta(ventaId, orderVentaId, cantidad, usuarioId);
   }
 
+  @Patch(':ventaId/producto/:orderVentaId/estado')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Actualizar el estado de preparación de un producto' })
+  @ApiResponse({ status: 200, description: 'Estado actualizado' })
+  actualizarEstadoProducto(
+    @Param('ventaId') ventaId: string,
+    @Param('orderVentaId') orderVentaId: string,
+    @Body('estado') estado: string,
+  ) {
+    return this.ventasService.actualizarEstadoProducto(ventaId, orderVentaId, estado);
+  }
+
   @Delete('bulk')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('Admin app')

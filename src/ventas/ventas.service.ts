@@ -752,6 +752,38 @@ export class VentasService {
     return ventaActualizada;
   }
 
+  async actualizarEstadoProducto(ventaId: string, orderVentaId: string, estado: string) {
+    const venta = await this.prisma.ventas.findUnique({
+      where: { IDventas: ventaId },
+      include: { ordenVentas: true },
+    });
+
+    if (!venta) {
+      throw new NotFoundException(`Venta con ID ${ventaId} no encontrada`);
+    }
+
+    const orderVenta = venta.ordenVentas.find((ov) => ov.IDorderventas === orderVentaId);
+    if (!orderVenta) {
+      throw new NotFoundException(`Producto de venta con ID ${orderVentaId} no encontrado en la venta ${ventaId}`);
+    }
+
+    const preparadoAt = estado === 'LISTO' ? new Date() : null;
+
+    await this.prisma.orderventas.update({
+      where: { IDorderventas: orderVentaId },
+      data: { estado, preparadoAt },
+    });
+
+    const ventaActualizada = await this.prisma.ventas.findUnique({
+      where: { IDventas: ventaId },
+      include: { ordenVentas: true },
+    });
+
+    this.appGateway.emitToVentas(SocketEvent.REFRESH_VENTAS, { action: 'updateEstado', venta: ventaActualizada });
+
+    return ventaActualizada;
+  }
+
   async findAll(query: VentaQueryDto) {
     const { 
       page = 1, 
