@@ -319,6 +319,7 @@ model Orderventas {
   updatedAt         DateTime?
   usuarioId         String?
   preparadoAt       DateTime?  @map("preparadoAt")
+  cantidadPreparada Int        @default(0) @map("cantidadPreparada")
   venta             Ventas?    @relation(fields: [IDventas], references: [IDventas])
   producto          Productos? @relation(fields: [productoId], references: [IDproductos], onDelete: SetNull)
   usuario           Usuarios?  @relation(fields: [usuarioId], references: [IDusuarios])

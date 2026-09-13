@@ -603,8 +603,13 @@ export class VentasService {
       where: { IDventas: id },
     });
 
+    const oldItemsMap = new Map();
+    for (const ov of oldOrderventas) {
+      const key = `${ov.productoId}_${ov.comentarios || ''}`;
+      oldItemsMap.set(key, ov);
+    }
+
     // REVERSO DE INVENTARIO
-    // Devolvemos el stock de los productos viejos
     await this.applyRecipeDeductions(oldOrderventas, 'entrada', 'Reverso por edición de venta');
 
     await this.prisma.orderventas.deleteMany({
@@ -631,6 +636,24 @@ export class VentasService {
             }
           }
 
+          const key = `${producto.productoId}_${producto.comentarios || ''}`;
+          const oldItem = oldItemsMap.get(key);
+          
+          let cantidadPreparada = 0;
+          let estado = producto.estado || ventaActualizada.estado || 'iniciado';
+          let preparadoAt = undefined;
+          
+          if (oldItem) {
+            cantidadPreparada = Math.min(producto.cantidad, oldItem.cantidadPreparada || 0);
+            
+            if (cantidadPreparada >= producto.cantidad) {
+              estado = 'LISTO';
+              preparadoAt = oldItem.preparadoAt || new Date();
+            } else if (oldItem.estado !== 'iniciado' && oldItem.estado !== 'EN_EL_CARRITO') {
+              estado = oldItem.estado;
+            }
+          }
+
           return this.prisma.orderventas.create({
             data: {
               ...producto,
@@ -642,6 +665,9 @@ export class VentasService {
               IDventas: ventaActualizada.IDventas,
               usuarioId,
               fecha: fechaContable,
+              cantidadPreparada,
+              estado,
+              preparadoAt
             } as Prisma.OrderventasCreateInput,
           });
         }),
@@ -752,7 +778,7 @@ export class VentasService {
     return ventaActualizada;
   }
 
-  async actualizarEstadoProducto(ventaId: string, orderVentaId: string, estado: string) {
+  async actualizarEstadoProducto(ventaId: string, orderVentaId: string, estado: string, cantidadPreparada?: number) {
     const venta = await this.prisma.ventas.findUnique({
       where: { IDventas: ventaId },
       include: { ordenVentas: true },
@@ -767,11 +793,21 @@ export class VentasService {
       throw new NotFoundException(`Producto de venta con ID ${orderVentaId} no encontrado en la venta ${ventaId}`);
     }
 
-    const preparadoAt = estado === 'LISTO' ? new Date() : null;
+    let finalEstado = estado;
+    let finalCantidadPreparada = cantidadPreparada !== undefined ? cantidadPreparada : (estado === 'LISTO' ? (orderVenta.cantidad || 1) : 0);
+    
+    if (orderVenta.cantidad && finalCantidadPreparada >= orderVenta.cantidad) {
+      finalEstado = 'LISTO';
+      finalCantidadPreparada = orderVenta.cantidad;
+    } else if (finalCantidadPreparada < (orderVenta.cantidad || 1)) {
+      finalEstado = 'PREPARANDO';
+    }
+
+    const preparadoAt = finalEstado === 'LISTO' ? new Date() : null;
 
     await this.prisma.orderventas.update({
       where: { IDorderventas: orderVentaId },
-      data: { estado, preparadoAt },
+      data: { estado: finalEstado, preparadoAt, cantidadPreparada: finalCantidadPreparada },
     });
 
     const ventaActualizada = await this.prisma.ventas.findUnique({

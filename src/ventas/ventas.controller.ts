@@ -143,8 +143,9 @@ export class VentasController {
     @Param('ventaId') ventaId: string,
     @Param('orderVentaId') orderVentaId: string,
     @Body('estado') estado: string,
+    @Body('cantidadPreparada') cantidadPreparada?: number,
   ) {
-    return this.ventasService.actualizarEstadoProducto(ventaId, orderVentaId, estado);
+    return this.ventasService.actualizarEstadoProducto(ventaId, orderVentaId, estado, cantidadPreparada);
   }
 
   @Delete('bulk')
