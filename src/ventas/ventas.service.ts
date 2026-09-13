@@ -1039,6 +1039,23 @@ export class VentasService {
 
     const nuevoRegistro = this.appendTiempoLog(venta.registroDeTiempo, estado);
 
+    if (estado === 'ENTREGADO' || estado === 'LISTO_PARA_ENTREGA') {
+      const orderItems = await this.prisma.orderventas.findMany({ where: { IDventas: id } });
+      if (orderItems.length > 0) {
+        await Promise.all(
+          orderItems.map(ov =>
+            this.prisma.orderventas.update({
+              where: { IDorderventas: ov.IDorderventas },
+              data: {
+                estado: 'LISTO',
+                cantidadPreparada: ov.cantidad || 1
+              }
+            })
+          )
+        );
+      }
+    }
+
     await this.prisma.ventas.update({
       where: { IDventas: id },
       data: {
