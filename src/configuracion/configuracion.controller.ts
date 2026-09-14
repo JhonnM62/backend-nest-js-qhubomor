@@ -27,6 +27,11 @@ export class ConfiguracionController {
     nit?: string;
     direccion?: string;
     telefono?: string;
+    latitudNegocio?: number;
+    longitudNegocio?: number;
+    radioGeocercaM?: number;
+    radioGeocercaDescansoM?: number;
+    minutosGraciaLlegadaTarde?: number;
     emitirFacturaAutomatica?: boolean;
     factusEmail?: string;
     factusPassword?: string;

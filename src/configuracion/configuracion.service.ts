@@ -33,6 +33,8 @@ async updateConfiguracion(data: {
   latitudNegocio?: number;
   longitudNegocio?: number;
   radioGeocercaM?: number;
+  radioGeocercaDescansoM?: number;
+  minutosGraciaLlegadaTarde?: number;
   emitirFacturaAutomatica?: boolean;
   factusEmail?: string;
   factusPassword?: string;
@@ -53,6 +55,8 @@ async updateConfiguracion(data: {
       latitudNegocio: data.latitudNegocio,
       longitudNegocio: data.longitudNegocio,
       radioGeocercaM: data.radioGeocercaM,
+      radioGeocercaDescansoM: data.radioGeocercaDescansoM,
+      minutosGraciaLlegadaTarde: data.minutosGraciaLlegadaTarde,
       emitirFacturaAutomatica: data.emitirFacturaAutomatica,
       factusEmail: data.factusEmail,
       factusPassword: data.factusPassword,
@@ -72,6 +76,8 @@ async updateConfiguracion(data: {
       latitudNegocio: data.latitudNegocio,
       longitudNegocio: data.longitudNegocio,
       radioGeocercaM: data.radioGeocercaM ?? 100,
+      radioGeocercaDescansoM: data.radioGeocercaDescansoM ?? 50,
+      minutosGraciaLlegadaTarde: data.minutosGraciaLlegadaTarde ?? 5,
       emitirFacturaAutomatica: data.emitirFacturaAutomatica || false,
       factusEmail: data.factusEmail,
       factusPassword: data.factusPassword,
