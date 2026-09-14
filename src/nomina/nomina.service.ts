@@ -367,7 +367,7 @@ export class NominaService implements OnModuleInit {
         const radioPermitido = config.radioGeocercaDescansoM || 50;
         dentroGeocerca = distanciaMetros <= radioPermitido;
         if (!dentroGeocerca) {
-          throw new BadRequestException(`Estás fuera del rango permitido para descansos (${Math.round(distanciaMetros)}m > ${radioPermitido}m)`);
+          throw new BadRequestException(`Debes estar en el puesto de trabajo. Estás a ${Math.round(distanciaMetros)}m y el límite configurado es de ${radioPermitido}m.`);
         }
       } else {
         throw new BadRequestException('La ubicación es obligatoria para iniciar el descanso.');
@@ -426,7 +426,7 @@ export class NominaService implements OnModuleInit {
         const radioPermitido = config.radioGeocercaDescansoM || 50;
         dentroGeocerca = distanciaMetros <= radioPermitido;
         if (!dentroGeocerca) {
-          throw new BadRequestException(`Estás fuera del rango permitido para descansos (${Math.round(distanciaMetros)}m > ${radioPermitido}m)`);
+          throw new BadRequestException(`Debes estar en el puesto de trabajo. Estás a ${Math.round(distanciaMetros)}m y el límite configurado es de ${radioPermitido}m.`);
         }
       } else {
         throw new BadRequestException('La ubicación es obligatoria para terminar el descanso.');
