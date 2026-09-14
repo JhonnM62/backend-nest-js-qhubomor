@@ -32,7 +32,7 @@ export class VentasService {
     
     // Si tenemos un cartStartTime, significa que el usuario inició el carrito antes de enviarlo
     if (cartStartTime && estadoFinal && estadoFinal !== 'iniciado' && estadoFinal !== 'EN_EL_CARRITO') {
-      const inicioTime = new Date(cartStartTime);
+      const inicioTime = new Date(Math.min(new Date(cartStartTime).getTime(), now.getTime()));
       const diffMs = now.getTime() - inicioTime.getTime();
       const duracionFinal = diffMs > 0 ? this.formatDuration(diffMs) : '00:00:00:00';
 
@@ -655,6 +655,12 @@ export class VentasService {
             }
           }
 
+          if (ventaActualizada.estado === 'PAGADO' || ventaActualizada.estado === 'ENTREGADO' || ventaActualizada.estado === 'LISTO_PARA_ENTREGA') {
+            estado = 'LISTO';
+            cantidadPreparada = producto.cantidad || 1;
+            preparadoAt = preparadoAt || new Date();
+          }
+
           return this.prisma.orderventas.create({
             data: {
               ...producto,
@@ -1137,12 +1143,31 @@ export class VentasService {
       throw new NotFoundException(`Venta con ID ${id} no encontrada`);
     }
 
-    const nuevoRegistro = this.appendTiempoLog(venta.registroDeTiempo, updateData.estado || 'PAGADO');
+    const estadoUpdate = updateData.estado || 'PAGADO';
+    const nuevoRegistro = this.appendTiempoLog(venta.registroDeTiempo, estadoUpdate);
+
+    if (estadoUpdate === 'ENTREGADO' || estadoUpdate === 'LISTO_PARA_ENTREGA' || estadoUpdate === 'PAGADO') {
+      const orderItems = await this.prisma.orderventas.findMany({ where: { IDventas: id } });
+      if (orderItems.length > 0) {
+        await Promise.all(
+          orderItems.map(ov =>
+            this.prisma.orderventas.update({
+              where: { IDorderventas: ov.IDorderventas },
+              data: {
+                estado: 'LISTO',
+                cantidadPreparada: ov.cantidad || 1,
+                preparadoAt: ov.preparadoAt || new Date()
+              }
+            })
+          )
+        );
+      }
+    }
 
     await this.prisma.ventas.update({
       where: { IDventas: id },
       data: {
-        estado: updateData.estado || 'PAGADO',
+        estado: estadoUpdate,
         medioDePago: updateData.medioDePago,
         efectivoRecibido: updateData.efectivoRecibido,
         devueltas: updateData.devueltas,
