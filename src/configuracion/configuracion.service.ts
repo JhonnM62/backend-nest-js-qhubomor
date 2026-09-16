@@ -220,4 +220,46 @@ async updateConfiguracion(data: {
       throw new Error(`Error al enviar a WhatsApp: ${error.message}`);
     }
   }
+
+  async sendTextToWhatsapp(receiverPhone: string, text: string) {
+    const config = await this.getConfiguracionWhatsapp();
+
+    if (!config.enabled) {
+      return { success: false, message: 'El envío por WhatsApp está deshabilitado en la configuración.' };
+    }
+
+    if (!config.urlBase || !config.sessionId || !config.token) {
+      return { success: false, message: 'Faltan parámetros en la configuración de WhatsApp.' };
+    }
+
+    const endpoint = `${config.urlBase.replace(/\/$/, '')}/chats/send?id=${config.sessionId}`;
+
+    try {
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-access-token': config.token,
+        },
+        body: JSON.stringify({
+          receiver: receiverPhone,
+          isGroup: false,
+          message: {
+            text: text,
+          },
+        }),
+      });
+
+      const responseData = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        throw new Error(responseData?.message || 'Error en la respuesta de la API de WhatsApp');
+      }
+
+      return { success: true, data: responseData };
+    } catch (error: any) {
+      console.error('[WhatsAppService] Error enviando mensaje de texto:', error.message);
+      throw new Error(`Error al enviar a WhatsApp: ${error.message}`);
+    }
+  }
 }

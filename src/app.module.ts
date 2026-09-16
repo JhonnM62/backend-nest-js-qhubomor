@@ -34,9 +34,11 @@ import { CargosModule } from './cargos/cargos.module';
 import { NominaModule } from './nomina/nomina.module';
 import { MovimientosInsumosModule } from './movimientos-insumos/movimientos-insumos.module';
 import { FacturacionModule } from './facturacion/facturacion.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
+    ScheduleModule.forRoot(),
     AppConfigModule,
     ServeStaticModule.forRoot({
       rootPath: join(process.cwd(), 'public'),

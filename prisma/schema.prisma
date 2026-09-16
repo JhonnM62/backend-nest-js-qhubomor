@@ -602,14 +602,20 @@ model ConfiguracionIA {
 }
 
 model ConfiguracionWhatsapp {
-  id        Int      @id @default(1)
-  enabled   Boolean  @default(false)
-  urlBase   String?
-  sessionId String?
-  token     String?
-  receiver  String?
-  isGroup   Boolean  @default(false)
-  updatedAt DateTime @updatedAt
+  id                           Int      @id @default(1)
+  enabled                      Boolean  @default(false)
+  urlBase                      String?
+  sessionId                    String?
+  token                        String?
+  receiver                     String?
+  isGroup                      Boolean  @default(false)
+  
+  // Configuración dinámica de descansos
+  descansoAlertEnabled         Boolean  @default(false)
+  descansoAnticipacionMinutos  Int      @default(10)
+  descansoFrecuenciaMinutos    Int      @default(5)
+  
+  updatedAt                    DateTime @updatedAt
 
   @@map("CONFIGURACION_WHATSAPP")
 }
@@ -751,6 +757,8 @@ model Turnos {
   distanciaMetrosFinDescanso Float?          @map("DistanciaMetrosFinDescanso")
   dentroGeocercaFinDescanso Boolean?         @map("DentroGeocercaFinDescanso")
   alertaDescansoEnviada Boolean?             @default(false) @map("AlertaDescansoEnviada")
+  ultimaAlertaDescanso  DateTime?            @map("UltimaAlertaDescanso")
+  alertasDescansoEnviadas Int?               @default(0) @map("AlertasDescansoEnviadas")
   descuentos            DescuentosEmpleado[]
   usuario               Usuarios             @relation(fields: [usuarioId], references: [IDusuarios], onDelete: Cascade)
 

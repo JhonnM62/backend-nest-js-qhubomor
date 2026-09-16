@@ -108,6 +108,7 @@ export class UsuariosService {
           geocercaActiva: true,
           esPersonalDePrueba: true,
           cargo: true,
+          notificationSetting: true,
           createdAt: true,
         },
       }),
@@ -148,6 +149,7 @@ export class UsuariosService {
         geocercaActiva: true,
         esPersonalDePrueba: true,
         cargo: true,
+        notificationSetting: true,
         createdAt: true,
       },
     });
