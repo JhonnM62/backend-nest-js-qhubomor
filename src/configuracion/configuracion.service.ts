@@ -235,6 +235,8 @@ async updateConfiguracion(data: {
     const endpoint = `${config.urlBase.replace(/\/$/, '')}/chats/send?id=${config.sessionId}`;
 
     try {
+      const sanitizedPhone = receiverPhone.replace(/\D/g, '');
+
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
@@ -242,7 +244,7 @@ async updateConfiguracion(data: {
           'x-access-token': config.token,
         },
         body: JSON.stringify({
-          receiver: receiverPhone,
+          receiver: sanitizedPhone,
           isGroup: false,
           message: {
             text: text,
@@ -259,7 +261,7 @@ async updateConfiguracion(data: {
       return { success: true, data: responseData };
     } catch (error: any) {
       console.error('[WhatsAppService] Error enviando mensaje de texto:', error.message);
-      throw new Error(`Error al enviar a WhatsApp: ${error.message}`);
+      throw new BadRequestException(`Error al enviar a WhatsApp: ${error.message}`);
     }
   }
 
