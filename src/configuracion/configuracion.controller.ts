@@ -122,18 +122,18 @@ export class ConfiguracionController {
     return this.configuracionService.sendReportToWhatsapp(publicUrl, body.fileName, body.caption);
   }
 
-  @Post('whatsapp/test-descanso')
+  @Post('whatsapp/test-conexion')
   @Roles('Admin app', 'Admin negocio')
-  async testWhatsappDescanso(@Body() body: { usuarioId: string }) {
+  async testWhatsappConexion(@Body() body: { usuarioId: string }) {
     if (!body.usuarioId) {
       throw new BadRequestException('Se requiere usuarioId');
     }
-    return this.configuracionService.testWhatsappDescanso(body.usuarioId);
+    return this.configuracionService.testWhatsappConexion(body.usuarioId);
   }
 
-  @Get('whatsapp/empleados-en-descanso')
+  @Get('whatsapp/empleados-para-prueba')
   @Roles('Admin app', 'Admin negocio')
-  async getEmpleadosEnDescanso() {
-    return this.configuracionService.getEmpleadosEnDescanso();
+  async getEmpleadosParaPrueba() {
+    return this.configuracionService.getEmpleadosParaPrueba();
   }
 }

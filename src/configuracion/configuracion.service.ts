@@ -265,71 +265,47 @@ async updateConfiguracion(data: {
     }
   }
 
-  async testWhatsappDescanso(usuarioId: string) {
-    const turno: any = await this.prisma.turnos.findFirst({
-      where: {
-        usuarioId: usuarioId,
-        horaSalida: null,
-        inicioDescanso: { not: null },
-        finDescanso: null,
-      },
-      include: {
-        usuario: {
-          include: { cargo: true, notificationSetting: true }
-        }
-      }
+  async testWhatsappConexion(usuarioId: string) {
+    const usuario: any = await this.prisma.usuarios.findUnique({
+      where: { IDusuarios: usuarioId },
     });
 
-    if (!turno) {
-      throw new BadRequestException('El empleado seleccionado no está en un descanso activo.');
+    if (!usuario) {
+      throw new BadRequestException('El empleado seleccionado no existe.');
     }
 
-    if (!turno.usuario.telefono) {
+    if (!usuario.telefono) {
       throw new BadRequestException('El empleado no tiene un número de teléfono configurado.');
     }
 
     const configGlobal = await this.getConfiguracionWhatsapp();
-    if (!configGlobal.enabled || !configGlobal.descansoAlertEnabled) {
-      throw new BadRequestException('Las notificaciones de descanso no están habilitadas globalmente.');
+    if (!configGlobal.enabled) {
+      throw new BadRequestException('El envío por WhatsApp no está habilitado globalmente.');
     }
 
-    const maxDescansoMinutos = turno.usuario.cargo?.tiempoDescansoMinutos;
-    if (!maxDescansoMinutos) {
-      throw new BadRequestException('El cargo del empleado no tiene un límite de descanso configurado.');
-    }
+    const mensaje = `¡Hola ${usuario.nombre}!\n\nEste es un mensaje de prueba para verificar que la integración con WhatsApp en el Punto de Venta funciona correctamente. ✅`;
 
-    const inicioDescanso = turno.inicioDescanso!;
-    const msInDescanso = new Date().getTime() - inicioDescanso.getTime();
-    const minutosEnDescanso = Math.floor(msInDescanso / 60000);
-    const minutosRestantes = maxDescansoMinutos - minutosEnDescanso;
-
-    let mensaje = '';
-    if (minutosRestantes <= 0) {
-      mensaje = `¡Hola ${turno.usuario.nombre}!\n\n(TEST) Tu tiempo de descanso ha finalizado hace ${Math.abs(minutosRestantes)} minutos. Por favor, regresa a tu puesto de trabajo.`;
-    } else {
-      mensaje = `¡Hola ${turno.usuario.nombre}!\n\n(TEST) Tu descanso está por finalizar en ${minutosRestantes} minutos.`;
-    }
-
-    return this.sendTextToWhatsapp(turno.usuario.telefono, mensaje);
+    return this.sendTextToWhatsapp(usuario.telefono, mensaje);
   }
 
-  async getEmpleadosEnDescanso() {
-    const turnos: any[] = await this.prisma.turnos.findMany({
+  async getEmpleadosParaPrueba() {
+    const empleados = await this.prisma.usuarios.findMany({
       where: {
-        horaSalida: null,
-        inicioDescanso: { not: null },
-        finDescanso: null,
+        telefono: { not: null },
+        isActive: true,
       },
-      include: {
-        usuario: {
-          select: { IDusuarios: true, nombre: true }
-        }
-      }
+      select: {
+        IDusuarios: true,
+        nombre: true,
+        telefono: true
+      },
+      orderBy: { nombre: 'asc' }
     });
 
-    return turnos.map(t => ({
-      id: t.usuario.IDusuarios,
-      nombre: t.usuario.nombre
+    return empleados.map(e => ({
+      id: e.IDusuarios,
+      nombre: e.nombre,
+      telefono: e.telefono
     }));
   }
 }
