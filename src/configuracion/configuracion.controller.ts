@@ -121,4 +121,19 @@ export class ConfiguracionController {
     const publicUrl = `${body.baseUrl.replace(/\/$/, '')}/uploads/pdf/${file.filename}`;
     return this.configuracionService.sendReportToWhatsapp(publicUrl, body.fileName, body.caption);
   }
+
+  @Post('whatsapp/test-descanso')
+  @Roles('Admin app', 'Admin negocio')
+  async testWhatsappDescanso(@Body() body: { usuarioId: string }) {
+    if (!body.usuarioId) {
+      throw new BadRequestException('Se requiere usuarioId');
+    }
+    return this.configuracionService.testWhatsappDescanso(body.usuarioId);
+  }
+
+  @Get('whatsapp/empleados-en-descanso')
+  @Roles('Admin app', 'Admin negocio')
+  async getEmpleadosEnDescanso() {
+    return this.configuracionService.getEmpleadosEnDescanso();
+  }
 }
