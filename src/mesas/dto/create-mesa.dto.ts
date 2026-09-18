@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, MaxLength } from 'class-validator';
+import { IsString, IsNotEmpty, MaxLength, IsOptional, IsNumber } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateMesaDto {
@@ -9,18 +9,27 @@ export class CreateMesaDto {
   nombre: string;
 
   @ApiProperty({ required: false })
+  @IsOptional()
+  @IsNumber()
   posX?: number;
 
   @ApiProperty({ required: false })
+  @IsOptional()
+  @IsNumber()
   posY?: number;
 
   @ApiProperty({ required: false })
+  @IsOptional()
+  @IsNumber()
   width?: number;
 
   @ApiProperty({ required: false })
+  @IsOptional()
+  @IsNumber()
   height?: number;
 
   @ApiProperty({ required: false })
+  @IsOptional()
   @IsString()
   tipo?: string;
 }
