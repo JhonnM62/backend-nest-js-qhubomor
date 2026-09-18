@@ -91,7 +91,9 @@ export class ProductosService {
             for (const receta of p.recetaInsumos) {
               const cantRequerida = Number(receta.cantidad) || 0;
               if (cantRequerida > 0 && receta.insumoRelacion) {
-                const stockGlobal = Number(receta.insumoRelacion.disponible) || receta.insumoRelacion.cantidad || 0;
+                const disp = receta.insumoRelacion.disponible;
+                const cant = receta.insumoRelacion.cantidad;
+                const stockGlobal = Number(disp !== null && disp !== undefined ? disp : (cant !== null && cant !== undefined ? cant : 0));
                 const possible = Math.floor(stockGlobal / cantRequerida);
                 if (possible < maxPossible) maxPossible = possible;
               }

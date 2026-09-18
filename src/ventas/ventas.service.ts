@@ -285,6 +285,7 @@ export class VentasService {
     const ventasDelTurno = await this.prisma.ventas.findMany({
       where: {
         fecha: fechaContable,
+        deletedAt: null,
       },
       select: {
         pedido: true,
