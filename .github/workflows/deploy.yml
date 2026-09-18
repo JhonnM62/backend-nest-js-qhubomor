@@ -149,4 +149,9 @@ jobs:
               "8071" \
               "api-restaurante2.autosystemprojects.site" \
               "${{ secrets.ENV_BACKEND_RESTAURANTE2 }}"
+            deploy_new_client \
+              "fogata" \
+              "8072" \
+              "api-fogata.autosystemprojects.site" \
+              "${{ secrets.ENV_BACKEND_FOGATA }}"
 
