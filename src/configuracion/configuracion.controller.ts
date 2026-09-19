@@ -46,6 +46,8 @@ export class ConfiguracionController {
     logoSize80?: number;
     opcionesPropina?: any;
     opcionesDescuento?: any;
+    habilitarPropinas?: boolean;
+    habilitarDescuentos?: boolean;
   }) {
     return this.configuracionService.updateConfiguracion(data);
   }

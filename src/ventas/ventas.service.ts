@@ -188,6 +188,8 @@ export class VentasService {
         logoSize80: 50,
         opcionesPropina: [5, 10, 15],
         opcionesDescuento: [5, 10, 20],
+        habilitarPropinas: true,
+        habilitarDescuentos: true
       };
     }
     
@@ -1211,6 +1213,8 @@ export class VentasService {
         descuento: updateData.descuento,
         porcentajeDeDescuento: updateData.porcentajeDeDescuento,
         abono: updateData.abono,
+        propina: updateData.propina,
+        porcentajePropina: updateData.porcentajePropina,
         registroDeTiempo: nuevoRegistro,
       },
     });

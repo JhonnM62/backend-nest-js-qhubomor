@@ -265,6 +265,8 @@ model Ventas {
   costoDelDomicilio     Decimal?             @map("Costo del Domicilio") @db.Money
   porcentajeDeDescuento String?              @map("% de descuento")
   descuento             Decimal?             @map("Descuento") @db.Money
+  porcentajePropina     String?              @map("PorcentajePropina")
+  propina               Decimal?             @map("Propina") @db.Money
   medioDePago           String?              @map("Medio de pago")
   banco                 String?              @map("BANCO")
   valorDeTransferencia  Decimal?             @map("Valor de transferencia") @db.Money
@@ -574,6 +576,8 @@ model ConfiguracionNegocio {
   logoSize80              Int     @default(50)
   opcionesPropina         Json?   @default("[5, 10, 15]")
   opcionesDescuento       Json?   @default("[5, 10, 20]")
+  habilitarPropinas       Boolean @default(true)
+  habilitarDescuentos     Boolean @default(true)
 }
 
 model FacturasElectronicas {

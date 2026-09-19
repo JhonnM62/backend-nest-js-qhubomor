@@ -48,6 +48,8 @@ async updateConfiguracion(data: {
   logoSize80?: number;
   opcionesPropina?: any;
   opcionesDescuento?: any;
+  habilitarPropinas?: boolean;
+  habilitarDescuentos?: boolean;
 }) {
   return this.prisma.configuracionNegocio.upsert({
     where: { id: 1 },
@@ -75,7 +77,9 @@ async updateConfiguracion(data: {
       logoSize58: data.logoSize58,
       logoSize80: data.logoSize80,
       opcionesPropina: data.opcionesPropina ? JSON.stringify(data.opcionesPropina) : undefined,
-      opcionesDescuento: data.opcionesDescuento ? JSON.stringify(data.opcionesDescuento) : undefined
+      opcionesDescuento: data.opcionesDescuento ? JSON.stringify(data.opcionesDescuento) : undefined,
+      habilitarPropinas: data.habilitarPropinas,
+      habilitarDescuentos: data.habilitarDescuentos
     },
     create: {
       id: 1,
@@ -102,7 +106,9 @@ async updateConfiguracion(data: {
       logoSize58: data.logoSize58 ?? 50,
       logoSize80: data.logoSize80 ?? 50,
       opcionesPropina: data.opcionesPropina ? JSON.stringify(data.opcionesPropina) : '[5, 10, 15]',
-      opcionesDescuento: data.opcionesDescuento ? JSON.stringify(data.opcionesDescuento) : '[5, 10, 20]'
+      opcionesDescuento: data.opcionesDescuento ? JSON.stringify(data.opcionesDescuento) : '[5, 10, 20]',
+      habilitarPropinas: data.habilitarPropinas !== undefined ? data.habilitarPropinas : true,
+      habilitarDescuentos: data.habilitarDescuentos !== undefined ? data.habilitarDescuentos : true
     }
   });
 }

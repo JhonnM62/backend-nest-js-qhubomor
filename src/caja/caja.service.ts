@@ -26,7 +26,7 @@ export class CajaService {
 
     let config = await this.prisma.configuracionNegocio.findUnique({ where: { id: 1 } });
     if (!config) {
-      config = { id: 1, nombreComercial: 'Q HUBO MOR', nit: null, direccion: null, telefono: null, horaCorteDia: '00:00', modoOperacion: 'GENERAL', latitudNegocio: null, longitudNegocio: null, radioGeocercaM: 100, minutosGraciaLlegadaTarde: 5, updatedAt: new Date(), emitirFacturaAutomatica: false, factusEmail: null, factusPassword: null, factusClientId: null, factusClientSecret: null, factusMunicipioCodigo: '52356', factusEntorno: 'SANDBOX', radioGeocercaDescansoM: 50, logoUrl: null, imprimirLogo: true, logoSize58: 50, logoSize80: 50, opcionesPropina: [5, 10, 15], opcionesDescuento: [5, 10, 20] };
+      config = { id: 1, nombreComercial: 'Q HUBO MOR', nit: null, direccion: null, telefono: null, horaCorteDia: '00:00', modoOperacion: 'GENERAL', latitudNegocio: null, longitudNegocio: null, radioGeocercaM: 100, minutosGraciaLlegadaTarde: 5, updatedAt: new Date(), emitirFacturaAutomatica: false, factusEmail: null, factusPassword: null, factusClientId: null, factusClientSecret: null, factusMunicipioCodigo: '52356', factusEntorno: 'SANDBOX', radioGeocercaDescansoM: 50, logoUrl: null, imprimirLogo: true, logoSize58: 50, logoSize80: 50, opcionesPropina: [5, 10, 15], opcionesDescuento: [5, 10, 20], habilitarPropinas: true, habilitarDescuentos: true };
     }
 
     const [corteHours, corteMinutes] = config!.horaCorteDia.split(':').map(Number);
