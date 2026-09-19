@@ -76,8 +76,8 @@ async updateConfiguracion(data: {
       imprimirLogo: data.imprimirLogo,
       logoSize58: data.logoSize58,
       logoSize80: data.logoSize80,
-      opcionesPropina: data.opcionesPropina ? JSON.stringify(data.opcionesPropina) : undefined,
-      opcionesDescuento: data.opcionesDescuento ? JSON.stringify(data.opcionesDescuento) : undefined,
+      opcionesPropina: data.opcionesPropina ? (typeof data.opcionesPropina === 'string' ? data.opcionesPropina : JSON.stringify(data.opcionesPropina)) : undefined,
+      opcionesDescuento: data.opcionesDescuento ? (typeof data.opcionesDescuento === 'string' ? data.opcionesDescuento : JSON.stringify(data.opcionesDescuento)) : undefined,
       habilitarPropinas: data.habilitarPropinas,
       habilitarDescuentos: data.habilitarDescuentos
     },
@@ -105,8 +105,8 @@ async updateConfiguracion(data: {
       imprimirLogo: data.imprimirLogo ?? true,
       logoSize58: data.logoSize58 ?? 50,
       logoSize80: data.logoSize80 ?? 50,
-      opcionesPropina: data.opcionesPropina ? JSON.stringify(data.opcionesPropina) : '[5, 10, 15]',
-      opcionesDescuento: data.opcionesDescuento ? JSON.stringify(data.opcionesDescuento) : '[5, 10, 20]',
+      opcionesPropina: data.opcionesPropina ? (typeof data.opcionesPropina === 'string' ? data.opcionesPropina : JSON.stringify(data.opcionesPropina)) : '[5, 10, 15]',
+      opcionesDescuento: data.opcionesDescuento ? (typeof data.opcionesDescuento === 'string' ? data.opcionesDescuento : JSON.stringify(data.opcionesDescuento)) : '[5, 10, 20]',
       habilitarPropinas: data.habilitarPropinas !== undefined ? data.habilitarPropinas : true,
       habilitarDescuentos: data.habilitarDescuentos !== undefined ? data.habilitarDescuentos : true
     }
