@@ -42,6 +42,12 @@ async updateConfiguracion(data: {
   factusClientSecret?: string;
   factusMunicipioCodigo?: string;
   factusEntorno?: string;
+  logoUrl?: string;
+  imprimirLogo?: boolean;
+  logoSize58?: number;
+  logoSize80?: number;
+  opcionesPropina?: any;
+  opcionesDescuento?: any;
 }) {
   return this.prisma.configuracionNegocio.upsert({
     where: { id: 1 },
@@ -63,7 +69,13 @@ async updateConfiguracion(data: {
       factusClientId: data.factusClientId,
       factusClientSecret: data.factusClientSecret,
       factusMunicipioCodigo: data.factusMunicipioCodigo,
-      factusEntorno: data.factusEntorno
+      factusEntorno: data.factusEntorno,
+      logoUrl: data.logoUrl,
+      imprimirLogo: data.imprimirLogo,
+      logoSize58: data.logoSize58,
+      logoSize80: data.logoSize80,
+      opcionesPropina: data.opcionesPropina ? JSON.stringify(data.opcionesPropina) : undefined,
+      opcionesDescuento: data.opcionesDescuento ? JSON.stringify(data.opcionesDescuento) : undefined
     },
     create: {
       id: 1,
@@ -84,7 +96,13 @@ async updateConfiguracion(data: {
       factusClientId: data.factusClientId,
       factusClientSecret: data.factusClientSecret,
       factusMunicipioCodigo: data.factusMunicipioCodigo || '52356',
-      factusEntorno: data.factusEntorno || 'SANDBOX'
+      factusEntorno: data.factusEntorno || 'SANDBOX',
+      logoUrl: data.logoUrl,
+      imprimirLogo: data.imprimirLogo ?? true,
+      logoSize58: data.logoSize58 ?? 50,
+      logoSize80: data.logoSize80 ?? 50,
+      opcionesPropina: data.opcionesPropina ? JSON.stringify(data.opcionesPropina) : '[5, 10, 15]',
+      opcionesDescuento: data.opcionesDescuento ? JSON.stringify(data.opcionesDescuento) : '[5, 10, 20]'
     }
   });
 }

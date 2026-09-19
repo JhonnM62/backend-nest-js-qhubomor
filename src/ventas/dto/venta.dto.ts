@@ -46,6 +46,11 @@ export class CreateVentaDto {
   @ApiPropertyOptional()
   @IsOptional()
   @IsNumber()
+  abono?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
   costoDelDomicilio?: number;
 
   @ApiPropertyOptional()

@@ -7,6 +7,7 @@ import { ConfiguracionService } from './configuracion.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
+const Jimp = require('jimp');
 
 @Controller('configuracion')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -39,6 +40,12 @@ export class ConfiguracionController {
     factusClientSecret?: string;
     factusMunicipioCodigo?: string;
     factusEntorno?: string;
+    logoUrl?: string;
+    imprimirLogo?: boolean;
+    logoSize58?: number;
+    logoSize80?: number;
+    opcionesPropina?: any;
+    opcionesDescuento?: any;
   }) {
     return this.configuracionService.updateConfiguracion(data);
   }
@@ -135,5 +142,56 @@ export class ConfiguracionController {
   @Roles('Admin app', 'Admin negocio')
   async getEmpleadosParaPrueba() {
     return this.configuracionService.getEmpleadosParaPrueba();
+  }
+
+  @Post('logo')
+  @Roles('Admin app', 'Admin negocio')
+  @UseInterceptors(
+    FileInterceptor('logo', {
+      storage: diskStorage({
+        destination: (req, file, cb) => {
+          const isProd = process.env.NODE_ENV === 'production';
+          const uploadPath = isProd ? '/app/public/uploads/logos' : './public/uploads/logos';
+          if (!fs.existsSync(uploadPath)) {
+            fs.mkdirSync(uploadPath, { recursive: true });
+          }
+          cb(null, uploadPath);
+        },
+        filename: (req, file, cb) => {
+          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+          cb(null, `logo-${uniqueSuffix}${extname(file.originalname)}`);
+        },
+      }),
+      fileFilter: (req, file, cb) => {
+        if (!file.mimetype.match(/\/(jpg|jpeg|png|bmp|gif)$/)) {
+          return cb(new BadRequestException('Solo se permiten imágenes'), false);
+        }
+        cb(null, true);
+      }
+    }),
+  )
+  async uploadLogo(
+    @UploadedFile() file: Express.Multer.File,
+    @Body() body: { baseUrl: string },
+  ) {
+    if (!file) throw new BadRequestException('La imagen es requerida');
+    
+    try {
+      // Convertir la imagen a blanco y negro (monocromática) usando Jimp
+      // Esto es crucial para la eficiencia en las impresoras térmicas ESC/POS
+      const image = await Jimp.read(file.path);
+      // Aplicar escala de grises y un contraste alto (1) para forzar blanco/negro puro
+      image.greyscale().contrast(1);
+      await image.writeAsync(file.path);
+    } catch (error) {
+      console.error('Error procesando imagen del logo con Jimp:', error);
+      // Si falla, continuamos con la imagen original pero logueamos el error
+    }
+
+    const publicUrl = `${body.baseUrl.replace(/\/$/, '')}/uploads/logos/${file.filename}`;
+    
+    await this.configuracionService.updateConfiguracion({ logoUrl: publicUrl });
+    
+    return { success: true, url: publicUrl };
   }
 }

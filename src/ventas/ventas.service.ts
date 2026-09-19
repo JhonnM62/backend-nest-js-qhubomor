@@ -182,6 +182,12 @@ export class VentasService {
         factusMunicipioCodigo: '52356',
         factusEntorno: 'SANDBOX',
         radioGeocercaDescansoM: 50,
+        logoUrl: null,
+        imprimirLogo: true,
+        logoSize58: 50,
+        logoSize80: 50,
+        opcionesPropina: [5, 10, 15],
+        opcionesDescuento: [5, 10, 20],
       };
     }
     
@@ -445,6 +451,7 @@ export class VentasService {
       totalInput: venta.totalInput,
       descuento: venta.descuento,
       porcentajeDeDescuento: venta.porcentajeDeDescuento,
+      abono: venta.abono,
     };
 
     const ventaCreada = await this.prisma.ventas.create({
@@ -514,7 +521,9 @@ export class VentasService {
     );
 
     // DEDUCCIÓN DE INVENTARIO
-    await this.applyRecipeDeductions(productos, 'salida', 'Descuento por venta');
+    if (venta.estado !== 'RESERVA') {
+      await this.applyRecipeDeductions(productos, 'salida', 'Descuento por venta');
+    }
 
     const resultVenta = {
       ...ventaCreada,
@@ -586,6 +595,7 @@ export class VentasService {
       totalInput: venta.totalInput,
       descuento: venta.descuento,
       porcentajeDeDescuento: venta.porcentajeDeDescuento,
+      abono: venta.abono,
       estado: estadoToSave,
       fecha: fechaContable,
       clienteId: venta.clienteId || null,
@@ -620,7 +630,9 @@ export class VentasService {
     }
 
     // REVERSO DE INVENTARIO
-    await this.applyRecipeDeductions(oldOrderventas, 'entrada', 'Reverso por edición de venta');
+    if (ventaExistente.estado !== 'RESERVA') {
+      await this.applyRecipeDeductions(oldOrderventas, 'entrada', 'Reverso por edición de venta');
+    }
 
     await this.prisma.orderventas.deleteMany({
       where: { IDventas: id },
@@ -690,7 +702,9 @@ export class VentasService {
       );
 
       // APLICACIÓN DE NUEVO INVENTARIO
-      await this.applyRecipeDeductions(productos, 'salida', 'Descuento por venta editada');
+      if (estadoToSave !== 'RESERVA') {
+        await this.applyRecipeDeductions(productos, 'salida', 'Descuento por venta editada');
+      }
     }
 
     const updatedVentaWithOrders = await this.prisma.ventas.findUnique({
@@ -778,15 +792,17 @@ export class VentasService {
     });
 
     // Actualizar inventario
-    const absDiff = Math.abs(diff);
-    const tipoMovimiento = diff < 0 ? 'entrada' : 'salida';
-    const motivo = diff < 0 ? 'Reverso por cuadre de caja' : 'Adición por cuadre de caja';
+    if (venta.estado !== 'RESERVA') {
+      const absDiff = Math.abs(diff);
+      const tipoMovimiento = diff < 0 ? 'entrada' : 'salida';
+      const motivo = diff < 0 ? 'Reverso por cuadre de caja' : 'Adición por cuadre de caja';
 
-    await this.applyRecipeDeductions(
-      [{ ...orderVenta, cantidad: absDiff } as any],
-      tipoMovimiento,
-      motivo
-    );
+      await this.applyRecipeDeductions(
+        [{ ...orderVenta, cantidad: absDiff } as any],
+        tipoMovimiento,
+        motivo
+      );
+    }
 
     // Emit event
     this.appGateway.emitToVentas(SocketEvent.REFRESH_VENTAS, { action: 'updateEstado', venta: ventaActualizada });
@@ -1072,6 +1088,11 @@ export class VentasService {
       }
     }
 
+    if (venta.estado === 'RESERVA' && estado !== 'RESERVA') {
+      const orderItems = await this.prisma.orderventas.findMany({ where: { IDventas: id } });
+      await this.applyRecipeDeductions(orderItems, 'salida', 'Descuento al pasar de reserva a activo');
+    }
+
     await this.prisma.ventas.update({
       where: { IDventas: id },
       data: {
@@ -1173,6 +1194,11 @@ export class VentasService {
       }
     }
 
+    if (venta.estado === 'RESERVA' && estadoUpdate !== 'RESERVA') {
+      const orderItems = await this.prisma.orderventas.findMany({ where: { IDventas: id } });
+      await this.applyRecipeDeductions(orderItems, 'salida', 'Descuento al pasar de reserva a activo');
+    }
+
     await this.prisma.ventas.update({
       where: { IDventas: id },
       data: {
@@ -1184,6 +1210,7 @@ export class VentasService {
         totalInput: updateData.totalInput,
         descuento: updateData.descuento,
         porcentajeDeDescuento: updateData.porcentajeDeDescuento,
+        abono: updateData.abono,
         registroDeTiempo: nuevoRegistro,
       },
     });
@@ -1324,7 +1351,9 @@ export class VentasService {
     });
 
     // REVERSO DE INVENTARIO
-    await this.applyRecipeDeductions(oldOrderventas, 'entrada', 'Reverso por anulación de venta');
+    if (venta.estado !== 'RESERVA') {
+      await this.applyRecipeDeductions(oldOrderventas, 'entrada', 'Reverso por anulación de venta');
+    }
 
     await this.prisma.orderventas.deleteMany({
       where: { IDventas: id },
@@ -1352,9 +1381,12 @@ export class VentasService {
   }
 
   async removeBulk(ids: string[], usuarioId: string, reason?: string) {
-    // REVERSO DE INVENTARIO PARA TODAS LAS VENTAS
+    const activeVentas = await this.prisma.ventas.findMany({ where: { IDventas: { in: ids } } });
+    const nonReservaIds = activeVentas.filter(v => v.estado !== 'RESERVA').map(v => v.IDventas);
+
+    // REVERSO DE INVENTARIO PARA TODAS LAS VENTAS (excepto RESERVA)
     const oldOrderventas = await this.prisma.orderventas.findMany({
-      where: { IDventas: { in: ids } },
+      where: { IDventas: { in: nonReservaIds } },
     });
     await this.applyRecipeDeductions(oldOrderventas, 'entrada', 'Reverso por anulación masiva');
 
@@ -1419,7 +1451,7 @@ export class VentasService {
       throw new NotFoundException(`Venta con ID ${id} no encontrada`);
     }
 
-    if (venta.deletedAt === null) {
+    if (venta.deletedAt === null && venta.estado !== 'RESERVA') {
       const oldOrderventas = await this.prisma.orderventas.findMany({
         where: { IDventas: id },
       });
@@ -1442,7 +1474,7 @@ export class VentasService {
     });
 
     if (activeVentas.length > 0) {
-      const activeIds = activeVentas.map(v => v.IDventas);
+      const activeIds = activeVentas.filter(v => v.estado !== 'RESERVA').map(v => v.IDventas);
       const oldOrderventas = await this.prisma.orderventas.findMany({
         where: { IDventas: { in: activeIds } },
       });
