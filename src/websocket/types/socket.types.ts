@@ -19,6 +19,7 @@ export enum SocketEvent {
   REFRESH_GASTOS = 'refreshGastos',
   REFRESH_VENTAS = 'refreshVentas',
   USER_PERMISSIONS_UPDATED = 'userPermissionsUpdated',
+  VENTA_ID_GENERATED = 'ventaIdGenerated',
 }
 
 export enum Room {

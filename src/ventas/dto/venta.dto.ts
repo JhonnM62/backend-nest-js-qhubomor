@@ -92,6 +92,10 @@ export class CreateVentaDto {
   @IsOptional()
   @IsString()
   fechaContableManual?: string;
+
+  @IsOptional()
+  @IsString()
+  temporalId?: string;
 }
 
 export class CreateOrderVentaDto {
@@ -185,6 +189,10 @@ export class CreateVentaCompletaDto {
   @IsOptional()
   @IsString()
   fechaContableManual?: string;
+
+  @IsOptional()
+  @IsString()
+  temporalId?: string;
 }
 
 export class UpdateVentaDto {

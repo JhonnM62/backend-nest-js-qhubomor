@@ -1,11 +1,20 @@
+import * as dotenv from 'dotenv';
 import { PrismaClient } from '@prisma/client';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 
-const prisma = new PrismaClient();
+dotenv.config();
+
+const prisma = new PrismaClient({
+  datasources: {
+    db: {
+      url: process.env.DATABASE_URL,
+    },
+  },
+});
 
 async function main() {
   const email = 'admin@fogata.com';
-  const password = 'admin'; // Cambia esta contraseña si lo deseas
+  const password = 'admin123456'; // Cambia esta contraseña si lo deseas
   const nombre = 'Admin Fogata';
 
   console.log(`Buscando usuario con email: ${email}`);
@@ -24,7 +33,7 @@ async function main() {
   } else {
     console.log('El usuario no existe, creándolo...');
     const hashedPassword = await bcrypt.hash(password, 10);
-    
+
     usuario = await prisma.usuarios.create({
       data: {
         nombre,

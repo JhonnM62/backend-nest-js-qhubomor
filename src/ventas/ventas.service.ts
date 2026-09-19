@@ -246,6 +246,10 @@ export class VentasService {
     const fechaContable = await this.getFechaContable(now, createVentaDto.fechaContableManual);
     const pedido = await this.generatePedidoNumber(createVentaDto.mesa, undefined, fechaContable);
 
+    if (createVentaDto.temporalId) {
+      this.appGateway.emitToVentas(SocketEvent.VENTA_ID_GENERATED, { temporalId: createVentaDto.temporalId, pedido });
+    }
+
     const validMesaId = await this.resolveMesaOrCreate(createVentaDto.mesa);
 
     const ventaData: any = {
@@ -415,6 +419,10 @@ export class VentasService {
       usuario?.nombre,
       fechaContable
     );
+
+    if (createVentaCompletaDto.temporalId) {
+      this.appGateway.emitToVentas(SocketEvent.VENTA_ID_GENERATED, { temporalId: createVentaCompletaDto.temporalId, pedido: pedidoGenerado });
+    }
 
     // Buscar nombre del cliente si hay clienteId
     let clienteNombre: string | null = null;
