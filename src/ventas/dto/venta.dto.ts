@@ -248,6 +248,11 @@ export class VentaQueryDto extends PaginationDto {
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
+  vendedor?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
   mesa?: string;
 
   @ApiPropertyOptional()
