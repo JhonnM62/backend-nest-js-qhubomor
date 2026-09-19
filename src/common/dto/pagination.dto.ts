@@ -16,6 +16,12 @@ export class PaginationDto {
   @IsInt()
   @Min(1)
   limit?: number = 20;
+
+  @ApiPropertyOptional({ description: 'Timestamp para bypass de cache' })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  _t?: number;
 }
 
 export class PaginatedResponseDto<T> {
