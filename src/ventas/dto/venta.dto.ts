@@ -101,6 +101,16 @@ export class CreateVentaDto {
   @IsOptional()
   @IsString()
   temporalId?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  propina?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  porcentajePropina?: string;
 }
 
 export class CreateOrderVentaDto {

@@ -454,6 +454,8 @@ export class VentasService {
       descuento: venta.descuento,
       porcentajeDeDescuento: venta.porcentajeDeDescuento,
       abono: venta.abono,
+      propina: venta.propina,
+      porcentajePropina: venta.porcentajePropina,
     };
 
     const ventaCreada = await this.prisma.ventas.create({
@@ -603,6 +605,8 @@ export class VentasService {
       clienteId: venta.clienteId || null,
       cliente: clienteNombre,  // Columna "Clente" – nombre en texto
       registroDeTiempo: nuevoRegistro,
+      propina: venta.propina,
+      porcentajePropina: venta.porcentajePropina,
     };
 
     // Update Venta
