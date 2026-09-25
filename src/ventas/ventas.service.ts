@@ -1471,9 +1471,14 @@ export class VentasService {
       where: { IDventas: id },
     });
 
-    return this.prisma.ventas.delete({
+    const result = await this.prisma.ventas.delete({
       where: { IDventas: id },
     });
+
+    // Emit socket so all clients remove the sale from their local state immediately
+    this.appGateway.emitToVentas(SocketEvent.REFRESH_VENTAS, { action: 'delete', ventaId: id, venta });
+
+    return result;
   }
 
   async hardDeleteBulk(ids: string[]) {
@@ -1497,6 +1502,9 @@ export class VentasService {
     const result = await this.prisma.ventas.deleteMany({
       where: { IDventas: { in: ids } },
     });
+
+    // Emit socket so all clients remove these sales from their local state immediately
+    this.appGateway.emitToVentas(SocketEvent.REFRESH_VENTAS, { action: 'bulkDelete', ventaIds: ids, count: result.count });
 
     return { count: result.count };
   }
@@ -1528,6 +1536,10 @@ export class VentasService {
         `Se han eliminado permanentemente ${result.count} pedidos de la papelera.`,
         {}
       );
+      // Emit socket so all clients remove trashed sales from their local state immediately
+      if (deletedIds.length > 0) {
+        this.appGateway.emitToVentas(SocketEvent.REFRESH_VENTAS, { action: 'bulkDelete', ventaIds: deletedIds, count: result.count });
+      }
     }
 
     return { message: 'Papelera vaciada correctamente', count: result.count };
