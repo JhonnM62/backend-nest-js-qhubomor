@@ -287,6 +287,11 @@ export class VentaQueryDto extends PaginationDto {
 
   @ApiPropertyOptional()
   @IsOptional()
+  @IsString()
+  banco?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
   includeDeleted?: boolean | string;
 
   @ApiPropertyOptional()

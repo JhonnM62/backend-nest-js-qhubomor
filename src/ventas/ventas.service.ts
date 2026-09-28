@@ -874,7 +874,8 @@ export class VentasService {
       totalMax,
       productoId,
       categoriaProducto,
-      clienteId
+      clienteId,
+      banco
     } = query;
     const skip = (page - 1) * limit;
 
@@ -948,17 +949,23 @@ export class VentasService {
     }
 
     if (categoriaProducto) {
+      const categorias = categoriaProducto.split(',');
       where.ordenVentas = {
         ...((where.ordenVentas as any) || {}),
         some: {
           ...(((where.ordenVentas as any)?.some) || {}),
-          categoriaProducto: categoriaProducto
+          categoriaProducto: categorias.length > 1 ? { in: categorias } : categorias[0]
         }
       };
     }
 
     if (estado) {
-      where.estado = estado;
+      const estados = estado.split(',');
+      if (estados.length > 1) {
+        where.estado = { in: estados };
+      } else {
+        where.estado = estado;
+      }
     }
 
     if (usuario) {
@@ -970,7 +977,28 @@ export class VentasService {
     }
 
     if (medioDePago) {
-      where.medioDePago = medioDePago;
+      const medios = medioDePago.split(',');
+      where.AND = [
+        ...(Array.isArray(where.AND) ? where.AND : (where.AND ? [where.AND] : [])),
+        {
+          OR: medios.map(m => ({
+            OR: [
+              { medioDePago: { contains: m, mode: 'insensitive' } },
+              { banco: { contains: m, mode: 'insensitive' } }
+            ]
+          }))
+        }
+      ];
+    }
+
+    if (banco) {
+      const bancos = banco.split(',');
+      where.AND = [
+        ...(Array.isArray(where.AND) ? where.AND : (where.AND ? [where.AND] : [])),
+        {
+          OR: bancos.map(b => ({ banco: { contains: b, mode: 'insensitive' } }))
+        }
+      ];
     }
 
     if (fechaDesde || fechaHasta) {
@@ -993,11 +1021,10 @@ export class VentasService {
       }
     }
 
-    if (productoId || categoriaProducto) {
+    if (productoId) {
       where.ordenVentas = {
         some: {
-          ...(productoId ? { productoId } : {}),
-          ...(categoriaProducto ? { categoria: categoriaProducto } : {})
+          ...(productoId ? { productoId } : {})
         }
       };
     }
