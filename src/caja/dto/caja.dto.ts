@@ -251,6 +251,18 @@ export class CajaQueryDto {
   @IsOptional()
   @IsString()
   fechaHasta?: string;
+
+  @ApiPropertyOptional({ description: 'Page number (0-indexed)', default: 0 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  page?: number;
+
+  @ApiPropertyOptional({ description: 'Items per page', default: 25 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  limit?: number;
 }
 
 export class InsumoVerificacionDto {

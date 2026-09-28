@@ -444,7 +444,9 @@ export class CajaService {
   }
 
   async findAll(query: CajaQueryDto) {
-    const { nombre, fechaDesde, fechaHasta } = query;
+    const { nombre, fechaDesde, fechaHasta, page = 0, limit = 25 } = query;
+    const take = Math.min(Number(limit), 100); // max 100 por página
+    const skip = Number(page) * take;
 
     const where: Prisma.AperturaCierreCajaWhereInput = {};
 
@@ -462,24 +464,28 @@ export class CajaService {
       }
     }
 
-    return this.prisma.aperturaCierreCaja.findMany({
-      where,
-      orderBy: { fechaDeApertura: 'desc' },
-    });
+    const [data, total] = await Promise.all([
+      this.prisma.aperturaCierreCaja.findMany({
+        where,
+        orderBy: { fechaDeApertura: 'desc' },
+        skip,
+        take,
+      }),
+      this.prisma.aperturaCierreCaja.count({ where }),
+    ]);
+
+    return {
+      data,
+      total,
+      page: Number(page),
+      limit: take,
+      hasMore: skip + take < total,
+    };
   }
 
   async findOne(id: string) {
     const caja = await this.prisma.aperturaCierreCaja.findUnique({
       where: { IDcaja: id },
-      include: {
-        venta: {
-          where: {
-            fecha: {
-              gte: new Date(),
-            },
-          },
-        },
-      },
     });
 
     if (!caja) {
@@ -493,15 +499,6 @@ export class CajaService {
     return this.prisma.aperturaCierreCaja.findFirst({
       where: { cierre: 'abierta' },
       orderBy: { fechaDeApertura: 'desc' },
-      include: {
-        venta: {
-          where: {
-            fecha: {
-              gte: new Date(),
-            },
-          },
-        },
-      },
     });
   }
 
@@ -733,7 +730,7 @@ export class CajaService {
 
     const insumosCaja = await this.prisma.aperturaCierreInsumos.findMany({
       where: { IDcaja: caja.IDcaja },
-      include: { insumo: true, historial: { orderBy: { fechaYHora: 'desc' } } }
+      include: { insumo: true, historial: { orderBy: { fechaYHora: 'desc' }, take: 20 } }
     });
 
     // Cargar todos los productos para mapear nombres
