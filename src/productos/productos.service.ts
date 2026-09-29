@@ -108,12 +108,10 @@ export class ProductosService {
         // Se elimina la receta del payload final para evitar sobrecarga de red
         const { recetaInsumos, ...rest } = p;
 
-        // Heredar seccionCocinaId de la categoría si el producto no tiene uno
-        const seccionCocinaIdFinal = p.seccionCocinaId || p.categoriaRelacion?.seccionCocinaId || null;
-
         return {
           ...rest,
-          seccionCocinaId: seccionCocinaIdFinal,
+          seccionCocinaId: p.seccionCocinaId,
+          categoriaSeccionCocinaId: p.categoriaRelacion?.seccionCocinaId || null,
           disponibilidadCalculada,
           categoriaNombre: p.categoriaRelacion?.nombre || p.categoriaNombre,
         };
@@ -164,11 +162,10 @@ export class ProductosService {
       throw new NotFoundException(`Producto con ID ${id} no encontrado`);
     }
 
-    const seccionCocinaIdFinal = producto.seccionCocinaId || producto.categoriaRelacion?.seccionCocinaId || null;
-
     return {
       ...producto,
-      seccionCocinaId: seccionCocinaIdFinal,
+      seccionCocinaId: producto.seccionCocinaId,
+      categoriaSeccionCocinaId: producto.categoriaRelacion?.seccionCocinaId || null,
     };
   }
 
