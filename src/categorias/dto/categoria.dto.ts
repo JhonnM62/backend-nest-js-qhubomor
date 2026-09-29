@@ -18,8 +18,7 @@ export class CreateCategoriaDto {
 
   @ApiPropertyOptional()
   @IsOptional()
-  @IsString()
-  seccionCocinaId?: string;
+  seccionCocinaId?: string | null;
 }
 
 export class UpdateCategoriaDto {
