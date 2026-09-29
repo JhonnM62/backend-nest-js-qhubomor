@@ -104,6 +104,10 @@ export class CreateProductoDto {
   @ValidateNested({ each: true })
   @Type(() => RecetaInsumoDto)
   recetaInsumos?: RecetaInsumoDto[];
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  seccionCocinaId?: string;
 }
 
 export class UpdateProductoDto {
@@ -187,6 +191,10 @@ export class UpdateProductoDto {
   @ValidateNested({ each: true })
   @Type(() => RecetaInsumoDto)
   recetaInsumos?: RecetaInsumoDto[];
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  seccionCocinaId?: string;
 }
 
 export class ProductoQueryDto extends PaginationDto {
