@@ -1047,7 +1047,16 @@ export class VentasService {
           ordenVentas: {
             include: {
               producto: {
-                select: { IDproductos: true, nombre: true, categoriaNombre: true, categoria: true, imagenUrl: true, image: true, seccionCocinaId: true },
+                select: { 
+                  IDproductos: true, 
+                  nombre: true, 
+                  categoriaNombre: true, 
+                  categoria: true, 
+                  imagenUrl: true, 
+                  image: true, 
+                  seccionCocinaId: true,
+                  categoriaRelacion: { select: { seccionCocinaId: true } }
+                },
               },
             },
           },
@@ -1082,7 +1091,9 @@ export class VentasService {
       include: {
         ordenVentas: {
           include: {
-            producto: true,
+            producto: {
+              include: { categoriaRelacion: true }
+            },
           },
         },
         usuarioRelacion: true,
