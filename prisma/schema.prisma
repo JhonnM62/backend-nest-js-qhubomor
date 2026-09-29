@@ -44,8 +44,10 @@ model Usuarios {
 model Categorias {
   IDcategoria String      @id @default(cuid()) @map("IDcategoria")
   nombre      String      @map("Nombre")
-  image       String?     @map("Image")
-  productos   Productos[]
+  image           String?     @map("Image")
+  seccionCocinaId String?         @map("SeccionCocinaId")
+  seccionCocina   SeccionCocina?  @relation(fields: [seccionCocinaId], references: [IDseccion], onDelete: SetNull)
+  productos       Productos[]
 
   @@map("CATEGORIAS")
 }
@@ -120,6 +122,7 @@ model SeccionCocina {
   createdAt DateTime    @default(now()) @map("CreatedAt")
   updatedAt DateTime    @updatedAt @map("UpdatedAt")
   productos Productos[]
+  categorias Categorias[]
 
   @@map("SECCIONES_COCINA")
 }

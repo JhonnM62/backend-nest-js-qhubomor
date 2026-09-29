@@ -15,6 +15,11 @@ export class CreateCategoriaDto {
   @IsOptional()
   @IsUUID()
   padreId?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  seccionCocinaId?: string;
 }
 
 export class UpdateCategoriaDto {

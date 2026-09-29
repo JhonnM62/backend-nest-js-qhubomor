@@ -35,6 +35,7 @@ export class CategoriasService {
     const categorias = await this.prisma.categorias.findMany({
       orderBy: { nombre: 'asc' },
       include: {
+        seccionCocina: true, // Para que retorne la información de la sección
         productos: {
           select: {
             IDproductos: true,
@@ -54,6 +55,7 @@ export class CategoriasService {
     const categoria = await this.prisma.categorias.findUnique({
       where: { IDcategoria: id },
       include: {
+        seccionCocina: true,
         productos: true,
       },
     });
