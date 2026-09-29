@@ -20,6 +20,15 @@ export enum SocketEvent {
   REFRESH_VENTAS = 'refreshVentas',
   USER_PERMISSIONS_UPDATED = 'userPermissionsUpdated',
   VENTA_ID_GENERATED = 'ventaIdGenerated',
+  // Secciones de cocina
+  REFRESH_SECCIONES_COCINA = 'refreshSeccionesCocina',
+  // Impresión remota BT via socket
+  PRINT_REGISTER   = 'print:register',
+  PRINT_REGISTERED = 'print:registered',
+  PRINT_REQUEST    = 'print:request',
+  PRINT_JOB        = 'print:job',
+  PRINT_DONE       = 'print:done',
+  PRINT_ACK        = 'print:ack',
 }
 
 export enum Room {
@@ -121,4 +130,22 @@ export interface OrdenCompletadaPayload extends BasePayload {
   totalInput: number;
   medioDePago: string;
   module?: string;
+}
+
+// ============================================================
+// PRINT JOB — Impresión remota BT via socket
+// ============================================================
+export interface PrintJobPayload {
+  jobId: string;          // UUID único por trabajo de impresión
+  negocioId?: string;     // Para filtrar por negocio (sala printers:<negocioId>)
+  ticketData: any;        // Misma estructura que usa executePrint()
+  type: 'comanda' | 'factura';
+  paperSize: 58 | 80;
+  seccionNombre?: string; // Si es ticket de sección específica
+}
+
+export interface PrintAckPayload {
+  jobId: string;
+  success: boolean;
+  error?: string;
 }

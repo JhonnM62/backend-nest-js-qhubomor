@@ -34,6 +34,7 @@ import { Server, Socket } from 'socket.io';
 import { Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { SocketEvent, Room } from './types/socket.types';
+import type { PrintJobPayload, PrintAckPayload } from './types/socket.types';
 
 interface ConnectedClient {
   socket: Socket;
@@ -192,6 +193,48 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     this.server.to(Room.CAJA).emit(SocketEvent.ORDEN_COMPLETADA, enrichedData);
 
+    return { success: true };
+  }
+
+  // ============================================================
+  // IMPRESIÓN REMOTA BT via Socket
+  // Permite delegar la impresión a un dispositivo con BT conectado
+  // ============================================================
+
+  @SubscribeMessage(SocketEvent.PRINT_REGISTER)
+  handlePrintRegister(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { negocioId?: string },
+  ) {
+    const room = `printers:${data.negocioId ?? 'default'}`;
+    client.join(room);
+    const clientData = this.connectedClients.get(client.id);
+    if (clientData) clientData.rooms.add(room);
+    this.logger.log(`Dispositivo ${client.id} registrado como servidor de impresión en ${room}`);
+    client.emit(SocketEvent.PRINT_REGISTERED, { ok: true, room });
+    return { success: true };
+  }
+
+  @SubscribeMessage(SocketEvent.PRINT_REQUEST)
+  handlePrintRequest(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() payload: PrintJobPayload,
+  ) {
+    const room = `printers:${payload.negocioId ?? 'default'}`;
+    this.logger.log(`Print request jobId=${payload.jobId} type=${payload.type} → room=${room}`);
+    // Reenviar el trabajo al primer dispositivo disponible con impresora
+    this.server.to(room).emit(SocketEvent.PRINT_JOB, payload);
+    return { success: true, jobId: payload.jobId };
+  }
+
+  @SubscribeMessage(SocketEvent.PRINT_DONE)
+  handlePrintDone(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() payload: PrintAckPayload,
+  ) {
+    this.logger.log(`Print done jobId=${payload.jobId} success=${payload.success}`);
+    // Notificar al solicitante original por evento dinámico
+    this.server.emit(`print:ack:${payload.jobId}`, payload);
     return { success: true };
   }
 

@@ -105,6 +105,25 @@ model Mesas {
   @@map("MESAS")
 }
 
+// ============================================================
+// SECCIONES DE COCINA
+// Permite dividir una comanda en tickets por sección
+// (Cocina, Bebidas, Parrilla, etc.)
+// ============================================================
+model SeccionCocina {
+  IDseccion String      @id @default(cuid()) @map("IDseccion")
+  nombre    String      @map("Nombre")
+  color     String      @default("#FF6B35") @map("Color")
+  icono     String      @default("restaurant-outline") @map("Icono")
+  orden     Int         @default(0) @map("Orden")
+  activa    Boolean     @default(true) @map("Activa")
+  createdAt DateTime    @default(now()) @map("CreatedAt")
+  updatedAt DateTime    @updatedAt @map("UpdatedAt")
+  productos Productos[]
+
+  @@map("SECCIONES_COCINA")
+}
+
 model Productos {
   IDproductos             String          @id @default(cuid()) @map("IDproductos")
   categoria               String?         @map("Categoria")
@@ -129,6 +148,8 @@ model Productos {
   categoriaRelacion       Categorias?     @relation(fields: [categoria], references: [IDcategoria], onDelete: Cascade)
   recetaInsumos           Recetainsumos[]
   mostrarDisponibilidad   Boolean?        @default(false) @map("Mostrar Disponibilidad")
+  seccionCocinaId         String?         @map("SeccionCocinaId")
+  seccionCocina           SeccionCocina?  @relation(fields: [seccionCocinaId], references: [IDseccion], onDelete: SetNull)
 
   @@map("PRODUCTOS")
 }

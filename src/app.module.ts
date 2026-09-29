@@ -35,6 +35,7 @@ import { NominaModule } from './nomina/nomina.module';
 import { MovimientosInsumosModule } from './movimientos-insumos/movimientos-insumos.module';
 import { FacturacionModule } from './facturacion/facturacion.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { SeccionCocinaModule } from './seccion-cocina/seccion-cocina.module';
 
 @Module({
   imports: [
@@ -89,6 +90,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     NominaModule,
     MovimientosInsumosModule,
     FacturacionModule,
+    SeccionCocinaModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: AllExceptionsFilter },
