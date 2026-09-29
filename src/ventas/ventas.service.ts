@@ -1043,7 +1043,7 @@ export class VentasService {
           ordenVentas: {
             include: {
               producto: {
-                select: { IDproductos: true, nombre: true, categoriaNombre: true, categoria: true, imagenUrl: true, image: true },
+                select: { IDproductos: true, nombre: true, categoriaNombre: true, categoria: true, imagenUrl: true, image: true, seccionCocinaId: true },
               },
             },
           },

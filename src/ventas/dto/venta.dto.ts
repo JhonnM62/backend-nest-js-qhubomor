@@ -189,6 +189,11 @@ export class CreateOrderVentaDto {
   @IsOptional()
   @IsString()
   imagenUrl?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  seccionCocinaId?: string;
 }
 
 export class CreateVentaCompletaDto {
