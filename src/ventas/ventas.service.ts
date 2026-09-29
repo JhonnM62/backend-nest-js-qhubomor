@@ -532,7 +532,7 @@ export class VentasService {
     const resultVenta = await this.prisma.ventas.findUnique({
       where: { IDventas: ventaCreada.IDventas },
       include: {
-        ordenVentas: { include: { producto: true } },
+        ordenVentas: { include: { producto: { include: { categoria: true } } } },
         usuarioRelacion: { select: { IDusuarios: true, nombre: true, email: true } },
         facturaElectronica: true,
       },
@@ -1143,7 +1143,7 @@ export class VentasService {
     const updated = await this.prisma.ventas.findUnique({
       where: { IDventas: id },
       include: {
-        ordenVentas: { include: { producto: true } },
+        ordenVentas: { include: { producto: { include: { categoria: true } } } },
         usuarioRelacion: { select: { IDusuarios: true, nombre: true, email: true } },
         facturaElectronica: true,
       },
@@ -1258,7 +1258,7 @@ export class VentasService {
     const updated = await this.prisma.ventas.findUnique({
       where: { IDventas: id },
       include: {
-        ordenVentas: { include: { producto: true } },
+        ordenVentas: { include: { producto: { include: { categoria: true } } } },
         usuarioRelacion: { select: { IDusuarios: true, nombre: true, email: true } },
         facturaElectronica: true,
       },
