@@ -529,10 +529,14 @@ export class VentasService {
       await this.applyRecipeDeductions(productos, 'salida', 'Descuento por venta');
     }
 
-    const resultVenta = {
-      ...ventaCreada,
-      ordenVentas: ordenesVentas,
-    };
+    const resultVenta = await this.prisma.ventas.findUnique({
+      where: { IDventas: ventaCreada.IDventas },
+      include: {
+        ordenVentas: { include: { producto: true } },
+        usuarioRelacion: { select: { IDusuarios: true, nombre: true, email: true } },
+        facturaElectronica: true,
+      },
+    });
 
     this.appGateway.emitToVentas(SocketEvent.REFRESH_VENTAS, { action: 'create', venta: resultVenta });
 
@@ -1139,7 +1143,7 @@ export class VentasService {
     const updated = await this.prisma.ventas.findUnique({
       where: { IDventas: id },
       include: {
-        ordenVentas: true,
+        ordenVentas: { include: { producto: true } },
         usuarioRelacion: { select: { IDusuarios: true, nombre: true, email: true } },
         facturaElectronica: true,
       },
@@ -1254,7 +1258,7 @@ export class VentasService {
     const updated = await this.prisma.ventas.findUnique({
       where: { IDventas: id },
       include: {
-        ordenVentas: true,
+        ordenVentas: { include: { producto: true } },
         usuarioRelacion: { select: { IDusuarios: true, nombre: true, email: true } },
         facturaElectronica: true,
       },
