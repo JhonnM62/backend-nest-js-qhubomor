@@ -36,4 +36,8 @@ export class UpdateCategoriaDto {
   @IsOptional()
   @IsUUID()
   padreId?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  seccionCocinaId?: string | null;
 }
