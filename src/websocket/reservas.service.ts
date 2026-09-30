@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, Inject, forwardRef } from '@nestjs/common';
 import { AppGateway } from './app.gateway';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -24,6 +24,7 @@ export class ReservasInventarioService {
   private globalReservations = new Map<string, number>();
 
   constructor(
+    @Inject(forwardRef(() => AppGateway))
     private readonly appGateway: AppGateway,
     private readonly prisma: PrismaService,
   ) {
