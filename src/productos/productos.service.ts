@@ -106,7 +106,7 @@ export class ProductosService {
         }
 
         const insumosRequeridos = p.recetaInsumos?.map((r) => ({
-          IDinsumo: r.IDinsumo,
+          IDinsumo: r.insumo,
           cantidad: Number(r.cantidad) || 0,
           stockGlobal: Number(r.insumoRelacion?.disponible ?? r.insumoRelacion?.cantidad ?? 0)
         })) || [];
