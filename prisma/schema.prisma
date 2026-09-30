@@ -602,6 +602,7 @@ model ConfiguracionNegocio {
   opcionesDescuento       Json?   @default("[5, 10, 20]")
   habilitarPropinas       Boolean @default(true)
   habilitarDescuentos     Boolean @default(true)
+  tiempoReservaInventario Int     @default(5)
 }
 
 model FacturasElectronicas {

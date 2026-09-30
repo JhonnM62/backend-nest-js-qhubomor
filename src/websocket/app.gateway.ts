@@ -31,9 +31,10 @@ import {
   MessageBody,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { Logger } from '@nestjs/common';
+import { Logger, forwardRef, Inject } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { SocketEvent, Room } from './types/socket.types';
+import { ReservasInventarioService } from './reservas.service';
 import type { PrintJobPayload, PrintAckPayload } from './types/socket.types';
 
 interface ConnectedClient {
@@ -54,7 +55,11 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
   private readonly logger = new Logger(AppGateway.name);
   private connectedClients = new Map<string, ConnectedClient>();
 
-  constructor(private readonly jwtService: JwtService) {}
+  constructor(
+    private readonly jwtService: JwtService,
+    @Inject(forwardRef(() => ReservasInventarioService))
+    private readonly reservasService: ReservasInventarioService,
+  ) {}
 
   handleConnection(client: Socket) {
     try {
@@ -105,6 +110,23 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
       this.logger.log(`Client disconnected: ${client.id} (was in rooms: ${[...clientData.rooms].join(', ')})`);
       this.connectedClients.delete(client.id);
     }
+    this.reservasService.liberarTodasReservasDeSocket(client.id);
+  }
+
+  @SubscribeMessage('reservar_producto')
+  handleReservarProducto(client: Socket, payload: { productoId: string; cantidad: number }) {
+    this.reservasService.reservarProducto(client.id, payload.productoId, payload.cantidad);
+  }
+
+  @SubscribeMessage('liberar_reservas')
+  handleLiberarReservas(client: Socket) {
+    this.reservasService.liberarTodasReservasDeSocket(client.id);
+  }
+
+  @SubscribeMessage('get_reservas')
+  handleGetReservas(client: Socket) {
+    const reservas = this.reservasService.getAllReservations();
+    client.emit('init_reservas', reservas);
   }
 
   @SubscribeMessage(SocketEvent.JOIN_ROOM)

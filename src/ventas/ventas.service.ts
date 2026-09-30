@@ -189,7 +189,8 @@ export class VentasService {
         opcionesPropina: [5, 10, 15],
         opcionesDescuento: [5, 10, 20],
         habilitarPropinas: true,
-        habilitarDescuentos: true
+        habilitarDescuentos: true,
+        tiempoReservaInventario: 5
       };
     }
     

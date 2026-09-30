@@ -13,11 +13,6 @@ export class CreateCategoriaDto {
 
   @ApiPropertyOptional()
   @IsOptional()
-  @IsUUID()
-  padreId?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
   seccionCocinaId?: string | null;
 }
 
@@ -31,11 +26,6 @@ export class UpdateCategoriaDto {
   @IsOptional()
   @IsString()
   image?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsUUID()
-  padreId?: string;
 
   @ApiPropertyOptional()
   @IsOptional()

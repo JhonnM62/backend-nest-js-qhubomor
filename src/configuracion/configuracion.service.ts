@@ -50,6 +50,7 @@ async updateConfiguracion(data: {
   opcionesDescuento?: any;
   habilitarPropinas?: boolean;
   habilitarDescuentos?: boolean;
+  tiempoReservaInventario?: number;
 }) {
   return this.prisma.configuracionNegocio.upsert({
     where: { id: 1 },
@@ -79,7 +80,8 @@ async updateConfiguracion(data: {
       opcionesPropina: data.opcionesPropina ? (typeof data.opcionesPropina === 'string' ? data.opcionesPropina : JSON.stringify(data.opcionesPropina)) : undefined,
       opcionesDescuento: data.opcionesDescuento ? (typeof data.opcionesDescuento === 'string' ? data.opcionesDescuento : JSON.stringify(data.opcionesDescuento)) : undefined,
       habilitarPropinas: data.habilitarPropinas,
-      habilitarDescuentos: data.habilitarDescuentos
+      habilitarDescuentos: data.habilitarDescuentos,
+      tiempoReservaInventario: data.tiempoReservaInventario
     },
     create: {
       id: 1,
@@ -108,7 +110,8 @@ async updateConfiguracion(data: {
       opcionesPropina: data.opcionesPropina ? (typeof data.opcionesPropina === 'string' ? data.opcionesPropina : JSON.stringify(data.opcionesPropina)) : '[5, 10, 15]',
       opcionesDescuento: data.opcionesDescuento ? (typeof data.opcionesDescuento === 'string' ? data.opcionesDescuento : JSON.stringify(data.opcionesDescuento)) : '[5, 10, 20]',
       habilitarPropinas: data.habilitarPropinas !== undefined ? data.habilitarPropinas : true,
-      habilitarDescuentos: data.habilitarDescuentos !== undefined ? data.habilitarDescuentos : true
+      habilitarDescuentos: data.habilitarDescuentos !== undefined ? data.habilitarDescuentos : true,
+      tiempoReservaInventario: data.tiempoReservaInventario !== undefined ? data.tiempoReservaInventario : 5
     }
   });
 }
