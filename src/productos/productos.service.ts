@@ -105,6 +105,12 @@ export class ProductosService {
           }
         }
 
+        const insumosRequeridos = p.recetaInsumos?.map((r) => ({
+          IDinsumo: r.IDinsumo,
+          cantidad: Number(r.cantidad) || 0,
+          stockGlobal: Number(r.insumoRelacion?.disponible ?? r.insumoRelacion?.cantidad ?? 0)
+        })) || [];
+
         // Se elimina la receta del payload final para evitar sobrecarga de red
         const { recetaInsumos, ...rest } = p;
 
@@ -114,6 +120,7 @@ export class ProductosService {
           categoriaSeccionCocinaId: p.categoriaRelacion?.seccionCocinaId || null,
           disponibilidadCalculada,
           categoriaNombre: p.categoriaRelacion?.nombre || p.categoriaNombre,
+          insumosRequeridos,
         };
       });
 
