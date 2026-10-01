@@ -1137,9 +1137,15 @@ export class VentasService {
       }
     }
 
-    if (venta.estado === 'RESERVA' && estado !== 'RESERVA') {
+    const isOldActive = venta.estado !== 'RESERVA' && venta.estado !== 'CANCELADO' && venta.estado !== 'ANULADO';
+    const isNewActive = estado !== 'RESERVA' && estado !== 'CANCELADO' && estado !== 'ANULADO';
+
+    if (!isOldActive && isNewActive) {
       const orderItems = await this.prisma.orderventas.findMany({ where: { IDventas: id } });
-      await this.applyRecipeDeductions(orderItems, 'salida', 'Descuento al pasar de reserva a activo');
+      await this.applyRecipeDeductions(orderItems, 'salida', 'Descuento al pasar a estado activo');
+    } else if (isOldActive && !isNewActive) {
+      const orderItems = await this.prisma.orderventas.findMany({ where: { IDventas: id } });
+      await this.applyRecipeDeductions(orderItems, 'entrada', 'Reverso al pasar a estado inactivo (cancelado/anulado/reserva)');
     }
 
     await this.prisma.ventas.update({
@@ -1243,9 +1249,15 @@ export class VentasService {
       }
     }
 
-    if (venta.estado === 'RESERVA' && estadoUpdate !== 'RESERVA') {
+    const isOldActive = venta.estado !== 'RESERVA' && venta.estado !== 'CANCELADO' && venta.estado !== 'ANULADO';
+    const isNewActive = estadoUpdate !== 'RESERVA' && estadoUpdate !== 'CANCELADO' && estadoUpdate !== 'ANULADO';
+
+    if (!isOldActive && isNewActive) {
       const orderItems = await this.prisma.orderventas.findMany({ where: { IDventas: id } });
-      await this.applyRecipeDeductions(orderItems, 'salida', 'Descuento al pasar de reserva a activo');
+      await this.applyRecipeDeductions(orderItems, 'salida', 'Descuento al pasar a estado activo');
+    } else if (isOldActive && !isNewActive) {
+      const orderItems = await this.prisma.orderventas.findMany({ where: { IDventas: id } });
+      await this.applyRecipeDeductions(orderItems, 'entrada', 'Reverso al pasar a estado inactivo (cancelado/anulado/reserva)');
     }
 
     await this.prisma.ventas.update({

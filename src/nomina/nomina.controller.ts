@@ -50,7 +50,7 @@ export class NominaController {
   ) {
     let fotoPath: string | undefined;
 
-    if (foto) {
+    if (foto || dto.fotoBase64) {
       const isProd = process.env.NODE_ENV === 'production';
       const destFolder = isProd ? '/app/public/uploads/asistencia' : './public/uploads/asistencia';
       if (!fs.existsSync(destFolder)) fs.mkdirSync(destFolder, { recursive: true });
@@ -59,8 +59,16 @@ export class NominaController {
       const finalFilename = `${uniqueSuffix}.jpg`;
       const filePath = join(destFolder, finalFilename);
 
+      let buffer: Buffer;
+      if (foto) {
+        buffer = foto.buffer;
+      } else {
+        const base64Data = dto.fotoBase64!.replace(/^data:image\/\w+;base64,/, '');
+        buffer = Buffer.from(base64Data, 'base64');
+      }
+
       // Comprimir foto de selfie (menor resolución, más comprimida)
-      await sharp(foto.buffer)
+      await sharp(buffer)
         .resize({ width: 600, withoutEnlargement: true })
         .jpeg({ quality: 75 })
         .toFile(filePath);
@@ -90,7 +98,7 @@ export class NominaController {
   ) {
     let fotoPath: string | undefined;
 
-    if (foto) {
+    if (foto || dto.fotoBase64) {
       const isProd = process.env.NODE_ENV === 'production';
       const destFolder = isProd ? '/app/public/uploads/asistencia' : './public/uploads/asistencia';
       if (!fs.existsSync(destFolder)) fs.mkdirSync(destFolder, { recursive: true });
@@ -99,7 +107,15 @@ export class NominaController {
       const finalFilename = `${uniqueSuffix}_out.jpg`;
       const filePath = join(destFolder, finalFilename);
 
-      await sharp(foto.buffer)
+      let buffer: Buffer;
+      if (foto) {
+        buffer = foto.buffer;
+      } else {
+        const base64Data = dto.fotoBase64!.replace(/^data:image\/\w+;base64,/, '');
+        buffer = Buffer.from(base64Data, 'base64');
+      }
+
+      await sharp(buffer)
         .resize({ width: 600, withoutEnlargement: true })
         .jpeg({ quality: 75 })
         .toFile(filePath);
@@ -136,7 +152,7 @@ export class NominaController {
   ) {
     let fotoPath: string | undefined;
 
-    if (foto) {
+    if (foto || dto.fotoBase64) {
       const isProd = process.env.NODE_ENV === 'production';
       const destFolder = isProd ? '/app/public/uploads/asistencia' : './public/uploads/asistencia';
       if (!fs.existsSync(destFolder)) fs.mkdirSync(destFolder, { recursive: true });
@@ -145,7 +161,15 @@ export class NominaController {
       const finalFilename = `${uniqueSuffix}.jpg`;
       const filePath = join(destFolder, finalFilename);
 
-      await sharp(foto.buffer)
+      let buffer: Buffer;
+      if (foto) {
+        buffer = foto.buffer;
+      } else {
+        const base64Data = dto.fotoBase64!.replace(/^data:image\/\w+;base64,/, '');
+        buffer = Buffer.from(base64Data, 'base64');
+      }
+
+      await sharp(buffer)
         .resize(800)
         .jpeg({ quality: 60 })
         .toFile(filePath);
@@ -175,7 +199,7 @@ export class NominaController {
   ) {
     let fotoPath: string | undefined;
 
-    if (foto) {
+    if (foto || dto.fotoBase64) {
       const isProd = process.env.NODE_ENV === 'production';
       const destFolder = isProd ? '/app/public/uploads/asistencia' : './public/uploads/asistencia';
       if (!fs.existsSync(destFolder)) fs.mkdirSync(destFolder, { recursive: true });
@@ -184,7 +208,15 @@ export class NominaController {
       const finalFilename = `${uniqueSuffix}.jpg`;
       const filePath = join(destFolder, finalFilename);
 
-      await sharp(foto.buffer)
+      let buffer: Buffer;
+      if (foto) {
+        buffer = foto.buffer;
+      } else {
+        const base64Data = dto.fotoBase64!.replace(/^data:image\/\w+;base64,/, '');
+        buffer = Buffer.from(base64Data, 'base64');
+      }
+
+      await sharp(buffer)
         .resize(800)
         .jpeg({ quality: 60 })
         .toFile(filePath);

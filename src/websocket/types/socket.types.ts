@@ -29,6 +29,8 @@ export enum SocketEvent {
   PRINT_JOB        = 'print:job',
   PRINT_DONE       = 'print:done',
   PRINT_ACK        = 'print:ack',
+  GET_PRINT_SERVERS= 'print:get_servers',
+  PRINT_SERVERS_UPDATE = 'print:servers_update',
 }
 
 export enum Room {

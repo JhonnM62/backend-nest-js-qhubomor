@@ -22,6 +22,11 @@ export class RegistrarEntradaDto {
   @IsOptional()
   @IsString()
   observacion?: string;
+
+  @ApiPropertyOptional({ description: 'Foto en base64 para evitar bug de Blob en Safari iOS Web' })
+  @IsOptional()
+  @IsString()
+  fotoBase64?: string;
 }
 
 export class CreateTurnoManualDto {
@@ -71,6 +76,11 @@ export class RegistrarSalidaDto {
   @Type(() => Number)
   @IsNumber()
   longitud?: number;
+
+  @ApiPropertyOptional({ description: 'Foto en base64 para evitar bug de Blob en Safari iOS Web' })
+  @IsOptional()
+  @IsString()
+  fotoBase64?: string;
 }
 
 export class UpdateTurnoAdminDto {
@@ -229,6 +239,11 @@ export class UpdateDescuentoDto {
 
   @ApiPropertyOptional()
   @IsOptional()
+  @IsString()
+  concepto?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
   @IsNumber()
   @Min(1)
   @Type(() => Number)
@@ -318,4 +333,9 @@ export class DescansoDto {
   @IsOptional()
   @IsNumber()
   longitud?: number;
+
+  @ApiPropertyOptional({ description: 'Foto en base64 para evitar bug de Blob en Safari iOS Web' })
+  @IsOptional()
+  @IsString()
+  fotoBase64?: string;
 }

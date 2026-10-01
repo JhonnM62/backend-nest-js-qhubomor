@@ -109,6 +109,10 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
     if (clientData) {
       this.logger.log(`Client disconnected: ${client.id} (was in rooms: ${[...clientData.rooms].join(', ')})`);
       this.connectedClients.delete(client.id);
+      
+      if ((clientData as any).isPrintServer) {
+        this.broadcastPrintServers((clientData as any).negocioId ?? 'default');
+      }
     }
     this.reservasService.liberarTodasReservasDeSocket(client.id);
   }
@@ -226,15 +230,55 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage(SocketEvent.PRINT_REGISTER)
   handlePrintRegister(
     @ConnectedSocket() client: Socket,
-    @MessageBody() data: { negocioId?: string },
+    @MessageBody() data: { negocioId?: string, deviceName?: string },
   ) {
     const room = `printers:${data.negocioId ?? 'default'}`;
     client.join(room);
     const clientData = this.connectedClients.get(client.id);
-    if (clientData) clientData.rooms.add(room);
-    this.logger.log(`Dispositivo ${client.id} registrado como servidor de impresión en ${room}`);
+    if (clientData) {
+      clientData.rooms.add(room);
+      (clientData as any).isPrintServer = true;
+      (clientData as any).deviceName = data.deviceName || 'Dispositivo Desconocido';
+      (clientData as any).negocioId = data.negocioId ?? 'default';
+    }
+    this.logger.log(`Dispositivo ${client.id} (${data.deviceName}) registrado como servidor de impresión en ${room}`);
     client.emit(SocketEvent.PRINT_REGISTERED, { ok: true, room });
+    
+    // Broadcast the updated list to everyone in the namespace or just those who care
+    this.broadcastPrintServers(data.negocioId ?? 'default');
+    
     return { success: true };
+  }
+
+  @SubscribeMessage(SocketEvent.GET_PRINT_SERVERS)
+  handleGetPrintServers(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { negocioId?: string },
+  ) {
+    const negocioId = data?.negocioId ?? 'default';
+    const servers = this.getPrintServersForNegocio(negocioId);
+    client.emit(SocketEvent.PRINT_SERVERS_UPDATE, { negocioId, servers });
+    return { success: true, servers };
+  }
+
+  private broadcastPrintServers(negocioId: string) {
+    const servers = this.getPrintServersForNegocio(negocioId);
+    this.server.emit(SocketEvent.PRINT_SERVERS_UPDATE, { negocioId, servers });
+  }
+
+  private getPrintServersForNegocio(negocioId: string) {
+    const room = `printers:${negocioId}`;
+    const servers: any[] = [];
+    this.connectedClients.forEach((clientData, clientId) => {
+      if (clientData.rooms.has(room) && (clientData as any).isPrintServer) {
+        servers.push({
+          socketId: clientId,
+          deviceName: (clientData as any).deviceName || 'Dispositivo',
+          status: 'online',
+        });
+      }
+    });
+    return servers;
   }
 
   @SubscribeMessage(SocketEvent.PRINT_REQUEST)
@@ -244,7 +288,7 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
   ) {
     const room = `printers:${payload.negocioId ?? 'default'}`;
     this.logger.log(`Print request jobId=${payload.jobId} type=${payload.type} → room=${room}`);
-    // Reenviar el trabajo al primer dispositivo disponible con impresora
+    // Reenviar el trabajo a todos los dispositivos en la sala de impresoras
     this.server.to(room).emit(SocketEvent.PRINT_JOB, payload);
     return { success: true, jobId: payload.jobId };
   }
