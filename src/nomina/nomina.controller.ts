@@ -41,7 +41,7 @@ export class NominaController {
       }
       cb(null, true);
     },
-    limits: { fileSize: 15 * 1024 * 1024 }, // 15MB
+    limits: { fileSize: 15 * 1024 * 1024, fieldSize: 15 * 1024 * 1024 }, // 15MB
   }))
   async registrarEntrada(
     @Request() req: any,
@@ -90,7 +90,7 @@ export class NominaController {
       }
       cb(null, true);
     },
-    limits: { fileSize: 15 * 1024 * 1024 },
+    limits: { fileSize: 15 * 1024 * 1024, fieldSize: 15 * 1024 * 1024 },
   }))
   async registrarSalida(
     @Param('id') id: string,
@@ -146,7 +146,7 @@ export class NominaController {
       }
       cb(null, true);
     },
-    limits: { fileSize: 15 * 1024 * 1024 }, // 15MB
+    limits: { fileSize: 15 * 1024 * 1024, fieldSize: 15 * 1024 * 1024 }, // 15MB
   }))
   async iniciarDescanso(
     @Param('id') id: string,
@@ -195,7 +195,7 @@ export class NominaController {
       }
       cb(null, true);
     },
-    limits: { fileSize: 15 * 1024 * 1024 }, // 15MB
+    limits: { fileSize: 15 * 1024 * 1024, fieldSize: 15 * 1024 * 1024 }, // 15MB
   }))
   async terminarDescanso(
     @Param('id') id: string,
