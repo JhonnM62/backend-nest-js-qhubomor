@@ -293,26 +293,30 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() payload: PrintJobPayload & { targetSocketId?: string },
   ) {
     const room = `printers:${payload.negocioId ?? 'default'}`;
-    this.logger.log(`Print request jobId=${payload.jobId} type=${payload.type} target=${payload.targetSocketId || 'all'} → room=${room}`);
+    this.logger.log(`[PRINT DEBUG] Print request received from client ${client.id} - jobId=${payload.jobId} type=${payload.type} target=${payload.targetSocketId || 'all'} → room=${room}`);
     
     if (payload.targetSocketId) {
       // Reenviar el trabajo solo al dispositivo seleccionado
       const targetSockets = this.server.sockets.adapter.rooms.get(payload.targetSocketId);
+      this.logger.log(`[PRINT DEBUG] Target sockets size: ${targetSockets ? targetSockets.size : 0}`);
       if (!targetSockets || targetSockets.size === 0) {
         this.logger.warn(`El servidor destino ${payload.targetSocketId} no está conectado.`);
         this.server.emit(`print:ack:${payload.jobId}`, { jobId: payload.jobId, success: false, error: 'El dispositivo seleccionado no está conectado o cerró la app.' });
         return { success: false, error: 'Dispositivo desconectado' };
       }
       this.server.to(payload.targetSocketId).emit(SocketEvent.PRINT_JOB, payload);
+      this.logger.log(`[PRINT DEBUG] Emitted PRINT_JOB to targetSocketId ${payload.targetSocketId}`);
     } else {
       // Reenviar el trabajo a todos los dispositivos en la sala de impresoras
       const roomSockets = this.server.sockets.adapter.rooms.get(room);
+      this.logger.log(`[PRINT DEBUG] Room ${room} sockets size: ${roomSockets ? roomSockets.size : 0}`);
       if (!roomSockets || roomSockets.size === 0) {
         this.logger.warn(`No hay servidores en la sala ${room}.`);
         this.server.emit(`print:ack:${payload.jobId}`, { jobId: payload.jobId, success: false, error: 'No hay servidores de impresión conectados actualmente.' });
         return { success: false, error: 'Sin servidores' };
       }
       this.server.to(room).emit(SocketEvent.PRINT_JOB, payload);
+      this.logger.log(`[PRINT DEBUG] Emitted PRINT_JOB to room ${room}`);
     }
     
     return { success: true, jobId: payload.jobId };
