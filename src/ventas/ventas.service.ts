@@ -502,9 +502,11 @@ export class VentasService {
         // Apply Jornada Comercial to Orderventas
         const orderFechaContable = fechaContable;
 
+        const { seccionCocinaId, categoriaSeccionCocinaId, ...validProducto } = producto as any;
+
         return this.prisma.orderventas.create({
           data: {
-            ...producto,
+            ...validProducto,
             nombre: nombreProducto,
             categoria: categoriaProducto,
             nombreProducto,
@@ -693,9 +695,11 @@ export class VentasService {
             preparadoAt = preparadoAt || new Date();
           }
 
+          const { seccionCocinaId, categoriaSeccionCocinaId, ...validProducto } = producto as any;
+
           return this.prisma.orderventas.create({
             data: {
-              ...producto,
+              ...validProducto,
               nombre: nombreProducto,
               categoria: categoriaProducto,
               nombreProducto,
