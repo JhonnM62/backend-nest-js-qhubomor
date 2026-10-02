@@ -284,12 +284,19 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage(SocketEvent.PRINT_REQUEST)
   handlePrintRequest(
     @ConnectedSocket() client: Socket,
-    @MessageBody() payload: PrintJobPayload,
+    @MessageBody() payload: PrintJobPayload & { targetSocketId?: string },
   ) {
     const room = `printers:${payload.negocioId ?? 'default'}`;
-    this.logger.log(`Print request jobId=${payload.jobId} type=${payload.type} → room=${room}`);
-    // Reenviar el trabajo a todos los dispositivos en la sala de impresoras
-    this.server.to(room).emit(SocketEvent.PRINT_JOB, payload);
+    this.logger.log(`Print request jobId=${payload.jobId} type=${payload.type} target=${payload.targetSocketId || 'all'} → room=${room}`);
+    
+    if (payload.targetSocketId) {
+      // Reenviar el trabajo solo al dispositivo seleccionado
+      this.server.to(payload.targetSocketId).emit(SocketEvent.PRINT_JOB, payload);
+    } else {
+      // Reenviar el trabajo a todos los dispositivos en la sala de impresoras
+      this.server.to(room).emit(SocketEvent.PRINT_JOB, payload);
+    }
+    
     return { success: true, jobId: payload.jobId };
   }
 
