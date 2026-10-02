@@ -63,7 +63,9 @@ export class NominaController {
       if (foto) {
         buffer = foto.buffer;
       } else {
-        const base64Data = dto.fotoBase64!.replace(/^data:image\/\w+;base64,/, '');
+        const base64Data = dto.fotoBase64!.includes('base64,') 
+          ? dto.fotoBase64!.split('base64,')[1] 
+          : dto.fotoBase64!;
         buffer = Buffer.from(base64Data, 'base64');
       }
 
@@ -111,7 +113,9 @@ export class NominaController {
       if (foto) {
         buffer = foto.buffer;
       } else {
-        const base64Data = dto.fotoBase64!.replace(/^data:image\/\w+;base64,/, '');
+        const base64Data = dto.fotoBase64!.includes('base64,') 
+          ? dto.fotoBase64!.split('base64,')[1] 
+          : dto.fotoBase64!;
         buffer = Buffer.from(base64Data, 'base64');
       }
 
@@ -165,7 +169,9 @@ export class NominaController {
       if (foto) {
         buffer = foto.buffer;
       } else {
-        const base64Data = dto.fotoBase64!.replace(/^data:image\/\w+;base64,/, '');
+        const base64Data = dto.fotoBase64!.includes('base64,') 
+          ? dto.fotoBase64!.split('base64,')[1] 
+          : dto.fotoBase64!;
         buffer = Buffer.from(base64Data, 'base64');
       }
 
@@ -212,7 +218,9 @@ export class NominaController {
       if (foto) {
         buffer = foto.buffer;
       } else {
-        const base64Data = dto.fotoBase64!.replace(/^data:image\/\w+;base64,/, '');
+        const base64Data = dto.fotoBase64!.includes('base64,') 
+          ? dto.fotoBase64!.split('base64,')[1] 
+          : dto.fotoBase64!;
         buffer = Buffer.from(base64Data, 'base64');
       }
 
