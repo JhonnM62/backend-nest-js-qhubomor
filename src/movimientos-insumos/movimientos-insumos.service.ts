@@ -123,6 +123,30 @@ export class MovimientosInsumosService {
       this.appGateway.emitToInsumos(SocketEvent.REFRESH_INSUMOS, { action: 'update', data: insumoActualizado });
     }
 
+    if (cajaId) {
+      const cajaInsumo = await this.prisma.aperturaCierreInsumos.findFirst({
+        where: { IDcaja: cajaId, nombreInsumo: insumoId }
+      });
+      if (cajaInsumo) {
+        await this.prisma.aperturaCierreInsumos.update({
+          where: { Idcierreyapertura: cajaInsumo.Idcierreyapertura },
+          data: {
+            cantApertura: (cajaInsumo.cantApertura || 0) + cantidadReal
+          }
+        });
+        await this.prisma.historialCajaInsumos.create({
+          data: {
+            Idcierreyapertura: cajaInsumo.Idcierreyapertura,
+            campoModificado: 'cantApertura',
+            valorAnterior: String(cajaInsumo.cantApertura || 0),
+            valorNuevo: String((cajaInsumo.cantApertura || 0) + cantidadReal),
+            fechaYHora: new Date(),
+            usuario: usuario || 'Sistema'
+          }
+        });
+      }
+    }
+
     return {
       success: true,
       message: syncGlobalStock ? 'Paquete abierto y stock actualizado' : 'Paquete abierto exitosamente',
@@ -168,6 +192,31 @@ export class MovimientosInsumosService {
     });
 
     this.appGateway.emitToInsumos(SocketEvent.REFRESH_INSUMOS, { action: 'update', data: insumoActualizado });
+
+    if (cajaId) {
+      const cajaInsumo = await this.prisma.aperturaCierreInsumos.findFirst({
+        where: { IDcaja: cajaId, nombreInsumo: insumoId }
+      });
+      if (cajaInsumo) {
+        const newVal = Math.max(0, (cajaInsumo.cantApertura || 0) - cantidadDescontada);
+        await this.prisma.aperturaCierreInsumos.update({
+          where: { Idcierreyapertura: cajaInsumo.Idcierreyapertura },
+          data: {
+            cantApertura: newVal
+          }
+        });
+        await this.prisma.historialCajaInsumos.create({
+          data: {
+            Idcierreyapertura: cajaInsumo.Idcierreyapertura,
+            campoModificado: 'cantApertura',
+            valorAnterior: String(cajaInsumo.cantApertura || 0),
+            valorNuevo: String(newVal),
+            fechaYHora: new Date(),
+            usuario: usuario || 'Sistema'
+          }
+        });
+      }
+    }
 
     return {
       success: true,
@@ -233,6 +282,30 @@ export class MovimientosInsumosService {
 
     if (syncGlobalStock && diferencia !== 0) {
       this.appGateway.emitToInsumos(SocketEvent.REFRESH_INSUMOS, { action: 'update', data: insumoActualizado });
+    }
+
+    if (cajaId) {
+      const cajaInsumo = await this.prisma.aperturaCierreInsumos.findFirst({
+        where: { IDcaja: cajaId, nombreInsumo: insumoId }
+      });
+      if (cajaInsumo) {
+        await this.prisma.aperturaCierreInsumos.update({
+          where: { Idcierreyapertura: cajaInsumo.Idcierreyapertura },
+          data: {
+            cantApertura: (cajaInsumo.cantApertura || 0) + cantidadAgregada
+          }
+        });
+        await this.prisma.historialCajaInsumos.create({
+          data: {
+            Idcierreyapertura: cajaInsumo.Idcierreyapertura,
+            campoModificado: 'cantApertura',
+            valorAnterior: String(cajaInsumo.cantApertura || 0),
+            valorNuevo: String((cajaInsumo.cantApertura || 0) + cantidadAgregada),
+            fechaYHora: new Date(),
+            usuario: usuario || 'Sistema'
+          }
+        });
+      }
     }
 
     return {
