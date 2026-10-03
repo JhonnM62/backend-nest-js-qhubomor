@@ -297,7 +297,7 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
     
     if (payload.targetSocketId) {
       // Reenviar el trabajo solo al dispositivo seleccionado
-      const targetSockets = this.server.sockets.adapter.rooms.get(payload.targetSocketId);
+      const targetSockets = this.server.adapter.rooms.get(payload.targetSocketId);
       this.logger.log(`[PRINT DEBUG] Target sockets size: ${targetSockets ? targetSockets.size : 0}`);
       if (!targetSockets || targetSockets.size === 0) {
         this.logger.warn(`El servidor destino ${payload.targetSocketId} no está conectado.`);
@@ -308,7 +308,7 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
       this.logger.log(`[PRINT DEBUG] Emitted PRINT_JOB to targetSocketId ${payload.targetSocketId}`);
     } else {
       // Reenviar el trabajo a todos los dispositivos en la sala de impresoras
-      const roomSockets = this.server.sockets.adapter.rooms.get(room);
+      const roomSockets = this.server.adapter.rooms.get(room);
       this.logger.log(`[PRINT DEBUG] Room ${room} sockets size: ${roomSockets ? roomSockets.size : 0}`);
       if (!roomSockets || roomSockets.size === 0) {
         this.logger.warn(`No hay servidores en la sala ${room}.`);
@@ -399,7 +399,7 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   getClientsInRoom(room: string): string[] {
-    const roomClients = this.server.sockets.adapter.rooms.get(room);
+    const roomClients = this.server.adapter.rooms.get(room);
     return roomClients ? [...roomClients] : [];
   }
 
