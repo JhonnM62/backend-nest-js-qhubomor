@@ -245,9 +245,10 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
       clientData.rooms.add(room);
       (clientData as any).isPrintServer = true;
       (clientData as any).deviceName = data.deviceName || 'Dispositivo Desconocido';
+      (clientData as any).deviceId = (data as any).deviceId || client.id;
       (clientData as any).negocioId = data.negocioId ?? 'default';
     }
-    this.logger.log(`Dispositivo ${client.id} (${data.deviceName}) registrado como servidor de impresión en ${room}`);
+    this.logger.log(`Dispositivo ${client.id} (${data.deviceName}, ID: ${(clientData as any)?.deviceId}) registrado como servidor de impresión en ${room}`);
     client.emit(SocketEvent.PRINT_REGISTERED, { ok: true, room });
     
     // Broadcast the updated list to everyone in the namespace or just those who care
@@ -278,7 +279,8 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.connectedClients.forEach((clientData, clientId) => {
       if (clientData.rooms.has(room) && (clientData as any).isPrintServer) {
         servers.push({
-          socketId: clientId,
+          socketId: clientId, // Mantener compatibilidad
+          serverId: (clientData as any).deviceId || clientId, // ID persistente
           deviceName: (clientData as any).deviceName || 'Dispositivo',
           status: 'online',
         });
@@ -296,16 +298,25 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.logger.log(`[PRINT DEBUG] Print request received from client ${client.id} - jobId=${payload.jobId} type=${payload.type} target=${payload.targetSocketId || 'all'} → room=${room}`);
     
     if (payload.targetSocketId) {
+      // Intentar buscar el socketId real asumiendo que targetSocketId es un deviceId
+      let actualTargetSocketId = payload.targetSocketId;
+      for (const [clientId, data] of this.connectedClients.entries()) {
+        if ((data as any).deviceId === payload.targetSocketId) {
+          actualTargetSocketId = clientId;
+          break;
+        }
+      }
+
       // Reenviar el trabajo solo al dispositivo seleccionado
-      const targetSockets = (this.server as any).adapter.rooms.get(payload.targetSocketId);
-      this.logger.log(`[PRINT DEBUG] Target sockets size: ${targetSockets ? targetSockets.size : 0}`);
+      const targetSockets = (this.server as any).adapter.rooms.get(actualTargetSocketId);
+      this.logger.log(`[PRINT DEBUG] Target sockets size: ${targetSockets ? targetSockets.size : 0} for mapped ID ${actualTargetSocketId}`);
       if (!targetSockets || targetSockets.size === 0) {
         this.logger.warn(`El servidor destino ${payload.targetSocketId} no está conectado.`);
         this.server.emit(`print:ack:${payload.jobId}`, { jobId: payload.jobId, success: false, error: 'El dispositivo seleccionado no está conectado o cerró la app.' });
         return { success: false, error: 'Dispositivo desconectado' };
       }
-      this.server.to(payload.targetSocketId).emit(SocketEvent.PRINT_JOB, payload);
-      this.logger.log(`[PRINT DEBUG] Emitted PRINT_JOB to targetSocketId ${payload.targetSocketId}`);
+      this.server.to(actualTargetSocketId).emit(SocketEvent.PRINT_JOB, payload);
+      this.logger.log(`[PRINT DEBUG] Emitted PRINT_JOB to actual targetSocketId ${actualTargetSocketId}`);
     } else {
       // Reenviar el trabajo a todos los dispositivos en la sala de impresoras
       const roomSockets = (this.server as any).adapter.rooms.get(room);
