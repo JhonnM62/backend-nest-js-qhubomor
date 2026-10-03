@@ -178,7 +178,7 @@ export class CajaService {
                   }
                 });
               }
-              if (existing.cantDeCierre !== insumo.cantDeCierre) {
+              if (existing.cantDeCierre !== insumo.cantDeCierre && insumo.cantDeCierre !== undefined) {
                 await tx.historialCajaInsumos.create({
                   data: {
                     Idcierreyapertura: insumo.Idcierreyapertura,
@@ -316,7 +316,9 @@ export class CajaService {
             const existing = await tx.aperturaCierreInsumos.findUnique({
               where: { Idcierreyapertura: insumoCierre.Idcierreyapertura }
             });
-            const gastadoFisico = (insumoCierre.cantApertura !== undefined ? insumoCierre.cantApertura : (existing?.cantApertura || 0)) - (insumoCierre.cantDeCierre || 0);
+            const newApertura = insumoCierre.cantApertura !== undefined ? insumoCierre.cantApertura : (existing?.cantApertura || 0);
+            const newCierre = insumoCierre.cantDeCierre !== undefined ? insumoCierre.cantDeCierre : (existing?.cantDeCierre || 0);
+            const gastadoFisico = Number(newApertura) - Number(newCierre);
 
             const globalInsumo = insumoCierre.nombreInsumo ? await tx.insumos.findUnique({ where: { IDalimentos: insumoCierre.nombreInsumo } }) : null;
 
@@ -324,7 +326,7 @@ export class CajaService {
               where: { Idcierreyapertura: insumoCierre.Idcierreyapertura },
               data: {
                 cantApertura: insumoCierre.cantApertura !== undefined ? insumoCierre.cantApertura : existing?.cantApertura,
-                cantDeCierre: insumoCierre.cantDeCierre,
+                cantDeCierre: insumoCierre.cantDeCierre !== undefined ? insumoCierre.cantDeCierre : existing?.cantDeCierre,
                 observacion: insumoCierre.observacion,
                 seUtilizaron: gastadoFisico,
                 paraQueProducto: insumoCierre.paraQueProducto,
@@ -344,7 +346,7 @@ export class CajaService {
               });
             }
 
-            if (existing && existing.cantDeCierre !== insumoCierre.cantDeCierre) {
+            if (existing && existing.cantDeCierre !== insumoCierre.cantDeCierre && insumoCierre.cantDeCierre !== undefined) {
               await tx.historialCajaInsumos.create({
                 data: {
                   Idcierreyapertura: insumoCierre.Idcierreyapertura,
