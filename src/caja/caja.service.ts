@@ -167,7 +167,7 @@ export class CajaService {
 
             // Log history if changed
             if (existing) {
-              if (existing.cantApertura !== insumo.cantApertura) {
+              if (existing.cantApertura !== insumo.cantApertura && insumo.cantApertura !== undefined) {
                 await tx.historialCajaInsumos.create({
                   data: {
                     Idcierreyapertura: insumo.Idcierreyapertura,
