@@ -732,7 +732,8 @@ export class CajaService {
 
     const insumosCaja = await this.prisma.aperturaCierreInsumos.findMany({
       where: { IDcaja: caja.IDcaja },
-      include: { insumo: true, historial: { orderBy: { fechaYHora: 'desc' }, take: 20 } }
+      include: { insumo: true, historial: { orderBy: { fechaYHora: 'desc' }, take: 20 } },
+      orderBy: [{ fechaYHora: 'asc' }, { Idcierreyapertura: 'asc' }]
     });
 
     // Cargar todos los productos para mapear nombres
@@ -1839,7 +1840,8 @@ export class CajaService {
       where: { IDcaja: cajaId },
       include: {
         insumo: true
-      }
+      },
+      orderBy: [{ fechaYHora: 'asc' }, { Idcierreyapertura: 'asc' }]
     });
 
     const preview = [];
@@ -1891,7 +1893,8 @@ export class CajaService {
       where: { IDcaja: cajaId },
       include: {
         insumo: true
-      }
+      },
+      orderBy: [{ fechaYHora: 'asc' }, { Idcierreyapertura: 'asc' }]
     });
 
     let ajustesRealizados = 0;

@@ -144,6 +144,13 @@ export class MovimientosInsumosService {
             usuario: usuario || 'Sistema'
           }
         });
+
+        this.appGateway.emitToCaja(SocketEvent.REFRESH_CAJA, {
+          action: 'update',
+          cajaId,
+          updaterName: usuario,
+          timestamp: new Date().toISOString(),
+        });
       }
     }
 
@@ -214,6 +221,13 @@ export class MovimientosInsumosService {
             fechaYHora: new Date(),
             usuario: usuario || 'Sistema'
           }
+        });
+
+        this.appGateway.emitToCaja(SocketEvent.REFRESH_CAJA, {
+          action: 'update',
+          cajaId,
+          updaterName: usuario,
+          timestamp: new Date().toISOString(),
         });
       }
     }
@@ -304,6 +318,13 @@ export class MovimientosInsumosService {
             fechaYHora: new Date(),
             usuario: usuario || 'Sistema'
           }
+        });
+
+        this.appGateway.emitToCaja(SocketEvent.REFRESH_CAJA, {
+          action: 'update',
+          cajaId,
+          updaterName: usuario,
+          timestamp: new Date().toISOString(),
         });
       }
     }
