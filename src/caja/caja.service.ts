@@ -1860,7 +1860,7 @@ export class CajaService {
       }
 
       const stockFisicoTotal = closedStock + Number(insumoCaja.cantDeCierre);
-      const stockSistemaTotal = Number(insumo.disponible) || insumo.cantidad || 0;
+      const stockSistemaTotal = (insumo.disponible !== null && insumo.disponible !== undefined) ? Number(insumo.disponible) : (insumo.cantidad || 0);
       const diferencia = stockFisicoTotal - stockSistemaTotal;
 
       if (diferencia !== 0) {
@@ -1921,7 +1921,7 @@ export class CajaService {
         }
 
         const stockFisicoTotal = closedStock + Number(insumoCaja.cantDeCierre);
-        const stockSistemaTotal = Number(insumo.disponible) || insumo.cantidad || 0;
+        const stockSistemaTotal = (insumo.disponible !== null && insumo.disponible !== undefined) ? Number(insumo.disponible) : (insumo.cantidad || 0);
         const diferencia = stockFisicoTotal - stockSistemaTotal;
 
         if (diferencia !== 0) {
