@@ -1818,7 +1818,7 @@ export class CajaService {
       for (let i = 0; i < conteos.length; i++) {
         const conteo = conteos[i];
         if (conteo && conteo.cajaId === cajaId) {
-          const currentSystemValue = Number(insumo.cantidad) || 0;
+          const currentSystemValue = (insumo.disponible !== null && insumo.disponible !== undefined) ? Number(insumo.disponible) : (insumo.cantidad || 0);
           if (conteo.disponibleEnSistema !== currentSystemValue) {
             conteo.disponibleEnSistema = currentSystemValue;
             conteo.diferencia = Number(conteo.cantContada) - currentSystemValue;
