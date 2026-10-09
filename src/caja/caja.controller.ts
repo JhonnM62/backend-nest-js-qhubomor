@@ -151,6 +151,14 @@ export class CajaController {
     return this.cajaService.editarConteo(id, insumoId, Number(conteoIndex), body.cantContada);
   }
 
+  @Patch(':id/refresh-conteos')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Actualizar el stock de sistema para todos los conteos de la caja' })
+  refreshConteosCaja(@Param('id') id: string) {
+    return this.cajaService.refreshConteosCaja(id);
+  }
+
   @Post(':id/auto-cuadre/preview')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()

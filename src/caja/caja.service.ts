@@ -1792,6 +1792,60 @@ export class CajaService {
     return { success: true, message: 'Conteo actualizado correctamente', data: conteo };
   }
 
+  async refreshConteosCaja(cajaId: string) {
+    const caja = await this.prisma.aperturaCierreCaja.findUnique({
+      where: { IDcaja: cajaId }
+    });
+
+    if (!caja) {
+      throw new NotFoundException(`Caja con ID ${cajaId} no encontrada`);
+    }
+
+    const insumos = await this.prisma.insumos.findMany();
+    let actualizados = 0;
+
+    for (const insumo of insumos) {
+      if (!insumo.ultimosConteos) continue;
+
+      let conteos: any[] = [];
+      if (typeof insumo.ultimosConteos === 'string') {
+        try { conteos = JSON.parse(insumo.ultimosConteos); } catch (e) { conteos = []; }
+      } else {
+        conteos = Array.isArray(insumo.ultimosConteos) ? (insumo.ultimosConteos as any[]) : [];
+      }
+
+      let huboCambio = false;
+      for (let i = 0; i < conteos.length; i++) {
+        const conteo = conteos[i];
+        if (conteo && conteo.cajaId === cajaId) {
+          const currentSystemValue = Number(insumo.cantidad) || 0;
+          if (conteo.disponibleEnSistema !== currentSystemValue) {
+            conteo.disponibleEnSistema = currentSystemValue;
+            conteo.diferencia = Number(conteo.cantContada) - currentSystemValue;
+            huboCambio = true;
+          }
+        }
+      }
+
+      if (huboCambio) {
+        await this.prisma.insumos.update({
+          where: { IDalimentos: insumo.IDalimentos },
+          data: { ultimosConteos: conteos }
+        });
+        actualizados++;
+      }
+    }
+
+    if (actualizados > 0) {
+      this.appGateway.emitToRoom('insumos', SocketEvent.REFRESH_INSUMOS, {
+        action: 'conteos_refrescados',
+        cajaId
+      });
+    }
+
+    return { success: true, message: `Se actualizaron ${actualizados} insumos con el stock actual` };
+  }
+
   async reabrirCaja(id: string) {
     const caja = await this.prisma.aperturaCierreCaja.findUnique({
       where: { IDcaja: id }
