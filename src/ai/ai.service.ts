@@ -641,27 +641,49 @@ REGLAS DE FORMATO:
       const modelToUse = configIA.modeloDefecto || 'gemini-1.5-flash';
 
       const prompt = `
-Eres un verificador biométrico estricto de asistencia laboral para un restaurante/negocio.
-Analiza detenidamente esta fotografía tomada por un empleado al marcar turno o descanso:
+Eres un verificador biométrico ULTRA ESTRICTO de control de asistencia laboral para un restaurante/empresa.
+Tu función es auditar con el máximo rigor las fotos tomadas por empleados en sus registros de asistencia (entrada, salida de turno, inicio de descanso y fin de descanso).
 
-CRITERIOS DE APROBACIÓN (valido = true):
-1. Aparece el rostro real y en vivo de una persona mirando hacia la cámara (de frente o levemente en 3/4).
-2. El rostro está claramente visible (ojos, nariz y boca visibles, no cubierto por manos, mascarilla completa, pasamontañas ni gorras que tapen los ojos).
-3. El rostro está adecuadamente encuadrado y centrado (plano selfie, busto o primer plano), coherente con una silueta de encuadre.
+OBJETIVO CRÍTICO:
+Evitar fraudes y malas prácticas donde los empleados evaden el registro biométrico inclinando el celular hacia arriba para enfocar el techo, el cielo, el techo de un automóvil/vehículo o paredes vacías, dejando su rostro oculto, cortado o asomado únicamente en el borde inferior o lateral de la imagen.
 
-CRITERIOS DE RECHAZO ESTRICTO (valido = false):
-- Fotos de objetos, paredes, pisos, techos, escritorios, teclados, vehículos, ropa vacía, mascotas o cualquier cosa sin un rostro humano real.
-- Fotos donde la persona está de espaldas, o solo se ve el cabello, nuca, hombros o una oreja sin rostro claro.
-- Fotos completamente oscuras, sobreexpuestas o muy borrosas donde no se distingan las facciones.
-- Fotos de fotos en otra pantalla (celular, laptop) o fotos impresas (suplantación de identidad).
-- Fotos tomadas horizontalmente o acostado donde el rostro no esté en posición vertical razonable.
+REGLAS DE EVALUACIÓN (TODAS son obligatorias para responder con valido = true):
+
+1. ROSTRO COMPLETO Y TOTALMENTE DENTRO DEL CUADRO:
+   - Deben verse con nitidez y de forma completa TODAS las partes anatómicas del rostro: frente completa, cejas, ambos ojos, nariz, mejillas, boca completa y mentón/barbilla.
+   - RECHAZO OBLIGATORIO si la boca o el mentón quedan cortados por el borde inferior de la imagen.
+   - RECHAZO OBLIGATORIO si la persona solo asoma la parte superior de la cabeza, la frente o los ojos por la parte inferior o lateral.
+   - RECHAZO OBLIGATORIO si el rostro está cortado por cualquier margen (inferior, superior o lateral).
+
+2. PROHIBIDO ENFOCAR AL TECHO, CIELO O FONDOS PREDOMINANTES:
+   - La cámara debe estar sostenida DE FRENTE al empleado, a la altura de sus ojos o de su cara.
+   - RECHAZO OBLIGATORIO si la toma es en contrapicado apuntando hacia arriba hacia el techo de una habitación, el techo/tapicería de un vehículo, el cielo o lámparas, haciendo que ese techo o cielo ocupe la mayor parte de la fotografía (más del 40-50%) mientras el rostro queda arrinconado abajo o cortado.
+
+3. ENCUADRE CENTRADO Y TAMAÑO DE SELFIE BIOMÉTRICO:
+   - El rostro debe estar ubicado en el CENTRO de la imagen (dentro del área central de la silueta biométrica).
+   - El rostro debe tener un tamaño prominente: debe ocupar entre el 30% y el 70% de la altura de la imagen.
+   - RECHAZO OBLIGATORIO si el rostro está alejado o diminuto en una esquina o al fondo.
+
+4. POSTURA, NITIDEZ Y AUTENTICIDAD:
+   - El empleado debe estar mirando directamente de frente al lente de la cámara.
+   - No se aceptan fotos con el rostro tapado por manos, mascarillas, capotas o viseras que tapen los ojos o la frente.
+   - Debe ser una persona viva en tiempo real (no una foto de una pantalla de computador/celular ni foto impresa en papel).
+   - La imagen no debe ser excesivamente oscura o borrosa.
+
+GUÍA DE MOTIVOS DE RECHAZO (en "motivo", sé claro, directo e instructivo en español):
+- Si la cámara apunta al techo, cielo o techo de auto: "La cámara está apuntando al techo o al cielo. Sostén el celular de frente a la altura de tu rostro."
+- Si el rostro está cortado en la parte inferior o solo asoma la frente/ojos: "Rostro incompleto. Muestra tu rostro entero desde la frente hasta la barbilla dentro de la silueta."
+- Si el rostro no está centrado: "Centra tu rostro en la pantalla. Coloca tu cara en el centro de la silueta."
+- Si el rostro está muy lejos o pequeño: "Acércate más a la cámara para que tu rostro ocupe el centro de la silueta."
+- Si está cubierto o no mira de frente: "Rostro cubierto o no visible. Descubre tu rostro y mira de frente a la cámara."
+- Si no hay rostro o es un objeto/pantalla: "No se detecta un rostro humano claro mirando de frente a la cámara."
 
 Responde ÚNICA Y EXCLUSIVAMENTE con el siguiente JSON:
 {
   "valido": boolean,
   "motivo": string
 }
-En "motivo", si es false, da una instrucción clara y concisa en español (ej: "No se detecta un rostro en la foto", "El rostro no está mirando de frente a la cámara", "El rostro está cubierto o demasiado lejos"). Si es true, deja "motivo" vacío.
+Si valido es false, "motivo" debe contener la instrucción correctiva exacta en español. Si valido es true, "motivo" debe ser una cadena vacía "".
 `;
 
       const responseSchema: Schema = {
