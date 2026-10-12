@@ -139,4 +139,17 @@ export class AiController {
 
     return this.aiService.refineExtraction(previousData, correctionPrompt, context);
   }
+
+  @Post('validar-rostro')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Valida si una foto contiene un rostro humano encuadrado para asistencia' })
+  @Roles('Admin app', 'Admin negocio', 'Empleado')
+  async validarRostro(
+    @Body('image') image?: string
+  ) {
+    if (!image) {
+      return { valido: true, motivo: '', omitido: true };
+    }
+    return this.aiService.validarFotoFacialString(image);
+  }
 }

@@ -633,6 +633,7 @@ model ConfiguracionIA {
   isActive         Boolean  @default(true)
   updatedAt        DateTime @updatedAt
   usarRazonamiento Boolean? @default(false)
+  validarFacialAsistencia Boolean? @default(false)
 
   @@map("CONFIGURACION_IA")
 }

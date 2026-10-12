@@ -131,7 +131,8 @@ async updateConfiguracion(data: {
           topP: 0.95,
           maxTokens: 8192,
           isActive: true,
-          usarRazonamiento: false
+          usarRazonamiento: false,
+          validarFacialAsistencia: false,
         }
       });
     }
@@ -147,6 +148,7 @@ async updateConfiguracion(data: {
     maxTokens?: number;
     isActive?: boolean;
     usarRazonamiento?: boolean;
+    validarFacialAsistencia?: boolean;
   }) {
     return this.prisma.configuracionIA.upsert({
       where: { id: 1 },
@@ -159,6 +161,7 @@ async updateConfiguracion(data: {
         maxTokens: 8192,
         isActive: true,
         usarRazonamiento: false,
+        validarFacialAsistencia: false,
         ...data,
       }
     });

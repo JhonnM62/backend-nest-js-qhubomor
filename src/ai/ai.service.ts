@@ -623,4 +623,113 @@ REGLAS DE FORMATO:
       throw new BadRequestException(`Error al procesar Auto-Cuadre con IA: ${error.message}`);
     }
   }
+
+  async validarFotoFacial(imageBuffer: Buffer, mimeType: string = 'image/jpeg') {
+    const configIA = await this.configService.getConfiguracionIA();
+
+    // Si la IA está inactiva, o la validación facial está desactivada, o no hay API Key, se omite y aprueba
+    if (!configIA.isActive || !configIA.validarFacialAsistencia || !configIA.apiKey?.trim()) {
+      return {
+        valido: true,
+        motivo: '',
+        omitido: true,
+      };
+    }
+
+    try {
+      const ai = new GoogleGenAI({ apiKey: configIA.apiKey });
+      const modelToUse = configIA.modeloDefecto || 'gemini-1.5-flash';
+
+      const prompt = `
+Eres un verificador biométrico estricto de asistencia laboral para un restaurante/negocio.
+Analiza detenidamente esta fotografía tomada por un empleado al marcar turno o descanso:
+
+CRITERIOS DE APROBACIÓN (valido = true):
+1. Aparece el rostro real y en vivo de una persona mirando hacia la cámara (de frente o levemente en 3/4).
+2. El rostro está claramente visible (ojos, nariz y boca visibles, no cubierto por manos, mascarilla completa, pasamontañas ni gorras que tapen los ojos).
+3. El rostro está adecuadamente encuadrado y centrado (plano selfie, busto o primer plano), coherente con una silueta de encuadre.
+
+CRITERIOS DE RECHAZO ESTRICTO (valido = false):
+- Fotos de objetos, paredes, pisos, techos, escritorios, teclados, vehículos, ropa vacía, mascotas o cualquier cosa sin un rostro humano real.
+- Fotos donde la persona está de espaldas, o solo se ve el cabello, nuca, hombros o una oreja sin rostro claro.
+- Fotos completamente oscuras, sobreexpuestas o muy borrosas donde no se distingan las facciones.
+- Fotos de fotos en otra pantalla (celular, laptop) o fotos impresas (suplantación de identidad).
+- Fotos tomadas horizontalmente o acostado donde el rostro no esté en posición vertical razonable.
+
+Responde ÚNICA Y EXCLUSIVAMENTE con el siguiente JSON:
+{
+  "valido": boolean,
+  "motivo": string
+}
+En "motivo", si es false, da una instrucción clara y concisa en español (ej: "No se detecta un rostro en la foto", "El rostro no está mirando de frente a la cámara", "El rostro está cubierto o demasiado lejos"). Si es true, deja "motivo" vacío.
+`;
+
+      const responseSchema: Schema = {
+        type: Type.OBJECT,
+        properties: {
+          valido: { type: Type.BOOLEAN },
+          motivo: { type: Type.STRING },
+        },
+        required: ["valido", "motivo"],
+      };
+
+      const response = await ai.models.generateContent({
+        model: modelToUse,
+        contents: [
+          {
+            role: 'user',
+            parts: [
+              { text: prompt },
+              {
+                inlineData: {
+                  data: imageBuffer.toString('base64'),
+                  mimeType: mimeType || 'image/jpeg',
+                },
+              },
+            ],
+          },
+        ],
+        config: {
+          responseMimeType: 'application/json',
+          responseSchema: responseSchema,
+          temperature: 0.1,
+        },
+      });
+
+      const responseText = response.text?.trim() || '{}';
+      const parsed = this.repairAndParseJSON(responseText);
+
+      return {
+        valido: typeof parsed.valido === 'boolean' ? parsed.valido : true,
+        motivo: parsed.motivo || '',
+        omitido: false,
+      };
+    } catch (error: any) {
+      this.logger.error(`Error al validar foto facial con IA (${error.message}). Aplicando fallback permisivo.`);
+      // En caso de fallo de red o cuota en Gemini, no bloquear al empleado
+      return {
+        valido: true,
+        motivo: '',
+        omitido: true,
+      };
+    }
+  }
+
+  async validarFotoFacialString(imageDataUrlOrBase64: string) {
+    if (!imageDataUrlOrBase64) {
+      return { valido: true, motivo: '', omitido: true };
+    }
+
+    let mimeType = 'image/jpeg';
+    let base64Data = imageDataUrlOrBase64;
+
+    const match = imageDataUrlOrBase64.match(/^data:([^;]+);base64,(.+)$/);
+    if (match) {
+      mimeType = match[1];
+      base64Data = match[2];
+    }
+
+    const buffer = Buffer.from(base64Data, 'base64');
+    return this.validarFotoFacial(buffer, mimeType);
+  }
 }

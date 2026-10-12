@@ -69,6 +69,7 @@ export class ConfiguracionController {
     maxTokens?: number;
     isActive?: boolean;
     usarRazonamiento?: boolean;
+    validarFacialAsistencia?: boolean;
   }) {
     return this.configuracionService.updateConfiguracionIA(data);
   }
