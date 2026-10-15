@@ -150,15 +150,22 @@ export class CajaService {
             // Find existing to compare
             const existing = await tx.aperturaCierreInsumos.findUnique({ where: { Idcierreyapertura: insumo.Idcierreyapertura } });
 
-            const newApertura = insumo.cantApertura !== undefined ? insumo.cantApertura : existing?.cantApertura;
-            const newCierre = insumo.cantDeCierre !== undefined ? insumo.cantDeCierre : existing?.cantDeCierre;
+            const parsedApertura = insumo.cantApertura !== undefined 
+              ? (insumo.cantApertura === '' || isNaN(Number(insumo.cantApertura)) ? 0 : Number(insumo.cantApertura)) 
+              : undefined;
+            const parsedCierre = insumo.cantDeCierre !== undefined 
+              ? (insumo.cantDeCierre === '' || isNaN(Number(insumo.cantDeCierre)) ? null : Number(insumo.cantDeCierre)) 
+              : undefined;
+
+            const newApertura = parsedApertura !== undefined ? parsedApertura : existing?.cantApertura;
+            const newCierre = parsedCierre !== undefined ? parsedCierre : existing?.cantDeCierre;
             const gastadoFisico = (Number(newApertura) || 0) - (Number(newCierre) || 0);
 
             await tx.aperturaCierreInsumos.update({
               where: { Idcierreyapertura: insumo.Idcierreyapertura },
               data: {
-                cantApertura: insumo.cantApertura !== undefined ? insumo.cantApertura : undefined,
-                cantDeCierre: insumo.cantDeCierre !== undefined ? insumo.cantDeCierre : undefined,
+                cantApertura: parsedApertura,
+                cantDeCierre: parsedCierre,
                 seUtilizaron: gastadoFisico,
                 observacion: insumo.observacion,
                 paraQueProducto: insumo.paraQueProducto,
@@ -167,25 +174,25 @@ export class CajaService {
 
             // Log history if changed
             if (existing) {
-              if (existing.cantApertura !== insumo.cantApertura && insumo.cantApertura !== undefined) {
+              if (parsedApertura !== undefined && existing.cantApertura !== parsedApertura) {
                 await tx.historialCajaInsumos.create({
                   data: {
                     Idcierreyapertura: insumo.Idcierreyapertura,
                     usuario: updateDto.usuario || caja.nombre || 'Sistema',
                     campoModificado: 'cantApertura',
                     valorAnterior: String(existing.cantApertura || 0),
-                    valorNuevo: String(insumo.cantApertura || 0),
+                    valorNuevo: String(parsedApertura || 0),
                   }
                 });
               }
-              if (existing.cantDeCierre !== insumo.cantDeCierre && insumo.cantDeCierre !== undefined) {
+              if (parsedCierre !== undefined && existing.cantDeCierre !== parsedCierre) {
                 await tx.historialCajaInsumos.create({
                   data: {
                     Idcierreyapertura: insumo.Idcierreyapertura,
                     usuario: updateDto.usuario || caja.nombre || 'Sistema',
                     campoModificado: 'cantDeCierre',
                     valorAnterior: String(existing.cantDeCierre || 0),
-                    valorNuevo: String(insumo.cantDeCierre || 0),
+                    valorNuevo: String(parsedCierre || 0),
                   }
                 });
               }
@@ -196,8 +203,8 @@ export class CajaService {
               data: {
                 IDcaja: id,
                 nombreInsumo: insumo.nombreInsumo,
-                cantApertura: insumo.cantApertura,
-                cantDeCierre: insumo.cantDeCierre,
+                cantApertura: insumo.cantApertura !== undefined ? (insumo.cantApertura === '' || isNaN(Number(insumo.cantApertura)) ? 0 : Number(insumo.cantApertura)) : 0,
+                cantDeCierre: insumo.cantDeCierre !== undefined ? (insumo.cantDeCierre === '' || isNaN(Number(insumo.cantDeCierre)) ? null : Number(insumo.cantDeCierre)) : null,
                 unidadDeMedida: insumo.unidadDeMedida,
                 categoria: insumo.categoria,
                 observacion: insumo.observacion,
@@ -316,8 +323,15 @@ export class CajaService {
             const existing = await tx.aperturaCierreInsumos.findUnique({
               where: { Idcierreyapertura: insumoCierre.Idcierreyapertura }
             });
-            const newApertura = insumoCierre.cantApertura !== undefined ? insumoCierre.cantApertura : (existing?.cantApertura || 0);
-            const newCierre = insumoCierre.cantDeCierre !== undefined ? insumoCierre.cantDeCierre : (existing?.cantDeCierre || 0);
+            const parsedApertura = insumoCierre.cantApertura !== undefined 
+              ? (insumoCierre.cantApertura === '' || isNaN(Number(insumoCierre.cantApertura)) ? 0 : Number(insumoCierre.cantApertura)) 
+              : undefined;
+            const parsedCierre = insumoCierre.cantDeCierre !== undefined 
+              ? (insumoCierre.cantDeCierre === '' || isNaN(Number(insumoCierre.cantDeCierre)) ? null : Number(insumoCierre.cantDeCierre)) 
+              : undefined;
+
+            const newApertura = parsedApertura !== undefined ? parsedApertura : (existing?.cantApertura || 0);
+            const newCierre = parsedCierre !== undefined ? parsedCierre : (existing?.cantDeCierre || 0);
             const gastadoFisico = Number(newApertura) - Number(newCierre);
 
             const globalInsumo = insumoCierre.nombreInsumo ? await tx.insumos.findUnique({ where: { IDalimentos: insumoCierre.nombreInsumo } }) : null;
@@ -325,8 +339,8 @@ export class CajaService {
             await tx.aperturaCierreInsumos.update({
               where: { Idcierreyapertura: insumoCierre.Idcierreyapertura },
               data: {
-                cantApertura: insumoCierre.cantApertura !== undefined ? insumoCierre.cantApertura : existing?.cantApertura,
-                cantDeCierre: insumoCierre.cantDeCierre !== undefined ? insumoCierre.cantDeCierre : existing?.cantDeCierre,
+                cantApertura: parsedApertura !== undefined ? parsedApertura : existing?.cantApertura,
+                cantDeCierre: parsedCierre !== undefined ? parsedCierre : existing?.cantDeCierre,
                 observacion: insumoCierre.observacion,
                 seUtilizaron: gastadoFisico,
                 paraQueProducto: insumoCierre.paraQueProducto,
@@ -334,26 +348,26 @@ export class CajaService {
               },
             });
 
-            if (existing && existing.cantApertura !== insumoCierre.cantApertura && insumoCierre.cantApertura !== undefined) {
+            if (existing && parsedApertura !== undefined && existing.cantApertura !== parsedApertura) {
               await tx.historialCajaInsumos.create({
                 data: {
                   Idcierreyapertura: insumoCierre.Idcierreyapertura,
                   usuario: (updateCierreDto as any).usuario || caja.nombre || 'Sistema',
                   campoModificado: 'cantApertura',
                   valorAnterior: String(existing.cantApertura || 0),
-                  valorNuevo: String(insumoCierre.cantApertura || 0),
+                  valorNuevo: String(parsedApertura || 0),
                 }
               });
             }
 
-            if (existing && existing.cantDeCierre !== insumoCierre.cantDeCierre && insumoCierre.cantDeCierre !== undefined) {
+            if (existing && parsedCierre !== undefined && existing.cantDeCierre !== parsedCierre) {
               await tx.historialCajaInsumos.create({
                 data: {
                   Idcierreyapertura: insumoCierre.Idcierreyapertura,
                   usuario: (updateCierreDto as any).usuario || caja.nombre || 'Sistema',
                   campoModificado: 'cantDeCierre',
                   valorAnterior: String(existing.cantDeCierre || 0),
-                  valorNuevo: String(insumoCierre.cantDeCierre || 0),
+                  valorNuevo: String(parsedCierre || 0),
                 }
               });
             }
@@ -364,8 +378,8 @@ export class CajaService {
               data: {
                 IDcaja: id,
                 nombreInsumo: insumoCierre.nombreInsumo,
-                cantApertura: insumoCierre.cantApertura || 0,
-                cantDeCierre: insumoCierre.cantDeCierre || 0,
+                cantApertura: insumoCierre.cantApertura !== undefined ? (insumoCierre.cantApertura === '' || isNaN(Number(insumoCierre.cantApertura)) ? 0 : Number(insumoCierre.cantApertura)) : 0,
+                cantDeCierre: insumoCierre.cantDeCierre !== undefined ? (insumoCierre.cantDeCierre === '' || isNaN(Number(insumoCierre.cantDeCierre)) ? null : Number(insumoCierre.cantDeCierre)) : null,
                 seUtilizaron: (insumoCierre.cantApertura || 0) - (insumoCierre.cantDeCierre || 0),
                 observacion: insumoCierre.observacion || '',
                 paraQueProducto: insumoCierre.paraQueProducto || '',
