@@ -743,14 +743,40 @@ export class NominaService implements OnModuleInit {
       const COLOMBIA_OFFSET_HOURS = 5;
 
       const parseTime = (timeStr: string, year: number, month: number, day: number) => {
-        // timeStr like "08:00 AM" or "02:00 PM"
-        const [time, modifier] = timeStr.split(' ');
-        const [hours, minutes] = time.split(':');
-        let h = parseInt(hours, 10);
-        if (modifier === 'PM' && h < 12) h += 12;
-        if (modifier === 'AM' && h === 12) h = 0;
+        // Normalize whitespace (replace unicode/narrow/non-breaking spaces with standard space)
+        const clean = (timeStr || '').trim().replace(/[\u202F\u00A0\s]+/g, ' ');
+
+        let h = 0;
+        let min = 0;
+
+        // Try 12-hour format: "02:00 PM", "2:00 pm", "02:00 p. m.", "02:00 p.m."
+        const match12 = clean.match(/^(\d{1,2}):(\d{2})(?::\d{2})?\s*([aApP])\.?\s*([mM])\.?$/i);
+        if (match12) {
+          h = parseInt(match12[1], 10);
+          min = parseInt(match12[2], 10);
+          const isPM = match12[3].toUpperCase() === 'P';
+          if (isPM && h < 12) h += 12;
+          if (!isPM && h === 12) h = 0;
+        } else {
+          // Try 24-hour format: "14:00", "23:00", "08:00:00"
+          const match24 = clean.match(/^(\d{1,2}):(\d{2})(?::\d{2})?$/);
+          if (match24) {
+            h = parseInt(match24[1], 10);
+            min = parseInt(match24[2], 10);
+          } else {
+            // Fallback generic split
+            const parts = clean.split(' ');
+            const [hours, minutes] = (parts[0] || '0:0').split(':');
+            h = parseInt(hours, 10) || 0;
+            min = parseInt(minutes, 10) || 0;
+            const mod = (parts[1] || '').toUpperCase();
+            if (mod.startsWith('P') && h < 12) h += 12;
+            if (mod.startsWith('A') && h === 12) h = 0;
+          }
+        }
+
         // Build UTC date: Colombia hour + 5 = UTC hour
-        return new Date(Date.UTC(year, month - 1, day, h + COLOMBIA_OFFSET_HOURS, parseInt(minutes, 10), 0, 0));
+        return new Date(Date.UTC(year, month - 1, day, h + COLOMBIA_OFFSET_HOURS, min, 0, 0));
       };
 
       const hEntrada = parseTime(dto.horaEntrada, y, m, d);
