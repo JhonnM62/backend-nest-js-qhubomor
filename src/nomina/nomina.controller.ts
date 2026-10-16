@@ -382,6 +382,17 @@ export class NominaController {
     return this.nominaService.getResumenEmpleado(req.user.id, fechaDesde, fechaHasta);
   }
 
+  @Get('admin/dashboard')
+  @UseGuards(RolesGuard)
+  @Roles(...ROLES_ADMIN)
+  @ApiOperation({ summary: '(Admin) Dashboard completo de nómina, asistencia y métricas quincenales' })
+  getNominaAdminDashboard(
+    @Query('fechaDesde') fechaDesde?: string,
+    @Query('fechaHasta') fechaHasta?: string,
+  ) {
+    return this.nominaService.getNominaAdminDashboard(fechaDesde, fechaHasta);
+  }
+
   @Get('resumen/:usuarioId')
   @UseGuards(RolesGuard)
   @Roles(...ROLES_ADMIN)

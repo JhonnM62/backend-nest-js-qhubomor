@@ -670,37 +670,255 @@ export class NominaService implements OnModuleInit {
       this.prisma.turnos.count({ where }),
     ]);
 
-    const dataConDescuentosExtras = await Promise.all(data.map(async (turno) => {
-      // Obtenemos la fecha local en Colombia (UTC-5) basada en la hora de entrada real
-      const shiftDateLocal = new Date(turno.horaEntrada.getTime() - (5 * 60 * 60 * 1000));
-      
-      const y = shiftDateLocal.getUTCFullYear();
-      const m = shiftDateLocal.getUTCMonth();
-      const d = shiftDateLocal.getUTCDate();
+    let dataConDescuentosExtras = data;
+    if (data.length > 0) {
+      const userIds = Array.from(new Set(data.map(t => t.usuarioId)));
+      let minTime = Infinity;
+      let maxTime = -Infinity;
+      for (const t of data) {
+        const time = t.horaEntrada.getTime();
+        if (time < minTime) minTime = time;
+        if (time > maxTime) maxTime = time;
+      }
+      const minDateUTC = new Date(minTime - 24 * 60 * 60 * 1000);
+      const maxDateUTC = new Date(maxTime + 24 * 60 * 60 * 1000);
 
-      // Ajustamos los límites del día a la hora de Colombia. (00:00 local = 05:00 UTC)
-      const startOfDayUTC = new Date(Date.UTC(y, m, d, 5, 0, 0, 0));
-      const endOfDayUTC = new Date(Date.UTC(y, m, d + 1, 4, 59, 59, 999));
-      
-      const extraDescuentos = await this.prisma.descuentosEmpleado.findMany({
+      const allExtraDescuentos = await this.prisma.descuentosEmpleado.findMany({
         where: {
-          usuarioId: turno.usuarioId,
-          fecha: {
-            gte: startOfDayUTC,
-            lte: endOfDayUTC,
-          },
+          usuarioId: { in: userIds },
           turnoId: null,
-        }
+          fecha: {
+            gte: minDateUTC,
+            lte: maxDateUTC,
+          },
+        },
       });
-      return {
-        ...turno,
-        descuentos: [...turno.descuentos, ...extraDescuentos]
-      };
-    }));
+
+      dataConDescuentosExtras = data.map((turno) => {
+        const shiftDateLocal = new Date(turno.horaEntrada.getTime() - (5 * 60 * 60 * 1000));
+        const y = shiftDateLocal.getUTCFullYear();
+        const m = shiftDateLocal.getUTCMonth();
+        const d = shiftDateLocal.getUTCDate();
+
+        const startOfDayUTC = new Date(Date.UTC(y, m, d, 5, 0, 0, 0));
+        const endOfDayUTC = new Date(Date.UTC(y, m, d + 1, 4, 59, 59, 999));
+
+        const extraDescuentos = allExtraDescuentos.filter(
+          ed => ed.usuarioId === turno.usuarioId &&
+                ed.fecha >= startOfDayUTC &&
+                ed.fecha <= endOfDayUTC
+        );
+
+        return {
+          ...turno,
+          descuentos: [...turno.descuentos, ...extraDescuentos],
+        };
+      });
+    }
 
     return {
       data: dataConDescuentosExtras,
       meta: { total, page, limit, totalPages: Math.ceil(total / limit) },
+    };
+  }
+
+  async getNominaAdminDashboard(fechaDesdeParam?: string, fechaHastaParam?: string) {
+    const now = new Date();
+    const colombiaTime = new Date(now.getTime() - (5 * 60 * 60 * 1000));
+    const y = colombiaTime.getUTCFullYear();
+    const m = colombiaTime.getUTCMonth();
+    const d = colombiaTime.getUTCDate();
+
+    let fechaDesdeObj: Date;
+    let fechaHastaObj: Date;
+
+    if (fechaDesdeParam && fechaHastaParam) {
+      fechaDesdeObj = new Date(fechaDesdeParam);
+      fechaHastaObj = new Date(fechaHastaParam);
+    } else {
+      const startDay = d <= 15 ? 1 : 16;
+      const endDay = d <= 15 ? 15 : new Date(Date.UTC(y, m + 1, 0)).getUTCDate();
+      fechaDesdeObj = new Date(Date.UTC(y, m, startDay, 0, 0, 0, 0));
+      fechaHastaObj = new Date(Date.UTC(y, m, endDay, 23, 59, 59, 999));
+    }
+
+    const hoyDateDB = new Date(Date.UTC(y, m, d));
+    const hoyInicioUTC = new Date(Date.UTC(y, m, d, 5, 0, 0, 0));
+    const hoyFinUTC = new Date(Date.UTC(y, m, d + 1, 4, 59, 59, 999));
+
+    const [usuarios, turnosHoy, turnosQuincena, descuentosPendientes] = await Promise.all([
+      this.prisma.usuarios.findMany({
+        where: { isActive: true },
+        select: {
+          IDusuarios: true,
+          nombre: true,
+          rol: true,
+          isActive: true,
+          cargoId: true,
+          cargo: {
+            select: {
+              IDcargo: true,
+              nombre: true,
+              descuentoCena: true,
+              duracionDescansoMinutos: true,
+              horaSugeridaDescanso: true,
+            },
+          },
+        },
+        orderBy: { nombre: 'asc' },
+      }),
+
+      this.prisma.turnos.findMany({
+        where: {
+          OR: [
+            { estado: 'ACTIVO' },
+            { horaEntrada: { gte: hoyInicioUTC, lte: hoyFinUTC } },
+            { fecha: hoyDateDB },
+          ],
+        },
+        orderBy: { horaEntrada: 'desc' },
+        include: {
+          usuario: {
+            select: {
+              IDusuarios: true,
+              nombre: true,
+              rol: true,
+              cargo: {
+                select: {
+                  nombre: true,
+                  duracionDescansoMinutos: true,
+                  descuentoCena: true,
+                },
+              },
+            },
+          },
+          descuentos: true,
+        },
+      }),
+
+      this.prisma.turnos.findMany({
+        where: {
+          estado: { in: ['COMPLETADO', 'FINALIZADO'] },
+          fecha: {
+            gte: fechaDesdeObj,
+            lte: fechaHastaObj,
+          },
+        },
+        select: {
+          IDturno: true,
+          usuarioId: true,
+          fecha: true,
+          valorTurno: true,
+          estado: true,
+        },
+      }),
+
+      this.prisma.descuentosEmpleado.findMany({
+        where: {
+          estado: { not: 'COBRADO' },
+        },
+        select: {
+          IDdescuento: true,
+          usuarioId: true,
+          concepto: true,
+          valor: true,
+          estado: true,
+        },
+      }),
+    ]);
+
+    const quincenaMap = new Map<string, { totalTurnos: number; totalBruto: number }>();
+    for (const t of turnosQuincena) {
+      const prev = quincenaMap.get(t.usuarioId) || { totalTurnos: 0, totalBruto: 0 };
+      prev.totalTurnos += 1;
+      prev.totalBruto += Number(t.valorTurno || 0);
+      quincenaMap.set(t.usuarioId, prev);
+    }
+
+    const CONCEPTOS_BONO = ['BONO', 'PREMIO', 'HORAS_EXTRAS'];
+    const descuentosMap = new Map<string, { totalDescuentos: number; totalBonos: number; countDescuentos: number }>();
+    for (const d of descuentosPendientes) {
+      if (d.concepto === 'LLEGADA_TARDE' && d.estado === 'PENDIENTE') continue;
+      const prev = descuentosMap.get(d.usuarioId) || { totalDescuentos: 0, totalBonos: 0, countDescuentos: 0 };
+      const val = Number(d.valor || 0);
+      if (CONCEPTOS_BONO.includes(d.concepto)) {
+        prev.totalBonos += val;
+      } else {
+        prev.totalDescuentos += val;
+        prev.countDescuentos += 1;
+      }
+      descuentosMap.set(d.usuarioId, prev);
+    }
+
+    const turnosHoyPorUsuario = new Map<string, any[]>();
+    for (const t of turnosHoy) {
+      const list = turnosHoyPorUsuario.get(t.usuarioId) || [];
+      list.push(t);
+      turnosHoyPorUsuario.set(t.usuarioId, list);
+    }
+
+    const empleadosCompletos = usuarios.map((user) => {
+      const turnosUserHoy = turnosHoyPorUsuario.get(user.IDusuarios) || [];
+      const turnoActivo = turnosUserHoy.find(t => t.estado === 'ACTIVO') || null;
+      const turnoCerradoHoy = turnosUserHoy.find(t => t.estado !== 'ACTIVO') || null;
+
+      let statusHoy = {
+        tipo: 'SIN_INICIAR',
+        text: 'No ha iniciado turno hoy',
+        color: '#ef4444',
+        icon: 'close-circle',
+      };
+
+      if (turnoActivo) {
+        const horaStr = new Date(turnoActivo.horaEntrada).toLocaleTimeString('es-CO', {
+          hour: '2-digit',
+          minute: '2-digit',
+        });
+        statusHoy = {
+          tipo: 'EN_TURNO',
+          text: `En turno (Inició ${horaStr})`,
+          color: '#10b981',
+          icon: 'checkmark-circle',
+        };
+      } else if (turnoCerradoHoy) {
+        statusHoy = {
+          tipo: 'TURNO_CERRADO',
+          text: 'Turno cerrado hoy',
+          color: '#6b7280',
+          icon: 'time',
+        };
+      }
+
+      const qData = quincenaMap.get(user.IDusuarios) || { totalTurnos: 0, totalBruto: 0 };
+      const dData = descuentosMap.get(user.IDusuarios) || { totalDescuentos: 0, totalBonos: 0, countDescuentos: 0 };
+      const totalNeto = qData.totalBruto - dData.totalDescuentos + dData.totalBonos;
+
+      return {
+        ...user,
+        turnoActivo,
+        turnoHoy: turnoActivo || turnoCerradoHoy,
+        statusHoy,
+        quincena: {
+          totalTurnos: qData.totalTurnos,
+          totalBruto: qData.totalBruto,
+          totalDescuentos: dData.totalDescuentos,
+          totalBonos: dData.totalBonos,
+          totalNeto,
+          countDescuentos: dData.countDescuentos,
+        },
+      };
+    });
+
+    return {
+      success: true,
+      data: {
+        quincena: {
+          fechaDesde: fechaDesdeObj.toISOString(),
+          fechaHasta: fechaHastaObj.toISOString(),
+        },
+        empleados: empleadosCompletos,
+        turnosHoy,
+      },
     };
   }
 
@@ -1481,7 +1699,7 @@ export class NominaService implements OnModuleInit {
       this.prisma.liquidaciones.findMany({
         where, skip, take: limit,
         orderBy: { createdAt: 'desc' },
-        include: { usuario: { select: { nombre: true, cargo: true } } },
+        include: { usuario: { select: { nombre: true, cargo: true, cedula: true } } },
       }),
       this.prisma.liquidaciones.count({ where }),
     ]);
