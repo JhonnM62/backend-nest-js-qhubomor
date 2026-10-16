@@ -1695,14 +1695,50 @@ export class NominaService implements OnModuleInit {
     const skip = (page - 1) * limit;
     const where: Prisma.LiquidacionesWhereInput = usuarioId ? { usuarioId } : {};
 
-    const [data, total] = await Promise.all([
+    const [rawList, total] = await Promise.all([
       this.prisma.liquidaciones.findMany({
-        where, skip, take: limit,
+        where,
+        skip,
+        take: limit,
         orderBy: { createdAt: 'desc' },
-        include: { usuario: { select: { nombre: true, cargo: true, cedula: true } } },
+        select: {
+          IDliquidacion: true,
+          usuarioId: true,
+          fechaInicio: true,
+          fechaFin: true,
+          totalTurnos: true,
+          totalBruto: true,
+          totalDescuentos: true,
+          totalNeto: true,
+          estado: true,
+          observaciones: true,
+          pdfUrl: true,
+          creadoPor: true,
+          createdAt: true,
+          updatedAt: true,
+          firmaAdmin: true,
+          firmaEmpleado: true,
+          usuario: {
+            select: {
+              IDusuarios: true,
+              nombre: true,
+              cargo: true,
+              cedula: true,
+            },
+          },
+        },
       }),
       this.prisma.liquidaciones.count({ where }),
     ]);
+
+    // Reducir payload drásticamente de 8MB a ~15KB para iOS, Android y Desktop:
+    // Omitir cadenas masivas Base64 de firmas en la consulta de listado,
+    // convirtiéndolas en indicadores booleanos ('1' | null) para que el front sepa si está firmado.
+    const data = rawList.map((liq) => ({
+      ...liq,
+      firmaAdmin: liq.firmaAdmin ? '1' : null,
+      firmaEmpleado: liq.firmaEmpleado ? '1' : null,
+    }));
 
     return { data, meta: { total, page, limit, totalPages: Math.ceil(total / limit) } };
   }
