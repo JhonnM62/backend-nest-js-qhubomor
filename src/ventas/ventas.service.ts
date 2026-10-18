@@ -1105,7 +1105,16 @@ export class VentasService {
         ordenVentas: {
           include: {
             producto: {
-              include: { categoriaRelacion: true }
+              include: { 
+                categoriaRelacion: true,
+                recetaInsumos: {
+                  include: {
+                    insumoRelacion: {
+                      select: { nombre: true, unidades: true, cantidadPorPaquete: true }
+                    }
+                  }
+                }
+              }
             },
           },
         },
@@ -1173,7 +1182,22 @@ export class VentasService {
     const updated = await this.prisma.ventas.findUnique({
       where: { IDventas: id },
       include: {
-        ordenVentas: { include: { producto: { include: { categoriaRelacion: true } } } },
+        ordenVentas: { 
+          include: { 
+            producto: { 
+              include: { 
+                categoriaRelacion: true,
+                recetaInsumos: {
+                  include: {
+                    insumoRelacion: {
+                      select: { nombre: true, unidades: true, cantidadPorPaquete: true }
+                    }
+                  }
+                }
+              } 
+            } 
+          } 
+        },
         usuarioRelacion: { select: { IDusuarios: true, nombre: true, email: true } },
         facturaElectronica: true,
       },

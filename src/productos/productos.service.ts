@@ -100,11 +100,20 @@ export class ProductosService {
             const cantTeorica = Number(insumo.cantidadPorPaquete) || 0;
             const cantReceta = Number(receta.cantidad) || 0;
 
-            // Si el insumo tiene cantidadPorPaquete establecida (ej. 200g, 450g), se multiplica por cantReceta
-            // Si no tiene cantTeorica pero está en gramos, se toma cantReceta
-            const gramos = cantTeorica > 0 ? (cantReceta * cantTeorica) : (esGramos ? cantReceta : 0);
+            // Extraer gramos si vienen en el nombre del insumo (ej. "Porcion de papa 200 gr" -> 200)
+            const matchGramosNombre = nombreInsumo.match(/(\d+)\s*(?:g|gr|gramos)\b/i);
+            const gramosDelNombre = matchGramosNombre ? Number(matchGramosNombre[1]) : 0;
 
-            if (esPapa || (esGramos && gramos > 0 && nombreInsumo.includes('papa'))) {
+            let gramos = 0;
+            if (cantTeorica > 0) {
+              gramos = cantReceta * cantTeorica;
+            } else if (gramosDelNombre > 0) {
+              gramos = (cantReceta > 0 ? cantReceta : 1) * gramosDelNombre;
+            } else if (esGramos && cantReceta > 0) {
+              gramos = cantReceta;
+            }
+
+            if (esPapa && gramos > 0) {
               totalGramosPapa += gramos;
             }
           }
