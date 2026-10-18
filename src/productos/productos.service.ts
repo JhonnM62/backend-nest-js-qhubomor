@@ -84,32 +84,80 @@ export class ProductosService {
 
       const dataPlain = data.map((p) => {
         let disponibilidadCalculada = null;
+        let totalGramosPapa = 0;
+
+        // Detectar si la receta contiene insumo de papa y calcular gramos base por platillo
+        if (p.recetaInsumos && p.recetaInsumos.length > 0) {
+          for (const receta of p.recetaInsumos) {
+            const insumo = receta.insumoRelacion;
+            if (!insumo) continue;
+
+            const nombreInsumo = (insumo.nombre || '').toLowerCase();
+            const unidad = (insumo.unidades || receta.tipoDeMedida || '').trim().toLowerCase();
+            const esPapa = nombreInsumo.includes('papa');
+            const esGramos = unidad === 'gr' || unidad === 'g' || unidad === 'gramos';
+
+            const cantTeorica = Number(insumo.cantidadPorPaquete) || 0;
+            const cantReceta = Number(receta.cantidad) || 0;
+
+            // Si el insumo tiene cantidadPorPaquete establecida (ej. 200g, 450g), se multiplica por cantReceta
+            // Si no tiene cantTeorica pero está en gramos, se toma cantReceta
+            const gramos = cantTeorica > 0 ? (cantReceta * cantTeorica) : (esGramos ? cantReceta : 0);
+
+            if (esPapa || (esGramos && gramos > 0 && nombreInsumo.includes('papa'))) {
+              totalGramosPapa += gramos;
+            }
+          }
+        }
 
         if ((p as any).mostrarDisponibilidad) {
           if (p.recetaInsumos && p.recetaInsumos.length > 0) {
             let maxPossible = Infinity;
+            let insumosQueDescuentanCount = 0;
+
             for (const receta of p.recetaInsumos) {
+              const insumo = receta.insumoRelacion;
+              if (!insumo) continue;
+
+              // SOLO insumos que descuentan de ventas afectan la disponibilidad
+              const descontarVal = insumo.descontarCantDeVentas?.trim().toLowerCase();
+              const descuentaVentas = descontarVal !== 'no' && descontarVal !== 'false' && descontarVal !== 'falso';
+              if (!descuentaVentas) continue;
+
+              insumosQueDescuentanCount++;
               const cantRequerida = Number(receta.cantidad) || 0;
-              if (cantRequerida > 0 && receta.insumoRelacion) {
-                const disp = receta.insumoRelacion.disponible;
-                const cant = receta.insumoRelacion.cantidad;
+              if (cantRequerida > 0) {
+                const disp = insumo.disponible;
+                const cant = insumo.cantidad;
                 const stockGlobal = Number(disp !== null && disp !== undefined ? disp : (cant !== null && cant !== undefined ? cant : 0));
                 const possible = Math.floor(stockGlobal / cantRequerida);
                 if (possible < maxPossible) maxPossible = possible;
               }
             }
-            disponibilidadCalculada = maxPossible === Infinity ? 0 : Math.max(0, maxPossible);
+
+            if (insumosQueDescuentanCount > 0) {
+              disponibilidadCalculada = maxPossible === Infinity ? 0 : Math.max(0, maxPossible);
+            } else {
+              // Si ningún insumo de la receta descuenta ventas, no hay restricción por receta
+              disponibilidadCalculada = p.cantidad !== null && p.cantidad !== undefined ? Math.max(0, p.cantidad) : null;
+            }
           } else {
             // Si el producto no tiene receta, el stock global disponible es el suyo propio
             disponibilidadCalculada = Math.max(0, p.cantidad || 0);
           }
         }
 
-        const insumosRequeridos = p.recetaInsumos?.map((r) => ({
-          IDinsumo: r.insumo,
-          cantidad: Number(r.cantidad) || 0,
-          stockGlobal: Number(r.insumoRelacion?.disponible ?? r.insumoRelacion?.cantidad ?? 0)
-        })) || [];
+        // En insumosRequeridos solo enviamos los insumos que descuentan de ventas (para no bloquear en frontend)
+        const insumosRequeridos = p.recetaInsumos
+          ?.filter((r) => {
+            const descontarVal = r.insumoRelacion?.descontarCantDeVentas?.trim().toLowerCase();
+            return descontarVal !== 'no' && descontarVal !== 'false' && descontarVal !== 'falso';
+          })
+          .map((r) => ({
+            IDinsumo: r.insumo,
+            cantidad: Number(r.cantidad) || 0,
+            stockGlobal: Number(r.insumoRelacion?.disponible ?? r.insumoRelacion?.cantidad ?? 0)
+          })) || [];
 
         // Se elimina la receta del payload final para evitar sobrecarga de red
         const { recetaInsumos, ...rest } = p;
@@ -121,6 +169,7 @@ export class ProductosService {
           disponibilidadCalculada,
           categoriaNombre: p.categoriaRelacion?.nombre || p.categoriaNombre,
           insumosRequeridos,
+          gramosPapa: totalGramosPapa,
         };
       });
 
@@ -169,10 +218,29 @@ export class ProductosService {
       throw new NotFoundException(`Producto con ID ${id} no encontrado`);
     }
 
+    let totalGramosPapa = 0;
+    if (producto.recetaInsumos && producto.recetaInsumos.length > 0) {
+      for (const receta of producto.recetaInsumos) {
+        const insumo = receta.insumoRelacion;
+        if (!insumo) continue;
+        const nombreInsumo = (insumo.nombre || '').toLowerCase();
+        const unidad = (insumo.unidades || receta.tipoDeMedida || '').trim().toLowerCase();
+        const esPapa = nombreInsumo.includes('papa');
+        const esGramos = unidad === 'gr' || unidad === 'g' || unidad === 'gramos';
+        const cantTeorica = Number(insumo.cantidadPorPaquete) || 0;
+        const cantReceta = Number(receta.cantidad) || 0;
+        const gramos = cantTeorica > 0 ? (cantReceta * cantTeorica) : (esGramos ? cantReceta : 0);
+        if (esPapa || (esGramos && gramos > 0 && nombreInsumo.includes('papa'))) {
+          totalGramosPapa += gramos;
+        }
+      }
+    }
+
     return {
       ...producto,
       seccionCocinaId: producto.seccionCocinaId,
       categoriaSeccionCocinaId: producto.categoriaRelacion?.seccionCocinaId || null,
+      gramosPapa: totalGramosPapa,
     };
   }
 

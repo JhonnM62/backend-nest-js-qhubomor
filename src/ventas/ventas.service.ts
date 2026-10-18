@@ -190,7 +190,8 @@ export class VentasService {
         opcionesDescuento: [5, 10, 20],
         habilitarPropinas: true,
         habilitarDescuentos: true,
-        tiempoReservaInventario: 5
+        tiempoReservaInventario: 5,
+        porcentajeMermaPapa: 10
       };
     }
     
@@ -1060,7 +1061,14 @@ export class VentasService {
                   imagenUrl: true, 
                   image: true, 
                   seccionCocinaId: true,
-                  categoriaRelacion: { select: { seccionCocinaId: true } }
+                  categoriaRelacion: { select: { seccionCocinaId: true } },
+                  recetaInsumos: {
+                    include: {
+                      insumoRelacion: {
+                        select: { nombre: true, unidades: true, cantidadPorPaquete: true }
+                      }
+                    }
+                  }
                 },
               },
             },

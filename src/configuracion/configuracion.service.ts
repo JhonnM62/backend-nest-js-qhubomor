@@ -51,6 +51,7 @@ async updateConfiguracion(data: {
   habilitarPropinas?: boolean;
   habilitarDescuentos?: boolean;
   tiempoReservaInventario?: number;
+  porcentajeMermaPapa?: number;
 }) {
   return this.prisma.configuracionNegocio.upsert({
     where: { id: 1 },
@@ -81,7 +82,8 @@ async updateConfiguracion(data: {
       opcionesDescuento: data.opcionesDescuento ? (typeof data.opcionesDescuento === 'string' ? data.opcionesDescuento : JSON.stringify(data.opcionesDescuento)) : undefined,
       habilitarPropinas: data.habilitarPropinas,
       habilitarDescuentos: data.habilitarDescuentos,
-      tiempoReservaInventario: data.tiempoReservaInventario
+      tiempoReservaInventario: data.tiempoReservaInventario,
+      porcentajeMermaPapa: data.porcentajeMermaPapa !== undefined ? Number(data.porcentajeMermaPapa) : undefined
     },
     create: {
       id: 1,
@@ -111,7 +113,8 @@ async updateConfiguracion(data: {
       opcionesDescuento: data.opcionesDescuento ? (typeof data.opcionesDescuento === 'string' ? data.opcionesDescuento : JSON.stringify(data.opcionesDescuento)) : '[5, 10, 20]',
       habilitarPropinas: data.habilitarPropinas !== undefined ? data.habilitarPropinas : true,
       habilitarDescuentos: data.habilitarDescuentos !== undefined ? data.habilitarDescuentos : true,
-      tiempoReservaInventario: data.tiempoReservaInventario !== undefined ? data.tiempoReservaInventario : 5
+      tiempoReservaInventario: data.tiempoReservaInventario !== undefined ? data.tiempoReservaInventario : 5,
+      porcentajeMermaPapa: data.porcentajeMermaPapa !== undefined ? Number(data.porcentajeMermaPapa) : 10
     }
   });
 }

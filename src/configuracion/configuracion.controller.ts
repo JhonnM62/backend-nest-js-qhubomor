@@ -48,6 +48,7 @@ export class ConfiguracionController {
     opcionesDescuento?: any;
     habilitarPropinas?: boolean;
     habilitarDescuentos?: boolean;
+    porcentajeMermaPapa?: number;
   }) {
     return this.configuracionService.updateConfiguracion(data);
   }

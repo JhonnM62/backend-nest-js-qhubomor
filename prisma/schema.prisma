@@ -603,6 +603,7 @@ model ConfiguracionNegocio {
   habilitarPropinas       Boolean @default(true)
   habilitarDescuentos     Boolean @default(true)
   tiempoReservaInventario Int     @default(5)
+  porcentajeMermaPapa     Float?  @default(10) @map("PorcentajeMermaPapa")
 }
 
 model FacturasElectronicas {
