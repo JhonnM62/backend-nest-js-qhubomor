@@ -144,6 +144,7 @@ export interface PrintJobPayload {
   type: 'comanda' | 'factura';
   paperSize: 58 | 80;
   seccionNombre?: string; // Si es ticket de sección específica
+  rawPayload?: string;    // ESC/POS crudo opcional para imprimir directamente sin re-procesar
 }
 
 export interface PrintAckPayload {
