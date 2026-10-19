@@ -685,8 +685,9 @@ export class VentasService {
             if (cantidadPreparada >= producto.cantidad) {
               estado = 'LISTO';
               preparadoAt = oldItem.preparadoAt || new Date();
-            } else if (oldItem.estado !== 'iniciado' && oldItem.estado !== 'EN_EL_CARRITO') {
-              estado = oldItem.estado;
+            } else {
+              estado = 'PREPARANDO';
+              preparadoAt = null;
             }
           }
 

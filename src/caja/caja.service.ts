@@ -1458,9 +1458,15 @@ export class CajaService {
             const nuevaCantidad = Number(ordenExistente.cantidad) + Number(accion.cantidadAAnadir);
             const nuevoPrecioTotal = unitPrice * nuevaCantidad;
 
+            const isReady = (ordenExistente.cantidadPreparada || 0) >= nuevaCantidad;
             await tx.orderventas.update({
               where: { IDorderventas: ordenExistente.IDorderventas },
-              data: { cantidad: nuevaCantidad, precioTotal: nuevoPrecioTotal }
+              data: { 
+                cantidad: nuevaCantidad, 
+                precioTotal: nuevoPrecioTotal,
+                estado: isReady ? 'LISTO' : 'PREPARANDO',
+                preparadoAt: isReady ? ordenExistente.preparadoAt || new Date() : null,
+              }
             });
             observacionesNuevas += `- Añadido: ${accion.nombreProducto} (+${accion.cantidadAAnadir}) al Pedido #${ventaExiste.pedido}.\n`;
             console.log(`[ExecuteAutoCuadre] → Cantidad actualizada a ${nuevaCantidad}, precio: $${nuevoPrecioTotal}`);
