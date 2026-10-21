@@ -429,20 +429,79 @@ export class EstadisticasService {
       },
     });
 
-    const PALETTE = [
-      '#2563eb', // Azul
+    const EXTENDED_PALETTE = [
+      '#2563eb', // Azul real
       '#10b981', // Verde esmeralda
-      '#f59e0b', // Naranja ámbar
-      '#8b5cf6', // Púrpura
-      '#ef4444', // Rojo
-      '#06b6d4', // Cian
-      '#ec4899', // Rosa
-      '#84cc16', // Lima
-      '#6366f1', // Índigo
-      '#14b8a6', // Teal
-      '#f97316', // Naranja brillante
-      '#a855f7', // Violeta
+      '#f59e0b', // Ámbar cálido
+      '#8b5cf6', // Púrpura brillante
+      '#ef4444', // Rojo coral
+      '#06b6d4', // Cian brillante
+      '#ec4899', // Rosa vibrante
+      '#84cc16', // Lima eléctrico
+      '#6366f1', // Índigo moderno
+      '#14b8a6', // Teal tropical
+      '#f97316', // Naranja fuego
+      '#a855f7', // Violeta intenso
+      '#0284c7', // Celeste cielo
+      '#059669', // Verde profundo
+      '#d97706', // Ocre tostado
+      '#7c3aed', // Violeta eléctrico
+      '#dc2626', // Carmesí vivo
+      '#0891b2', // Azul petróleo
+      '#db2777', // Magenta oscuro
+      '#65a30d', // Oliva brillante
+      '#4f46e5', // Azul cobalto
+      '#0d9488', // Verde azulado
+      '#ea580c', // Naranja quemado
+      '#9333ea', // Morado real
+      '#e11d48', // Rubí carmín
+      '#16a34a', // Verde bosque
+      '#b45309', // Canela dorado
+      '#6d28d9', // Púrpura noche
+      '#b91c1c', // Rojo borgoña
+      '#0e7490', // Océano profundo
+      '#be185d', // Fucsia silvestre
+      '#4d7c0f', // Musgo oscuro
+      '#4338ca', // Añil medianoche
+      '#0f766e', // Turquesa oscuro
+      '#c2410c', // Ladrillo óxido
+      '#7e22ce', // Amatista oscura
+      '#1d4ed8', // Azul zafiro
+      '#15803d', // Jade esmeralda
+      '#a16207', // Mostaza oro
+      '#581c87', // Púrpura berenjena
+      '#991b1b', // Vino tinto
+      '#155e75', // Marino mineral
+      '#9d174d', // Rosa granate
+      '#3f6212', // Pino militar
+      '#3730a3', // Índigo oscuro
+      '#115e59', // Pavo real
+      '#9a3412', // Terracota cálido
+      '#6b21a8', // Ciruela intenso
     ];
+
+    const hslToHex = (h: number, s: number, l: number): string => {
+      const lNorm = l / 100;
+      const a = (s * Math.min(lNorm, 1 - lNorm)) / 100;
+      const f = (n: number) => {
+        const k = (n + h / 30) % 12;
+        const color = lNorm - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+        return Math.round(255 * color)
+          .toString(16)
+          .padStart(2, '0');
+      };
+      return `#${f(0)}${f(8)}${f(4)}`;
+    };
+
+    const getInsumoColor = (index: number): string => {
+      if (index < EXTENDED_PALETTE.length) {
+        return EXTENDED_PALETTE[index];
+      }
+      const hue = Math.round((index * 137.508) % 360);
+      const saturation = 75 + (index % 3) * 8;
+      const lightness = 38 + (index % 4) * 4;
+      return hslToHex(hue, saturation, lightness);
+    };
 
     // Estructura agrupada de compras por insumo
     const insumoPurchasesMap = new Map<
@@ -497,7 +556,7 @@ export class EstadisticasService {
     // 3. Consolidar el resultado para cada insumo del catálogo
     const insumosConsolidados = insumosCatalog.map((ins, index) => {
       const purchases = insumoPurchasesMap.get(ins.IDalimentos) || [];
-      const color = PALETTE[index % PALETTE.length];
+      const color = getInsumoColor(index);
       const precioCatalogo = Number(ins.precio || 0);
 
       let precioInicial = precioCatalogo;
