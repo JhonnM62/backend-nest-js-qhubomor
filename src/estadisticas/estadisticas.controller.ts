@@ -37,4 +37,19 @@ export class EstadisticasController {
   ) {
     return this.estadisticasService.getInsumosDescuadres(startDate, endDate);
   }
+
+  @Get('insumos-precios-multi')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Obtener historial y variación de precios multi-insumo por rango de fechas' })
+  @ApiQuery({ name: 'startDate', required: false, description: 'Fecha inicio (YYYY-MM-DD)' })
+  @ApiQuery({ name: 'endDate', required: false, description: 'Fecha fin (YYYY-MM-DD)' })
+  @ApiQuery({ name: 'categoriaId', required: false })
+  getInsumosPreciosMulti(
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+    @Query('categoriaId') categoriaId?: string,
+  ) {
+    return this.estadisticasService.getInsumosPreciosMulti(startDate, endDate, categoriaId);
+  }
 }

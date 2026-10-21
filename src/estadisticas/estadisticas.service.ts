@@ -335,4 +335,256 @@ export class EstadisticasService {
       ranking
     };
   }
+
+  async getInsumosPreciosMulti(startDate?: string, endDate?: string, categoriaId?: string) {
+    let start = new Date();
+    let end = new Date();
+
+    if (startDate) {
+      start = new Date(startDate);
+      start.setUTCHours(0, 0, 0, 0);
+    } else {
+      start.setDate(1);
+      start.setUTCHours(0, 0, 0, 0);
+    }
+
+    if (endDate) {
+      end = new Date(endDate);
+      end.setUTCHours(23, 59, 59, 999);
+    } else {
+      end.setUTCHours(23, 59, 59, 999);
+    }
+
+    // 1. Obtener catálogo de insumos
+    const insumosWhere: any = {};
+    if (categoriaId) {
+      insumosWhere.categoria = categoriaId;
+    }
+
+    const insumosCatalog = await this.prisma.insumos.findMany({
+      where: insumosWhere,
+      select: {
+        IDalimentos: true,
+        nombre: true,
+        categoria: true,
+        nombreCategoria: true,
+        unidades: true,
+        precio: true,
+        disponible: true,
+        createdAt: true,
+        categoriaInsumosRelacion: {
+          select: { nombre: true },
+        },
+      },
+      orderBy: { nombre: 'asc' },
+    });
+
+    // Mapeos rápidos por ID y por nombre para vincular compras
+    const byId = new Map<string, (typeof insumosCatalog)[0]>();
+    const byName = new Map<string, (typeof insumosCatalog)[0]>();
+
+    insumosCatalog.forEach((ins) => {
+      byId.set(ins.IDalimentos, ins);
+      if (ins.nombre) {
+        byName.set(ins.nombre.trim().toLowerCase(), ins);
+      }
+    });
+
+    // 2. Obtener órdenes de inventario en el período
+    const ordersRaw = await this.prisma.orderinventario.findMany({
+      where: {
+        OR: [
+          { fechaYHora: { gte: start, lte: end } },
+          {
+            fechaYHora: null,
+            fecha: { gte: start, lte: end },
+          },
+          {
+            fechaYHora: null,
+            fecha: null,
+            createdAt: { gte: start, lte: end },
+          },
+        ],
+        AND: [
+          {
+            OR: [
+              { precio: { gt: 0 } },
+              { precioActual: { gt: 0 } },
+            ],
+          },
+        ],
+      },
+      orderBy: [
+        { fechaYHora: 'asc' },
+        { fecha: 'asc' },
+        { createdAt: 'asc' },
+      ],
+      include: {
+        proveedor: {
+          select: { nombre: true },
+        },
+        inventario: {
+          select: { tipo: true, nombre: true },
+        },
+      },
+    });
+
+    const PALETTE = [
+      '#2563eb', // Azul
+      '#10b981', // Verde esmeralda
+      '#f59e0b', // Naranja ámbar
+      '#8b5cf6', // Púrpura
+      '#ef4444', // Rojo
+      '#06b6d4', // Cian
+      '#ec4899', // Rosa
+      '#84cc16', // Lima
+      '#6366f1', // Índigo
+      '#14b8a6', // Teal
+      '#f97316', // Naranja brillante
+      '#a855f7', // Violeta
+    ];
+
+    // Estructura agrupada de compras por insumo
+    const insumoPurchasesMap = new Map<
+      string,
+      Array<{
+        date: string;
+        label: string;
+        value: number;
+        precioAnterior?: number;
+        proveedor: string;
+        cantidad: number;
+        subtotal: number;
+      }>
+    >();
+
+    ordersRaw.forEach((order) => {
+      const key = order.nombreDelAlimento?.trim() || '';
+      if (!key) return;
+
+      const matchedInsumo = byId.get(key) || byName.get(key.toLowerCase());
+      const insumoId = matchedInsumo ? matchedInsumo.IDalimentos : key;
+
+      if (!insumoPurchasesMap.has(insumoId)) {
+        insumoPurchasesMap.set(insumoId, []);
+      }
+
+      const rawDate = order.fechaYHora || order.fecha || order.createdAt || new Date();
+      const d = new Date(rawDate);
+      const day = String(d.getDate()).padStart(2, '0');
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const year = d.getFullYear();
+      const dateStr = `${year}-${month}-${day}`;
+      const labelStr = `${day}/${month}`;
+
+      const unitPrice = Number(order.precioActual || order.precio || 0);
+      const prevPrice = order.precioAnterior != null ? Number(order.precioAnterior) : undefined;
+      const qty = Number(order.cantidad || 0);
+      const subtotal = Number(order.subtotal || unitPrice * qty);
+      const supplierName = order.proveedor?.nombre || order.provedor || 'Proveedor';
+
+      insumoPurchasesMap.get(insumoId)!.push({
+        date: dateStr,
+        label: labelStr,
+        value: unitPrice,
+        precioAnterior: prevPrice,
+        proveedor: supplierName,
+        cantidad: qty,
+        subtotal,
+      });
+    });
+
+    // 3. Consolidar el resultado para cada insumo del catálogo
+    const insumosConsolidados = insumosCatalog.map((ins, index) => {
+      const purchases = insumoPurchasesMap.get(ins.IDalimentos) || [];
+      const color = PALETTE[index % PALETTE.length];
+      const precioCatalogo = Number(ins.precio || 0);
+
+      let precioInicial = precioCatalogo;
+      let precioFinal = precioCatalogo;
+      let precioPromedio = precioCatalogo;
+      let precioMin = precioCatalogo;
+      let precioMax = precioCatalogo;
+      let totalComprado = 0;
+      let subtotalComprado = 0;
+      let ultimoProveedor = 'Sin compras registradas';
+      let variacionPorcentual = 0;
+      let variacionAbsoluta = 0;
+
+      if (purchases.length > 0) {
+        purchases.sort((a, b) => a.date.localeCompare(b.date));
+
+        precioInicial =
+          purchases[0].precioAnterior && purchases[0].precioAnterior > 0
+            ? purchases[0].precioAnterior
+            : purchases[0].value;
+
+        precioFinal = purchases[purchases.length - 1].value;
+
+        const values = purchases.map((p) => p.value);
+        precioMin = Math.min(...values);
+        precioMax = Math.max(...values);
+
+        totalComprado = purchases.reduce((acc, p) => acc + p.cantidad, 0);
+        subtotalComprado = purchases.reduce((acc, p) => acc + p.subtotal, 0);
+
+        precioPromedio =
+          totalComprado > 0
+            ? Math.round(subtotalComprado / totalComprado)
+            : Math.round(values.reduce((a, b) => a + b, 0) / values.length);
+
+        ultimoProveedor = purchases[purchases.length - 1].proveedor;
+
+        variacionAbsoluta = precioFinal - precioInicial;
+        variacionPorcentual =
+          precioInicial > 0
+            ? Number(((variacionAbsoluta / precioInicial) * 100).toFixed(1))
+            : 0;
+      }
+
+      return {
+        id: ins.IDalimentos,
+        nombre: ins.nombre,
+        categoria: ins.categoriaInsumosRelacion?.nombre || ins.nombreCategoria || 'General',
+        unidad: ins.unidades || 'und',
+        color,
+        precioActual: precioFinal > 0 ? precioFinal : precioCatalogo,
+        precioInicial,
+        precioPromedio,
+        precioMin,
+        precioMax,
+        variacionPorcentual,
+        variacionAbsoluta,
+        totalComprado,
+        subtotalComprado,
+        ultimoProveedor,
+        comprasRegistradas: purchases.length,
+        seriePuntos: purchases,
+      };
+    });
+
+    insumosConsolidados.sort((a, b) => {
+      if (a.comprasRegistradas > 0 && b.comprasRegistradas === 0) return -1;
+      if (b.comprasRegistradas > 0 && a.comprasRegistradas === 0) return 1;
+      return Math.abs(b.variacionPorcentual) - Math.abs(a.variacionPorcentual);
+    });
+
+    const conAumento = insumosConsolidados.filter((i) => i.variacionPorcentual > 0);
+    const conBaja = insumosConsolidados.filter((i) => i.variacionPorcentual < 0);
+    const estables = insumosConsolidados.filter((i) => i.variacionPorcentual === 0);
+
+    return {
+      success: true,
+      data: {
+        resumen: {
+          totalInsumosAuditados: insumosConsolidados.length,
+          insumosConCompras: insumosConsolidados.filter((i) => i.comprasRegistradas > 0).length,
+          insumosConAumento: conAumento.length,
+          insumosConBaja: conBaja.length,
+          insumosEstables: estables.length,
+        },
+        insumos: insumosConsolidados,
+      },
+    };
+  }
 }
