@@ -401,6 +401,22 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.emitToAll(event, data);
   }
 
+  emitNuevoDomicilio(domicilio: any) {
+    this.logger.log(`Emitting nuevoDomicilio: ${domicilio.orderIdWA || domicilio.IDdomicilio}`);
+    this.emitToRoom(Room.DOMICILIOS, SocketEvent.NUEVO_DOMICILIO, domicilio);
+    this.emitToRoom(Room.VENTAS, SocketEvent.NUEVO_DOMICILIO, domicilio);
+    this.emitToRoom(Room.CAJA, SocketEvent.NUEVO_DOMICILIO, domicilio);
+    this.emitToAll(SocketEvent.NUEVO_DOMICILIO, domicilio);
+  }
+
+  emitDomicilioActualizado(domicilio: any) {
+    this.logger.log(`Emitting domicilioActualizado: ${domicilio.orderIdWA || domicilio.IDdomicilio}`);
+    this.emitToRoom(Room.DOMICILIOS, SocketEvent.DOMICILIO_ACTUALIZADO, domicilio);
+    this.emitToRoom(Room.VENTAS, SocketEvent.DOMICILIO_ACTUALIZADO, domicilio);
+    this.emitToRoom(Room.CAJA, SocketEvent.DOMICILIO_ACTUALIZADO, domicilio);
+    this.emitToAll(SocketEvent.DOMICILIO_ACTUALIZADO, domicilio);
+  }
+
   // ============================================================
   // UTILIDADES
   // ============================================================

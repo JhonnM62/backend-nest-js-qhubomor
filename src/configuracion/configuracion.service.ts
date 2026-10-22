@@ -52,6 +52,13 @@ async updateConfiguracion(data: {
   habilitarDescuentos?: boolean;
   tiempoReservaInventario?: number;
   porcentajeMermaPapa?: number;
+  domisHabilitado?: boolean;
+  domisBloqueoVentas?: boolean;
+  domisTimeoutMinutos?: number;
+  domisAlertaSonora?: boolean;
+  domisPromptMapeo?: string;
+  domisWebhookSecret?: string;
+  domisWaQueueUrl?: string;
 }) {
   return this.prisma.configuracionNegocio.upsert({
     where: { id: 1 },
@@ -83,7 +90,14 @@ async updateConfiguracion(data: {
       habilitarPropinas: data.habilitarPropinas,
       habilitarDescuentos: data.habilitarDescuentos,
       tiempoReservaInventario: data.tiempoReservaInventario,
-      porcentajeMermaPapa: data.porcentajeMermaPapa !== undefined ? Number(data.porcentajeMermaPapa) : undefined
+      porcentajeMermaPapa: data.porcentajeMermaPapa !== undefined ? Number(data.porcentajeMermaPapa) : undefined,
+      domisHabilitado: data.domisHabilitado,
+      domisBloqueoVentas: data.domisBloqueoVentas,
+      domisTimeoutMinutos: data.domisTimeoutMinutos !== undefined ? Number(data.domisTimeoutMinutos) : undefined,
+      domisAlertaSonora: data.domisAlertaSonora,
+      domisPromptMapeo: data.domisPromptMapeo,
+      domisWebhookSecret: data.domisWebhookSecret,
+      domisWaQueueUrl: data.domisWaQueueUrl,
     },
     create: {
       id: 1,
@@ -114,7 +128,14 @@ async updateConfiguracion(data: {
       habilitarPropinas: data.habilitarPropinas !== undefined ? data.habilitarPropinas : true,
       habilitarDescuentos: data.habilitarDescuentos !== undefined ? data.habilitarDescuentos : true,
       tiempoReservaInventario: data.tiempoReservaInventario !== undefined ? data.tiempoReservaInventario : 5,
-      porcentajeMermaPapa: data.porcentajeMermaPapa !== undefined ? Number(data.porcentajeMermaPapa) : 10
+      porcentajeMermaPapa: data.porcentajeMermaPapa !== undefined ? Number(data.porcentajeMermaPapa) : 10,
+      domisHabilitado: data.domisHabilitado ?? true,
+      domisBloqueoVentas: data.domisBloqueoVentas ?? true,
+      domisTimeoutMinutos: data.domisTimeoutMinutos ?? 10,
+      domisAlertaSonora: data.domisAlertaSonora ?? true,
+      domisPromptMapeo: data.domisPromptMapeo,
+      domisWebhookSecret: data.domisWebhookSecret || 'qhubo-secret-2026',
+      domisWaQueueUrl: data.domisWaQueueUrl,
     }
   });
 }

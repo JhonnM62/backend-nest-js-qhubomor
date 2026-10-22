@@ -20,6 +20,9 @@ export enum SocketEvent {
   REFRESH_VENTAS = 'refreshVentas',
   USER_PERMISSIONS_UPDATED = 'userPermissionsUpdated',
   VENTA_ID_GENERATED = 'ventaIdGenerated',
+  // Domicilios WhatsApp
+  NUEVO_DOMICILIO = 'nuevoDomicilio',
+  DOMICILIO_ACTUALIZADO = 'domicilioActualizado',
   // Secciones de cocina
   REFRESH_SECCIONES_COCINA = 'refreshSeccionesCocina',
   // Impresión remota BT via socket
@@ -42,6 +45,7 @@ export enum Room {
   CATEGORIAS = 'categorias',
   GASTOS = 'gastos',
   VENTAS = 'ventas',
+  DOMICILIOS = 'domicilios',
 }
 
 export enum ConnectionState {

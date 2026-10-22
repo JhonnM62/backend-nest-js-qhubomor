@@ -192,7 +192,7 @@ export class VentasService {
         habilitarDescuentos: true,
         tiempoReservaInventario: 5,
         porcentajeMermaPapa: 10
-      };
+      } as any;
     }
     
     const [corteHours, corteMinutes] = config!.horaCorteDia.split(':').map(Number);

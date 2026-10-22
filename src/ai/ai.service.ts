@@ -754,4 +754,214 @@ Si valido es false, "motivo" debe contener la instrucción correctiva exacta en 
     const buffer = Buffer.from(base64Data, 'base64');
     return this.validarFotoFacial(buffer, mimeType);
   }
+
+  /**
+   * Mapea el texto de un pedido de domicilio WhatsApp contra el catálogo de productos
+   * y promociones configurados en el POS mediante Gemini AI.
+   */
+  async mapearPedidoDomicilio(
+    textoDetalle: string,
+    totalWA?: string,
+    promptPersonalizado?: string,
+  ): Promise<{
+    itemsPropios: Array<{
+      productoId?: string;
+      nombre: string;
+      cantidad: number;
+      precioUnitario?: number;
+      precioTotal?: number;
+      descuento?: number;
+      comentarios?: string;
+      encontradoEnCatalogo: boolean;
+    }>;
+    itemsExternos: Array<{
+      nombre: string;
+      cantidad: number;
+      observacion?: string;
+    }>;
+    totalCalculado: number;
+    notasGenerales?: string;
+  }> {
+    if (!textoDetalle || !textoDetalle.trim()) {
+      return { itemsPropios: [], itemsExternos: [], totalCalculado: 0 };
+    }
+
+    // 1. Obtener catálogo de productos local
+    const productosRaw = await this.prisma.productos.findMany({
+      select: {
+        IDproductos: true,
+        nombre: true,
+        precioUnitario: true,
+        categoriaNombre: true,
+        combo: true,
+      },
+    });
+
+    const catalogMini = productosRaw.map((p) => ({
+      id: p.IDproductos,
+      nombre: p.nombre,
+      precio: Number(p.precioUnitario || 0),
+      categoria: p.categoriaNombre || '',
+      esCombo: p.combo === 'SI' || p.combo === 'true',
+    }));
+
+    // 2. Intentar parseo con Gemini si la API Key está disponible
+    try {
+      const configIA = await this.configService.getConfiguracionIA();
+      if (configIA.isActive && configIA.apiKey) {
+        const ai = new GoogleGenAI({ apiKey: configIA.apiKey });
+        const modelo = configIA.modeloDefecto || 'gemini-2.5-flash';
+
+        const customPromptText = promptPersonalizado
+          ? `\nREGLAS DE NEGOCIO, DESCUENTOS Y PROMOCIONES DEL USUARIO:\n${promptPersonalizado}\n`
+          : '';
+
+        const systemInstruction = `Eres un asistente experto de restaurante y POS.
+Tu tarea es analizar el texto de un pedido que llegó por WhatsApp y mapearlo de forma precisa contra nuestro catálogo de productos local.
+
+CATÁLOGO DE PRODUCTOS DISPONIBLES:
+${JSON.stringify(catalogMini)}
+${customPromptText}
+INSTRUCCIONES CLAVE:
+1. 'itemsPropios': Platos o productos que corresponden a nuestro catálogo (o variaciones muy claras de ellos).
+   - Asigna 'productoId' exacto del catálogo si coincide.
+   - Extrae la cantidad exacta solicitada (por defecto 1).
+   - Extrae precioUnitario y calcula precioTotal.
+   - Si aplica un descuento o promoción según las reglas, indica el valor del 'descuento' numérico.
+   - Si el cliente hizo observaciones como "sin cebolla", "con salsa de ajo", colócalo en 'comentarios'.
+   - 'encontradoEnCatalogo': true si coincide con un productoId del catálogo, false si es un plato de nuestra categoría pero no está en la lista.
+2. 'itemsExternos': Si en el texto se piden productos de OTRO negocio (por ejemplo, granizados o bebidas especiales si este es un restaurante de comidas, o viceversa platos fuertes si este es un negocio de bebidas), colócalos en 'itemsExternos' indicando la cantidad y una breve observación.
+3. 'totalCalculado': La suma de los subtotales de 'itemsPropios'.`;
+
+        const responseSchema: Schema = {
+          type: Type.OBJECT,
+          properties: {
+            itemsPropios: {
+              type: Type.ARRAY,
+              items: {
+                type: Type.OBJECT,
+                properties: {
+                  productoId: { type: Type.STRING },
+                  nombre: { type: Type.STRING },
+                  cantidad: { type: Type.INTEGER },
+                  precioUnitario: { type: Type.NUMBER },
+                  precioTotal: { type: Type.NUMBER },
+                  descuento: { type: Type.NUMBER },
+                  comentarios: { type: Type.STRING },
+                  encontradoEnCatalogo: { type: Type.BOOLEAN },
+                },
+                required: ["nombre", "cantidad", "encontradoEnCatalogo"],
+              },
+            },
+            itemsExternos: {
+              type: Type.ARRAY,
+              items: {
+                type: Type.OBJECT,
+                properties: {
+                  nombre: { type: Type.STRING },
+                  cantidad: { type: Type.INTEGER },
+                  observacion: { type: Type.STRING },
+                },
+                required: ["nombre", "cantidad"],
+              },
+            },
+            totalCalculado: { type: Type.NUMBER },
+            notasGenerales: { type: Type.STRING },
+          },
+          required: ["itemsPropios", "totalCalculado"],
+        };
+
+        const response = await ai.models.generateContent({
+          model: modelo,
+          contents: [
+            {
+              role: 'user',
+              parts: [
+                {
+                  text: `Texto del pedido de WhatsApp a mapear:\n${textoDetalle}\n\nTotal reportado en WhatsApp: ${totalWA || 'No especificado'}`,
+                },
+              ],
+            },
+          ],
+          config: {
+            systemInstruction,
+            responseMimeType: 'application/json',
+            responseSchema,
+            temperature: 0.1,
+          },
+        });
+
+        const parsed = this.repairAndParseJSON(response.text?.trim() || '{}');
+        if (parsed && Array.isArray(parsed.itemsPropios)) {
+          return {
+            itemsPropios: parsed.itemsPropios,
+            itemsExternos: Array.isArray(parsed.itemsExternos) ? parsed.itemsExternos : [],
+            totalCalculado: Number(parsed.totalCalculado || 0),
+            notasGenerales: parsed.notasGenerales || '',
+          };
+        }
+      }
+    } catch (e: any) {
+      this.logger.warn(`Mapeo con Gemini falló (${e.message}). Aplicando fallback por coincidencia de texto.`);
+    }
+
+    // 3. Fallback determinista por coincidencia de texto
+    const lineas = textoDetalle
+      .split('\n')
+      .map((l) => l.replace(/^[👉•\-\*\s]+/, '').trim())
+      .filter(Boolean);
+
+    const itemsPropios: any[] = [];
+    let totalCalculado = 0;
+
+    for (const linea of lineas) {
+      // Extraer cantidad si viene en formato "2 x Hamburguesa" o "1x"
+      let cantidad = 1;
+      let nombreLimpio = linea;
+      const cantMatch = linea.match(/^(\d+)\s*[xX]?\s*(.*)$/);
+      if (cantMatch) {
+        cantidad = parseInt(cantMatch[1], 10) || 1;
+        nombreLimpio = cantMatch[2].trim();
+      }
+
+      // Buscar coincidencia en catálogo
+      const lower = nombreLimpio.toLowerCase();
+      const match = catalogMini.find(
+        (p) => lower.includes(p.nombre.toLowerCase()) || p.nombre.toLowerCase().includes(lower),
+      );
+
+      if (match) {
+        const precioTotal = match.precio * cantidad;
+        totalCalculado += precioTotal;
+        itemsPropios.push({
+          productoId: match.id,
+          nombre: match.nombre,
+          cantidad,
+          precioUnitario: match.precio,
+          precioTotal,
+          descuento: 0,
+          comentarios: '',
+          encontradoEnCatalogo: true,
+        });
+      } else {
+        itemsPropios.push({
+          nombre: nombreLimpio,
+          cantidad,
+          precioUnitario: 0,
+          precioTotal: 0,
+          descuento: 0,
+          comentarios: '',
+          encontradoEnCatalogo: false,
+        });
+      }
+    }
+
+    return {
+      itemsPropios,
+      itemsExternos: [],
+      totalCalculado,
+      notasGenerales: 'Mapeo generado por fallback de texto',
+    };
+  }
 }
+

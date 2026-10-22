@@ -317,6 +317,7 @@ model Ventas {
   aperturaCierreCaja    AperturaCierreCaja[] @relation("AperturaCierreCajaToVentas")
   buscar                String?              @map("Buscar")
   facturaElectronica    FacturasElectronicas?
+  domiciliosWA          DomicilioWA[]
 
   @@index([fechaYHora])
   @@index([createdAt])
@@ -604,6 +605,40 @@ model ConfiguracionNegocio {
   habilitarDescuentos     Boolean @default(true)
   tiempoReservaInventario Int     @default(5)
   porcentajeMermaPapa     Float?  @default(10) @map("PorcentajeMermaPapa")
+  domisHabilitado         Boolean @default(true) @map("DomisHabilitado")
+  domisBloqueoVentas      Boolean @default(true) @map("DomisBloqueoVentas")
+  domisTimeoutMinutos     Int     @default(10)   @map("DomisTimeoutMinutos")
+  domisAlertaSonora       Boolean @default(true) @map("DomisAlertaSonora")
+  domisPromptMapeo        String? @map("DomisPromptMapeo")
+  domisWebhookSecret      String? @default("qhubo-secret-2026") @map("DomisWebhookSecret")
+  domisWaQueueUrl         String? @map("DomisWaQueueUrl")
+}
+
+model DomicilioWA {
+  IDdomicilio          String      @id @default(cuid()) @map("IDdomicilio")
+  orderIdWA            String      @unique @map("OrderIdWA")
+  clienteTelefono      String      @map("ClienteTelefono")
+  clienteNombre        String?     @map("ClienteNombre")
+  direccion            String?     @map("Direccion")
+  detalleTextoWA       String      @map("DetalleTextoWA")
+  itemsMapeados        Json        @map("ItemsMapeados")
+  itemsExternos        Json?       @map("ItemsExternos")
+  totalWA              Decimal     @map("TotalWA") @db.Money
+  totalCalculado       Decimal?    @map("TotalCalculado") @db.Money
+  metodoPagoWA         String?     @map("MetodoPagoWA")
+  estado               String      @default("RECIENTE") @map("Estado")
+  origen               String?     @default("whatsapp_bot") @map("Origen")
+  ventaId              String?     @map("VentaId")
+  ventaRelacion        Ventas?     @relation(fields: [ventaId], references: [IDventas], onDelete: SetNull)
+  timestampPedido      DateTime    @map("TimestampPedido")
+  atendidoAt           DateTime?   @map("AtendidoAt")
+  atendidoPor          String?     @map("AtendidoPor")
+  createdAt            DateTime    @default(now()) @map("CreatedAt")
+  updatedAt            DateTime    @updatedAt @map("UpdatedAt")
+
+  @@index([estado])
+  @@index([timestampPedido])
+  @@map("DOMICILIOS_WA")
 }
 
 model FacturasElectronicas {

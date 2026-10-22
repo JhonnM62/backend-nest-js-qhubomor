@@ -49,6 +49,13 @@ export class ConfiguracionController {
     habilitarPropinas?: boolean;
     habilitarDescuentos?: boolean;
     porcentajeMermaPapa?: number;
+    domisHabilitado?: boolean;
+    domisBloqueoVentas?: boolean;
+    domisTimeoutMinutos?: number;
+    domisAlertaSonora?: boolean;
+    domisPromptMapeo?: string;
+    domisWebhookSecret?: string;
+    domisWaQueueUrl?: string;
   }) {
     return this.configuracionService.updateConfiguracion(data);
   }

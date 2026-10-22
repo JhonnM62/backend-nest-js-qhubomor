@@ -36,6 +36,7 @@ import { MovimientosInsumosModule } from './movimientos-insumos/movimientos-insu
 import { FacturacionModule } from './facturacion/facturacion.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { SeccionCocinaModule } from './seccion-cocina/seccion-cocina.module';
+import { DomiciliosModule } from './domicilios/domicilios.module';
 
 @Module({
   imports: [
@@ -91,6 +92,7 @@ import { SeccionCocinaModule } from './seccion-cocina/seccion-cocina.module';
     MovimientosInsumosModule,
     FacturacionModule,
     SeccionCocinaModule,
+    DomiciliosModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: AllExceptionsFilter },
