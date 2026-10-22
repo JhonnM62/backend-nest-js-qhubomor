@@ -164,4 +164,18 @@ export class DomiciliosService {
     this.appGateway.emitDomicilioActualizado(updated);
     return updated;
   }
+
+  async remove(id: string) {
+    const dom = await this.prisma.domicilioWA.findUnique({
+      where: { IDdomicilio: id },
+    });
+    if (!dom) throw new NotFoundException('Domicilio no encontrado');
+
+    await this.prisma.domicilioWA.delete({
+      where: { IDdomicilio: id },
+    });
+
+    this.appGateway.emitDomicilioActualizado({ IDdomicilio: id, estado: 'ELIMINADO' } as any);
+    return { ok: true, id };
+  }
 }

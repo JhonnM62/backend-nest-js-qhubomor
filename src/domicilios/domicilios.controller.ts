@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Patch, Body, Param, Query, Headers, UseGuards, Request, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Get, Patch, Delete, Body, Param, Query, Headers, UseGuards, Request, HttpCode, HttpStatus } from '@nestjs/common';
 import { DomiciliosService } from './domicilios.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { Public } from '../common/decorators/public.decorator';
@@ -63,5 +63,14 @@ export class DomiciliosController {
     @Body('ventaId') ventaId: string,
   ) {
     return this.domiciliosService.vincularVenta(id, ventaId);
+  }
+
+  /**
+   * Elimina un domicilio por su ID.
+   */
+  @Delete(':id')
+  @UseGuards(JwtAuthGuard)
+  async remove(@Param('id') id: string) {
+    return this.domiciliosService.remove(id);
   }
 }

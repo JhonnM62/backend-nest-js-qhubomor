@@ -805,6 +805,10 @@ Si valido es false, "motivo" debe contener la instrucción correctiva exacta en 
       esCombo: p.combo === 'SI' || p.combo === 'true',
     }));
 
+    const categoriasLocales = Array.from(
+      new Set(productosRaw.map((p) => p.categoriaNombre?.trim()).filter(Boolean)),
+    );
+
     // 2. Intentar parseo con Gemini si la API Key está disponible
     try {
       const configIA = await this.configService.getConfiguracionIA();
@@ -816,22 +820,27 @@ Si valido es false, "motivo" debe contener la instrucción correctiva exacta en 
           ? `\nREGLAS DE NEGOCIO, DESCUENTOS Y PROMOCIONES DEL USUARIO:\n${promptPersonalizado}\n`
           : '';
 
-        const systemInstruction = `Eres un asistente experto de restaurante y POS.
-Tu tarea es analizar el texto de un pedido que llegó por WhatsApp y mapearlo de forma precisa contra nuestro catálogo de productos local.
+        const systemInstruction = `Eres un asistente experto de restaurante y POS ERP multi-tenant.
+Tu tarea es analizar el texto de un pedido de WhatsApp y clasificar sus productos de forma rigurosa.
 
-CATÁLOGO DE PRODUCTOS DISPONIBLES:
+IMPORTANTE SOBRE ESTE NEGOCIO/POS:
+Este sistema POS pertenece a un negocio específico que ÚNICAMENTE vende los siguientes tipos de productos:
+- CATEGORÍAS LOCALES DEL NEGOCIO: ${JSON.stringify(categoriasLocales)}
+- CATÁLOGO DE PRODUCTOS DISPONIBLES:
 ${JSON.stringify(catalogMini)}
 ${customPromptText}
-INSTRUCCIONES CLAVE:
-1. 'itemsPropios': Platos o productos que corresponden a nuestro catálogo (o variaciones muy claras de ellos).
-   - Asigna 'productoId' exacto del catálogo si coincide.
-   - Extrae la cantidad exacta solicitada (por defecto 1).
-   - Extrae precioUnitario y calcula precioTotal.
-   - Si aplica un descuento o promoción según las reglas, indica el valor del 'descuento' numérico.
-   - Si el cliente hizo observaciones como "sin cebolla", "con salsa de ajo", colócalo en 'comentarios'.
-   - 'encontradoEnCatalogo': true si coincide con un productoId del catálogo, false si es un plato de nuestra categoría pero no está en la lista.
-2. 'itemsExternos': Si en el texto se piden productos de OTRO negocio (por ejemplo, granizados o bebidas especiales si este es un restaurante de comidas, o viceversa platos fuertes si este es un negocio de bebidas), colócalos en 'itemsExternos' indicando la cantidad y una breve observación.
-3. 'totalCalculado': La suma de los subtotales de 'itemsPropios'.`;
+
+REGLAS DE ORO DE CLASIFICACIÓN:
+1. 'itemsPropios': DEBE ser ÚNICAMENTE aquellos productos que pertenezcan a este negocio (coinciden directamente o son variantes de sabor/tamaño de los productos de nuestro catálogo local).
+   - Asigna 'productoId' exacto del catálogo si coincide (ej. "Granizado 8oz Lulo" coincide con el producto "Granizado 8oz").
+   - 'encontradoEnCatalogo': true si tiene productoId de nuestro catálogo.
+   - Extrae cantidad, precioUnitario y precioTotal.
+   - Si dice "gratis" o "promo gratis", coloca en 'descuento' o en comentarios, y cobra solo el valor real cobrado (ej. adiciones/tapas).
+   - Observaciones como "sin licor", "con salsa de ajo", ponlas en 'comentarios'.
+   - CRÍTICO: NUNCA coloques en 'itemsPropios' productos que pertenecen a otro comercio (ej. si este negocio vende bebidas/granizados, la comida como alitas, hamburguesas, salchipapas, etc. NO son de este negocio; y viceversa, si este negocio vende comida, los granizados/bebidas de otro comercio NO son de este negocio).
+2. 'itemsExternos': TODO producto solicitado en el texto que NO pertenezca a nuestro catálogo ni a las categorías locales de este negocio (ej. alitas en un negocio de granizados, o granizados en un negocio de alitas).
+   - Debe ir en 'itemsExternos' con su nombre, cantidad y una breve observación o precio si venía especificado.
+3. 'totalCalculado': Suma exacta de los subtotales de 'itemsPropios'.`;
 
         const responseSchema: Schema = {
           type: Type.OBJECT,
@@ -912,6 +921,7 @@ INSTRUCCIONES CLAVE:
       .filter(Boolean);
 
     const itemsPropios: any[] = [];
+    const itemsExternos: any[] = [];
     let totalCalculado = 0;
 
     for (const linea of lineas) {
@@ -944,21 +954,17 @@ INSTRUCCIONES CLAVE:
           encontradoEnCatalogo: true,
         });
       } else {
-        itemsPropios.push({
+        itemsExternos.push({
           nombre: nombreLimpio,
           cantidad,
-          precioUnitario: 0,
-          precioTotal: 0,
-          descuento: 0,
-          comentarios: '',
-          encontradoEnCatalogo: false,
+          observacion: 'De otro comercio',
         });
       }
     }
 
     return {
       itemsPropios,
-      itemsExternos: [],
+      itemsExternos,
       totalCalculado,
       notasGenerales: 'Mapeo generado por fallback de texto',
     };
