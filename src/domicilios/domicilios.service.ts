@@ -187,12 +187,12 @@ export class DomiciliosService {
     return updated;
   }
 
-  async vincularVenta(id: string, ventaId: string) {
+  async vincularVenta(id: string, ventaId: string, nuevoEstado?: string) {
     const updated = await this.prisma.domicilioWA.update({
       where: { IDdomicilio: id },
       data: {
         ventaId,
-        estado: 'COBRADO',
+        estado: nuevoEstado || 'TOMADO',
         atendidoAt: new Date(),
       },
     });

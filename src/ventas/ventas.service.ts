@@ -446,13 +446,18 @@ export class VentasService {
 
     const validMesaId = await this.resolveMesaOrCreate(venta.mesa);
 
+    let totalInputNormalized = Number(venta.totalInput) || 0;
+    if (totalInputNormalized > 0 && totalInputNormalized < 100) {
+      totalInputNormalized = totalInputNormalized * 1000;
+    }
+
     const ventaData = {
       mesa: validMesaId,
       medioDePago: venta.medioDePago,
       efectivoRecibido: venta.efectivoRecibido,
       devueltas: venta.devueltas,
       banco: venta.medioDePago === 'EFECTIVO' ? null : venta.banco,
-      totalInput: venta.totalInput,
+      totalInput: totalInputNormalized,
       descuento: venta.descuento,
       porcentajeDeDescuento: venta.porcentajeDeDescuento,
       abono: venta.abono,
@@ -489,30 +494,41 @@ export class VentasService {
       productos.map(async (producto) => {
         let nombreProducto: string | undefined | null = producto.nombre;
         let categoriaProducto: string | undefined | null = producto.categoria;
+        let validProductoId: string | null = null;
 
-        if (producto.productoId) {
-          const productoData = await this.prisma.productos.findUnique({
-            where: { IDproductos: producto.productoId },
-          });
-          if (productoData) {
-            nombreProducto = productoData.nombre || undefined;
-            categoriaProducto = productoData.categoriaNombre || productoData.categoria || undefined;
+        const rawProdId = producto.productoId && String(producto.productoId).trim() !== ''
+          ? String(producto.productoId).trim()
+          : null;
+
+        if (rawProdId) {
+          try {
+            const productoData = await this.prisma.productos.findUnique({
+              where: { IDproductos: rawProdId },
+            });
+            if (productoData) {
+              validProductoId = productoData.IDproductos;
+              nombreProducto = productoData.nombre || undefined;
+              categoriaProducto = productoData.categoriaNombre || productoData.categoria || undefined;
+            }
+          } catch (e) {
+            validProductoId = null;
           }
         }
 
         // Apply Jornada Comercial to Orderventas
         const orderFechaContable = fechaContable;
 
-        const { seccionCocinaId, categoriaSeccionCocinaId, ...validProducto } = producto as any;
+        const { seccionCocinaId, categoriaSeccionCocinaId, productoId, ...restProducto } = producto as any;
 
         return this.prisma.orderventas.create({
           data: {
-            ...validProducto,
-            nombre: nombreProducto,
-            categoria: categoriaProducto,
-            nombreProducto,
-            categoriaProducto,
-            imagenUrl: producto.imagenUrl,
+            ...restProducto,
+            productoId: validProductoId,
+            nombre: nombreProducto || 'Producto',
+            categoria: categoriaProducto || 'GENERAL',
+            nombreProducto: nombreProducto || 'Producto',
+            categoriaProducto: categoriaProducto || 'GENERAL',
+            imagenUrl: producto.imagenUrl || null,
             IDventas: ventaCreada.IDventas,
             usuarioId,
             fecha: orderFechaContable, // Use accounting date
@@ -655,20 +671,31 @@ export class VentasService {
     if (productos && productos.length > 0) {
       await Promise.all(
         productos.map(async (producto) => {
-          const productoData = await this.prisma.productos.findFirst({
-            where: { IDproductos: producto.productoId },
-            select: { nombre: true, categoria: true, categoriaNombre: true },
-          });
-
           let nombreProducto = producto.nombre;
           let categoriaProducto = producto.categoria;
+          let validProductoId: string | null = null;
+          const rawProdId = producto.productoId && String(producto.productoId).trim() !== ''
+            ? String(producto.productoId).trim()
+            : null;
 
-          if (productoData) {
-            if (!nombreProducto || nombreProducto.trim() === '') {
-              nombreProducto = productoData.nombre;
-            }
-            if (!categoriaProducto || categoriaProducto.trim() === '') {
-              categoriaProducto = productoData.categoriaNombre || productoData.categoria || undefined;
+          if (rawProdId) {
+            try {
+              const productoData = await this.prisma.productos.findFirst({
+                where: { IDproductos: rawProdId },
+                select: { IDproductos: true, nombre: true, categoria: true, categoriaNombre: true },
+              });
+
+              if (productoData) {
+                validProductoId = productoData.IDproductos;
+                if (!nombreProducto || nombreProducto.trim() === '') {
+                  nombreProducto = productoData.nombre;
+                }
+                if (!categoriaProducto || categoriaProducto.trim() === '') {
+                  categoriaProducto = productoData.categoriaNombre || productoData.categoria || undefined;
+                }
+              }
+            } catch (e) {
+              validProductoId = null;
             }
           }
 
@@ -697,16 +724,17 @@ export class VentasService {
             preparadoAt = preparadoAt || new Date();
           }
 
-          const { seccionCocinaId, categoriaSeccionCocinaId, ...validProducto } = producto as any;
+          const { seccionCocinaId, categoriaSeccionCocinaId, productoId, ...restProducto } = producto as any;
 
           return this.prisma.orderventas.create({
             data: {
-              ...validProducto,
-              nombre: nombreProducto,
-              categoria: categoriaProducto,
-              nombreProducto,
-              categoriaProducto,
-              imagenUrl: producto.imagenUrl,
+              ...restProducto,
+              productoId: validProductoId,
+              nombre: nombreProducto || 'Producto',
+              categoria: categoriaProducto || 'GENERAL',
+              nombreProducto: nombreProducto || 'Producto',
+              categoriaProducto: categoriaProducto || 'GENERAL',
+              imagenUrl: producto.imagenUrl || null,
               IDventas: ventaActualizada.IDventas,
               usuarioId,
               fecha: fechaContable,

@@ -901,9 +901,9 @@ REGLAS DE ORO DE CLASIFICACIÓN (ESTRICTAS):
    - NUNCA pongas un producto de otro comercio en 'itemsPropios'.
 
 2. 'itemsPropios': Solo productos que pertenecen a NUESTRO catálogo.
-   - Asigna 'productoId' exacto del catálogo local. 'encontradoEnCatalogo' debe ser true.
+   - Asigna 'productoId' exacto del catálogo local buscando la mejor coincidencia semántica aunque el nombre varíe ligeramente (por ejemplo, 'Alitas Parche Pequeño' corresponde a 'ALITAS X5 peq', 'Alitas Parche Mediano' a 'ALITAS X10 med', 'Alitas Parche Familiar' a 'ALITAS X15 Fami', 'Hamburguesa Clásica' a 'H. La Parcera Clasica', etc.). Si coincide, asigna su 'productoId' exacto del catálogo y marca 'encontradoEnCatalogo: true'.
    - Extrae cantidad exacta.
-   - 'precioUnitario' y 'precioTotal' NUNCA deben ser 0 si el texto tiene precio especificado.
+   - 'precioUnitario' y 'precioTotal' NUNCA deben ser 0 si el texto tiene precio especificado. Si el precio viene abreviado (ej. 34 o 34.000), normalízalo a pesos colombianos completos (ej. 34000).
    - ADICIONALES Y DESECHABLES:
      * Si es comida y el texto tiene el valor con desechable ($1.000 adicionales por unidad): el precio unitario del producto es el precio base del catálogo, y el desechable ($1.000) debe incluirse en 'comentarios' como modificador JSON: [{"name": "Desechable", "price": 1000, "quantity": 1}].
      * Si es granizado gratis o promoción de bebidas gratis donde se cobran tapas (ej. "tapas $2.000"): precioUnitario base es 0 o el de la tapa, y en 'comentarios' incluye modificador JSON con la tapa y el sabor: [{"name": "Tapa", "price": 1000, "quantity": 1}, {"name": "Lulo sin licor", "price": 0}].

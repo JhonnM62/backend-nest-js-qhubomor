@@ -61,8 +61,9 @@ export class DomiciliosController {
   async vincularVenta(
     @Param('id') id: string,
     @Body('ventaId') ventaId: string,
+    @Body('estado') estado?: string,
   ) {
-    return this.domiciliosService.vincularVenta(id, ventaId);
+    return this.domiciliosService.vincularVenta(id, ventaId, estado);
   }
 
   /**
