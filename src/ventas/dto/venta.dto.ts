@@ -194,6 +194,11 @@ export class CreateOrderVentaDto {
   @IsOptional()
   @IsString()
   seccionCocinaId?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  gramosPapa?: number;
 }
 
 export class CreateVentaCompletaDto {

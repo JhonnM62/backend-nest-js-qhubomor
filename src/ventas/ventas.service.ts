@@ -724,7 +724,7 @@ export class VentasService {
             preparadoAt = preparadoAt || new Date();
           }
 
-          const { seccionCocinaId, categoriaSeccionCocinaId, productoId, ...restProducto } = producto as any;
+          const { seccionCocinaId, categoriaSeccionCocinaId, productoId, gramosPapa, ...restProducto } = producto as any;
 
           return this.prisma.orderventas.create({
             data: {
@@ -758,6 +758,14 @@ export class VentasService {
     });
 
     if (updatedVentaWithOrders) {
+      if (estadoToSave === 'PAGADO' || estadoToSave === 'COBRADO') {
+        try {
+          await this.prisma.domicilioWA.updateMany({
+            where: { ventaId: id },
+            data: { estado: 'COBRADO' },
+          });
+        } catch (e) {}
+      }
       this.appGateway.emitToVentas(SocketEvent.REFRESH_VENTAS, { action: 'updateEstado', venta: updatedVentaWithOrders });
     }
 
@@ -1206,6 +1214,22 @@ export class VentasService {
       },
     });
 
+    if (estado === 'PAGADO' || estado === 'COBRADO') {
+      try {
+        await this.prisma.domicilioWA.updateMany({
+          where: { ventaId: id },
+          data: { estado: 'COBRADO' },
+        });
+      } catch (e) {}
+    } else if (estado === 'CANCELADO') {
+      try {
+        await this.prisma.domicilioWA.updateMany({
+          where: { ventaId: id },
+          data: { estado: 'CANCELADO' },
+        });
+      } catch (e) {}
+    }
+
     // FIX: fetch with ordenVentas so the frontend never receives a payload
     // that overwrites the products/totalInput with stale/incomplete data.
     const updated = await this.prisma.ventas.findUnique({
@@ -1352,6 +1376,15 @@ export class VentasService {
         facturaElectronica: true,
       },
     });
+
+    if (estadoUpdate === 'PAGADO' || estadoUpdate === 'COBRADO') {
+      try {
+        await this.prisma.domicilioWA.updateMany({
+          where: { ventaId: id },
+          data: { estado: 'COBRADO' },
+        });
+      } catch (e) {}
+    }
 
     this.appGateway.emitToVentas(SocketEvent.REFRESH_VENTAS, { action: 'updateEstado', venta: updated });
     

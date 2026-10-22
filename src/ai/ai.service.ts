@@ -904,10 +904,23 @@ REGLAS DE ORO DE CLASIFICACIÓN (ESTRICTAS):
    - Asigna 'productoId' exacto del catálogo local buscando la mejor coincidencia semántica aunque el nombre varíe ligeramente (por ejemplo, 'Alitas Parche Pequeño' corresponde a 'ALITAS X5 peq', 'Alitas Parche Mediano' a 'ALITAS X10 med', 'Alitas Parche Familiar' a 'ALITAS X15 Fami', 'Hamburguesa Clásica' a 'H. La Parcera Clasica', etc.). Si coincide, asigna su 'productoId' exacto del catálogo y marca 'encontradoEnCatalogo: true'.
    - Extrae cantidad exacta.
    - 'precioUnitario' y 'precioTotal' NUNCA deben ser 0 si el texto tiene precio especificado. Si el precio viene abreviado (ej. 34 o 34.000), normalízalo a pesos colombianos completos (ej. 34000).
-   - ADICIONALES Y DESECHABLES:
-     * Si es comida y el texto tiene el valor con desechable ($1.000 adicionales por unidad): el precio unitario del producto es el precio base del catálogo, y el desechable ($1.000) debe incluirse en 'comentarios' como modificador JSON: [{"name": "Desechable", "price": 1000, "quantity": 1}].
-     * Si es granizado gratis o promoción de bebidas gratis donde se cobran tapas (ej. "tapas $2.000"): precioUnitario base es 0 o el de la tapa, y en 'comentarios' incluye modificador JSON con la tapa y el sabor: [{"name": "Tapa", "price": 1000, "quantity": 1}, {"name": "Lulo sin licor", "price": 0}].
-     * 'comentarios' SIEMPRE debe ser un JSON string válido con formato de modificadores: [{"name": string, "price": number, "quantity"?: number}].
+   - ADICIONALES Y PRODUCTOS EXTRA (ESTRICTO - NUNCA CREAR ADICIONALES CON PRECIO EN COMENTARIOS):
+     * Los adicionales NO se inventan ni se colocan como comentarios con precio. Son PRODUCTOS EXISTENTES en la base de datos (revisar categoría ADICCIONALES / ADICIONALES o catálogo: ej. tocineta, queso, carnes, papas, gomas, fruta, shot, etc.).
+     * Si el cliente pide un adicional, DEBE mapearse como un item independiente en 'itemsPropios' con su 'productoId' del catálogo.
+     * En 'comentarios' NUNCA coloques modificadores con precio para adicionales que existen como producto en el catálogo.
+
+   - DESECHABLES Y EMPAQUES (J1, SP1, CAJAS Y EMPAQUES):
+     * Ciertos platos requieren empaque desechable según su tamaño o categoría:
+       - Hamburguesas, alitas, porciones y combos individuales suelen llevar empaque tipo 'J1' (o empaque J1).
+       - Salchipapas, perros calientes y combos alargados suelen llevar empaque tipo 'SP1' (o empaque SP1).
+     * Si en el catálogo existe el producto de desechable o empaque (ej. 'J1', 'SP1', 'Desechable', 'Empaque'), agrégalo como un item propio en 'itemsPropios' con su 'productoId'.
+     * Si el plato incluye su desechable en el precio o no hay producto de empaque independiente en catálogo, especifica la referencia de empaque (ej. 'Empaque J1' o 'Empaque SP1') en 'comentarios' con precio 0.
+
+   - GRANIZADOS Y BEBIDAS (TAPAS Y ADICIONES SON PRODUCTOS REALES):
+     * En granizados, cuando se cobren tapas (ej. "tapas $2.000", "tapa 8 onz", "tapas domicilio", "tapa 24 onz"): DEBE agregarse como un PRODUCTO REAL del catálogo (ej. 'Tapas domicilio', 'Tapa 8 onz', 'TAPA DE 24 ONZ', etc.) con su correspondiente 'productoId', 'cantidad' y precio, y NO como una anotación o modificador con precio en comentarios.
+     * El granizado va con su precio base de catálogo (precio 0 si es promoción gratis).
+     * En 'comentarios' del granizado SOLO deben ir notas de preparación o sabores SIN costo (ej. [{"name": "Bonbombon sin licor", "price": 0}] o [{"name": "Lulo", "price": 0}]).
+   - 'comentarios' SIEMPRE debe ser un JSON string válido con formato de modificadores: [{"name": string, "price": number, "quantity"?: number}]. Solo lleva precio si es una adición puramente personalizada no existente en catálogo.
 
 3. 'itemsExternos': Productos del pedido que pertenecen a otro comercio.
    - 'nombre': Nombre del producto externo.
