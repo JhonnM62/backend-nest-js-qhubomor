@@ -20,7 +20,7 @@ async function bootstrap() {
   app.enableCors({
     origin: '*',
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'Bearer'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Bearer', 'x-webhook-token', 'X-Webhook-Token'],
   });
 
   app.useGlobalPipes(

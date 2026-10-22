@@ -1,6 +1,7 @@
-import { Controller, Post, Get, Patch, Body, Param, Query, Headers, UseGuards, Request } from '@nestjs/common';
+import { Controller, Post, Get, Patch, Body, Param, Query, Headers, UseGuards, Request, HttpCode, HttpStatus } from '@nestjs/common';
 import { DomiciliosService } from './domicilios.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { Public } from '../common/decorators/public.decorator';
 
 @Controller('domicilios')
 export class DomiciliosController {
@@ -10,7 +11,9 @@ export class DomiciliosController {
    * Endpoint de Webhook que recibe las notificaciones de pedidos desde wa-queue-api-v2.
    * No requiere JWT de usuario (se autentica por x-webhook-token).
    */
+  @Public()
   @Post('webhook')
+  @HttpCode(HttpStatus.OK)
   async webhook(
     @Body() payload: any,
     @Headers('x-webhook-token') webhookToken?: string,
