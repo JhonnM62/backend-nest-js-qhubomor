@@ -100,9 +100,18 @@ export class NotificationsService {
       const messages: ExpoPushMessage[] = [];
       const historyRecords = [];
 
+      const isDomicilioEvent = eventType === 'NUEVO_DOMICILIO' || eventType === 'DOMICILIO_TIMEOUT';
+
       for (const setting of settings) {
-        // Solo notificar si es Admin
-        if (setting.usuario.rol !== 'Admin app' && setting.usuario.rol !== 'Admin negocio') {
+        // Ignorar usuarios inactivos
+        if (setting.usuario.isActive === false) {
+          continue;
+        }
+
+        // Las notificaciones generales (ventas, caja, turnos, etc.) son SOLO para administradores.
+        // Las notificaciones de Domicilios son las únicas que llegan a todos los roles operativos,
+        // siempre y cuando el usuario tenga la opción activada en NotificationSettingsScreen.
+        if (!isDomicilioEvent && setting.usuario.rol !== 'Admin app' && setting.usuario.rol !== 'Admin negocio') {
           continue;
         }
 
@@ -147,8 +156,9 @@ export class NotificationsService {
 
   /**
    * Notificación específica para domicilios (nuevos o desatendidos con timeout).
-   * Se envía a TODOS los usuarios activos que tengan push tokens registrados
-   * (incluyendo cajeros, meseros y roles operativos, no solo administradores).
+   * Respeta la configuración personalizada de cada usuario en NotificationSettingsScreen
+   * (notifyDomicilioNuevo o notifyDomicilioTimeout), permitiendo que todos los roles activos
+   * la reciban siempre y cuando la tengan activada en su app.
    */
   async sendDomicilioNotification(
     eventType: 'NUEVO_DOMICILIO' | 'DOMICILIO_TIMEOUT',
@@ -156,63 +166,7 @@ export class NotificationsService {
     body: string,
     dataContext?: any
   ) {
-    try {
-      const usuarios = await this.prisma.usuarios.findMany({
-        where: {
-          OR: [
-            { isActive: true },
-            { isActive: null },
-          ],
-          pushTokens: { some: {} },
-        },
-        include: {
-          pushTokens: true,
-        },
-      });
-
-      if (!usuarios || usuarios.length === 0) {
-        this.logger.debug(`[DomiciliosPush] No hay usuarios activos con push tokens para enviar ${eventType}`);
-        return;
-      }
-
-      const messages: ExpoPushMessage[] = [];
-      const historyRecords = [];
-
-      for (const usuario of usuarios) {
-        historyRecords.push({
-          userId: usuario.IDusuarios,
-          title,
-          body,
-          type: eventType,
-          data: dataContext ? dataContext : {},
-        });
-
-        for (const pushToken of usuario.pushTokens) {
-          if (!Expo.isExpoPushToken(pushToken.token)) continue;
-
-          messages.push({
-            to: pushToken.token,
-            sound: 'default',
-            title,
-            body,
-            data: { eventType, ...dataContext },
-          });
-        }
-      }
-
-      if (historyRecords.length > 0) {
-        await this.prisma.notificationHistory.createMany({
-          data: historyRecords,
-        }).catch((e) => this.logger.error(`Error guardando historial de notificación domicilio: ${e.message}`));
-      }
-
-      if (messages.length > 0) {
-        this.logger.log(`[DomiciliosPush] Enviando ${messages.length} notificaciones push (${eventType}) a ${usuarios.length} usuarios`);
-        await this.sendExpoChunks(messages);
-      }
-    } catch (error) {
-      this.logger.error(`Error enviando notificación push de domicilio (${eventType}): ${error.message}`);
-    }
+    return this.sendNotification(eventType, title, body, dataContext);
   }
 
   private async sendExpoChunks(messages: ExpoPushMessage[]) {
@@ -328,6 +282,8 @@ export class NotificationsService {
       'TURNO_DESCANSO_STARTED': 'notifyTurnoDescanso',
       'TURNO_DESCANSO_ENDED': 'notifyTurnoDescanso',
       'TURNO_DESCANSO_EXCEEDED': 'notifyTurnoDescansoExceso',
+      'NUEVO_DOMICILIO': 'notifyDomicilioNuevo',
+      'DOMICILIO_TIMEOUT': 'notifyDomicilioTimeout',
     };
     return map[eventType] || null;
   }

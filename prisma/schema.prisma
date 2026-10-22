@@ -732,6 +732,8 @@ model NotificationSetting {
   notifyTurnoClosed            Boolean  @default(true)
   notifyTurnoDescanso          Boolean  @default(true)
   notifyTurnoDescansoExceso    Boolean  @default(true)
+  notifyDomicilioNuevo         Boolean  @default(true)
+  notifyDomicilioTimeout       Boolean  @default(true)
   createdAt                    DateTime @default(now())
   updatedAt                    DateTime @updatedAt
   usuario                      Usuarios @relation(fields: [userId], references: [IDusuarios], onDelete: Cascade)
