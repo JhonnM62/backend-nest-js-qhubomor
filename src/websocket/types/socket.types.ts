@@ -23,6 +23,7 @@ export enum SocketEvent {
   // Domicilios WhatsApp
   NUEVO_DOMICILIO = 'nuevoDomicilio',
   DOMICILIO_ACTUALIZADO = 'domicilioActualizado',
+  DOMICILIO_TIMEOUT = 'domicilioTimeout',
   // Secciones de cocina
   REFRESH_SECCIONES_COCINA = 'refreshSeccionesCocina',
   // Impresión remota BT via socket

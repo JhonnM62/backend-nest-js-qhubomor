@@ -417,6 +417,14 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.emitToAll(SocketEvent.DOMICILIO_ACTUALIZADO, domicilio);
   }
 
+  emitDomicilioTimeout(domicilio: any) {
+    this.logger.log(`Emitting domicilioTimeout: ${domicilio.orderIdWA || domicilio.IDdomicilio}`);
+    this.emitToRoom(Room.DOMICILIOS, SocketEvent.DOMICILIO_TIMEOUT, domicilio);
+    this.emitToRoom(Room.VENTAS, SocketEvent.DOMICILIO_TIMEOUT, domicilio);
+    this.emitToRoom(Room.CAJA, SocketEvent.DOMICILIO_TIMEOUT, domicilio);
+    this.emitToAll(SocketEvent.DOMICILIO_TIMEOUT, domicilio);
+  }
+
   // ============================================================
   // UTILIDADES
   // ============================================================

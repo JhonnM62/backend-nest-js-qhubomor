@@ -1,18 +1,22 @@
 import { Injectable, BadRequestException, UnauthorizedException, Logger, NotFoundException } from '@nestjs/common';
+import { Cron, CronExpression } from '@nestjs/schedule';
 import { PrismaService } from '../prisma/prisma.service';
 import { AiService } from '../ai/ai.service';
 import { ConfiguracionService } from '../configuracion/configuracion.service';
 import { AppGateway } from '../websocket/app.gateway';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class DomiciliosService {
   private readonly logger = new Logger(DomiciliosService.name);
+  private alertedTimeoutIds = new Set<string>();
 
   constructor(
     private readonly prisma: PrismaService,
     private readonly aiService: AiService,
     private readonly configService: ConfiguracionService,
     private readonly appGateway: AppGateway,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   async handleWebhook(payload: any, tokenHeader?: string) {
@@ -140,7 +144,92 @@ export class DomiciliosService {
 
     this.logger.log(`Nuevo domicilio guardado exitosamente: ${nuevo.IDdomicilio} (${orderIdWA})`);
     this.appGateway.emitNuevoDomicilio(nuevo);
+
+    // Enviar notificación push al móvil a todos los usuarios activos (incluyendo no admins)
+    try {
+      const clienteDesc = nuevo.clienteNombre || nuevo.clienteTelefono || 'Cliente';
+      const totalStr = nuevo.totalWA ? `$${Number(nuevo.totalWA).toLocaleString('es-CO')}` : '';
+      const dirStr = nuevo.direccion ? ` (${nuevo.direccion})` : '';
+      this.notificationsService.sendDomicilioNotification(
+        'NUEVO_DOMICILIO',
+        `🛵 Nuevo Domicilio #${nuevo.orderIdWA}`,
+        `${clienteDesc}${dirStr} por ${totalStr}. ¡Por favor atiéndelo!`,
+        {
+          domicilioId: nuevo.IDdomicilio,
+          orderIdWA: nuevo.orderIdWA,
+          totalWA: nuevo.totalWA,
+          clienteNombre: nuevo.clienteNombre,
+          clienteTelefono: nuevo.clienteTelefono,
+          direccion: nuevo.direccion,
+        }
+      ).catch(err => this.logger.error(`Error enviando push nuevo domicilio: ${err.message}`));
+    } catch (err: any) {
+      this.logger.error(`Error preparando push nuevo domicilio: ${err.message}`);
+    }
+
     return { ok: true, action: 'created', domicilio: nuevo };
+  }
+
+  /**
+   * Cronjob ejecutado cada minuto para verificar si existen domicilios en estado 'RECIENTE'
+   * que hayan superado el tiempo límite de configuración (domisTimeoutMinutos) sin ser atendidos.
+   * Envía push notification y emite evento socket.
+   */
+  @Cron(CronExpression.EVERY_MINUTE)
+  async checkDomiciliosSinAtender() {
+    try {
+      const config = await this.configService.getConfiguracion();
+      if (!config.domisHabilitado) return;
+
+      const timeoutMinutos = config.domisTimeoutMinutos && config.domisTimeoutMinutos > 0 ? config.domisTimeoutMinutos : 10;
+      const ahora = Date.now();
+      const cutoffTime = new Date(ahora - timeoutMinutos * 60 * 1000);
+      const limite24Horas = new Date(ahora - 24 * 60 * 60 * 1000);
+
+      const desatendidos = await this.prisma.domicilioWA.findMany({
+        where: {
+          estado: 'RECIENTE',
+          timestampPedido: {
+            lte: cutoffTime,
+            gte: limite24Horas,
+          },
+        },
+      });
+
+      for (const dom of desatendidos) {
+        if (this.alertedTimeoutIds.has(dom.IDdomicilio)) {
+          continue;
+        }
+
+        this.alertedTimeoutIds.add(dom.IDdomicilio);
+        const minutos = Math.max(
+          timeoutMinutos,
+          Math.round((ahora - new Date(dom.timestampPedido).getTime()) / 60000)
+        );
+        const clienteDesc = dom.clienteNombre || dom.clienteTelefono || 'Cliente';
+
+        this.logger.warn(`Domicilio sin atender #${dom.orderIdWA} superó límite de ${minutos} min`);
+
+        // Emitir evento Socket para alertas en pantallas web y POS
+        this.appGateway.emitDomicilioTimeout(dom);
+
+        // Enviar notificación push urgente al móvil a todos los usuarios
+        await this.notificationsService.sendDomicilioNotification(
+          'DOMICILIO_TIMEOUT',
+          `⏰ ¡Domicilio sin atender! #${dom.orderIdWA}`,
+          `El pedido de ${clienteDesc} lleva ${minutos} min sin atenderse. ¡Por favor atiéndelo!`,
+          {
+            domicilioId: dom.IDdomicilio,
+            orderIdWA: dom.orderIdWA,
+            totalWA: dom.totalWA,
+            clienteNombre: dom.clienteNombre,
+            minutos,
+          }
+        ).catch(err => this.logger.error(`Error enviando push timeout: ${err.message}`));
+      }
+    } catch (err: any) {
+      this.logger.error(`Error en checkDomiciliosSinAtender: ${err.message}`);
+    }
   }
 
   async findAll(estado?: string) {
@@ -174,6 +263,10 @@ export class DomiciliosService {
     });
     if (!dom) throw new NotFoundException('Domicilio no encontrado');
 
+    if (nuevoEstado !== 'RECIENTE') {
+      this.alertedTimeoutIds.delete(id);
+    }
+
     const updated = await this.prisma.domicilioWA.update({
       where: { IDdomicilio: id },
       data: {
@@ -188,6 +281,8 @@ export class DomiciliosService {
   }
 
   async vincularVenta(id: string, ventaId: string, nuevoEstado?: string) {
+    this.alertedTimeoutIds.delete(id);
+
     const updated = await this.prisma.domicilioWA.update({
       where: { IDdomicilio: id },
       data: {
@@ -201,6 +296,8 @@ export class DomiciliosService {
   }
 
   async remove(id: string) {
+    this.alertedTimeoutIds.delete(id);
+
     const dom = await this.prisma.domicilioWA.findUnique({
       where: { IDdomicilio: id },
     });

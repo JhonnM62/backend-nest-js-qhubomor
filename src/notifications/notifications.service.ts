@@ -11,7 +11,8 @@ export type NotificationEventType =
   | 'DINERO_RETIRADO'
   | 'GASTO_CREATED' | 'GASTO_DELETED' | 'GASTOS_BULK_CREATED'
   | 'TURNO_OPENED' | 'TURNO_CLOSED'
-  | 'TURNO_DESCANSO_STARTED' | 'TURNO_DESCANSO_ENDED' | 'TURNO_DESCANSO_EXCEEDED';
+  | 'TURNO_DESCANSO_STARTED' | 'TURNO_DESCANSO_ENDED' | 'TURNO_DESCANSO_EXCEEDED'
+  | 'NUEVO_DOMICILIO' | 'DOMICILIO_TIMEOUT';
 
 @Injectable()
 export class NotificationsService {
@@ -137,110 +138,169 @@ export class NotificationsService {
 
       // Enviar notificaciones push a Expo
       if (messages.length > 0) {
-        const chunks = this.expo.chunkPushNotifications(messages);
-        
-        // Ejecutar los chunks en paralelo pero atrapando errores de forma aislada
-        await Promise.allSettled(
-          chunks.map(async (chunk) => {
-            try {
-              const tickets = await this.expo.sendPushNotificationsAsync(chunk);
-              
-              // Verificar si hay errores en los tickets devueltos por Expo (ej. DeviceNotRegistered)
-              const invalidTokens: string[] = [];
-              for (let i = 0; i < tickets.length; i++) {
-                const ticket = tickets[i];
-                if (ticket.status === 'error') {
-                  this.logger.error(`Error en ticket para ${chunk[i].to}: ${ticket.message}`);
-                  if (ticket.details && ticket.details.error === 'DeviceNotRegistered') {
-                    invalidTokens.push(chunk[i].to as string);
-                  }
-                }
-              }
-
-              // Eliminar tokens desregistrados automáticamente
-              if (invalidTokens.length > 0) {
-                this.logger.log(`Eliminando ${invalidTokens.length} tokens inactivos (DeviceNotRegistered)...`);
-                await this.prisma.pushToken.deleteMany({
-                  where: { token: { in: invalidTokens } }
-                }).catch(e => this.logger.error(`Error eliminando tokens inactivos: ${e.message}`));
-              }
-            } catch (error) {
-              // Si falla un chunk (ej. PUSH_TOO_MANY_EXPERIENCE_IDS), registramos y auto-corregimos
-              this.logger.error(`Error enviando notificaciones push chunk: ${error.message}`);
-              if (error.details) {
-                 this.logger.error(`Detalles del conflicto de tokens: ${JSON.stringify(error.details)}`);
-                 
-                 // ERROR HANDLING PATTERN: Auto-recuperación (Self-Healing)
-                 // Si detectamos tokens de múltiples proyectos, eliminamos los tokens del proyecto antiguo
-                 // para que en el próximo envío ya no haya conflictos.
-                 const details = error.details;
-                 const tokensToDelete: string[] = [];
-                 
-                 // El proyecto actual que estamos usando (el que tiene más tokens válidos o el nuevo)
-                 // Para hacerlo dinámico, eliminaremos los tokens de cualquier proyecto que no sea el actual
-                 // o simplemente eliminaremos los que estén fallando.
-                 // Expo details object shape: { "@old_account/project": ["ExponentPushToken[...]"], "@new_account/project": ["ExponentPushToken[...]"] }
-                 
-                 // Obtenemos todos los nombres de proyectos involucrados
-                 const projectNames = Object.keys(details);
-                 const validTokens: string[] = [];
-                 
-                 if (projectNames.length > 1) {
-                    // Ordenamos asumiendo que el nuevo proyecto es el que queremos conservar 
-                    // (podemos asumir que el que tiene "@jhonnierm/" es el viejo y "@jhonnierm2/" es el nuevo)
-                    for (const projectName of projectNames) {
-                      // Identificamos el proyecto antiguo explícitamente, o asumimos que el nuevo es jhonnierm2
-                      if (projectName === '@jhonnierm/qhubomor-pos-app' || projectName.includes('@jhonnierm/')) {
-                        // Si hay varios y este es el viejo, lo marcamos para eliminar
-                        // Pero asegurémonos de no eliminar si es el único (por si acaso)
-                        if (projectName !== '@jhonnierm2/qhubomor-pos-app') {
-                          tokensToDelete.push(...details[projectName]);
-                        } else {
-                          validTokens.push(...details[projectName]);
-                        }
-                      } else {
-                        // Cualquier otro proyecto (ej. el nuevo @jhonnierm2) se considera válido
-                        validTokens.push(...details[projectName]);
-                      }
-                    }
-
-                    if (tokensToDelete.length > 0) {
-                      this.logger.log(`Auto-Healing: Eliminando ${tokensToDelete.length} tokens conflictivos del proyecto antiguo (${tokensToDelete.join(', ')})...`);
-                      await this.prisma.pushToken.deleteMany({
-                        where: {
-                          token: {
-                            in: tokensToDelete
-                          }
-                        }
-                      }).catch(e => this.logger.error(`Fallo al eliminar tokens viejos: ${e.message}`));
-                    }
-                    
-                    // REINTENTO CON TOKENS VÁLIDOS
-                    if (validTokens.length > 0) {
-                      this.logger.log(`Auto-Healing: Reintentando envío de notificaciones con ${validTokens.length} tokens válidos...`);
-                      const retryMessages = chunk.filter(msg => validTokens.includes(msg.to as string));
-                      if (retryMessages.length > 0) {
-                        try {
-                          await this.expo.sendPushNotificationsAsync(retryMessages);
-                          this.logger.log('Auto-Healing: Reintento exitoso.');
-                        } catch (retryError) {
-                          this.logger.error(`Auto-Healing: Fallo en el reintento: ${retryError.message}`);
-                        }
-                      }
-                    }
-                 }
-              }
-            }
-          })
-        );
+        await this.sendExpoChunks(messages);
       }
     } catch (error) {
       this.logger.error(`Error enviando notificación general: ${error.message}`);
     }
   }
 
+  /**
+   * Notificación específica para domicilios (nuevos o desatendidos con timeout).
+   * Se envía a TODOS los usuarios activos que tengan push tokens registrados
+   * (incluyendo cajeros, meseros y roles operativos, no solo administradores).
+   */
+  async sendDomicilioNotification(
+    eventType: 'NUEVO_DOMICILIO' | 'DOMICILIO_TIMEOUT',
+    title: string,
+    body: string,
+    dataContext?: any
+  ) {
+    try {
+      const usuarios = await this.prisma.usuarios.findMany({
+        where: {
+          OR: [
+            { isActive: true },
+            { isActive: null },
+          ],
+          pushTokens: { some: {} },
+        },
+        include: {
+          pushTokens: true,
+        },
+      });
+
+      if (!usuarios || usuarios.length === 0) {
+        this.logger.debug(`[DomiciliosPush] No hay usuarios activos con push tokens para enviar ${eventType}`);
+        return;
+      }
+
+      const messages: ExpoPushMessage[] = [];
+      const historyRecords = [];
+
+      for (const usuario of usuarios) {
+        historyRecords.push({
+          userId: usuario.IDusuarios,
+          title,
+          body,
+          type: eventType,
+          data: dataContext ? dataContext : {},
+        });
+
+        for (const pushToken of usuario.pushTokens) {
+          if (!Expo.isExpoPushToken(pushToken.token)) continue;
+
+          messages.push({
+            to: pushToken.token,
+            sound: 'default',
+            title,
+            body,
+            data: { eventType, ...dataContext },
+          });
+        }
+      }
+
+      if (historyRecords.length > 0) {
+        await this.prisma.notificationHistory.createMany({
+          data: historyRecords,
+        }).catch((e) => this.logger.error(`Error guardando historial de notificación domicilio: ${e.message}`));
+      }
+
+      if (messages.length > 0) {
+        this.logger.log(`[DomiciliosPush] Enviando ${messages.length} notificaciones push (${eventType}) a ${usuarios.length} usuarios`);
+        await this.sendExpoChunks(messages);
+      }
+    } catch (error) {
+      this.logger.error(`Error enviando notificación push de domicilio (${eventType}): ${error.message}`);
+    }
+  }
+
+  private async sendExpoChunks(messages: ExpoPushMessage[]) {
+    const chunks = this.expo.chunkPushNotifications(messages);
+
+    // Ejecutar los chunks en paralelo pero atrapando errores de forma aislada
+    await Promise.allSettled(
+      chunks.map(async (chunk) => {
+        try {
+          const tickets = await this.expo.sendPushNotificationsAsync(chunk);
+
+          // Verificar si hay errores en los tickets devueltos por Expo (ej. DeviceNotRegistered)
+          const invalidTokens: string[] = [];
+          for (let i = 0; i < tickets.length; i++) {
+            const ticket = tickets[i];
+            if (ticket.status === 'error') {
+              this.logger.error(`Error en ticket para ${chunk[i].to}: ${ticket.message}`);
+              if (ticket.details && ticket.details.error === 'DeviceNotRegistered') {
+                invalidTokens.push(chunk[i].to as string);
+              }
+            }
+          }
+
+          // Eliminar tokens desregistrados automáticamente
+          if (invalidTokens.length > 0) {
+            this.logger.log(`Eliminando ${invalidTokens.length} tokens inactivos (DeviceNotRegistered)...`);
+            await this.prisma.pushToken.deleteMany({
+              where: { token: { in: invalidTokens } },
+            }).catch((e) => this.logger.error(`Error eliminando tokens inactivos: ${e.message}`));
+          }
+        } catch (error) {
+          // Si falla un chunk (ej. PUSH_TOO_MANY_EXPERIENCE_IDS), registramos y auto-corregimos
+          this.logger.error(`Error enviando notificaciones push chunk: ${error.message}`);
+          if (error.details) {
+            this.logger.error(`Detalles del conflicto de tokens: ${JSON.stringify(error.details)}`);
+
+            // ERROR HANDLING PATTERN: Auto-recuperación (Self-Healing)
+            const details = error.details;
+            const tokensToDelete: string[] = [];
+            const projectNames = Object.keys(details);
+            const validTokens: string[] = [];
+
+            if (projectNames.length > 1) {
+              for (const projectName of projectNames) {
+                if (projectName === '@jhonnierm/qhubomor-pos-app' || projectName.includes('@jhonnierm/')) {
+                  if (projectName !== '@jhonnierm2/qhubomor-pos-app') {
+                    tokensToDelete.push(...details[projectName]);
+                  } else {
+                    validTokens.push(...details[projectName]);
+                  }
+                } else {
+                  validTokens.push(...details[projectName]);
+                }
+              }
+
+              if (tokensToDelete.length > 0) {
+                this.logger.log(`Auto-Healing: Eliminando ${tokensToDelete.length} tokens conflictivos del proyecto antiguo (${tokensToDelete.join(', ')})...`);
+                await this.prisma.pushToken.deleteMany({
+                  where: {
+                    token: {
+                      in: tokensToDelete,
+                    },
+                  },
+                }).catch((e) => this.logger.error(`Fallo al eliminar tokens viejos: ${e.message}`));
+              }
+
+              // REINTENTO CON TOKENS VÁLIDOS
+              if (validTokens.length > 0) {
+                this.logger.log(`Auto-Healing: Reintentando envío de notificaciones con ${validTokens.length} tokens válidos...`);
+                const retryMessages = chunk.filter((msg) => validTokens.includes(msg.to as string));
+                if (retryMessages.length > 0) {
+                  try {
+                    await this.expo.sendPushNotificationsAsync(retryMessages);
+                    this.logger.log('Auto-Healing: Reintento exitoso.');
+                  } catch (retryError) {
+                    this.logger.error(`Auto-Healing: Fallo en el reintento: ${retryError.message}`);
+                  }
+                }
+              }
+            }
+          }
+        }
+      })
+    );
+  }
+
   private mapEventToSettingColumn(eventType: NotificationEventType): string | null {
-    const map: Record<NotificationEventType, string> = {
+    const map: Partial<Record<NotificationEventType, string>> = {
       'VENTA_CREATED': 'notifyVentaCreated',
       'VENTA_UPDATED': 'notifyVentaUpdated',
       'VENTA_DELETED': 'notifyVentaDeleted',
