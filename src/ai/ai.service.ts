@@ -757,6 +757,8 @@ Si valido es false, "motivo" debe contener la instrucción correctiva exacta en 
 
   /**
    * Mapea el texto de un pedido de domicilio WhatsApp contra el catálogo de productos
+  /**
+   * Mapea el texto de un pedido de domicilio WhatsApp contra el catálogo de productos
    * y promociones configurados en el POS mediante Gemini AI.
    */
   async mapearPedidoDomicilio(
@@ -786,16 +788,56 @@ Si valido es false, "motivo" debe contener la instrucción correctiva exacta en 
       return { itemsPropios: [], itemsExternos: [], totalCalculado: 0 };
     }
 
-    // 1. Obtener catálogo de productos local
-    const productosRaw = await this.prisma.productos.findMany({
-      select: {
-        IDproductos: true,
-        nombre: true,
-        precioUnitario: true,
-        categoriaNombre: true,
-        combo: true,
-      },
-    });
+    const parseMontoCOP = (val: any): number => {
+      if (typeof val === 'number') {
+        if (val > 0 && val < 100) return val * 1000;
+        return val;
+      }
+      if (!val) return 0;
+      const rawStr = String(val).trim();
+      let str = rawStr.replace(/[^0-9.,]/g, '');
+      if (!str) return 0;
+      if (str.includes('.')) {
+        const parts = str.split('.');
+        if (parts.length > 2 || (parts.length === 2 && parts[1].length === 3)) {
+          str = str.replace(/\./g, '');
+        }
+      }
+      if (str.includes(',')) {
+        const parts = str.split(',');
+        if (parts.length > 2 || (parts.length === 2 && parts[1].length === 3)) {
+          str = str.replace(/,/g, '');
+        } else {
+          str = str.replace(',', '.');
+        }
+      }
+      let num = parseFloat(str) || 0;
+      if (num > 0 && num < 100) {
+        num = num * 1000;
+      }
+      return num;
+    };
+
+    // 1. Obtener catálogo de productos y adicionales/comentarios locales
+    const [productosRaw, comentariosRaw] = await Promise.all([
+      this.prisma.productos.findMany({
+        select: {
+          IDproductos: true,
+          nombre: true,
+          precioUnitario: true,
+          categoriaNombre: true,
+          combo: true,
+        },
+      }),
+      this.prisma.comentarios.findMany({
+        select: {
+          ID: true,
+          comentarios: true,
+          tipo: true,
+          precio: true,
+        },
+      }).catch(() => []),
+    ]);
 
     const catalogMini = productosRaw.map((p) => ({
       id: p.IDproductos,
@@ -805,16 +847,36 @@ Si valido es false, "motivo" debe contener la instrucción correctiva exacta en 
       esCombo: p.combo === 'SI' || p.combo === 'true',
     }));
 
+    const catalogComentarios = comentariosRaw.map((c) => ({
+      id: c.ID,
+      nombre: c.comentarios,
+      tipo: c.tipo || 'Adicional',
+      precio: Number(c.precio || 0),
+    }));
+
     const categoriasLocales = Array.from(
       new Set(productosRaw.map((p) => p.categoriaNombre?.trim()).filter(Boolean)),
+    );
+
+    const isGranizadosBusiness =
+      categoriasLocales.some((c) => /granizado|cremoso|coctel|bebida/i.test(c || '')) &&
+      !categoriasLocales.some((c) => /hamburguesa|alitas|salchipapa|carne|perro/i.test(c || ''));
+
+    const isComidaBusiness = categoriasLocales.some((c) =>
+      /hamburguesa|alitas|salchipapa|carne|perro|sandwich|sanduche/i.test(c || ''),
     );
 
     // 2. Intentar parseo con Gemini si la API Key está disponible
     try {
       const configIA = await this.configService.getConfiguracionIA();
-      if (configIA.isActive && configIA.apiKey) {
-        const ai = new GoogleGenAI({ apiKey: configIA.apiKey });
-        const modelo = configIA.modeloDefecto || 'gemini-2.5-flash';
+      const apiKey = process.env.GEMINI_API_KEY || configIA.apiKey;
+
+      if (configIA.isActive && apiKey) {
+        const ai = new GoogleGenAI({ apiKey });
+        let modelo = configIA.modeloDefecto || 'gemini-2.5-flash';
+        if (modelo.includes('3.5') || modelo === 'gemini-3-flash-preview') {
+          modelo = 'gemini-2.5-flash';
+        }
 
         const customPromptText = promptPersonalizado
           ? `\nREGLAS DE NEGOCIO, DESCUENTOS Y PROMOCIONES DEL USUARIO:\n${promptPersonalizado}\n`
@@ -823,24 +885,36 @@ Si valido es false, "motivo" debe contener la instrucción correctiva exacta en 
         const systemInstruction = `Eres un asistente experto de restaurante y POS ERP multi-tenant.
 Tu tarea es analizar el texto de un pedido de WhatsApp y clasificar sus productos de forma rigurosa.
 
-IMPORTANTE SOBRE ESTE NEGOCIO/POS:
-Este sistema POS pertenece a un negocio específico que ÚNICAMENTE vende los siguientes tipos de productos:
-- CATEGORÍAS LOCALES DEL NEGOCIO: ${JSON.stringify(categoriasLocales)}
-- CATÁLOGO DE PRODUCTOS DISPONIBLES:
+INFORMACIÓN DEL LOCAL ACTUAL:
+- Tipo de local detectado: ${isGranizadosBusiness ? 'GRANIZADOS Y BEBIDAS' : isComidaBusiness ? 'COMIDAS RÁPIDAS' : 'GENERAL'}
+- Categorías locales: ${JSON.stringify(categoriasLocales)}
+- Catálogo de productos disponibles:
 ${JSON.stringify(catalogMini)}
+- Catálogo de adicionales / notas disponibles:
+${JSON.stringify(catalogComentarios)}
 ${customPromptText}
 
-REGLAS DE ORO DE CLASIFICACIÓN:
-1. 'itemsPropios': DEBE ser ÚNICAMENTE aquellos productos que pertenezcan a este negocio (coinciden directamente o son variantes de sabor/tamaño de los productos de nuestro catálogo local).
-   - Asigna 'productoId' exacto del catálogo si coincide (ej. "Granizado 8oz Lulo" coincide con el producto "Granizado 8oz").
-   - 'encontradoEnCatalogo': true si tiene productoId de nuestro catálogo.
-   - Extrae cantidad, precioUnitario y precioTotal.
-   - Si dice "gratis" o "promo gratis", coloca en 'descuento' o en comentarios, y cobra solo el valor real cobrado (ej. adiciones/tapas).
-   - Observaciones como "sin licor", "con salsa de ajo", ponlas en 'comentarios'.
-   - CRÍTICO: NUNCA coloques en 'itemsPropios' productos que pertenecen a otro comercio (ej. si este negocio vende bebidas/granizados, la comida como alitas, hamburguesas, salchipapas, etc. NO son de este negocio; y viceversa, si este negocio vende comida, los granizados/bebidas de otro comercio NO son de este negocio).
-2. 'itemsExternos': TODO producto solicitado en el texto que NO pertenezca a nuestro catálogo ni a las categorías locales de este negocio (ej. alitas en un negocio de granizados, o granizados en un negocio de alitas).
-   - Debe ir en 'itemsExternos' con su nombre, cantidad y una breve observación o precio si venía especificado.
-3. 'totalCalculado': Suma exacta de los subtotales de 'itemsPropios'.`;
+REGLAS DE ORO DE CLASIFICACIÓN (ESTRICTAS):
+1. SEPARACIÓN DE COMERCIOS (CRÍTICO):
+   - Si este local es de GRANIZADOS/BEBIDAS: Platos de comida como alitas, hamburguesas, salchipapas, perros, sánduches NO SON DE ESTE LOCAL. DEBEN IR EN 'itemsExternos'.
+   - Si este local es de COMIDAS: Granizados, cócteles o bebidas de otro comercio NO SON DE ESTE LOCAL. DEBEN IR EN 'itemsExternos'.
+   - NUNCA pongas un producto de otro comercio en 'itemsPropios'.
+
+2. 'itemsPropios': Solo productos que pertenecen a NUESTRO catálogo.
+   - Asigna 'productoId' exacto del catálogo local. 'encontradoEnCatalogo' debe ser true.
+   - Extrae cantidad exacta.
+   - 'precioUnitario' y 'precioTotal' NUNCA deben ser 0 si el texto tiene precio especificado.
+   - ADICIONALES Y DESECHABLES:
+     * Si es comida y el texto tiene el valor con desechable ($1.000 adicionales por unidad): el precio unitario del producto es el precio base del catálogo, y el desechable ($1.000) debe incluirse en 'comentarios' como modificador JSON: [{"name": "Desechable", "price": 1000, "quantity": 1}].
+     * Si es granizado gratis o promoción de bebidas gratis donde se cobran tapas (ej. "tapas $2.000"): precioUnitario base es 0 o el de la tapa, y en 'comentarios' incluye modificador JSON con la tapa y el sabor: [{"name": "Tapa", "price": 1000, "quantity": 1}, {"name": "Lulo sin licor", "price": 0}].
+     * 'comentarios' SIEMPRE debe ser un JSON string válido con formato de modificadores: [{"name": string, "price": number, "quantity"?: number}].
+
+3. 'itemsExternos': Productos del pedido que pertenecen a otro comercio.
+   - 'nombre': Nombre del producto externo.
+   - 'cantidad': Cantidad numérica.
+   - 'observacion': Detalle de precios, tapas o pertenencia (ej. "Comida rápida / Alitas", "Granizado").
+
+4. 'totalCalculado': Suma exacta de 'precioTotal' de los 'itemsPropios'.`;
 
         const responseSchema: Schema = {
           type: Type.OBJECT,
@@ -859,7 +933,7 @@ REGLAS DE ORO DE CLASIFICACIÓN:
                   comentarios: { type: Type.STRING },
                   encontradoEnCatalogo: { type: Type.BOOLEAN },
                 },
-                required: ["nombre", "cantidad", "encontradoEnCatalogo"],
+                required: ["productoId", "nombre", "cantidad", "precioUnitario", "precioTotal", "encontradoEnCatalogo"],
               },
             },
             itemsExternos: {
@@ -877,7 +951,7 @@ REGLAS DE ORO DE CLASIFICACIÓN:
             totalCalculado: { type: Type.NUMBER },
             notasGenerales: { type: Type.STRING },
           },
-          required: ["itemsPropios", "totalCalculado"],
+          required: ["itemsPropios", "itemsExternos", "totalCalculado"],
         };
 
         const response = await ai.models.generateContent({
@@ -902,19 +976,23 @@ REGLAS DE ORO DE CLASIFICACIÓN:
 
         const parsed = this.repairAndParseJSON(response.text?.trim() || '{}');
         if (parsed && Array.isArray(parsed.itemsPropios)) {
+          let totalCalc = Number(parsed.totalCalculado || 0);
+          if (totalCalc === 0 && parsed.itemsPropios.length > 0) {
+            totalCalc = parsed.itemsPropios.reduce((sum: number, it: any) => sum + Number(it.precioTotal || 0), 0);
+          }
           return {
             itemsPropios: parsed.itemsPropios,
             itemsExternos: Array.isArray(parsed.itemsExternos) ? parsed.itemsExternos : [],
-            totalCalculado: Number(parsed.totalCalculado || 0),
+            totalCalculado: totalCalc,
             notasGenerales: parsed.notasGenerales || '',
           };
         }
       }
     } catch (e: any) {
-      this.logger.warn(`Mapeo con Gemini falló (${e.message}). Aplicando fallback por coincidencia de texto.`);
+      this.logger.warn(`Mapeo con Gemini falló (${e.message}). Aplicando fallback determinista.`);
     }
 
-    // 3. Fallback determinista por coincidencia de texto
+    // 3. Fallback determinista inteligente
     const lineas = textoDetalle
       .split('\n')
       .map((l) => l.replace(/^[👉•\-\*\s]+/, '').trim())
@@ -925,49 +1003,170 @@ REGLAS DE ORO DE CLASIFICACIÓN:
     let totalCalculado = 0;
 
     for (const linea of lineas) {
-      // Extraer cantidad si viene en formato "2 x Hamburguesa" o "1x"
       let cantidad = 1;
-      let nombreLimpio = linea;
+      let textoSinCant = linea;
       const cantMatch = linea.match(/^(\d+)\s*[xX]?\s*(.*)$/);
       if (cantMatch) {
         cantidad = parseInt(cantMatch[1], 10) || 1;
-        nombreLimpio = cantMatch[2].trim();
+        textoSinCant = cantMatch[2].trim();
       }
 
-      // Buscar coincidencia en catálogo
+      // Extraer notas entre paréntesis
+      const parentesisMatches = Array.from(textoSinCant.matchAll(/\(([^)]+)\)/g)).map((m) => m[1].trim());
+      let parentesisPrecio = 0;
+      let tieneTapas = false;
+      let valorTapas = 0;
+
+      for (const p of parentesisMatches) {
+        if (/tapa/i.test(p)) {
+          tieneTapas = true;
+          const pMonto = parseMontoCOP(p);
+          if (pMonto > 0) valorTapas = pMonto;
+        } else if (/\$|\d{2,}/.test(p)) {
+          const pMonto = parseMontoCOP(p);
+          if (pMonto > 0) parentesisPrecio = pMonto;
+        }
+      }
+
+      // Nombre base sin paréntesis
+      const nombreLimpio = textoSinCant.replace(/\([^)]*\)/g, '').trim();
       const lower = nombreLimpio.toLowerCase();
-      const match = catalogMini.find(
+
+      // Clasificación de comercio
+      const isComidaLine = /alita|hamburguesa|perro|choriperro|sandwich|sanduche|salchipapa|carne|asado|costilla|papa/i.test(lower);
+      const isBebidaLine = /granizado|coctel|cremoso|smirnoff|loko|mojito|mora azul/i.test(lower);
+
+      if (isGranizadosBusiness && isComidaLine) {
+        itemsExternos.push({
+          nombre: nombreLimpio,
+          cantidad,
+          observacion: parentesisPrecio ? `$${parentesisPrecio.toLocaleString('es-CO')} - Comida Rápida` : 'Comida Rápida',
+        });
+        continue;
+      }
+
+      if (isComidaBusiness && isBebidaLine) {
+        itemsExternos.push({
+          nombre: nombreLimpio,
+          cantidad,
+          observacion: tieneTapas ? `Granizado (${valorTapas > 0 ? `$${valorTapas.toLocaleString('es-CO')} tapas` : 'tapas'})` : 'Granizado',
+        });
+        continue;
+      }
+
+      // Buscar coincidencia en catálogo local
+      const palabras = lower.split(/\s+/).filter((w) => w.length > 2);
+      let match = catalogMini.find(
         (p) => lower.includes(p.nombre.toLowerCase()) || p.nombre.toLowerCase().includes(lower),
       );
 
+      // Búsqueda difusa por palabras clave si no hubo match directo
+      if (!match) {
+        match = catalogMini.find((p) => {
+          const pLower = p.nombre.toLowerCase();
+          const matches = palabras.filter((w) => pLower.includes(w));
+          return matches.length >= Math.min(2, palabras.length) && matches.length > 0;
+        });
+      }
+
+      // Variantes de alitas: pequeño -> peq, mediano -> med, etc.
+      if (!match && /alita/i.test(lower)) {
+        if (/peque/i.test(lower)) {
+          match = catalogMini.find((p) => /alita.*peq/i.test(p.nombre));
+        } else if (/med/i.test(lower)) {
+          match = catalogMini.find((p) => /alita.*med/i.test(p.nombre));
+        } else if (/fami|gran/i.test(lower)) {
+          match = catalogMini.find((p) => /alita.*fami/i.test(p.nombre));
+        }
+      }
+
+      // Variantes de granizados: sin licor
+      if (!match && /granizado/i.test(lower)) {
+        if (/sin licor/i.test(lower) || /gratis/i.test(lower)) {
+          match = catalogMini.find((p) => /sin licor/i.test(p.nombre)) || catalogMini.find((p) => /granizado/i.test(p.nombre));
+        } else if (/con licor/i.test(lower)) {
+          match = catalogMini.find((p) => /con licor/i.test(p.nombre) || /12 onz/i.test(p.nombre));
+        }
+      }
+
       if (match) {
-        const precioTotal = match.precio * cantidad;
+        const modifiers: Array<{ name: string; price: number; quantity?: number }> = [];
+
+        // Adicional de desechable para comida ($1.000 c/u)
+        if (isComidaBusiness && !/desechable/i.test(match.nombre)) {
+          modifiers.push({ name: 'Desechable', price: 1000, quantity: 1 });
+        }
+
+        // Tapa para granizados
+        if (tieneTapas || valorTapas > 0) {
+          const precioTapaUnit = valorTapas > 0 ? Math.round(valorTapas / cantidad) : 1000;
+          modifiers.push({ name: 'Tapa', price: precioTapaUnit, quantity: 1 });
+        }
+
+        // Sabor / Nota detectada
+        const saboresConocidos = ['lulo', 'mora azul', 'fresa', 'maracuya', 'mango', 'santorini', 'venom', 'bonbombon'];
+        for (const sab of saboresConocidos) {
+          if (lower.includes(sab)) {
+            modifiers.push({ name: `${sab.charAt(0).toUpperCase() + sab.slice(1)} sin licor`, price: 0, quantity: 1 });
+            break;
+          }
+        }
+
+        // Si es gratis / promoción
+        const esGratis = /gratis/i.test(textoSinCant);
+        let precioUnit = match.precio;
+        if (esGratis) {
+          precioUnit = 0;
+        }
+
+        const modifiersTotal = modifiers.reduce((acc, m) => acc + (m.price || 0) * (m.quantity || 1), 0);
+        let precioTotal = (precioUnit + modifiersTotal) * cantidad;
+
+        // Si el texto traía un precio explícito, respetarlo si coincide aproximadamente
+        if (parentesisPrecio > 0 && Math.abs(parentesisPrecio - precioTotal) <= 2000) {
+          precioTotal = parentesisPrecio;
+        }
+
         totalCalculado += precioTotal;
         itemsPropios.push({
           productoId: match.id,
           nombre: match.nombre,
           cantidad,
-          precioUnitario: match.precio,
+          precioUnitario: precioUnit,
           precioTotal,
-          descuento: 0,
-          comentarios: '',
+          descuento: esGratis ? match.precio * cantidad : 0,
+          comentarios: modifiers.length > 0 ? JSON.stringify(modifiers) : '',
           encontradoEnCatalogo: true,
         });
       } else {
-        itemsExternos.push({
+        // Si no se encontró en catálogo
+        let precioEst = parentesisPrecio > 0 ? parentesisPrecio : 0;
+        let precioUnitEst = precioEst > 0 ? Math.round(precioEst / cantidad) : 0;
+        totalCalculado += precioEst;
+
+        itemsPropios.push({
           nombre: nombreLimpio,
           cantidad,
-          observacion: 'De otro comercio',
+          precioUnitario: precioUnitEst,
+          precioTotal: precioEst,
+          descuento: 0,
+          comentarios: '',
+          encontradoEnCatalogo: false,
         });
       }
+    }
+
+    if (totalCalculado === 0 && totalWA) {
+      totalCalculado = parseMontoCOP(totalWA);
     }
 
     return {
       itemsPropios,
       itemsExternos,
       totalCalculado,
-      notasGenerales: 'Mapeo generado por fallback de texto',
+      notasGenerales: 'Mapeo generado por fallback determinista inteligente',
     };
   }
 }
+
 

@@ -36,6 +36,38 @@ export class DomiciliosService {
       }
     }
 
+    const parseMontoCOP = (val: any): number => {
+      if (typeof val === 'number') {
+        if (val > 0 && val < 100) return val * 1000;
+        return val;
+      }
+      if (!val) return 0;
+      const rawStr = String(val).trim();
+      let str = rawStr.replace(/[^0-9.,]/g, '');
+      if (!str) return 0;
+
+      if (str.includes('.')) {
+        const parts = str.split('.');
+        if (parts.length > 2 || (parts.length === 2 && parts[1].length === 3)) {
+          str = str.replace(/\./g, '');
+        }
+      }
+      if (str.includes(',')) {
+        const parts = str.split(',');
+        if (parts.length > 2 || (parts.length === 2 && parts[1].length === 3)) {
+          str = str.replace(/,/g, '');
+        } else {
+          str = str.replace(',', '.');
+        }
+      }
+
+      let num = parseFloat(str) || 0;
+      if (num > 0 && num < 100) {
+        num = num * 1000;
+      }
+      return num;
+    };
+
     const orderIdWA = String(payload.orderIdWA || payload.order_id || `ORDER_${Date.now()}`);
     const clienteTelefono = String(payload.clienteTelefono || payload.phone || payload.user_phone || '');
     const clienteNombre = payload.clienteNombre || payload.nombre_cliente || null;
@@ -43,7 +75,7 @@ export class DomiciliosService {
     const detalleTextoWA = payload.detalleTextoWA || payload.detalle_completo || payload.pedido || payload.resumen || '';
     const metodoPagoWA = payload.metodoPagoWA || payload.metodo_pago || 'PENDIENTE';
     const totalWAStr = String(payload.totalWA || payload.total_a_cobrar || '0');
-    const totalWANum = parseFloat(totalWAStr.replace(/[^0-9.]/g, '')) || 0;
+    let totalWANum = parseMontoCOP(payload.totalWA || payload.total_a_cobrar || '0');
     const timestampPedido = payload.timestamp ? new Date(Number(payload.timestamp)) : new Date();
 
     // 4. Mapeo inteligente con IA
@@ -55,6 +87,9 @@ export class DomiciliosService {
         totalWAStr,
         config.domisPromptMapeo || undefined,
       );
+      if (mapeoResult.totalCalculado > 0 && totalWANum === 0) {
+        totalWANum = mapeoResult.totalCalculado;
+      }
     } catch (err: any) {
       this.logger.error(`Error en mapeo IA de domicilio: ${err.message}`);
     }

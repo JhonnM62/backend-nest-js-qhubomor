@@ -150,7 +150,7 @@ async updateConfiguracion(data: {
       configIA = await this.prisma.configuracionIA.create({
         data: {
           id: 1,
-          modeloDefecto: 'gemini-3.5-flash',
+          modeloDefecto: 'gemini-2.5-flash',
           temperatura: 0.4,
           topP: 0.95,
           maxTokens: 8192,
@@ -159,6 +159,8 @@ async updateConfiguracion(data: {
           validarFacialAsistencia: false,
         }
       });
+    } else if (configIA.modeloDefecto === 'gemini-3.5-flash') {
+      configIA.modeloDefecto = 'gemini-2.5-flash';
     }
 
     return configIA;
@@ -179,7 +181,7 @@ async updateConfiguracion(data: {
       update: data,
       create: {
         id: 1,
-        modeloDefecto: 'gemini-3.5-flash',
+        modeloDefecto: 'gemini-2.5-flash',
         temperatura: 0.4,
         topP: 0.95,
         maxTokens: 8192,
