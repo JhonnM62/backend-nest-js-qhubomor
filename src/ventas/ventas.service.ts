@@ -463,6 +463,8 @@ export class VentasService {
       abono: venta.abono,
       propina: venta.propina,
       porcentajePropina: venta.porcentajePropina,
+      direccion: venta.direccion || null,
+      mensaje: venta.mensaje || null,
     };
 
     const ventaCreada = await this.prisma.ventas.create({
