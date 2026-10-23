@@ -90,6 +90,7 @@ export class DomiciliosService {
         detalleTextoWA,
         totalWAStr,
         config.domisPromptMapeo || undefined,
+        config.domisReglasEmpaque || undefined,
       );
       if (mapeoResult.totalCalculado > 0 && totalWANum === 0) {
         totalWANum = mapeoResult.totalCalculado;

@@ -59,6 +59,7 @@ async updateConfiguracion(data: {
   domisPromptMapeo?: string;
   domisWebhookSecret?: string;
   domisWaQueueUrl?: string;
+  domisReglasEmpaque?: any;
 }) {
   return this.prisma.configuracionNegocio.upsert({
     where: { id: 1 },
@@ -98,6 +99,9 @@ async updateConfiguracion(data: {
       domisPromptMapeo: data.domisPromptMapeo,
       domisWebhookSecret: data.domisWebhookSecret,
       domisWaQueueUrl: data.domisWaQueueUrl,
+      domisReglasEmpaque: data.domisReglasEmpaque !== undefined
+        ? (typeof data.domisReglasEmpaque === 'string' ? (() => { try { return JSON.parse(data.domisReglasEmpaque); } catch { return data.domisReglasEmpaque; } })() : data.domisReglasEmpaque)
+        : undefined,
     },
     create: {
       id: 1,
@@ -136,6 +140,9 @@ async updateConfiguracion(data: {
       domisPromptMapeo: data.domisPromptMapeo,
       domisWebhookSecret: data.domisWebhookSecret || 'qhubo-secret-2026',
       domisWaQueueUrl: data.domisWaQueueUrl,
+      domisReglasEmpaque: data.domisReglasEmpaque
+        ? (typeof data.domisReglasEmpaque === 'string' ? (() => { try { return JSON.parse(data.domisReglasEmpaque); } catch { return []; } })() : data.domisReglasEmpaque)
+        : [],
     }
   });
 }

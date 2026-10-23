@@ -612,6 +612,7 @@ model ConfiguracionNegocio {
   domisPromptMapeo        String? @map("DomisPromptMapeo")
   domisWebhookSecret      String? @default("qhubo-secret-2026") @map("DomisWebhookSecret")
   domisWaQueueUrl         String? @map("DomisWaQueueUrl")
+  domisReglasEmpaque      Json?   @default("[]") @map("DomisReglasEmpaque")
 }
 
 model DomicilioWA {

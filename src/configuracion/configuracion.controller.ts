@@ -56,6 +56,7 @@ export class ConfiguracionController {
     domisPromptMapeo?: string;
     domisWebhookSecret?: string;
     domisWaQueueUrl?: string;
+    domisReglasEmpaque?: any;
   }) {
     return this.configuracionService.updateConfiguracion(data);
   }

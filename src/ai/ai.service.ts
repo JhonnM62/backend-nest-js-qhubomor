@@ -765,6 +765,7 @@ Si valido es false, "motivo" debe contener la instrucción correctiva exacta en 
     textoDetalle: string,
     totalWA?: string,
     promptPersonalizado?: string,
+    reglasEmpaque?: any,
   ): Promise<{
     itemsPropios: Array<{
       productoId?: string;
@@ -786,6 +787,29 @@ Si valido es false, "motivo" debe contener la instrucción correctiva exacta en 
   }> {
     if (!textoDetalle || !textoDetalle.trim()) {
       return { itemsPropios: [], itemsExternos: [], totalCalculado: 0 };
+    }
+
+    let parsedReglas: Array<{
+      id: string;
+      tipoDestino: 'CATEGORIA' | 'PRODUCTO';
+      categoriaNombre?: string;
+      productoId?: string;
+      productoNombre?: string;
+      empaqueProductoId: string;
+      empaqueProductoNombre: string;
+      cantidadPorPlato: number;
+      cobrarAlCliente: boolean;
+    }> = [];
+
+    if (Array.isArray(reglasEmpaque)) {
+      parsedReglas = reglasEmpaque;
+    } else if (typeof reglasEmpaque === 'string') {
+      try {
+        const p = JSON.parse(reglasEmpaque);
+        if (Array.isArray(p)) parsedReglas = p;
+      } catch {
+        parsedReglas = [];
+      }
     }
 
     const parseMontoCOP = (val: any): number => {
@@ -882,6 +906,30 @@ Si valido es false, "motivo" debe contener la instrucción correctiva exacta en 
           ? `\nREGLAS DE NEGOCIO, DESCUENTOS Y PROMOCIONES DEL USUARIO:\n${promptPersonalizado}\n`
           : '';
 
+        let dynamicPackagingInstructions = '';
+        if (parsedReglas.length > 0) {
+          dynamicPackagingInstructions =
+            `\n   - REGLAS DE EMPAQUES Y DESECHABLES CONFIGURADAS POR EL NEGOCIO (OBLIGATORIAS):\n` +
+            parsedReglas
+              .map((r, i) => {
+                const target =
+                  r.tipoDestino === 'CATEGORIA'
+                    ? `A cualquier plato/producto de la categoría "${r.categoriaNombre}"`
+                    : `Al plato específico "${r.productoNombre || r.productoId}"`;
+                const cant = r.cantidadPorPlato || 1;
+                const cobro = r.cobrarAlCliente
+                  ? `DEBES agregar el producto de empaque "${r.empaqueProductoNombre}" (productoId: "${r.empaqueProductoId}") como un item independiente en 'itemsPropios', con cantidad = (${cant} * cantidad de este plato pedidos) y su precio de catálogo.`
+                  : `El empaque viene INCLUIDO en el valor del plato: NO agregues un item cobrado; únicamente agrega en 'comentarios' del plato la referencia de empaque "${r.empaqueProductoNombre}" con precio 0 (ej. [{"name": "Empaque ${r.empaqueProductoNombre}", "price": 0}]).`;
+                return `     * Regla ${i + 1}: ${target}: Requiere ${cant}x "${r.empaqueProductoNombre}". ${cobro}`;
+              })
+              .join('\n');
+        } else {
+          dynamicPackagingInstructions =
+            `\n   - REGLAS DE EMPAQUES Y DESECHABLES:\n` +
+            `     * Si en el catálogo existen productos para empaque o desechables (ej. 'Desechable', 'Empaque', 'Caja') y el texto menciona cobro o los requiere expresamente, agrégalos como items propios con su 'productoId'.\n` +
+            `     * Si el empaque ya está incluido en el valor del plato o no se cobra por separado, especifícalo en 'comentarios' del plato con precio 0.\n`;
+        }
+
         const systemInstruction = `Eres un asistente experto de restaurante y POS ERP multi-tenant.
 Tu tarea es analizar el texto de un pedido de WhatsApp y clasificar sus productos de forma rigurosa.
 
@@ -906,20 +954,9 @@ REGLAS DE ORO DE CLASIFICACIÓN (ESTRICTAS):
    - 'precioUnitario' y 'precioTotal' NUNCA deben ser 0 si el texto tiene precio especificado. Si el precio viene abreviado (ej. 34 o 34.000), normalízalo a pesos colombianos completos (ej. 34000).
    - ADICIONALES Y PRODUCTOS EXTRA (ESTRICTO - NUNCA CREAR ADICIONALES CON PRECIO EN COMENTARIOS):
      * Los adicionales NO se inventan ni se colocan como comentarios con precio. Son PRODUCTOS EXISTENTES en la base de datos (revisar categoría ADICCIONALES / ADICIONALES o catálogo: ej. tocineta, queso, carnes, papas, gomas, fruta, shot, etc.).
-     * Si el cliente pide un adicional, DEBE mapearse como un item independiente en 'itemsPropios' con su 'productoId' del catálogo.
+     * Si el cliente pide un adicional que existe en catálogo, DEBE mapearse como un item independiente en 'itemsPropios' con su 'productoId' del catálogo.
      * En 'comentarios' NUNCA coloques modificadores con precio para adicionales que existen como producto en el catálogo.
-
-   - DESECHABLES Y EMPAQUES (J1, SP1, CAJAS Y EMPAQUES):
-     * Ciertos platos requieren empaque desechable según su tamaño o categoría:
-       - Hamburguesas, alitas, porciones y combos individuales suelen llevar empaque tipo 'J1' (o empaque J1).
-       - Salchipapas, perros calientes y combos alargados suelen llevar empaque tipo 'SP1' (o empaque SP1).
-     * Si en el catálogo existe el producto de desechable o empaque (ej. 'J1', 'SP1', 'Desechable', 'Empaque'), agrégalo como un item propio en 'itemsPropios' con su 'productoId'.
-     * Si el plato incluye su desechable en el precio o no hay producto de empaque independiente en catálogo, especifica la referencia de empaque (ej. 'Empaque J1' o 'Empaque SP1') en 'comentarios' con precio 0.
-
-   - GRANIZADOS Y BEBIDAS (TAPAS Y ADICIONES SON PRODUCTOS REALES):
-     * En granizados, cuando se cobren tapas (ej. "tapas $2.000", "tapa 8 onz", "tapas domicilio", "tapa 24 onz"): DEBE agregarse como un PRODUCTO REAL del catálogo (ej. 'Tapas domicilio', 'Tapa 8 onz', 'TAPA DE 24 ONZ', etc.) con su correspondiente 'productoId', 'cantidad' y precio, y NO como una anotación o modificador con precio en comentarios.
-     * El granizado va con su precio base de catálogo (precio 0 si es promoción gratis).
-     * En 'comentarios' del granizado SOLO deben ir notas de preparación o sabores SIN costo (ej. [{"name": "Bonbombon sin licor", "price": 0}] o [{"name": "Lulo", "price": 0}]).
+${dynamicPackagingInstructions}
    - 'comentarios' SIEMPRE debe ser un JSON string válido con formato de modificadores: [{"name": string, "price": number, "quantity"?: number}]. Solo lleva precio si es una adición puramente personalizada no existente en catálogo.
 
 3. 'itemsExternos': Productos del pedido que pertenecen a otro comercio.
@@ -1105,15 +1142,36 @@ REGLAS DE ORO DE CLASIFICACIÓN (ESTRICTAS):
       if (match) {
         const modifiers: Array<{ name: string; price: number; quantity?: number }> = [];
 
-        // Adicional de desechable para comida ($1.000 c/u)
-        if (isComidaBusiness && !/desechable/i.test(match.nombre)) {
-          modifiers.push({ name: 'Desechable', price: 1000, quantity: 1 });
-        }
+        // Reglas dinámicas de empaque y desechables configuradas por el negocio
+        for (const regla of parsedReglas) {
+          const aplicaRegla =
+            (regla.tipoDestino === 'CATEGORIA' && match.categoria && match.categoria.toLowerCase() === regla.categoriaNombre?.toLowerCase()) ||
+            (regla.tipoDestino === 'PRODUCTO' && match.id === regla.productoId);
 
-        // Tapa para granizados
-        if (tieneTapas || valorTapas > 0) {
-          const precioTapaUnit = valorTapas > 0 ? Math.round(valorTapas / cantidad) : 1000;
-          modifiers.push({ name: 'Tapa', price: precioTapaUnit, quantity: 1 });
+          if (aplicaRegla) {
+            const cantEmpaque = (regla.cantidadPorPlato || 1) * cantidad;
+            if (regla.cobrarAlCliente) {
+              const prodEmpaque = catalogMini.find((p) => p.id === regla.empaqueProductoId);
+              const precioEmpaque = prodEmpaque?.precio || 0;
+              itemsPropios.push({
+                productoId: regla.empaqueProductoId,
+                nombre: regla.empaqueProductoNombre || prodEmpaque?.nombre || 'Empaque',
+                cantidad: cantEmpaque,
+                precioUnitario: precioEmpaque,
+                precioTotal: precioEmpaque * cantEmpaque,
+                descuento: 0,
+                comentarios: '',
+                encontradoEnCatalogo: !!prodEmpaque,
+              });
+              totalCalculado += precioEmpaque * cantEmpaque;
+            } else {
+              modifiers.push({
+                name: `Empaque ${regla.empaqueProductoNombre}`,
+                price: 0,
+                quantity: regla.cantidadPorPlato || 1,
+              });
+            }
+          }
         }
 
         // Sabor / Nota detectada
