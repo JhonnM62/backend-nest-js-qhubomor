@@ -863,7 +863,14 @@ Si valido es false, "motivo" debe contener la instrucción correctiva exacta en 
       }).catch(() => []),
     ]);
 
-    const catalogMini = productosRaw.map((p) => ({
+    // Filtrar estrictamente productos vendibles con precio > 0 en este local.
+    // Los productos con precio 0 son placeholders o de otro negocio y NUNCA deben asignarse a este local.
+    const productosValidos = productosRaw.filter((p) => {
+      const price = Number(p.precioUnitario || 0);
+      return price > 0;
+    });
+
+    const catalogMini = productosValidos.map((p) => ({
       id: p.IDproductos,
       nombre: p.nombre,
       precio: Number(p.precioUnitario || 0),
@@ -878,8 +885,9 @@ Si valido es false, "motivo" debe contener la instrucción correctiva exacta en 
       precio: Number(c.precio || 0),
     }));
 
+    // Las categorías de este local se determinan únicamente a partir de productos con precio válido
     const categoriasLocales = Array.from(
-      new Set(productosRaw.map((p) => p.categoriaNombre?.trim()).filter(Boolean)),
+      new Set(productosValidos.map((p) => p.categoriaNombre?.trim()).filter(Boolean)),
     );
 
     const isGranizadosBusiness =
@@ -936,7 +944,7 @@ Tu tarea es analizar el texto de un pedido de WhatsApp y clasificar sus producto
 INFORMACIÓN DEL LOCAL ACTUAL:
 - Tipo de local detectado: ${isGranizadosBusiness ? 'GRANIZADOS Y BEBIDAS' : isComidaBusiness ? 'COMIDAS RÁPIDAS' : 'GENERAL'}
 - Categorías locales: ${JSON.stringify(categoriasLocales)}
-- Catálogo de productos disponibles:
+- Catálogo de productos disponibles (solo vendibles con precio > 0):
 ${JSON.stringify(catalogMini)}
 - Catálogo de adicionales / notas disponibles:
 ${JSON.stringify(catalogComentarios)}
@@ -948,7 +956,10 @@ REGLAS DE ORO DE CLASIFICACIÓN (ESTRICTAS):
    - Si este local es de COMIDAS: Granizados, cócteles o bebidas de otro comercio NO SON DE ESTE LOCAL. DEBEN IR EN 'itemsExternos'.
    - NUNCA pongas un producto de otro comercio en 'itemsPropios'.
 
-2. 'itemsPropios': Solo productos que pertenecen a NUESTRO catálogo.
+2. 'itemsPropios': Solo productos que pertenecen a NUESTRO catálogo local Y TIENEN PRECIO MAYOR A 0.
+   - Solo puedes asignar productos que aparezcan explícitamente en el catálogo disponible con precio mayor a 0.
+   - Si un producto solicitado en el texto NO está en el catálogo disponible o no pertenece a este local, DEBE ir obligatoriamente en 'itemsExternos'.
+   - NUNCA asignes a 'itemsPropios' ningún producto que no exista en el catálogo o cuyo precio sea 0.
    - Asigna 'productoId' exacto del catálogo local buscando la mejor coincidencia semántica aunque el nombre varíe ligeramente (por ejemplo, 'Alitas Parche Pequeño' corresponde a 'ALITAS X5 peq', 'Alitas Parche Mediano' a 'ALITAS X10 med', 'Alitas Parche Familiar' a 'ALITAS X15 Fami', 'Hamburguesa Clásica' a 'H. La Parcera Clasica', etc.). Si coincide, asigna su 'productoId' exacto del catálogo y marca 'encontradoEnCatalogo: true'.
    - Extrae cantidad exacta.
    - 'precioUnitario' y 'precioTotal' NUNCA deben ser 0 si el texto tiene precio especificado. Si el precio viene abreviado (ej. 34 o 34.000), normalízalo a pesos colombianos completos (ej. 34000).
@@ -959,10 +970,10 @@ REGLAS DE ORO DE CLASIFICACIÓN (ESTRICTAS):
 ${dynamicPackagingInstructions}
    - 'comentarios' SIEMPRE debe ser un JSON string válido con formato de modificadores: [{"name": string, "price": number, "quantity"?: number}]. Solo lleva precio si es una adición puramente personalizada no existente en catálogo.
 
-3. 'itemsExternos': Productos del pedido que pertenecen a otro comercio.
+3. 'itemsExternos': Productos del pedido que pertenecen a otro comercio o no están en nuestro catálogo vendible.
    - 'nombre': Nombre del producto externo.
    - 'cantidad': Cantidad numérica.
-   - 'observacion': Detalle de precios, tapas o pertenencia (ej. "Comida rápida / Alitas", "Granizado").
+   - 'observacion': Detalle de precios, notas, sabores o pertenencia (ej. "Comida rápida / Alitas", "Granizado 12 onz con licor").
 
 4. 'totalCalculado': Suma exacta de 'precioTotal' de los 'itemsPropios'.`;
 
@@ -1026,13 +1037,38 @@ ${dynamicPackagingInstructions}
 
         const parsed = this.repairAndParseJSON(response.text?.trim() || '{}');
         if (parsed && Array.isArray(parsed.itemsPropios)) {
-          let totalCalc = Number(parsed.totalCalculado || 0);
-          if (totalCalc === 0 && parsed.itemsPropios.length > 0) {
-            totalCalc = parsed.itemsPropios.reduce((sum: number, it: any) => sum + Number(it.precioTotal || 0), 0);
+          const finalItemsPropios: any[] = [];
+          const finalItemsExternos: any[] = Array.isArray(parsed.itemsExternos) ? [...parsed.itemsExternos] : [];
+
+          for (const it of parsed.itemsPropios) {
+            const prodValido = productosValidos.find(
+              (p) => p.IDproductos === it.productoId || p.nombre.toLowerCase().trim() === (it.nombre || '').toLowerCase().trim(),
+            );
+
+            // Si el producto no existe en el catálogo activo o tiene precio <= 0 en catálogo, MOVER a itemsExternos
+            if (!prodValido || Number(prodValido.precioUnitario || 0) <= 0) {
+              this.logger.warn(`Item '${it.nombre}' (id: ${it.productoId}) tiene precio 0 o no pertenece al catálogo vendible de este local. Moviendo a itemsExternos.`);
+              finalItemsExternos.push({
+                nombre: it.nombre,
+                cantidad: it.cantidad || 1,
+                observacion: it.comentarios ? `${it.comentarios}` : `Producto no perteneciente a este local ($${it.precioTotal || it.precioUnitario || 0})`,
+              });
+            } else {
+              finalItemsPropios.push({
+                ...it,
+                productoId: prodValido.IDproductos,
+                nombre: it.nombre || prodValido.nombre,
+                precioUnitario: it.precioUnitario || Number(prodValido.precioUnitario || 0),
+                precioTotal: it.precioTotal || ((it.precioUnitario || Number(prodValido.precioUnitario || 0)) * (it.cantidad || 1)),
+              });
+            }
           }
+
+          let totalCalc = finalItemsPropios.reduce((sum: number, it: any) => sum + Number(it.precioTotal || 0), 0);
+
           return {
-            itemsPropios: parsed.itemsPropios,
-            itemsExternos: Array.isArray(parsed.itemsExternos) ? parsed.itemsExternos : [],
+            itemsPropios: finalItemsPropios,
+            itemsExternos: finalItemsExternos,
             totalCalculado: totalCalc,
             notasGenerales: parsed.notasGenerales || '',
           };
