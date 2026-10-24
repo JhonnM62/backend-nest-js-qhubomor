@@ -18,6 +18,9 @@ export class VentasService {
     private facturacionService: FacturacionService,
   ) {}
 
+  private recentSalesByTemporalId = new Map<string, { venta: any; timestamp: number }>();
+  private inFlightSalesByTemporalId = new Map<string, Promise<any>>();
+
   private formatDuration(diffMs: number): string {
     const totalSeconds = Math.max(0, Math.floor(diffMs / 1000));
     const d = Math.floor(totalSeconds / 86400);
@@ -414,25 +417,72 @@ export class VentasService {
 
 
   async createVentaCompleta(createVentaCompletaDto: CreateVentaCompletaDto & { fechaContableManual?: string }, usuarioId: string) {
-    const { venta, productos, fechaContableManual } = createVentaCompletaDto;
+    const effectiveTemporalId = createVentaCompletaDto.temporalId || createVentaCompletaDto.venta?.temporalId;
+    if (effectiveTemporalId) {
+      // 1. Promesa en vuelo (llamada concurrente inmediata): esperar el mismo resultado
+      const inFlight = this.inFlightSalesByTemporalId.get(effectiveTemporalId);
+      if (inFlight) {
+        console.log(`[DEDUP] createVentaCompleta concurrente detectado para temporalId ${effectiveTemporalId}, esperando promesa en vuelo...`);
+        return await inFlight;
+      }
 
-    const usuario = await this.prisma.usuarios.findUnique({
-      where: { IDusuarios: usuarioId },
-      select: { nombre: true },
-    });
+      // 2. Caché reciente en memoria (30 segundos)
+      const cached = this.recentSalesByTemporalId.get(effectiveTemporalId);
+      if (cached && (Date.now() - cached.timestamp < 30000)) {
+        console.log(`[DEDUP] createVentaCompleta duplicada detectada con temporalId ${effectiveTemporalId}, retornando venta existente ${cached.venta.IDventas}`);
+        return cached.venta;
+      }
 
-    const fechaVenta = new Date();
-    const fechaContable = await this.getFechaContable(fechaVenta, fechaContableManual);
-
-    const pedidoGenerado = await this.generatePedidoNumber(
-      venta.mesa && venta.mesa !== 'V.R' ? venta.mesa : null,
-      usuario?.nombre,
-      fechaContable
-    );
-
-    if (createVentaCompletaDto.temporalId) {
-      this.appGateway.emitToVentas(SocketEvent.VENTA_ID_GENERATED, { temporalId: createVentaCompletaDto.temporalId, pedido: pedidoGenerado });
+      // 3. Si el temporalId es de tomar un domicilio, verificar si ya tiene venta en BD
+      if (effectiveTemporalId.startsWith('tomar-dom-')) {
+        const domId = effectiveTemporalId.replace('tomar-dom-', '');
+        try {
+          const dom = await this.prisma.domicilioWA.findUnique({
+            where: { IDdomicilio: domId },
+            include: {
+              ventaRelacion: {
+                include: {
+                  ordenVentas: { include: { producto: { include: { categoriaRelacion: true } } } },
+                  usuarioRelacion: { select: { IDusuarios: true, nombre: true, email: true } },
+                  facturaElectronica: true,
+                },
+              },
+            },
+          });
+          if (dom?.ventaId && dom.ventaRelacion) {
+            console.log(`[DEDUP] Domicilio ${domId} ya tiene venta asociada en BD ${dom.ventaId}, retornando venta.`);
+            this.recentSalesByTemporalId.set(effectiveTemporalId, {
+              venta: dom.ventaRelacion,
+              timestamp: Date.now(),
+            });
+            return dom.ventaRelacion;
+          }
+        } catch (dbErr) {
+          console.error('[DEDUP] Error comprobando venta de domicilio en BD:', dbErr);
+        }
+      }
     }
+
+    const executeInner = async () => {
+      const { venta, productos, fechaContableManual } = createVentaCompletaDto;
+
+      const usuario = await this.prisma.usuarios.findUnique({
+        where: { IDusuarios: usuarioId },
+        select: { nombre: true },
+      });
+
+      const fechaVenta = new Date();
+      const fechaContable = await this.getFechaContable(fechaVenta, fechaContableManual);
+
+      const pedidoGenerado = await this.generatePedidoNumber(
+        venta.mesa && venta.mesa !== 'V.R' ? venta.mesa : null,
+        usuario?.nombre,
+        fechaContable
+      );
+
+      if (effectiveTemporalId) {
+        this.appGateway.emitToVentas(SocketEvent.VENTA_ID_GENERATED, { temporalId: effectiveTemporalId, pedido: pedidoGenerado });
+      }
 
     // Buscar nombre del cliente si hay clienteId
     let clienteNombre: string | null = null;
@@ -562,7 +612,33 @@ export class VentasService {
 
     this.appGateway.emitToVentas(SocketEvent.REFRESH_VENTAS, { action: 'create', venta: resultVenta });
 
-    return resultVenta;
+      return resultVenta;
+    };
+
+    if (effectiveTemporalId) {
+      const p = executeInner();
+      this.inFlightSalesByTemporalId.set(effectiveTemporalId, p);
+      try {
+        const res = await p;
+        if (res) {
+          this.recentSalesByTemporalId.set(effectiveTemporalId, {
+            venta: res,
+            timestamp: Date.now(),
+          });
+          if (this.recentSalesByTemporalId.size > 200) {
+            const nowMs = Date.now();
+            for (const [k, v] of this.recentSalesByTemporalId.entries()) {
+              if (nowMs - v.timestamp > 45000) this.recentSalesByTemporalId.delete(k);
+            }
+          }
+        }
+        return res;
+      } finally {
+        this.inFlightSalesByTemporalId.delete(effectiveTemporalId);
+      }
+    }
+
+    return await executeInner();
   }
 
   async updateVentaCompleta(id: string, updateVentaCompletaDto: CreateVentaCompletaDto & { fechaContableManual?: string }, usuarioId: string) {
