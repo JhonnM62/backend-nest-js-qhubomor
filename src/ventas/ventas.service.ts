@@ -528,15 +528,16 @@ export class VentasService {
     const configNegocio = await this.prisma.configuracionNegocio.findFirst();
     const esModoRestaurante = (configNegocio?.modoOperacion || 'GENERAL').toUpperCase() === 'RESTAURANTE';
 
+    const inicioCalculado = (venta as any).cartStartTime ? new Date((venta as any).cartStartTime) : fechaVenta;
     if (estInicial === 'TOMADO') {
-      cocinaInicioAtVal = fechaVenta;
+      cocinaInicioAtVal = inicioCalculado;
     } else if (estInicial === 'PAGADO') {
-      cocinaInicioAtVal = fechaVenta;
+      cocinaInicioAtVal = inicioCalculado;
       if (!esModoRestaurante) {
         cocinaFinAtVal = fechaVenta;
       }
     } else if (estInicial === 'ENTREGADO') {
-      cocinaInicioAtVal = fechaVenta;
+      cocinaInicioAtVal = inicioCalculado;
       cocinaFinAtVal = fechaVenta;
     }
 
