@@ -520,10 +520,17 @@ export class VentasService {
     let cocinaInicioAtVal: Date | null = null;
     let cocinaFinAtVal: Date | null = null;
     const estInicial = (venta.estado || 'EN_EL_CARRITO').toUpperCase();
-    if (estInicial === 'TOMADO' || estInicial === 'PAGADO') {
+    const configNegocio = await this.prisma.configuracionNegocio.findFirst();
+    const esModoRestaurante = (configNegocio?.modoOperacion || 'GENERAL').toUpperCase() === 'RESTAURANTE';
+
+    if (estInicial === 'TOMADO') {
       cocinaInicioAtVal = fechaVenta;
-    }
-    if (estInicial === 'ENTREGADO') {
+    } else if (estInicial === 'PAGADO') {
+      cocinaInicioAtVal = fechaVenta;
+      if (!esModoRestaurante) {
+        cocinaFinAtVal = fechaVenta;
+      }
+    } else if (estInicial === 'ENTREGADO') {
       cocinaInicioAtVal = fechaVenta;
       cocinaFinAtVal = fechaVenta;
     }
@@ -584,6 +591,11 @@ export class VentasService {
         const orderFechaContable = fechaContable;
 
         const { seccionCocinaId, categoriaSeccionCocinaId, productoId, ...restProducto } = producto as any;
+        if (cocinaFinAtVal !== null) {
+          restProducto.estado = 'LISTO';
+          restProducto.cantidadPreparada = producto.cantidad || 1;
+          restProducto.preparadoAt = fechaVenta;
+        }
 
         return this.prisma.orderventas.create({
           data: {
@@ -707,13 +719,21 @@ export class VentasService {
     let cocinaInicioAtUpdate = ventaExistente.cocinaInicioAt;
     let cocinaFinAtUpdate = ventaExistente.cocinaFinAt;
     const estUpper = (estadoToSave || '').toUpperCase();
+    const configNegocio = await this.prisma.configuracionNegocio.findFirst();
+    const esModoRestaurante = (configNegocio?.modoOperacion || 'GENERAL').toUpperCase() === 'RESTAURANTE';
 
-    if (estUpper === 'TOMADO' || estUpper === 'PAGADO') {
+    if (estUpper === 'TOMADO') {
       if (!cocinaInicioAtUpdate) {
         cocinaInicioAtUpdate = new Date();
       }
-    }
-    if (estUpper === 'ENTREGADO') {
+    } else if (estUpper === 'PAGADO') {
+      if (!cocinaInicioAtUpdate) {
+        cocinaInicioAtUpdate = new Date();
+      }
+      if (!esModoRestaurante && !cocinaFinAtUpdate) {
+        cocinaFinAtUpdate = new Date();
+      }
+    } else if (estUpper === 'ENTREGADO') {
       if (!cocinaFinAtUpdate) {
         cocinaFinAtUpdate = new Date();
       }
@@ -831,7 +851,7 @@ export class VentasService {
 
           const shouldBeListo = ventaActualizada.estado === 'ENTREGADO' || 
                                 ventaActualizada.estado === 'LISTO_PARA_ENTREGA' || 
-                                (ventaActualizada.estado === 'PAGADO' && (ventaExistente.estado === 'ENTREGADO' || cocinaFinAtUpdate !== null));
+                                (ventaActualizada.estado === 'PAGADO' && (!esModoRestaurante || ventaExistente.estado === 'ENTREGADO' || cocinaFinAtUpdate !== null));
           if (shouldBeListo) {
             estado = 'LISTO';
             cantidadPreparada = producto.cantidad || 1;
@@ -1298,14 +1318,21 @@ export class VentasService {
     let cocinaInicioAtUpdate = venta.cocinaInicioAt;
     let cocinaFinAtUpdate = venta.cocinaFinAt;
     const estUpper = (estado || '').toUpperCase();
+    const configNegocio = await this.prisma.configuracionNegocio.findFirst();
+    const esModoRestaurante = (configNegocio?.modoOperacion || 'GENERAL').toUpperCase() === 'RESTAURANTE';
 
-    if (estUpper === 'TOMADO' || estUpper === 'PAGADO') {
+    if (estUpper === 'TOMADO') {
       if (!cocinaInicioAtUpdate) {
         cocinaInicioAtUpdate = new Date();
       }
-    }
-
-    if (estUpper === 'ENTREGADO') {
+    } else if (estUpper === 'PAGADO') {
+      if (!cocinaInicioAtUpdate) {
+        cocinaInicioAtUpdate = new Date();
+      }
+      if (!esModoRestaurante && !cocinaFinAtUpdate) {
+        cocinaFinAtUpdate = new Date();
+      }
+    } else if (estUpper === 'ENTREGADO') {
       if (!cocinaFinAtUpdate) {
         cocinaFinAtUpdate = new Date();
       }
@@ -1316,7 +1343,7 @@ export class VentasService {
 
     const shouldMarkItemsListo = estUpper === 'ENTREGADO' || 
                                  estUpper === 'LISTO_PARA_ENTREGA' || 
-                                 (estUpper === 'PAGADO' && (venta.estado === 'ENTREGADO' || cocinaFinAtUpdate !== null));
+                                 (estUpper === 'PAGADO' && (!esModoRestaurante || venta.estado === 'ENTREGADO' || cocinaFinAtUpdate !== null));
 
     if (shouldMarkItemsListo) {
       const orderItems = await this.prisma.orderventas.findMany({ where: { IDventas: id } });
@@ -1466,14 +1493,21 @@ export class VentasService {
     let cocinaInicioAtUpdate = venta.cocinaInicioAt;
     let cocinaFinAtUpdate = venta.cocinaFinAt;
     const estUpper = (estadoUpdate || '').toUpperCase();
+    const configNegocio = await this.prisma.configuracionNegocio.findFirst();
+    const esModoRestaurante = (configNegocio?.modoOperacion || 'GENERAL').toUpperCase() === 'RESTAURANTE';
 
-    if (estUpper === 'TOMADO' || estUpper === 'PAGADO') {
+    if (estUpper === 'TOMADO') {
       if (!cocinaInicioAtUpdate) {
         cocinaInicioAtUpdate = new Date();
       }
-    }
-
-    if (estUpper === 'ENTREGADO') {
+    } else if (estUpper === 'PAGADO') {
+      if (!cocinaInicioAtUpdate) {
+        cocinaInicioAtUpdate = new Date();
+      }
+      if (!esModoRestaurante && !cocinaFinAtUpdate) {
+        cocinaFinAtUpdate = new Date();
+      }
+    } else if (estUpper === 'ENTREGADO') {
       if (!cocinaFinAtUpdate) {
         cocinaFinAtUpdate = new Date();
       }
@@ -1484,7 +1518,7 @@ export class VentasService {
 
     const shouldMarkItemsListo = estUpper === 'ENTREGADO' || 
                                  estUpper === 'LISTO_PARA_ENTREGA' || 
-                                 (estUpper === 'PAGADO' && (venta.estado === 'ENTREGADO' || cocinaFinAtUpdate !== null));
+                                 (estUpper === 'PAGADO' && (!esModoRestaurante || venta.estado === 'ENTREGADO' || cocinaFinAtUpdate !== null));
 
     if (shouldMarkItemsListo) {
       const orderItems = await this.prisma.orderventas.findMany({ where: { IDventas: id } });
