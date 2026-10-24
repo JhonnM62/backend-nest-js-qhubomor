@@ -517,6 +517,17 @@ export class VentasService {
       mensaje: venta.mensaje || null,
     };
 
+    let cocinaInicioAtVal: Date | null = null;
+    let cocinaFinAtVal: Date | null = null;
+    const estInicial = (venta.estado || 'EN_EL_CARRITO').toUpperCase();
+    if (estInicial === 'TOMADO' || estInicial === 'PAGADO') {
+      cocinaInicioAtVal = fechaVenta;
+    }
+    if (estInicial === 'ENTREGADO') {
+      cocinaInicioAtVal = fechaVenta;
+      cocinaFinAtVal = fechaVenta;
+    }
+
     const ventaCreada = await this.prisma.ventas.create({
       data: {
         ...ventaData,
@@ -529,6 +540,8 @@ export class VentasService {
         registroDeTiempo: this.generateTiempoLog(venta.estado || 'EN_EL_CARRITO', (venta as any).cartStartTime),
         clienteId: venta.clienteId || null,
         cliente: clienteNombre,  // Columna "Clente" – nombre en texto
+        cocinaInicioAt: cocinaInicioAtVal,
+        cocinaFinAt: cocinaFinAtVal,
       } as Prisma.VentasUncheckedCreateInput,
     });
 
@@ -691,6 +704,24 @@ export class VentasService {
       }
     }
 
+    let cocinaInicioAtUpdate = ventaExistente.cocinaInicioAt;
+    let cocinaFinAtUpdate = ventaExistente.cocinaFinAt;
+    const estUpper = (estadoToSave || '').toUpperCase();
+
+    if (estUpper === 'TOMADO' || estUpper === 'PAGADO') {
+      if (!cocinaInicioAtUpdate) {
+        cocinaInicioAtUpdate = new Date();
+      }
+    }
+    if (estUpper === 'ENTREGADO') {
+      if (!cocinaFinAtUpdate) {
+        cocinaFinAtUpdate = new Date();
+      }
+      if (!cocinaInicioAtUpdate) {
+        cocinaInicioAtUpdate = ventaExistente.fechaYHora || new Date();
+      }
+    }
+
     const ventaData = {
       mesa: nuevaMesaValue,
       pedido: pedidoToSave,
@@ -709,6 +740,8 @@ export class VentasService {
       registroDeTiempo: nuevoRegistro,
       propina: venta.propina,
       porcentajePropina: venta.porcentajePropina,
+      cocinaInicioAt: cocinaInicioAtUpdate,
+      cocinaFinAt: cocinaFinAtUpdate,
     };
 
     // Update Venta
@@ -796,11 +829,16 @@ export class VentasService {
             }
           }
 
-          if (ventaActualizada.estado === 'PAGADO' || ventaActualizada.estado === 'ENTREGADO' || ventaActualizada.estado === 'LISTO_PARA_ENTREGA') {
+          const shouldBeListo = ventaActualizada.estado === 'ENTREGADO' || 
+                                ventaActualizada.estado === 'LISTO_PARA_ENTREGA' || 
+                                (ventaActualizada.estado === 'PAGADO' && (ventaExistente.estado === 'ENTREGADO' || cocinaFinAtUpdate !== null));
+          if (shouldBeListo) {
             estado = 'LISTO';
             cantidadPreparada = producto.cantidad || 1;
             preparadoAt = preparadoAt || new Date();
           }
+
+          const comandaImpresa = oldItem ? Boolean(oldItem.comandaImpresa) : false;
 
           const { seccionCocinaId, categoriaSeccionCocinaId, productoId, gramosPapa, ...restProducto } = producto as any;
 
@@ -818,7 +856,8 @@ export class VentasService {
               fecha: fechaContable,
               cantidadPreparada,
               estado,
-              preparadoAt
+              preparadoAt,
+              comandaImpresa,
             } as Prisma.OrderventasCreateInput,
           });
         }),
@@ -1256,7 +1295,30 @@ export class VentasService {
 
     const nuevoRegistro = this.appendTiempoLog(venta.registroDeTiempo, estado);
 
-    if (estado === 'ENTREGADO' || estado === 'LISTO_PARA_ENTREGA' || estado === 'PAGADO') {
+    let cocinaInicioAtUpdate = venta.cocinaInicioAt;
+    let cocinaFinAtUpdate = venta.cocinaFinAt;
+    const estUpper = (estado || '').toUpperCase();
+
+    if (estUpper === 'TOMADO' || estUpper === 'PAGADO') {
+      if (!cocinaInicioAtUpdate) {
+        cocinaInicioAtUpdate = new Date();
+      }
+    }
+
+    if (estUpper === 'ENTREGADO') {
+      if (!cocinaFinAtUpdate) {
+        cocinaFinAtUpdate = new Date();
+      }
+      if (!cocinaInicioAtUpdate) {
+        cocinaInicioAtUpdate = venta.fechaYHora || new Date();
+      }
+    }
+
+    const shouldMarkItemsListo = estUpper === 'ENTREGADO' || 
+                                 estUpper === 'LISTO_PARA_ENTREGA' || 
+                                 (estUpper === 'PAGADO' && (venta.estado === 'ENTREGADO' || cocinaFinAtUpdate !== null));
+
+    if (shouldMarkItemsListo) {
       const orderItems = await this.prisma.orderventas.findMany({ where: { IDventas: id } });
       if (orderItems.length > 0) {
         await Promise.all(
@@ -1265,7 +1327,8 @@ export class VentasService {
               where: { IDorderventas: ov.IDorderventas },
               data: {
                 estado: 'LISTO',
-                cantidadPreparada: ov.cantidad || 1
+                cantidadPreparada: ov.cantidad || 1,
+                preparadoAt: ov.preparadoAt || new Date(),
               }
             })
           )
@@ -1288,7 +1351,9 @@ export class VentasService {
       where: { IDventas: id },
       data: {
         estado,
-        registroDeTiempo: nuevoRegistro
+        registroDeTiempo: nuevoRegistro,
+        cocinaInicioAt: cocinaInicioAtUpdate,
+        cocinaFinAt: cocinaFinAtUpdate,
       },
     });
 
@@ -1398,7 +1463,30 @@ export class VentasService {
     const estadoUpdate = updateData.estado || 'PAGADO';
     const nuevoRegistro = this.appendTiempoLog(venta.registroDeTiempo, estadoUpdate);
 
-    if (estadoUpdate === 'ENTREGADO' || estadoUpdate === 'LISTO_PARA_ENTREGA' || estadoUpdate === 'PAGADO') {
+    let cocinaInicioAtUpdate = venta.cocinaInicioAt;
+    let cocinaFinAtUpdate = venta.cocinaFinAt;
+    const estUpper = (estadoUpdate || '').toUpperCase();
+
+    if (estUpper === 'TOMADO' || estUpper === 'PAGADO') {
+      if (!cocinaInicioAtUpdate) {
+        cocinaInicioAtUpdate = new Date();
+      }
+    }
+
+    if (estUpper === 'ENTREGADO') {
+      if (!cocinaFinAtUpdate) {
+        cocinaFinAtUpdate = new Date();
+      }
+      if (!cocinaInicioAtUpdate) {
+        cocinaInicioAtUpdate = venta.fechaYHora || new Date();
+      }
+    }
+
+    const shouldMarkItemsListo = estUpper === 'ENTREGADO' || 
+                                 estUpper === 'LISTO_PARA_ENTREGA' || 
+                                 (estUpper === 'PAGADO' && (venta.estado === 'ENTREGADO' || cocinaFinAtUpdate !== null));
+
+    if (shouldMarkItemsListo) {
       const orderItems = await this.prisma.orderventas.findMany({ where: { IDventas: id } });
       if (orderItems.length > 0) {
         await Promise.all(
@@ -1442,6 +1530,8 @@ export class VentasService {
         propina: updateData.propina,
         porcentajePropina: updateData.porcentajePropina,
         registroDeTiempo: nuevoRegistro,
+        cocinaInicioAt: cocinaInicioAtUpdate,
+        cocinaFinAt: cocinaFinAtUpdate,
       },
     });
 
@@ -1774,5 +1864,58 @@ export class VentasService {
     }
 
     return { message: 'Papelera vaciada correctamente', count: result.count };
+  }
+
+  async despejarVenta(id: string, despejar: boolean = true) {
+    const venta = await this.prisma.ventas.findUnique({
+      where: { IDventas: id },
+    });
+    if (!venta) {
+      throw new NotFoundException(`Venta con ID ${id} no encontrada`);
+    }
+
+    const updated = await this.prisma.ventas.update({
+      where: { IDventas: id },
+      data: {
+        despejadoAt: despejar ? new Date() : null,
+      },
+      include: {
+        ordenVentas: { include: { producto: { include: { categoriaRelacion: true } } } },
+        usuarioRelacion: { select: { IDusuarios: true, nombre: true, email: true } },
+        facturaElectronica: true,
+      },
+    });
+
+    this.appGateway.emitToVentas(SocketEvent.REFRESH_VENTAS, { action: 'update', venta: updated });
+    return updated;
+  }
+
+  async despejarVentasBulk(ids: string[], despejar: boolean = true) {
+    if (!ids || ids.length === 0) return { count: 0 };
+    const dateVal = despejar ? new Date() : null;
+    const result = await this.prisma.ventas.updateMany({
+      where: { IDventas: { in: ids } },
+      data: { despejadoAt: dateVal },
+    });
+
+    this.appGateway.emitToVentas(SocketEvent.REFRESH_VENTAS, { 
+      action: 'despejarBulk', 
+      ventaIds: ids, 
+      despejadoAt: dateVal ? dateVal.toISOString() : null 
+    });
+    return result;
+  }
+
+  async marcarComandaImpresa(id: string) {
+    const now = new Date();
+    await this.prisma.ventas.update({
+      where: { IDventas: id },
+      data: { comandaImpresaAt: now },
+    });
+    await this.prisma.orderventas.updateMany({
+      where: { IDventas: id },
+      data: { comandaImpresa: true },
+    });
+    return { success: true, timestamp: now };
   }
 }

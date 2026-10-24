@@ -318,6 +318,10 @@ model Ventas {
   buscar                String?              @map("Buscar")
   facturaElectronica    FacturasElectronicas?
   domiciliosWA          DomicilioWA[]
+  cocinaInicioAt        DateTime?            @map("CocinaInicioAt")
+  cocinaFinAt           DateTime?            @map("CocinaFinAt")
+  despejadoAt           DateTime?            @map("DespejadoAt")
+  comandaImpresaAt      DateTime?            @map("ComandaImpresaAt")
 
   @@index([fechaYHora])
   @@index([createdAt])
@@ -348,6 +352,7 @@ model Orderventas {
   usuarioId         String?
   preparadoAt       DateTime?  @map("preparadoAt")
   cantidadPreparada Int        @default(0) @map("cantidadPreparada")
+  comandaImpresa    Boolean    @default(false) @map("ComandaImpresa")
   venta             Ventas?    @relation(fields: [IDventas], references: [IDventas])
   producto          Productos? @relation(fields: [productoId], references: [IDproductos], onDelete: SetNull)
   usuario           Usuarios?  @relation(fields: [usuarioId], references: [IDusuarios])

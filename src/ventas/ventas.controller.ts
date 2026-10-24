@@ -102,6 +102,33 @@ export class VentasController {
     return this.ventasService.updateEstado(id, estado);
   }
 
+  @Patch('despejar-bulk')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Despejar múltiples ventas de la vista de entregados' })
+  @ApiResponse({ status: 200, description: 'Ventas despejadas' })
+  despejarBulk(@Body('ids') ids: string[], @Body('despejar') despejar?: boolean) {
+    return this.ventasService.despejarVentasBulk(ids, despejar !== false);
+  }
+
+  @Patch(':id/despejar')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Despejar una venta individual de la vista de entregados' })
+  @ApiResponse({ status: 200, description: 'Venta despejada' })
+  despejarVenta(@Param('id') id: string, @Body('despejar') despejar?: boolean) {
+    return this.ventasService.despejarVenta(id, despejar !== false);
+  }
+
+  @Patch(':id/marcar-comanda')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Marcar comanda como impresa' })
+  @ApiResponse({ status: 200, description: 'Comanda marcada como impresa' })
+  marcarComandaImpresa(@Param('id') id: string) {
+    return this.ventasService.marcarComandaImpresa(id);
+  }
+
   @Patch(':id/pago')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
