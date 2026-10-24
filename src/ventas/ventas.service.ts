@@ -507,6 +507,11 @@ export class VentasService {
       efectivoRecibido: venta.efectivoRecibido,
       devueltas: venta.devueltas,
       banco: venta.medioDePago === 'EFECTIVO' ? null : venta.banco,
+      valorDeTransferencia: (venta as any).valorDeTransferencia ?? (venta as any).transferencia ?? (
+        venta.medioDePago === 'EFECTIVO Y OTROS' && totalInputNormalized && venta.efectivoRecibido ?
+          Math.max(0, totalInputNormalized - Number(venta.efectivoRecibido)) :
+        (['TRANSFERENCIA', 'NEQUI', 'DAVIPLATA', 'TARJETA'].includes(venta.medioDePago || '') ? totalInputNormalized : undefined)
+      ),
       totalInput: totalInputNormalized,
       descuento: venta.descuento,
       porcentajeDeDescuento: venta.porcentajeDeDescuento,
@@ -697,7 +702,7 @@ export class VentasService {
     const nuevaMesaValue = await this.resolveMesaOrCreate(venta.mesa);
 
     let pedidoToSave = ventaExistente.pedido;
-    if (ventaExistente.mesa !== nuevaMesaValue && ventaExistente.pedido) {
+    if (ventaExistente.pedido) {
       let mesaStr = venta.mesa && venta.mesa !== 'V.R' && venta.mesa !== 'CAJA' ? venta.mesa : 'V.R';
       if (nuevaMesaValue) {
         try {
@@ -710,7 +715,7 @@ export class VentasService {
         } catch (e) {}
       }
       const partes = ventaExistente.pedido.split('-');
-      if (partes.length >= 3) {
+      if (partes.length >= 2 && partes[0] !== mesaStr) {
         partes[0] = mesaStr;
         pedidoToSave = partes.join('-');
       }
@@ -749,6 +754,11 @@ export class VentasService {
       efectivoRecibido: venta.efectivoRecibido,
       devueltas: venta.devueltas,
       banco: venta.medioDePago === 'EFECTIVO' ? null : venta.banco,
+      valorDeTransferencia: (venta as any).valorDeTransferencia ?? (venta as any).transferencia ?? (
+        venta.medioDePago === 'EFECTIVO Y OTROS' && venta.totalInput && venta.efectivoRecibido ?
+          Math.max(0, Number(venta.totalInput) - Number(venta.efectivoRecibido)) :
+        (['TRANSFERENCIA', 'NEQUI', 'DAVIPLATA', 'TARJETA'].includes(venta.medioDePago || '') ? Number(venta.totalInput || 0) : undefined)
+      ),
       totalInput: venta.totalInput,
       descuento: venta.descuento,
       porcentajeDeDescuento: venta.porcentajeDeDescuento,
@@ -1557,6 +1567,11 @@ export class VentasService {
         efectivoRecibido: updateData.efectivoRecibido,
         devueltas: updateData.devueltas,
         banco: updateData.banco,
+        valorDeTransferencia: (updateData as any).valorDeTransferencia ?? (updateData as any).transferencia ?? (
+          updateData.medioDePago === 'EFECTIVO Y OTROS' && updateData.totalInput && updateData.efectivoRecibido ?
+            Math.max(0, Number(updateData.totalInput) - Number(updateData.efectivoRecibido)) :
+          (['TRANSFERENCIA', 'NEQUI', 'DAVIPLATA', 'TARJETA'].includes(updateData.medioDePago || '') ? Number(updateData.totalInput || 0) : undefined)
+        ),
         totalInput: updateData.totalInput,
         descuento: updateData.descuento,
         porcentajeDeDescuento: updateData.porcentajeDeDescuento,

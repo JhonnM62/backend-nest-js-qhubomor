@@ -31,6 +31,16 @@ export class CreateVentaDto {
   @ApiPropertyOptional()
   @IsOptional()
   @IsNumber()
+  valorDeTransferencia?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  transferencia?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
   devueltas?: number;
 
   @ApiPropertyOptional()
@@ -240,6 +250,21 @@ export class UpdateVentaDto {
   @IsOptional()
   @IsNumber()
   efectivoRecibido?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  valorDeTransferencia?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  transferencia?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  banco?: string | null;
 
   @ApiPropertyOptional()
   @IsOptional()
