@@ -200,6 +200,10 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.server.to(Room.KITCHEN).emit(SocketEvent.ORDEN_RECIBIDA, enrichedData);
     this.server.to(Room.KITCHEN).emit(SocketEvent.ORDEN_ACTUALIZADA_KITCHEN, enrichedData);
     this.server.to(Room.CAJA).emit(SocketEvent.ORDEN_ACTUALIZADA_CAJA, enrichedData);
+    this.server.to(Room.VENTAS).emit(SocketEvent.ORDEN_RECIBIDA, enrichedData);
+    this.server.to(Room.VENTAS).emit(SocketEvent.NUEVA_ORDEN, enrichedData);
+    this.emitToAll(SocketEvent.ORDEN_RECIBIDA, enrichedData);
+    this.emitToAll(SocketEvent.NUEVA_ORDEN, enrichedData);
 
     return { success: true };
   }
@@ -212,7 +216,9 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     this.server.to(Room.KITCHEN).emit(SocketEvent.ORDEN_ACTUALIZADA_KITCHEN, enrichedData);
     this.server.to(Room.CAJA).emit(SocketEvent.ORDEN_ACTUALIZADA_CAJA, enrichedData);
-    this.server.to(Room.CAJA).emit(SocketEvent.ORDEN_ACTUALIZADA, enrichedData); // Agregamos este evento
+    this.server.to(Room.CAJA).emit(SocketEvent.ORDEN_ACTUALIZADA, enrichedData);
+    this.server.to(Room.VENTAS).emit(SocketEvent.ORDEN_ACTUALIZADA, enrichedData);
+    this.emitToAll(SocketEvent.ORDEN_ACTUALIZADA, enrichedData);
 
     return { success: true };
   }
