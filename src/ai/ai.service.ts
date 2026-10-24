@@ -756,7 +756,40 @@ Si valido es false, "motivo" debe contener la instrucción correctiva exacta en 
   }
 
   /**
-   * Mapea el texto de un pedido de domicilio WhatsApp contra el catálogo de productos
+   * Determina si un pedido contiene platos o ítems de comida rápida / restaurante.
+   */
+  public pedidoTieneComida(
+    detalleTexto?: string,
+    itemsPropios?: any[],
+    itemsExternos?: any[],
+  ): boolean {
+    const FOOD_REGEX =
+      /\b(hamburguesa|hamburguesas|burger|burgers|alita|alitas|wings|perro|perros|hot\s*dog|hotdogs|choriperro|choriperros|chorizo|chorizos|salchipapa|salchipapas|sandwich|sandwiches|sanduche|sanduches|sánduche|sánduches|sándwich|sándwiches|carne|carnes|asado|asados|costilla|costillas|parrilla|porcion|porción|papas|papa\s*francesa|papas\s*francesas|francesa|rustica|rústica|desgranado|desgranados|patacon|patacón|patacones|arepa|arepas|taco|tacos|burrito|burritos|quesadilla|quesadillas|mazorca|mazorcas|pincho|pinchos|crispy|parcera|fogata|combo|pollo|pechuga|nugget|nuggets|fundido|fundidos)\b/i;
+
+    const checkName = (name?: string): boolean => {
+      if (!name || typeof name !== 'string') return false;
+      return FOOD_REGEX.test(name.trim());
+    };
+
+    if (Array.isArray(itemsPropios) && itemsPropios.length > 0) {
+      for (const it of itemsPropios) {
+        if (checkName(it.nombre || it.name)) return true;
+      }
+    }
+
+    if (Array.isArray(itemsExternos) && itemsExternos.length > 0) {
+      for (const it of itemsExternos) {
+        if (checkName(it.nombre || it.name || it.observacion)) return true;
+      }
+    }
+
+    if (detalleTexto && typeof detalleTexto === 'string') {
+      if (FOOD_REGEX.test(detalleTexto)) return true;
+    }
+
+    return false;
+  }
+
   /**
    * Mapea el texto de un pedido de domicilio WhatsApp contra el catálogo de productos
    * y promociones configurados en el POS mediante Gemini AI.
@@ -784,9 +817,12 @@ Si valido es false, "motivo" debe contener la instrucción correctiva exacta en 
     }>;
     totalCalculado: number;
     notasGenerales?: string;
+    isComidaBusiness?: boolean;
+    isGranizadosBusiness?: boolean;
+    tieneComida?: boolean;
   }> {
     if (!textoDetalle || !textoDetalle.trim()) {
-      return { itemsPropios: [], itemsExternos: [], totalCalculado: 0 };
+      return { itemsPropios: [], itemsExternos: [], totalCalculado: 0, isComidaBusiness: false, isGranizadosBusiness: false, tieneComida: false };
     }
 
     let parsedReglas: Array<{
@@ -892,10 +928,10 @@ Si valido es false, "motivo" debe contener la instrucción correctiva exacta en 
 
     const isGranizadosBusiness =
       categoriasLocales.some((c) => /granizado|cremoso|coctel|bebida/i.test(c || '')) &&
-      !categoriasLocales.some((c) => /hamburguesa|alitas|salchipapa|carne|perro/i.test(c || ''));
+      !categoriasLocales.some((c) => /hamburguesa|alitas|salchipapa|carne|perro|sandwich|sanduche|fundido|parrilla|asado/i.test(c || ''));
 
     const isComidaBusiness = categoriasLocales.some((c) =>
-      /hamburguesa|alitas|salchipapa|carne|perro|sandwich|sanduche/i.test(c || ''),
+      /hamburguesa|alitas|salchipapa|carne|perro|sandwich|sanduche|fundido|queso|parrilla|asado|costilla|platos|cocina/i.test(c || ''),
     );
 
     // 2. Intentar parseo con Gemini si la API Key está disponible
@@ -960,6 +996,7 @@ REGLAS DE ORO DE CLASIFICACIÓN (ESTRICTAS):
    - Solo puedes asignar productos que aparezcan explícitamente en el catálogo disponible con precio mayor a 0.
    - Si un producto solicitado en el texto NO está en el catálogo disponible o no pertenece a este local, DEBE ir obligatoriamente en 'itemsExternos'.
    - NUNCA asignes a 'itemsPropios' ningún producto que no exista en el catálogo o cuyo precio sea 0.
+   - 🚫 REGLA ESTRICTA DE PRECIOS: PROHIBIDO MODIFICAR EL PRECIO UNITARIO BASE DE LOS PRODUCTOS. NUNCA sumes desechables, empaques, tapas ni propinas al 'precioUnitario' de un producto de catálogo. Todos los productos ya tienen sus 'Reglas de Empaques y Desechables' configuradas que se agregan como items independientes. El 'precioUnitario' de cada producto en 'itemsPropios' DEBE coincidir EXACTAMENTE con su precio en el catálogo local. El 'precioTotal' es cantidad * precioUnitario (menos descuento si aplica).
    - Asigna 'productoId' exacto del catálogo local buscando la mejor coincidencia semántica aunque el nombre varíe ligeramente (por ejemplo, 'Alitas Parche Pequeño' corresponde a 'ALITAS X5 peq', 'Alitas Parche Mediano' a 'ALITAS X10 med', 'Alitas Parche Familiar' a 'ALITAS X15 Fami', 'Hamburguesa Clásica' a 'H. La Parcera Clasica', etc.). Si coincide, asigna su 'productoId' exacto del catálogo y marca 'encontradoEnCatalogo: true'.
    - Extrae cantidad exacta.
    - 'precioUnitario' y 'precioTotal' NUNCA deben ser 0 si el texto tiene precio especificado. Si el precio viene abreviado (ej. 34 o 34.000), normalízalo a pesos colombianos completos (ej. 34000).
@@ -1054,23 +1091,31 @@ ${dynamicPackagingInstructions}
                 observacion: it.comentarios ? `${it.comentarios}` : `Producto no perteneciente a este local ($${it.precioTotal || it.precioUnitario || 0})`,
               });
             } else {
+              const precioCatalogo = Number(prodValido.precioUnitario || 0);
+              const cant = it.cantidad || 1;
+              const desc = Number(it.descuento || 0);
+              // REGLA ESTRICTA: El precio unitario siempre proviene del catálogo base, sin inflarse por desechables
               finalItemsPropios.push({
                 ...it,
                 productoId: prodValido.IDproductos,
                 nombre: it.nombre || prodValido.nombre,
-                precioUnitario: it.precioUnitario || Number(prodValido.precioUnitario || 0),
-                precioTotal: it.precioTotal || ((it.precioUnitario || Number(prodValido.precioUnitario || 0)) * (it.cantidad || 1)),
+                precioUnitario: precioCatalogo,
+                precioTotal: Math.max(0, (precioCatalogo * cant) - desc),
               });
             }
           }
 
           let totalCalc = finalItemsPropios.reduce((sum: number, it: any) => sum + Number(it.precioTotal || 0), 0);
+          const tieneComida = this.pedidoTieneComida(textoDetalle, finalItemsPropios, finalItemsExternos);
 
           return {
             itemsPropios: finalItemsPropios,
             itemsExternos: finalItemsExternos,
             totalCalculado: totalCalc,
             notasGenerales: parsed.notasGenerales || '',
+            isComidaBusiness,
+            isGranizadosBusiness,
+            tieneComida,
           };
         }
       }
@@ -1267,11 +1312,16 @@ ${dynamicPackagingInstructions}
       totalCalculado = parseMontoCOP(totalWA);
     }
 
+    const tieneComida = this.pedidoTieneComida(textoDetalle, itemsPropios, itemsExternos);
+
     return {
       itemsPropios,
       itemsExternos,
       totalCalculado,
       notasGenerales: 'Mapeo generado por fallback determinista inteligente',
+      isComidaBusiness,
+      isGranizadosBusiness,
+      tieneComida,
     };
   }
 }

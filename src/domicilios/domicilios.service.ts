@@ -99,6 +99,18 @@ export class DomiciliosService {
       this.logger.error(`Error en mapeo IA de domicilio: ${err.message}`);
     }
 
+    // 4.1 Si el local es de Comida/Restaurante y el pedido NO CONTIENE comida (es solo granizados/bebidas)
+    if (mapeoResult?.isComidaBusiness && !mapeoResult?.tieneComida) {
+      this.logger.warn(
+        `[DOMICILIOS] Pedido ${orderIdWA} es EXCLUSIVO de granizados/bebidas (sin comida) y este local es Restaurante de comida. IGNORANDO pedido en este local.`
+      );
+      return {
+        ok: true,
+        action: 'ignored',
+        message: 'Pedido exclusivo de granizados/bebidas ignorado en local de comida',
+      };
+    }
+
     // 5. Verificar si el pedido ya existe en BD (actualización vs creación)
     const existing = await this.prisma.domicilioWA.findUnique({
       where: { orderIdWA },
@@ -197,7 +209,21 @@ export class DomiciliosService {
         },
       });
 
+      const isComida = await this.isBusinessComida();
+
       for (const dom of desatendidos) {
+        // En locales de comida rápida, no alertar por pedidos que sean solo granizados
+        if (
+          isComida &&
+          !this.aiService.pedidoTieneComida(
+            dom.detalleTextoWA,
+            dom.itemsMapeados as any[],
+            dom.itemsExternos as any[],
+          )
+        ) {
+          continue;
+        }
+
         if (this.alertedTimeoutIds.has(dom.IDdomicilio)) {
           continue;
         }
@@ -233,12 +259,23 @@ export class DomiciliosService {
     }
   }
 
+  private async isBusinessComida(): Promise<boolean> {
+    try {
+      const cats: Array<{ nombre: string }> = await this.prisma.categorias.findMany({ select: { nombre: true } }).catch(() => []);
+      return cats.some((c) =>
+        /hamburguesa|alitas|salchipapa|carne|perro|sandwich|sanduche|fundido|queso|parrilla|asado|costilla|platos|cocina/i.test(c.nombre || ''),
+      );
+    } catch {
+      return false;
+    }
+  }
+
   async findAll(estado?: string) {
     const where: any = {};
     if (estado && estado !== 'TODOS') {
       where.estado = estado;
     }
-    return this.prisma.domicilioWA.findMany({
+    const list = await this.prisma.domicilioWA.findMany({
       where,
       orderBy: { timestampPedido: 'desc' },
       include: {
@@ -247,6 +284,19 @@ export class DomiciliosService {
         },
       },
     });
+
+    const isComida = await this.isBusinessComida();
+    if (isComida) {
+      return list.filter((dom) =>
+        this.aiService.pedidoTieneComida(
+          dom.detalleTextoWA,
+          dom.itemsMapeados as any[],
+          dom.itemsExternos as any[],
+        ),
+      );
+    }
+
+    return list;
   }
 
   async findOne(id: string) {
