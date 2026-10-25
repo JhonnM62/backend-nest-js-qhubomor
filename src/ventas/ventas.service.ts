@@ -616,6 +616,8 @@ export class VentasService {
           restProducto.estado = 'LISTO';
           restProducto.cantidadPreparada = producto.cantidad || 1;
           restProducto.preparadoAt = fechaVenta;
+        } else {
+          restProducto.estado = 'PREPARANDO';
         }
 
         return this.prisma.orderventas.create({
@@ -751,7 +753,8 @@ export class VentasService {
       if (!cocinaInicioAtUpdate) {
         cocinaInicioAtUpdate = new Date();
       }
-      if (!esModoRestaurante && !cocinaFinAtUpdate) {
+      const prevEstUpper = (venta.estado || '').toUpperCase();
+      if ((!esModoRestaurante || prevEstUpper === 'ENTREGADO' || prevEstUpper === 'LISTO_PARA_ENTREGA') && !cocinaFinAtUpdate) {
         cocinaFinAtUpdate = new Date();
       }
     } else if (estUpper === 'ENTREGADO') {
@@ -1403,7 +1406,8 @@ export class VentasService {
       if (!cocinaInicioAtUpdate) {
         cocinaInicioAtUpdate = new Date();
       }
-      if (!esModoRestaurante && !cocinaFinAtUpdate) {
+      const prevEstUpper = (venta.estado || '').toUpperCase();
+      if ((!esModoRestaurante || prevEstUpper === 'ENTREGADO' || prevEstUpper === 'LISTO_PARA_ENTREGA') && !cocinaFinAtUpdate) {
         cocinaFinAtUpdate = new Date();
       }
     } else if (estUpper === 'ENTREGADO') {
@@ -1578,7 +1582,8 @@ export class VentasService {
       if (!cocinaInicioAtUpdate) {
         cocinaInicioAtUpdate = new Date();
       }
-      if (!esModoRestaurante && !cocinaFinAtUpdate) {
+      const prevEstUpper = (venta.estado || '').toUpperCase();
+      if ((!esModoRestaurante || prevEstUpper === 'ENTREGADO' || prevEstUpper === 'LISTO_PARA_ENTREGA') && !cocinaFinAtUpdate) {
         cocinaFinAtUpdate = new Date();
       }
     } else if (estUpper === 'ENTREGADO') {
