@@ -899,11 +899,65 @@ Si valido es false, "motivo" debe contener la instrucción correctiva exacta en 
       }).catch(() => []),
     ]);
 
-    // Filtrar estrictamente productos vendibles con precio > 0 en este local.
-    // Los productos con precio 0 son placeholders o de otro negocio y NUNCA deben asignarse a este local.
+    // Determinar el giro del negocio a partir de los productos con precio > 0
+    const productosConPrecio = productosRaw.filter((p) => Number(p.precioUnitario || 0) > 0);
+    const categoriasConPrecio = Array.from(
+      new Set(productosConPrecio.map((p) => p.categoriaNombre?.trim()).filter(Boolean)),
+    );
+
+    const isGranizadosBusiness =
+      categoriasConPrecio.some((c) => /granizado|cremoso|coctel|bebida/i.test(c || '')) &&
+      !categoriasConPrecio.some((c) => /hamburguesa|alitas|salchipapa|carne|perro|sandwich|sanduche|fundido|parrilla|asado/i.test(c || ''));
+
+    const isComidaBusiness = categoriasConPrecio.some((c) =>
+      /hamburguesa|alitas|salchipapa|carne|perro|sandwich|sanduche|fundido|queso|parrilla|asado|costilla|platos|cocina/i.test(c || ''),
+    );
+
+    // IDs y nombres de productos referenciados explícitamente en las reglas de empaque configuradas por este local
+    const reglasProductIds = new Set(
+      parsedReglas
+        .flatMap((r) => [r.productoId, r.empaqueProductoId])
+        .filter(Boolean)
+        .map((id) => String(id).trim()),
+    );
+    const reglasProductNames = new Set(
+      parsedReglas
+        .flatMap((r) => [r.productoNombre, r.empaqueProductoNombre])
+        .filter(Boolean)
+        .map((n) => String(n).trim().toLowerCase()),
+    );
+
+    // Filtrar productos válidos de este local:
+    // - Productos con precio > 0 propios del giro del negocio.
+    // - Productos con precio 0 ÚNICAMENTE si están configurados en las reglas de empaque del local (ej. "8 onz PROMO")
+    //   o son productos promocionales explícitos ("PROMO", "GRATIS") de este giro de negocio.
     const productosValidos = productosRaw.filter((p) => {
       const price = Number(p.precioUnitario || 0);
-      return price > 0;
+      const nombreNorm = (p.nombre || '').trim().toLowerCase();
+      const catNorm = (p.categoriaNombre || '').trim().toLowerCase();
+
+      if (
+        isGranizadosBusiness &&
+        /hamburguesa|alita|salchipapa|perro|choriperro|sandwich|sanduche|costilla|parrilla|asado/i.test(`${nombreNorm} ${catNorm}`)
+      ) {
+        return false;
+      }
+      if (
+        isComidaBusiness &&
+        /granizado|coctel|cremoso|smirnoff|four loko|mojito/i.test(`${nombreNorm} ${catNorm}`)
+      ) {
+        return false;
+      }
+
+      if (price > 0) return true;
+
+      if (reglasProductIds.has(p.IDproductos) || reglasProductNames.has(nombreNorm)) {
+        return true;
+      }
+      if (/\b(promo|promoci[oó]n|gratis|obsequio|cortes[ií]a)\b/i.test(nombreNorm)) {
+        return true;
+      }
+      return false;
     });
 
     const catalogMini = productosValidos.map((p) => ({
@@ -921,17 +975,8 @@ Si valido es false, "motivo" debe contener la instrucción correctiva exacta en 
       precio: Number(c.precio || 0),
     }));
 
-    // Las categorías de este local se determinan únicamente a partir de productos con precio válido
     const categoriasLocales = Array.from(
       new Set(productosValidos.map((p) => p.categoriaNombre?.trim()).filter(Boolean)),
-    );
-
-    const isGranizadosBusiness =
-      categoriasLocales.some((c) => /granizado|cremoso|coctel|bebida/i.test(c || '')) &&
-      !categoriasLocales.some((c) => /hamburguesa|alitas|salchipapa|carne|perro|sandwich|sanduche|fundido|parrilla|asado/i.test(c || ''));
-
-    const isComidaBusiness = categoriasLocales.some((c) =>
-      /hamburguesa|alitas|salchipapa|carne|perro|sandwich|sanduche|fundido|queso|parrilla|asado|costilla|platos|cocina/i.test(c || ''),
     );
 
     // 2. Intentar parseo con Gemini si la API Key está disponible
@@ -947,19 +992,21 @@ Si valido es false, "motivo" debe contener la instrucción correctiva exacta en 
         }
 
         const customPromptText = promptPersonalizado
-          ? `\nREGLAS DE NEGOCIO, DESCUENTOS Y PROMOCIONES DEL USUARIO:\n${promptPersonalizado}\n`
+          ? `\nCONTEXTO ADICIONAL DEL USUARIO (NOTA: Las Reglas de Oro de Clasificación y las Reglas de Empaques Configuradas abajo tienen PRIORIDAD ABSOLUTA sobre este texto):\n${promptPersonalizado}\n`
           : '';
 
         let dynamicPackagingInstructions = '';
         if (parsedReglas.length > 0) {
           dynamicPackagingInstructions =
-            `\n   - REGLAS DE EMPAQUES Y DESECHABLES CONFIGURADAS POR EL NEGOCIO (OBLIGATORIAS):\n` +
+            `\n   - REGLAS DE EMPAQUES Y DESECHABLES CONFIGURADAS POR EL NEGOCIO (OBLIGATORIAS Y EXCLUSIVAS):\n` +
+            `     * ⚠️ PRIORIDAD DE REGLA ESPECÍFICA SOBRE CATEGORÍA: Si un plato tiene una regla específica de PRODUCTO (ej. "Sal La Rechimba Especial" -> "Des P1"), APLICA ÚNICAMENTE esa regla de PRODUCTO y NO apliques además la regla general de su CATEGORÍA (ej. NO agregues "Des J1" a la Rechimba Especial).\n` +
+            `     * ⚠️ PROHIBIDO AGREGAR EMPAQUES POR PRODUCTOS DE OTRO COMERCIO: NUNCA agregues desechables ("Des J1", "Des P1") ni tapas en 'itemsPropios' por productos que van en 'itemsExternos' (por ejemplo, en el local de Comidas Rápidas JAMÁS agregues "Des J1" por los granizados o tapas de granizados).\n` +
             parsedReglas
               .map((r, i) => {
                 const target =
                   r.tipoDestino === 'CATEGORIA'
-                    ? `A cualquier plato/producto de la categoría "${r.categoriaNombre}"`
-                    : `Al plato específico "${r.productoNombre || r.productoId}"`;
+                    ? `[REGLA GENERAL DE CATEGORÍA - Solo si el plato NO tiene regla específica de producto] A cualquier plato/producto de la categoría "${r.categoriaNombre}"`
+                    : `[REGLA ESPECÍFICA DE PRODUCTO - PRIORIDAD MÁXIMA] Al plato específico "${r.productoNombre || r.productoId}"`;
                 const cant = r.cantidadPorPlato || 1;
                 const cobro = r.cobrarAlCliente
                   ? `DEBES agregar el producto de empaque "${r.empaqueProductoNombre}" (productoId: "${r.empaqueProductoId}") como un item independiente en 'itemsPropios', con cantidad = (${cant} * cantidad de este plato pedidos) y su precio de catálogo.`
@@ -970,7 +1017,7 @@ Si valido es false, "motivo" debe contener la instrucción correctiva exacta en 
         } else {
           dynamicPackagingInstructions =
             `\n   - REGLAS DE EMPAQUES Y DESECHABLES:\n` +
-            `     * Si en el catálogo existen productos para empaque o desechables (ej. 'Desechable', 'Empaque', 'Caja') y el texto menciona cobro o los requiere expresamente, agrégalos como items propios con su 'productoId'.\n` +
+            `     * Si en el catálogo existen productos para empaque o desechables (ej. 'Desechable', 'Empaque', 'Caja') y el texto menciona cobro o los requiere expresamente para platos de ESTE local, agrégalos como items propios con su 'productoId'.\n` +
             `     * Si el empaque ya está incluido en el valor del plato o no se cobra por separado, especifícalo en 'comentarios' del plato con precio 0.\n`;
         }
 
@@ -980,7 +1027,7 @@ Tu tarea es analizar el texto de un pedido de WhatsApp y clasificar sus producto
 INFORMACIÓN DEL LOCAL ACTUAL:
 - Tipo de local detectado: ${isGranizadosBusiness ? 'GRANIZADOS Y BEBIDAS' : isComidaBusiness ? 'COMIDAS RÁPIDAS' : 'GENERAL'}
 - Categorías locales: ${JSON.stringify(categoriasLocales)}
-- Catálogo de productos disponibles (solo vendibles con precio > 0):
+- Catálogo de productos disponibles de este local:
 ${JSON.stringify(catalogMini)}
 - Catálogo de adicionales / notas disponibles:
 ${JSON.stringify(catalogComentarios)}
@@ -988,18 +1035,19 @@ ${customPromptText}
 
 REGLAS DE ORO DE CLASIFICACIÓN (ESTRICTAS):
 1. SEPARACIÓN DE COMERCIOS (CRÍTICO):
-   - Si este local es de GRANIZADOS/BEBIDAS: Platos de comida como alitas, hamburguesas, salchipapas, perros, sánduches NO SON DE ESTE LOCAL. DEBEN IR EN 'itemsExternos'.
-   - Si este local es de COMIDAS: Granizados, cócteles o bebidas de otro comercio NO SON DE ESTE LOCAL. DEBEN IR EN 'itemsExternos'.
+   - Si este local es de GRANIZADOS/BEBIDAS: Platos de comida como alitas, hamburguesas, salchipapas, perros, sánduches NO SON DE ESTE LOCAL. DEBEN IR EN 'itemsExternos' (y sus desechables de comida NUNCA se cobran aquí).
+   - Si este local es de COMIDAS: Granizados (incluyendo granizados gratis/promo de 8oz y granizados de 12oz/24oz), cócteles o bebidas de otro comercio NO SON DE ESTE LOCAL. TODOS los granizados DEBEN IR EN 'itemsExternos'. NUNCA conviertas el cobro de tapas de granizados ($1.000 / $4.000) en desechables de comida ("Des J1" o "Des P1") dentro del local de comidas.
    - NUNCA pongas un producto de otro comercio en 'itemsPropios'.
 
-2. 'itemsPropios': Solo productos que pertenecen a NUESTRO catálogo local Y TIENEN PRECIO MAYOR A 0.
-   - Solo puedes asignar productos que aparezcan explícitamente en el catálogo disponible con precio mayor a 0.
+2. 'itemsPropios': Solo productos que pertenecen a NUESTRO catálogo local disponible arriba.
+   - Solo puedes asignar productos que aparezcan explícitamente en el catálogo disponible arriba.
    - Si un producto solicitado en el texto NO está en el catálogo disponible o no pertenece a este local, DEBE ir obligatoriamente en 'itemsExternos'.
-   - NUNCA asignes a 'itemsPropios' ningún producto que no exista en el catálogo o cuyo precio sea 0.
+   - 🍧 REGLA ESPECIAL PARA GRANIZADOS DE PROMOCIÓN / GRATIS (8 ONZ / 8 OZ) EN LOCAL DE GRANIZADOS:
+     * Si este local es de GRANIZADOS y el pedido menciona "Granizado gratis 8oz", "Granizado 8oz sin licor", "Granizado promo 8oz" o similar, DEBES mapear el granizado al producto promocional del catálogo (ej. "8 onz PROMO", cuyo precio base en catálogo es 0) con la cantidad solicitada, 'precioUnitario: 0' y 'precioTotal: 0', colocando los sabores detallados (ej. "3x Sabor Mango biche", "1x Sabor Lulo") en su campo 'comentarios' con price 0.
+     * NO reemplaces el producto "8 onz PROMO" por "Tapa 8 onz": "8 onz PROMO" es el plato/bebida principal (que debe aparecer en cocina/barra con sus sabores) y "Tapa 8 onz" es su empaque adicional que se agrega como otro item separado según la Regla de Empaque configurada.
    - 🚫 REGLA ESTRICTA DE PRECIOS: PROHIBIDO MODIFICAR EL PRECIO UNITARIO BASE DE LOS PRODUCTOS. NUNCA sumes desechables, empaques, tapas ni propinas al 'precioUnitario' de un producto de catálogo. Todos los productos ya tienen sus 'Reglas de Empaques y Desechables' configuradas que se agregan como items independientes. El 'precioUnitario' de cada producto en 'itemsPropios' DEBE coincidir EXACTAMENTE con su precio en el catálogo local. El 'precioTotal' es cantidad * precioUnitario (menos descuento si aplica).
-   - Asigna 'productoId' exacto del catálogo local buscando la mejor coincidencia semántica aunque el nombre varíe ligeramente (por ejemplo, 'Alitas Parche Pequeño' corresponde a 'ALITAS X5 peq', 'Alitas Parche Mediano' a 'ALITAS X10 med', 'Alitas Parche Familiar' a 'ALITAS X15 Fami', 'Hamburguesa Clásica' a 'H. La Parcera Clasica', etc.). Si coincide, asigna su 'productoId' exacto del catálogo y marca 'encontradoEnCatalogo: true'.
+   - Asigna 'productoId' exacto del catálogo local buscando la mejor coincidencia semántica aunque el nombre varíe ligeramente (por ejemplo, 'Salchipapa La Re-Chimba' corresponde a 'Sal La Rechimba Especial', 'Alitas Parche Pequeño' a 'ALITAS X5 peq', 'Alitas Parche Mediano' a 'ALITAS X10 med', 'Alitas Parche Familiar' a 'ALITAS X15 Fami', 'Hamburguesa Clásica' a 'H. La Parcera Clasica', 'Granizado gratis 8oz sin licor' a '8 onz PROMO', 'Granizado 12oz sin licor' a 'Normal 12 Onz Sin licor', etc.). Si coincide, asigna su 'productoId' exacto del catálogo y marca 'encontradoEnCatalogo: true'.
    - Extrae cantidad exacta.
-   - 'precioUnitario' y 'precioTotal' NUNCA deben ser 0 si el texto tiene precio especificado. Si el precio viene abreviado (ej. 34 o 34.000), normalízalo a pesos colombianos completos (ej. 34000).
    - ADICIONALES Y PRODUCTOS EXTRA (ESTRICTO - NUNCA CREAR ADICIONALES CON PRECIO EN COMENTARIOS):
      * Los adicionales NO se inventan ni se colocan como comentarios con precio. Son PRODUCTOS EXISTENTES en la base de datos (revisar categoría ADICCIONALES / ADICIONALES o catálogo: ej. tocineta, queso, carnes, papas, gomas, fruta, shot, etc.).
      * Si el cliente pide un adicional que existe en catálogo, DEBE mapearse como un item independiente en 'itemsPropios' con su 'productoId' del catálogo.
@@ -1010,7 +1058,7 @@ ${dynamicPackagingInstructions}
 3. 'itemsExternos': Productos del pedido que pertenecen a otro comercio o no están en nuestro catálogo vendible.
    - 'nombre': Nombre del producto externo.
    - 'cantidad': Cantidad numérica.
-   - 'observacion': Detalle de precios, notas, sabores o pertenencia (ej. "Comida rápida / Alitas", "Granizado 12 onz con licor").
+   - 'observacion': Detalle de precios, notas, sabores o pertenencia (ej. "Comida rápida / Alitas", "Granizado 12 onz sin licor").
 
 4. 'totalCalculado': Suma exacta de 'precioTotal' de los 'itemsPropios'.`;
 
@@ -1074,7 +1122,7 @@ ${dynamicPackagingInstructions}
 
         const parsed = this.repairAndParseJSON(response.text?.trim() || '{}');
         if (parsed && Array.isArray(parsed.itemsPropios)) {
-          const finalItemsPropios: any[] = [];
+          let finalItemsPropios: any[] = [];
           const finalItemsExternos: any[] = Array.isArray(parsed.itemsExternos) ? [...parsed.itemsExternos] : [];
 
           for (const it of parsed.itemsPropios) {
@@ -1082,9 +1130,9 @@ ${dynamicPackagingInstructions}
               (p) => p.IDproductos === it.productoId || p.nombre.toLowerCase().trim() === (it.nombre || '').toLowerCase().trim(),
             );
 
-            // Si el producto no existe en el catálogo activo o tiene precio <= 0 en catálogo, MOVER a itemsExternos
-            if (!prodValido || Number(prodValido.precioUnitario || 0) <= 0) {
-              this.logger.warn(`Item '${it.nombre}' (id: ${it.productoId}) tiene precio 0 o no pertenece al catálogo vendible de este local. Moviendo a itemsExternos.`);
+            // Si el producto no existe en productosValidos de este local, MOVER a itemsExternos
+            if (!prodValido) {
+              this.logger.warn(`Item '${it.nombre}' (id: ${it.productoId}) no pertenece al catálogo válido de este local. Moviendo a itemsExternos.`);
               finalItemsExternos.push({
                 nombre: it.nombre,
                 cantidad: it.cantidad || 1,
@@ -1098,19 +1146,34 @@ ${dynamicPackagingInstructions}
               finalItemsPropios.push({
                 ...it,
                 productoId: prodValido.IDproductos,
-                nombre: it.nombre || prodValido.nombre,
+                nombre: prodValido.nombre || it.nombre,
                 precioUnitario: precioCatalogo,
                 precioTotal: Math.max(0, (precioCatalogo * cant) - desc),
+                encontradoEnCatalogo: true,
               });
             }
           }
 
-          let totalCalc = finalItemsPropios.reduce((sum: number, it: any) => sum + Number(it.precioTotal || 0), 0);
-          const tieneComida = this.pedidoTieneComida(textoDetalle, finalItemsPropios, finalItemsExternos);
+          // Reconciliación determinista de productos promo ($0), externos omitidos y reglas de empaque
+          const reconciled = this.reconciliarMapeoConReglas({
+            textoDetalle,
+            itemsPropios: finalItemsPropios,
+            itemsExternos: finalItemsExternos,
+            productosValidos,
+            productosRaw,
+            parsedReglas,
+            isComidaBusiness,
+            isGranizadosBusiness,
+          });
+          finalItemsPropios = reconciled.itemsPropios;
+          const reconciledExternos = reconciled.itemsExternos;
+
+          const totalCalc = finalItemsPropios.reduce((sum: number, it: any) => sum + Number(it.precioTotal || 0), 0);
+          const tieneComida = this.pedidoTieneComida(textoDetalle, finalItemsPropios, reconciledExternos);
 
           return {
             itemsPropios: finalItemsPropios,
-            itemsExternos: finalItemsExternos,
+            itemsExternos: reconciledExternos,
             totalCalculado: totalCalc,
             notasGenerales: parsed.notasGenerales || '',
             isComidaBusiness,
@@ -1211,9 +1274,14 @@ ${dynamicPackagingInstructions}
         }
       }
 
-      // Variantes de granizados: sin licor
+      // Variantes de granizados: sin licor / promo 8oz
       if (!match && /granizado/i.test(lower)) {
-        if (/sin licor/i.test(lower) || /gratis/i.test(lower)) {
+        if (/gratis|promo|8\s*oz|8\s*onz/i.test(lower)) {
+          match =
+            catalogMini.find((p) => /8\s*(onz|oz).*promo|promo.*8\s*(onz|oz)/i.test(p.nombre)) ||
+            catalogMini.find((p) => /sin licor/i.test(p.nombre)) ||
+            catalogMini.find((p) => /granizado/i.test(p.nombre));
+        } else if (/sin licor/i.test(lower)) {
           match = catalogMini.find((p) => /sin licor/i.test(p.nombre)) || catalogMini.find((p) => /granizado/i.test(p.nombre));
         } else if (/con licor/i.test(lower)) {
           match = catalogMini.find((p) => /con licor/i.test(p.nombre) || /12 onz/i.test(p.nombre));
@@ -1224,34 +1292,46 @@ ${dynamicPackagingInstructions}
         const modifiers: Array<{ name: string; price: number; quantity?: number }> = [];
 
         // Reglas dinámicas de empaque y desechables configuradas por el negocio
-        for (const regla of parsedReglas) {
-          const aplicaRegla =
-            (regla.tipoDestino === 'CATEGORIA' && match.categoria && match.categoria.toLowerCase() === regla.categoriaNombre?.toLowerCase()) ||
-            (regla.tipoDestino === 'PRODUCTO' && match.id === regla.productoId);
+        // Prioridad absoluta: regla específica de PRODUCTO sobre regla general de CATEGORIA
+        const reglasProductoMatch = parsedReglas.filter(
+          (regla) =>
+            regla.tipoDestino === 'PRODUCTO' &&
+            (match.id === regla.productoId ||
+              (regla.productoNombre && match.nombre.trim().toLowerCase() === regla.productoNombre.trim().toLowerCase())),
+        );
+        const reglasAplicables =
+          reglasProductoMatch.length > 0
+            ? reglasProductoMatch
+            : parsedReglas.filter(
+                (regla) =>
+                  regla.tipoDestino === 'CATEGORIA' &&
+                  match.categoria &&
+                  regla.categoriaNombre &&
+                  match.categoria.trim().toLowerCase() === regla.categoriaNombre.trim().toLowerCase(),
+              );
 
-          if (aplicaRegla) {
-            const cantEmpaque = (regla.cantidadPorPlato || 1) * cantidad;
-            if (regla.cobrarAlCliente) {
-              const prodEmpaque = catalogMini.find((p) => p.id === regla.empaqueProductoId);
-              const precioEmpaque = prodEmpaque?.precio || 0;
-              itemsPropios.push({
-                productoId: regla.empaqueProductoId,
-                nombre: regla.empaqueProductoNombre || prodEmpaque?.nombre || 'Empaque',
-                cantidad: cantEmpaque,
-                precioUnitario: precioEmpaque,
-                precioTotal: precioEmpaque * cantEmpaque,
-                descuento: 0,
-                comentarios: '',
-                encontradoEnCatalogo: !!prodEmpaque,
-              });
-              totalCalculado += precioEmpaque * cantEmpaque;
-            } else {
-              modifiers.push({
-                name: `Empaque ${regla.empaqueProductoNombre}`,
-                price: 0,
-                quantity: regla.cantidadPorPlato || 1,
-              });
-            }
+        for (const regla of reglasAplicables) {
+          const cantEmpaque = (regla.cantidadPorPlato || 1) * cantidad;
+          if (regla.cobrarAlCliente) {
+            const prodEmpaque = catalogMini.find((p) => p.id === regla.empaqueProductoId);
+            const precioEmpaque = prodEmpaque?.precio || 0;
+            itemsPropios.push({
+              productoId: regla.empaqueProductoId,
+              nombre: regla.empaqueProductoNombre || prodEmpaque?.nombre || 'Empaque',
+              cantidad: cantEmpaque,
+              precioUnitario: precioEmpaque,
+              precioTotal: precioEmpaque * cantEmpaque,
+              descuento: 0,
+              comentarios: '',
+              encontradoEnCatalogo: !!prodEmpaque,
+            });
+            totalCalculado += precioEmpaque * cantEmpaque;
+          } else {
+            modifiers.push({
+              name: `Empaque ${regla.empaqueProductoNombre}`,
+              price: 0,
+              quantity: regla.cantidadPorPlato || 1,
+            });
           }
         }
 
@@ -1323,6 +1403,258 @@ ${dynamicPackagingInstructions}
       isGranizadosBusiness,
       tieneComida,
     };
+  }
+
+  /**
+   * Reconcilia determinísticamente el resultado del mapeo de IA con las reglas del negocio:
+   * 1. Asegura que los productos de otro comercio (ej. granizados gratis en local de comidas) no se pierdan de itemsExternos.
+   * 2. En local de granizados, asegura que los granizados gratis/promo de 8oz se mapeen al plato "8 onz PROMO" ($0) con sus sabores, y no solo a la tapa.
+   * 3. Recalcula los empaques/desechables cobrados estrictamente a partir de los platos reales de itemsPropios, dando prioridad absoluta a las reglas de PRODUCTO sobre las de CATEGORIA.
+   */
+  private reconciliarMapeoConReglas(params: {
+    textoDetalle: string;
+    itemsPropios: any[];
+    itemsExternos: any[];
+    productosValidos: any[];
+    productosRaw: any[];
+    parsedReglas: any[];
+    isComidaBusiness: boolean;
+    isGranizadosBusiness: boolean;
+  }): { itemsPropios: any[]; itemsExternos: any[] } {
+    const {
+      textoDetalle,
+      productosValidos,
+      productosRaw,
+      parsedReglas,
+      isComidaBusiness,
+      isGranizadosBusiness,
+    } = params;
+
+    let itemsPropios = [...params.itemsPropios];
+    const itemsExternos = [...params.itemsExternos];
+
+    const lineas = (textoDetalle || '')
+      .split('\n')
+      .map((l) => l.replace(/^[👉•\-\*\s]+/, '').trim())
+      .filter(Boolean);
+
+    // 1. Asegurar que ninguna línea del otro comercio se haya omitido de itemsExternos
+    for (const linea of lineas) {
+      let cantidad = 1;
+      let textoSinCant = linea;
+      const cantMatch = linea.match(/^(\d+)\s*[xX]?\s*(.*)$/);
+      if (cantMatch) {
+        cantidad = parseInt(cantMatch[1], 10) || 1;
+        textoSinCant = cantMatch[2].trim();
+      }
+      // Quitar sufijo de precio como " - $4.000"
+      const nombreLimpio = textoSinCant.replace(/\s*-\s*\$?\s*[\d.,]+\s*$/, '').trim();
+      const lower = nombreLimpio.toLowerCase();
+
+      if (isComidaBusiness && /granizado|coctel|cremoso|smirnoff|four loko|mojito/i.test(lower)) {
+        const isGratisLine = /gratis|promo|8\s*oz|8\s*onz/i.test(lower);
+        const yaExiste = itemsExternos.some((ext) => {
+          const extLower = String(ext.nombre || '').toLowerCase();
+          if (isGratisLine) return /gratis|promo|8\s*oz|8\s*onz/i.test(extLower);
+          return extLower.includes(lower.slice(0, 15)) || lower.includes(extLower.slice(0, 15));
+        });
+        if (!yaExiste) {
+          itemsExternos.push({
+            nombre: nombreLimpio,
+            cantidad,
+            observacion: 'Granizado de otro comercio',
+          });
+        }
+      }
+
+      if (
+        isGranizadosBusiness &&
+        /alita|hamburguesa|perro|choriperro|sandwich|sanduche|salchipapa|carne|asado|costilla/i.test(lower)
+      ) {
+        const yaExiste = itemsExternos.some((ext) => {
+          const extLower = String(ext.nombre || '').toLowerCase();
+          return extLower.includes(lower.slice(0, 12)) || lower.includes(extLower.slice(0, 12));
+        });
+        if (!yaExiste) {
+          itemsExternos.push({
+            nombre: nombreLimpio,
+            cantidad,
+            observacion: 'Comida rápida de otro comercio',
+          });
+        }
+      }
+    }
+
+    // Identificador de productos de empaque / desechables / tapas
+    const empaqueIds = new Set(
+      parsedReglas
+        .map((r) => String(r.empaqueProductoId || '').trim())
+        .filter(Boolean),
+    );
+    const empaqueNames = new Set(
+      parsedReglas
+        .map((r) => String(r.empaqueProductoNombre || '').trim().toLowerCase())
+        .filter(Boolean),
+    );
+    const isEmpaqueItem = (it: any): boolean => {
+      const id = String(it?.productoId || '').trim();
+      const nombre = String(it?.nombre || '').trim().toLowerCase();
+      if (id && empaqueIds.has(id)) return true;
+      if (nombre && empaqueNames.has(nombre)) return true;
+      return /^(des\s*[jp]\d+|desechable\b|tapa\s*8\s*(onz|oz)|tapas?\s*domicilio|empaque\b)/i.test(nombre);
+    };
+
+    // 2. En local de GRANIZADOS: rescatar el plato promocional "8 onz PROMO" ($0) si el pedido incluye granizados gratis/promo de 8oz
+    if (isGranizadosBusiness) {
+      const prodPromo8oz = productosValidos.find((p) =>
+        /8\s*(onz|oz).*promo|promo.*8\s*(onz|oz)|granizado.*(gratis|promo)/i.test(p.nombre || ''),
+      );
+      if (prodPromo8oz) {
+        const yaTienePromo8oz = itemsPropios.some((it) => it.productoId === prodPromo8oz.IDproductos);
+        if (!yaTienePromo8oz) {
+          const lineaPromo = lineas.find((l) => /granizado\b.*?(?:gratis|promo|8\s*oz|8\s*onz)/i.test(l));
+          if (lineaPromo) {
+            const cantMatch = lineaPromo.match(/^(\d+)\s*[xX]?\s*(.*)$/);
+            const cantPromo = cantMatch ? parseInt(cantMatch[1], 10) || 1 : 1;
+            const restoLinea = cantMatch ? cantMatch[2].trim() : lineaPromo;
+
+            // Extraer sabores entre paréntesis: ej. "(3 Mango biche, 1 Lulo)"
+            const modifiers: Array<{ name: string; price: number }> = [];
+            const parenMatches = Array.from(restoLinea.matchAll(/\(([^)]+)\)/g)).map((m) => m[1].trim());
+            for (const pText of parenMatches) {
+              if (!/^\$?\s*[\d.,]+$/.test(pText) && !/^tapa/i.test(pText)) {
+                const partes = pText
+                  .split(',')
+                  .map((s) => s.trim())
+                  .filter(Boolean);
+                for (const parte of partes) {
+                  const mSab = parte.match(/^(\d+)\s*[xX]?\s*(.+)$/);
+                  if (mSab) {
+                    const cSab = parseInt(mSab[1], 10) || 1;
+                    const nSab = mSab[2].trim();
+                    modifiers.push({
+                      name: `${cSab}x ${/sabor/i.test(nSab) ? nSab : `Sabor ${nSab}`}`,
+                      price: 0,
+                    });
+                  } else {
+                    modifiers.push({
+                      name: /sabor/i.test(parte) ? parte : `Sabor ${parte}`,
+                      price: 0,
+                    });
+                  }
+                }
+              }
+            }
+
+            const precioBasePromo = Number(prodPromo8oz.precioUnitario || 0);
+            itemsPropios.unshift({
+              productoId: prodPromo8oz.IDproductos,
+              nombre: prodPromo8oz.nombre,
+              cantidad: cantPromo,
+              precioUnitario: precioBasePromo,
+              precioTotal: precioBasePromo * cantPromo,
+              descuento: 0,
+              comentarios: JSON.stringify(modifiers),
+              encontradoEnCatalogo: true,
+            });
+          }
+        }
+      }
+    }
+
+    // 3. Recalcular determinísticamente los empaques/desechables a partir de los platos reales cuando existen reglas configuradas
+    const platosBase = itemsPropios.filter((it) => !isEmpaqueItem(it));
+    if (parsedReglas.length > 0 && platosBase.length > 0) {
+      const reconciledPropios: any[] = [];
+
+      for (const plato of platosBase) {
+        reconciledPropios.push(plato);
+
+        const prodCatalog =
+          productosValidos.find((p) => p.IDproductos === plato.productoId) ||
+          productosRaw.find((p) => p.IDproductos === plato.productoId);
+
+        const platoNombreNorm = String(plato.nombre || prodCatalog?.nombre || '')
+          .trim()
+          .toLowerCase();
+
+        // Prioridad 1: Reglas específicas de PRODUCTO para este plato
+        const reglasProducto = parsedReglas.filter(
+          (r) =>
+            r.tipoDestino === 'PRODUCTO' &&
+            ((r.productoId && r.productoId === plato.productoId) ||
+              (r.productoNombre && r.productoNombre.trim().toLowerCase() === platoNombreNorm)),
+        );
+
+        // Prioridad 2: Solo si el plato NO tiene regla específica de PRODUCTO, aplicar reglas de CATEGORIA
+        const reglasAplicables =
+          reglasProducto.length > 0
+            ? reglasProducto
+            : parsedReglas.filter(
+                (r) =>
+                  r.tipoDestino === 'CATEGORIA' &&
+                  prodCatalog?.categoriaNombre &&
+                  r.categoriaNombre &&
+                  prodCatalog.categoriaNombre.trim().toLowerCase() === r.categoriaNombre.trim().toLowerCase(),
+              );
+
+        for (const regla of reglasAplicables) {
+          const cantEmpaque = (Number(regla.cantidadPorPlato) || 1) * (Number(plato.cantidad) || 1);
+          if (regla.cobrarAlCliente) {
+            const prodEmpaque =
+              productosRaw.find((p) => p.IDproductos === regla.empaqueProductoId) ||
+              productosRaw.find(
+                (p) =>
+                  regla.empaqueProductoNombre &&
+                  (p.nombre || '').trim().toLowerCase() === regla.empaqueProductoNombre.trim().toLowerCase(),
+              );
+            const empId = prodEmpaque?.IDproductos || regla.empaqueProductoId;
+            const empNombre = prodEmpaque?.nombre || regla.empaqueProductoNombre || 'Empaque';
+            const precioEmpaque = Number(prodEmpaque?.precioUnitario || 0);
+
+            const existenteEmpaque = reconciledPropios.find(
+              (item) => isEmpaqueItem(item) && item.productoId === empId,
+            );
+            if (existenteEmpaque) {
+              existenteEmpaque.cantidad += cantEmpaque;
+              existenteEmpaque.precioTotal = existenteEmpaque.precioUnitario * existenteEmpaque.cantidad;
+            } else {
+              reconciledPropios.push({
+                productoId: empId,
+                nombre: empNombre,
+                cantidad: cantEmpaque,
+                precioUnitario: precioEmpaque,
+                precioTotal: precioEmpaque * cantEmpaque,
+                descuento: 0,
+                comentarios: '[]',
+                encontradoEnCatalogo: Boolean(prodEmpaque),
+              });
+            }
+          } else {
+            let currentMods: any[] = [];
+            try {
+              const parsedMods = JSON.parse(plato.comentarios || '[]');
+              if (Array.isArray(parsedMods)) currentMods = parsedMods;
+            } catch {
+              currentMods = [];
+            }
+            const labelEmpaque = `Empaque ${regla.empaqueProductoNombre}`;
+            if (!currentMods.some((m) => String(m?.name || '').toLowerCase() === labelEmpaque.toLowerCase())) {
+              currentMods.push({
+                name: labelEmpaque,
+                price: 0,
+                quantity: Number(regla.cantidadPorPlato) || 1,
+              });
+              plato.comentarios = JSON.stringify(currentMods);
+            }
+          }
+        }
+      }
+
+      itemsPropios = reconciledPropios;
+    }
+
+    return { itemsPropios, itemsExternos };
   }
 }
 
