@@ -32,10 +32,10 @@ jobs:
           script: |
             set -e
             
-            # 0. Limpiar imagenes viejas del proyecto y caché de construcción
+            # 0. Limpiar imagenes viejas del proyecto (conservando caché activa de BuildKit de los últimos 7 días)
             echo "Limpiando espacio en disco de imagenes viejas..."
             docker image prune -f || true
-            docker builder prune -f || true
+            docker builder prune -f --filter "until=168h" || true
             
             # 1. Crear directorio del proyecto si no existe
             mkdir -p /root/backend-qhubomor
@@ -58,9 +58,9 @@ jobs:
             ${{ secrets.ENV_FILE_CONTENT }}
             EOF
             
-            # 4. Construir la nueva imagen de Docker localmente en Contabo (sin cache para asegurar construccion limpia)
+            # 4. Construir la nueva imagen de Docker localmente en Contabo (aprovechando caché de BuildKit)
             echo "Construyendo imagen Docker..."
-            docker build -t qhubomor-backend .
+            DOCKER_BUILDKIT=1 docker build -t qhubomor-backend .
             
             # 5. Detener y eliminar el contenedor anterior si existe
             echo "Deteniendo contenedor anterior..."
