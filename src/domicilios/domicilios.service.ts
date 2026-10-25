@@ -280,7 +280,15 @@ export class DomiciliosService {
       orderBy: { timestampPedido: 'desc' },
       include: {
         ventaRelacion: {
-          select: { IDventas: true, estado: true, pedido: true, totalInput: true },
+          select: {
+            IDventas: true,
+            estado: true,
+            pedido: true,
+            totalInput: true,
+            comandaImpresaAt: true,
+            cocinaInicioAt: true,
+            cocinaFinAt: true,
+          },
         },
       },
     });
@@ -333,15 +341,42 @@ export class DomiciliosService {
 
   async vincularVenta(id: string, ventaId: string, nuevoEstado?: string) {
     this.alertedTimeoutIds.delete(id);
+    const now = new Date();
+    const estadoFinal = nuevoEstado || 'TOMADO';
 
     const updated = await this.prisma.domicilioWA.update({
       where: { IDdomicilio: id },
       data: {
         ventaId,
-        estado: nuevoEstado || 'TOMADO',
-        atendidoAt: new Date(),
+        estado: estadoFinal,
+        atendidoAt: now,
       },
     });
+
+    if (ventaId && (estadoFinal === 'TOMADO' || estadoFinal === 'COBRADO' || estadoFinal === 'PAGADO')) {
+      try {
+        const ventaExistente = await this.prisma.ventas.findUnique({
+          where: { IDventas: ventaId },
+          select: { comandaImpresaAt: true, cocinaInicioAt: true },
+        });
+        if (ventaExistente) {
+          await this.prisma.ventas.update({
+            where: { IDventas: ventaId },
+            data: {
+              comandaImpresaAt: ventaExistente.comandaImpresaAt || now,
+              cocinaInicioAt: ventaExistente.cocinaInicioAt || now,
+            },
+          });
+          await this.prisma.orderventas.updateMany({
+            where: { IDventas: ventaId },
+            data: { comandaImpresa: true },
+          });
+        }
+      } catch (err: any) {
+        this.logger.warn(`No se pudo marcar comandaImpresa en venta vinculada ${ventaId}: ${err.message}`);
+      }
+    }
+
     this.appGateway.emitDomicilioActualizado(updated);
     return updated;
   }

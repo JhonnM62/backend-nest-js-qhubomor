@@ -593,6 +593,21 @@ export class VentasService {
           }
         }
 
+        if (!validProductoId && nombreProducto && nombreProducto.trim() !== '') {
+          try {
+            const productoByName = await this.prisma.productos.findFirst({
+              where: { nombre: { equals: nombreProducto.trim(), mode: 'insensitive' } },
+            });
+            if (productoByName) {
+              validProductoId = productoByName.IDproductos;
+              nombreProducto = productoByName.nombre || nombreProducto;
+              categoriaProducto = productoByName.categoriaNombre || productoByName.categoria || categoriaProducto || undefined;
+            }
+          } catch (e) {
+            // Ignore fallback error
+          }
+        }
+
         // Apply Jornada Comercial to Orderventas
         const orderFechaContable = fechaContable;
 
@@ -795,10 +810,32 @@ export class VentasService {
       where: { IDventas: id },
     });
 
-    const oldItemsMap = new Map();
+    const yaEstuvoEnCocina = Boolean(
+      ventaExistente.comandaImpresaAt ||
+      ventaExistente.cocinaInicioAt ||
+      ['TOMADO', 'PREPARANDO', 'LISTO_PARA_ENTREGA', 'ENTREGADO', 'PAGADO'].includes((ventaExistente.estado || '').toUpperCase())
+    );
+
+    const oldItemsMap = new Map<string, any>();
+    const oldItemsByNameMap = new Map<string, any>();
+    const oldItemsByIdOnlyMap = new Map<string, any>();
+    const oldItemsByNameOnlyMap = new Map<string, any>();
+
     for (const ov of oldOrderventas) {
-      const key = `${ov.productoId}_${ov.comentarios || ''}`;
-      oldItemsMap.set(key, ov);
+      const comm = (ov.comentarios || '').trim();
+      if (ov.productoId) {
+        oldItemsMap.set(`${ov.productoId}_${comm}`, ov);
+        if (!oldItemsByIdOnlyMap.has(ov.productoId)) {
+          oldItemsByIdOnlyMap.set(ov.productoId, ov);
+        }
+      }
+      const normName = (ov.nombre || ov.nombreProducto || '').trim().toLowerCase();
+      if (normName) {
+        oldItemsByNameMap.set(`${normName}_${comm}`, ov);
+        if (!oldItemsByNameOnlyMap.has(normName)) {
+          oldItemsByNameOnlyMap.set(normName, ov);
+        }
+      }
     }
 
     // REVERSO DE INVENTARIO
@@ -841,8 +878,34 @@ export class VentasService {
             }
           }
 
-          const key = `${producto.productoId}_${producto.comentarios || ''}`;
-          const oldItem = oldItemsMap.get(key);
+          if (!validProductoId && nombreProducto && nombreProducto.trim() !== '') {
+            try {
+              const productoByName = await this.prisma.productos.findFirst({
+                where: { nombre: { equals: nombreProducto.trim(), mode: 'insensitive' } },
+                select: { IDproductos: true, nombre: true, categoria: true, categoriaNombre: true },
+              });
+              if (productoByName) {
+                validProductoId = productoByName.IDproductos;
+                if (!categoriaProducto || categoriaProducto.trim() === '') {
+                  categoriaProducto = productoByName.categoriaNombre || productoByName.categoria || undefined;
+                }
+              }
+            } catch (e) {
+              // Ignore fallback error
+            }
+          }
+
+          const comm = (producto.comentarios || '').trim();
+          const effectiveProdId = validProductoId || producto.productoId || '';
+          const normName = (nombreProducto || producto.nombre || '').trim().toLowerCase();
+
+          const oldItem =
+            (effectiveProdId ? oldItemsMap.get(`${effectiveProdId}_${comm}`) : undefined) ||
+            (producto.productoId ? oldItemsMap.get(`${producto.productoId}_${comm}`) : undefined) ||
+            (normName ? oldItemsByNameMap.get(`${normName}_${comm}`) : undefined) ||
+            (effectiveProdId ? oldItemsByIdOnlyMap.get(effectiveProdId) : undefined) ||
+            (producto.productoId ? oldItemsByIdOnlyMap.get(producto.productoId) : undefined) ||
+            (normName ? oldItemsByNameOnlyMap.get(normName) : undefined);
           
           let cantidadPreparada = 0;
           let estado = producto.estado || ventaActualizada.estado || 'iniciado';
@@ -869,7 +932,7 @@ export class VentasService {
             preparadoAt = preparadoAt || new Date();
           }
 
-          const comandaImpresa = oldItem ? Boolean(oldItem.comandaImpresa) : false;
+          const comandaImpresa = oldItem ? (Boolean(oldItem.comandaImpresa) || yaEstuvoEnCocina) : false;
 
           const { seccionCocinaId, categoriaSeccionCocinaId, productoId, gramosPapa, ...restProducto } = producto as any;
 
@@ -1966,6 +2029,17 @@ export class VentasService {
       where: { IDventas: id },
       data: { comandaImpresa: true },
     });
+    const updated = await this.prisma.ventas.findUnique({
+      where: { IDventas: id },
+      include: {
+        ordenVentas: { include: { producto: { include: { categoriaRelacion: true } } } },
+        usuarioRelacion: { select: { IDusuarios: true, nombre: true, email: true } },
+        facturaElectronica: true,
+      },
+    });
+    if (updated) {
+      this.appGateway.emitToVentas(SocketEvent.REFRESH_VENTAS, { action: 'update', venta: updated });
+    }
     return { success: true, timestamp: now };
   }
 }
