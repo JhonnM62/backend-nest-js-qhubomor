@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateVentaDto, CreateOrderVentaDto, CreateVentaCompletaDto, VentaQueryDto } from './dto/venta.dto';
 import { Prisma } from '@prisma/client';
@@ -10,6 +10,9 @@ import { FacturacionService } from '../facturacion/facturacion.service';
 
 @Injectable()
 export class VentasService {
+  private readonly logger = new Logger(VentasService.name);
+  private cachedConfigNegocio: { data: any; timestamp: number } | null = null;
+
   constructor(
     private prisma: PrismaService,
     private notificationsService: NotificationsService,
@@ -17,6 +20,39 @@ export class VentasService {
     private appGateway: AppGateway,
     private facturacionService: FacturacionService,
   ) {}
+
+  async getConfiguracionNegocioCached() {
+    const now = Date.now();
+    if (this.cachedConfigNegocio && now - this.cachedConfigNegocio.timestamp < 60000) {
+      return this.cachedConfigNegocio.data;
+    }
+    let config = await this.prisma.configuracionNegocio.findUnique({ where: { id: 1 } });
+    if (!config) {
+      config = {
+        id: 1,
+        nombreComercial: 'Q HUBO MOR',
+        nit: null,
+        direccion: null,
+        telefono: null,
+        horaCorteDia: '00:00',
+        modoOperacion: 'GENERAL',
+        latitudNegocio: null,
+        longitudNegocio: null,
+        radioGeocercaM: 100,
+        minutosGraciaLlegadaTarde: 5,
+        updatedAt: new Date(),
+        emitirFacturaAutomatica: false,
+        opcionesPropina: [5, 10, 15],
+        opcionesDescuento: [5, 10, 20],
+        habilitarPropinas: true,
+        habilitarDescuentos: true,
+        tiempoReservaInventario: 5,
+        porcentajeMermaPapa: 10,
+      } as any;
+    }
+    this.cachedConfigNegocio = { data: config, timestamp: now };
+    return config;
+  }
 
   private recentSalesByTemporalId = new Map<string, { venta: any; timestamp: number }>();
   private inFlightSalesByTemporalId = new Map<string, Promise<any>>();
@@ -161,42 +197,8 @@ export class VentasService {
       }
     }
 
-    // Buscar configuración dinámica
-    let config = await this.prisma.configuracionNegocio.findUnique({ where: { id: 1 } });
-    if (!config) {
-      config = {
-        id: 1,
-        nombreComercial: 'Q HUBO MOR',
-        nit: null,
-        direccion: null,
-        telefono: null,
-        horaCorteDia: '00:00',
-        modoOperacion: 'GENERAL',
-        latitudNegocio: null,
-        longitudNegocio: null,
-        radioGeocercaM: 100,
-        minutosGraciaLlegadaTarde: 5,
-        updatedAt: new Date(),
-        emitirFacturaAutomatica: false,
-        factusEmail: null,
-        factusPassword: null,
-        factusClientId: null,
-        factusClientSecret: null,
-        factusMunicipioCodigo: '52356',
-        factusEntorno: 'SANDBOX',
-        radioGeocercaDescansoM: 50,
-        logoUrl: null,
-        imprimirLogo: true,
-        logoSize58: 50,
-        logoSize80: 50,
-        opcionesPropina: [5, 10, 15],
-        opcionesDescuento: [5, 10, 20],
-        habilitarPropinas: true,
-        habilitarDescuentos: true,
-        tiempoReservaInventario: 5,
-        porcentajeMermaPapa: 10
-      } as any;
-    }
+    // Buscar configuración dinámica cacheada (TTL 60s)
+    const config = await this.getConfiguracionNegocioCached();
     
     const [corteHours, corteMinutes] = config!.horaCorteDia.split(':').map(Number);
 
@@ -299,24 +301,39 @@ export class VentasService {
   async generatePedidoNumber(mesaId: string | null | undefined, usuarioNombre: string | null | undefined, providedFechaContable?: Date): Promise<string> {
     const fechaContable = providedFechaContable || await this.getFechaContable(new Date());
 
-    const ventasDelTurno = await this.prisma.ventas.findMany({
-      where: {
-        fecha: fechaContable,
-        deletedAt: null,
-      },
-      select: {
-        pedido: true,
-      },
-    });
-
     let maxConsecutivo = 0;
-    for (const venta of ventasDelTurno) {
-      if (venta.pedido) {
-        const match = venta.pedido.match(/-(\d+)$/);
-        if (match) {
-          const num = parseInt(match[1], 10);
-          if (num > maxConsecutivo) {
-            maxConsecutivo = num;
+    try {
+      // Optimización: Cálculo atómico de 1 ms directo en PostgreSQL
+      const rawResult = await this.prisma.$queryRaw<Array<{ max_num: number | null }>>`
+        SELECT MAX(CAST(SUBSTRING("Pedido" FROM '-([0-9]+)$') AS INTEGER)) AS max_num
+        FROM "VENTAS"
+        WHERE "FECHA" = ${fechaContable}
+          AND "deletedAt" IS NULL
+          AND "Pedido" ~ '-[0-9]+$'
+      `;
+      if (rawResult && rawResult[0]?.max_num != null) {
+        maxConsecutivo = Number(rawResult[0].max_num) || 0;
+      }
+    } catch (sqlErr: any) {
+      this.logger.warn(`Fallback en generatePedidoNumber por error SQL (${sqlErr?.message})`);
+      const ventasDelTurno = await this.prisma.ventas.findMany({
+        where: {
+          fecha: fechaContable,
+          deletedAt: null,
+        },
+        select: {
+          pedido: true,
+        },
+      });
+
+      for (const venta of ventasDelTurno) {
+        if (venta.pedido) {
+          const match = venta.pedido.match(/-(\d+)$/);
+          if (match) {
+            const num = parseInt(match[1], 10);
+            if (num > maxConsecutivo) {
+              maxConsecutivo = num;
+            }
           }
         }
       }
@@ -331,6 +348,7 @@ export class VentasService {
       try {
         const mesaObj = await this.prisma.mesas.findUnique({
           where: { IdMesas: mesaId },
+          select: { nombre: true },
         });
         if (mesaObj && mesaObj.nombre) {
           mesaStr = mesaObj.nombre;
@@ -525,7 +543,7 @@ export class VentasService {
     let cocinaInicioAtVal: Date | null = null;
     let cocinaFinAtVal: Date | null = null;
     const estInicial = (venta.estado || 'EN_EL_CARRITO').toUpperCase();
-    const configNegocio = await this.prisma.configuracionNegocio.findFirst();
+    const configNegocio = await this.getConfiguracionNegocioCached();
     const esModoRestaurante = (configNegocio?.modoOperacion || 'GENERAL').toUpperCase() === 'RESTAURANTE';
 
     const inicioCalculado = (venta as any).cartStartTime ? new Date((venta as any).cartStartTime) : fechaVenta;
@@ -644,9 +662,34 @@ export class VentasService {
       { ventaId: ventaCreada.IDventas }
     );
 
-    // DEDUCCIÓN DE INVENTARIO
+    // DEDUCCIÓN DE INVENTARIO (en segundo plano asíncrono para responder de inmediato en ~150ms)
     if (venta.estado !== 'RESERVA') {
-      await this.applyRecipeDeductions(productos, 'salida', 'Descuento por venta');
+      this.applyRecipeDeductions(productos, 'salida', 'Descuento por venta').catch((err) =>
+        this.logger.error(`Error aplicando deducciones de inventario para venta ${ventaCreada.IDventas}: ${err.message}`),
+      );
+    }
+
+    // Auto-vincular domicilio si la venta proviene de tomar un domicilio
+    if (effectiveTemporalId && effectiveTemporalId.startsWith('tomar-dom-')) {
+      const domId = effectiveTemporalId.replace('tomar-dom-', '');
+      try {
+        await this.prisma.domicilioWA.update({
+          where: { IDdomicilio: domId },
+          data: {
+            ventaId: ventaCreada.IDventas,
+            estado: 'TOMADO',
+            atendidoAt: fechaVenta,
+          },
+        });
+        this.appGateway.emitDomicilioActualizado({
+          IDdomicilio: domId,
+          ventaId: ventaCreada.IDventas,
+          estado: 'TOMADO',
+          atendidoAt: fechaVenta,
+        } as any);
+      } catch (domErr: any) {
+        this.logger.warn(`No se pudo auto-vincular domicilio ${domId} en createVentaCompleta: ${domErr.message}`);
+      }
     }
 
     const resultVenta = await this.prisma.ventas.findUnique({
