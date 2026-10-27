@@ -117,25 +117,48 @@ export class ClientesService {
 
     const cliente = await this.prisma.clientes.findFirst({
       where,
-      include: {
-        ventas: {
-          take: 5,
-          orderBy: { fechaYHora: 'desc' },
-          include: { ordenVentas: true },
-        },
-      },
     });
 
     if (!cliente) {
       throw new NotFoundException(`Cliente no encontrado con identificador ${clean}`);
     }
 
-    const contador = cliente.contador || 0;
-    const comprasTotales = parseInt(cliente.compras || '0', 10) || 0;
+    // Buscar ventas tanto por IDcliente (FK) como por texto (columna "Clente" / número de teléfono)
+    const ventasOrConditions: Prisma.VentasWhereInput[] = [
+      { clienteId: cliente.IDcliente },
+      { cliente: String(cliente.IDcliente) },
+    ];
+
+    if (cliente.cedula) {
+      ventasOrConditions.push({ cliente: cliente.cedula.toString() });
+    }
+    if (cliente.nombre) {
+      ventasOrConditions.push({ cliente: cliente.nombre });
+    }
+    if (cliente.whatsapp) {
+      ventasOrConditions.push({ cliente: cliente.whatsapp });
+      const numOnly = cliente.whatsapp.replace(/\D/g, '');
+      if (numOnly) {
+        ventasOrConditions.push({ cliente: { contains: numOnly } });
+      }
+    }
+
+    const ventas = await this.prisma.ventas.findMany({
+      where: {
+        OR: ventasOrConditions,
+        deleteReason: null,
+      },
+      take: 10,
+      orderBy: { fechaYHora: 'desc' },
+      include: { ordenVentas: true },
+    });
+
+    const contador = cliente.contador ?? 0;
+    const comprasTotales = Math.max(parseInt(cliente.compras || '0', 10) || 0, contador, ventas.length);
 
     return {
       IDcliente: cliente.IDcliente,
-      nombre: cliente.nombre || 'Cliente Frecuente',
+      nombre: cliente.nombre || 'Cliente VIP',
       cedula: cliente.cedula ? cliente.cedula.toString() : null,
       whatsapp: cliente.whatsapp || null,
       contador,
@@ -144,14 +167,14 @@ export class ClientesService {
       hito10: contador >= 10,
       granizadoGratis: contador >= 10,
       sellosRestantesParaGranizado: Math.max(0, 10 - contador),
-      ultimasVentas: cliente.ventas.map((v) => ({
+      ultimasVentas: ventas.map((v) => ({
         IDventas: v.IDventas,
         pedido: v.pedido || 'Pedido',
         totalInput: v.totalInput ? Number(v.totalInput) : 0,
-        fechaYHora: v.fechaYHora,
+        fechaYHora: v.fechaYHora ? v.fechaYHora.toISOString() : null,
         estado: v.estado,
         compras: v.compras,
-        productos: v.ordenVentas.map((o) => ({
+        productos: (v.ordenVentas || []).map((o) => ({
           nombre: o.nombreProducto || 'Producto',
           cantidad: o.cantidad,
           precioTotal: o.precioTotal ? Number(o.precioTotal) : 0,
