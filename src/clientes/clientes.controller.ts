@@ -12,7 +12,8 @@ import {
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { ClientesService } from './clientes.service';
 import { CreateClienteDto, UpdateClienteDto, ClienteQueryDto } from './dto/cliente.dto';
-import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { Public } from '../common/decorators/public.decorator';
 
 @ApiTags('Clientes')
 @Controller('clientes')
@@ -33,6 +34,7 @@ export class ClientesController {
     return this.clientesService.findAll(query);
   }
 
+  @Public()
   @Get('fidelidad/:identificador')
   @ApiOperation({ summary: 'Consultar tarjeta de fidelidad por Cédula o Código' })
   findFidelidad(@Param('identificador') identificador: string) {
