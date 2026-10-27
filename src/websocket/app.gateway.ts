@@ -1,454 +1,485 @@
-// ============================================================
-// Q'HUBO MOR ERP - AppGateway
-// ============================================================
-// Gateway WebSocket genérico y escalable para el ERP
-//
-// CARACTERÍSTICAS:
-// - Soporte para múltiples módulos (POS, Inventario, Insumos, Gastos, Caja)
-// - Rooms dinámicos por módulo
-// - Validación de autenticación
-// - Tipado estricto con socket-types
-//
-// ESTRUCTURA DE ROOMS:
-// - kitchen: Pedidos de cocina
-// - caja: Actualizaciones de caja
-// - inventario: Actualizaciones de inventario (futuro)
-// - insumos: Actualizaciones de insumos (futuro)
-// - gastos: Actualizaciones de gastos (futuro)
-//
-// EVENTOS:
-// - joinRoom/leaveRoom: Unirse/salir de rooms dinámicos
-// - events por módulo: Cada módulo tiene sus propios eventos
-// ============================================================
-
-import {
-  WebSocketGateway,
-  WebSocketServer,
-  SubscribeMessage,
-  ConnectedSocket,
-  OnGatewayConnection,
-  OnGatewayDisconnect,
-  MessageBody,
-} from '@nestjs/websockets';
-import { Server, Socket } from 'socket.io';
-import { Logger, forwardRef, Inject } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import { SocketEvent, Room } from './types/socket.types';
-import { ReservasInventarioService } from './reservas.service';
-import type { PrintJobPayload, PrintAckPayload } from './types/socket.types';
-
-interface ConnectedClient {
-  socket: Socket;
-  rooms: Set<string>;
-  userId?: string;
-}
-
-@WebSocketGateway({
-  cors: { origin: '*' },
-  namespace: '/pos',
-  transports: ['websocket', 'polling'],
-})
-export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
-  @WebSocketServer()
-  server: Server;
-
-  private readonly logger = new Logger(AppGateway.name);
-  private connectedClients = new Map<string, ConnectedClient>();
-
-  constructor(
-    private readonly jwtService: JwtService,
-    @Inject(forwardRef(() => ReservasInventarioService))
-    private readonly reservasService: ReservasInventarioService,
-  ) {}
-
-  handleConnection(client: Socket) {
-    try {
-      const token = client.handshake.auth?.token;
-
-      if (!token) {
-        this.logger.warn(`Client ${client.id} rejected: No token provided`);
-        client.emit(SocketEvent.ERROR, { message: 'Token requerido', code: 'AUTH_NO_TOKEN' });
-        client.disconnect();
-        return;
-      }
-
-      let userId: string | undefined;
-      try {
-        // Decode token to get user ID
-        const decoded = this.jwtService.verify(token);
-        userId = decoded.sub; // Assuming the token has 'sub' as user ID
-      } catch (e) {
-        this.logger.warn(`Client ${client.id} provided invalid token`);
-        // We might not want to disconnect them immediately if they are just logging out
-      }
-
-      this.connectedClients.set(client.id, {
-        socket: client,
-        rooms: new Set(),
-        userId,
-      });
-      
-      // Automatically join a personal room for direct messages
-      if (userId) {
-        const personalRoom = `user_${userId}`;
-        client.join(personalRoom);
-        const clientData = this.connectedClients.get(client.id);
-        if (clientData) clientData.rooms.add(personalRoom);
-        this.logger.log(`Client ${client.id} mapped to user ${userId} and joined ${personalRoom}`);
-      } else {
-        this.logger.log(`Client connected without valid userId: ${client.id}`);
-      }
-    } catch (error) {
-      this.logger.error(`Connection error for ${client.id}:`, error);
-      client.disconnect();
-    }
-  }
-
-  handleDisconnect(client: Socket) {
-    const clientData = this.connectedClients.get(client.id);
-    if (clientData) {
-      this.logger.log(`Client disconnected: ${client.id} (was in rooms: ${[...clientData.rooms].join(', ')})`);
-      this.connectedClients.delete(client.id);
-      
-      if ((clientData as any).isPrintServer) {
-        this.broadcastPrintServers((clientData as any).negocioId ?? 'default');
-      }
-    }
-    this.reservasService.liberarTodasReservasDeSocket(client.id);
-  }
-
-  @SubscribeMessage('reservar_producto')
-  handleReservarProducto(client: Socket, payload: { productoId: string; cantidad: number }) {
-    this.reservasService.reservarProducto(client.id, payload.productoId, payload.cantidad);
-  }
-
-  @SubscribeMessage('liberar_reservas')
-  handleLiberarReservas(client: Socket) {
-    this.reservasService.liberarTodasReservasDeSocket(client.id);
-  }
-
-  @SubscribeMessage('get_reservas')
-  handleGetReservas(client: Socket) {
-    const reservas = this.reservasService.getAllReservations();
-    client.emit('init_reservas', reservas);
-  }
-
-  @SubscribeMessage(SocketEvent.JOIN_ROOM)
-  handleJoinRoom(
-    @ConnectedSocket() client: Socket,
-    @MessageBody() data: { room: string },
-  ) {
-    const room = data.room;
-    if (!room) {
-      client.emit(SocketEvent.ERROR, { message: 'Room es requerido', code: 'ROOM_REQUIRED' });
-      return { success: false, error: 'Room es requerido' };
-    }
-
-    const clientData = this.connectedClients.get(client.id);
-    if (!clientData) {
-      return { success: false, error: 'Cliente no encontrado' };
-    }
-
-    client.join(room);
-    clientData.rooms.add(room);
-
-    this.logger.log(`Client ${client.id} joined room: ${room}`);
-
-    return {
-      success: true,
-      event: SocketEvent.JOINED,
-      data: { room, timestamp: Date.now() },
-    };
-  }
-
-  @SubscribeMessage(SocketEvent.LEAVE_ROOM)
-  handleLeaveRoom(
-    @ConnectedSocket() client: Socket,
-    @MessageBody() data: { room: string },
-  ) {
-    const room = data.room;
-    if (!room) {
-      return { success: false, error: 'Room es requerido' };
-    }
-
-    const clientData = this.connectedClients.get(client.id);
-    if (clientData) {
-      client.leave(room);
-      clientData.rooms.delete(room);
-      this.logger.log(`Client ${client.id} left room: ${room}`);
-      
-      if (room.startsWith('printers:')) {
-        (clientData as any).isPrintServer = false;
-        const negocioId = room.split(':')[1] || 'default';
-        this.broadcastPrintServers(negocioId);
-      }
-    }
-
-    return { success: true };
-  }
-
-  // ============================================================
-  // EVENTOS POS / VENTAS
-  // ============================================================
-
-  @SubscribeMessage(SocketEvent.NUEVA_ORDEN)
-  handleNuevaOrden(@MessageBody() data: any) {
-    this.logger.log(`Nueva orden received: ${data.ventaId || data.venta?.pedido}`);
-
-    const enrichedData = { ...data, timestamp: Date.now(), module: 'POS' };
-
-    this.server.to(Room.KITCHEN).emit(SocketEvent.ORDEN_RECIBIDA, enrichedData);
-    this.server.to(Room.KITCHEN).emit(SocketEvent.ORDEN_ACTUALIZADA_KITCHEN, enrichedData);
-    this.server.to(Room.CAJA).emit(SocketEvent.ORDEN_ACTUALIZADA_CAJA, enrichedData);
-    this.server.to(Room.VENTAS).emit(SocketEvent.ORDEN_RECIBIDA, enrichedData);
-    this.server.to(Room.VENTAS).emit(SocketEvent.NUEVA_ORDEN, enrichedData);
-    this.emitToAll(SocketEvent.ORDEN_RECIBIDA, enrichedData);
-    this.emitToAll(SocketEvent.NUEVA_ORDEN, enrichedData);
-
-    return { success: true };
-  }
-
-  @SubscribeMessage(SocketEvent.ORDEN_ACTUALIZADA)
-  handleOrdenActualizada(@MessageBody() data: any) {
-    this.logger.log(`Orden actualizada received: ${data.ventaId || data.IDventas}`);
-
-    const enrichedData = { ...data, timestamp: Date.now(), module: 'POS' };
-
-    this.server.to(Room.KITCHEN).emit(SocketEvent.ORDEN_ACTUALIZADA_KITCHEN, enrichedData);
-    this.server.to(Room.CAJA).emit(SocketEvent.ORDEN_ACTUALIZADA_CAJA, enrichedData);
-    this.server.to(Room.CAJA).emit(SocketEvent.ORDEN_ACTUALIZADA, enrichedData);
-    this.server.to(Room.VENTAS).emit(SocketEvent.ORDEN_ACTUALIZADA, enrichedData);
-    this.emitToAll(SocketEvent.ORDEN_ACTUALIZADA, enrichedData);
-
-    return { success: true };
-  }
-
-  @SubscribeMessage(SocketEvent.ORDEN_COMPLETADA)
-  handleOrdenCompletada(@MessageBody() data: any) {
-    this.logger.log(`Orden completada received: ${data.ventaId}`);
-
-    const enrichedData = { ...data, timestamp: Date.now(), module: 'POS' };
-
-    this.server.to(Room.CAJA).emit(SocketEvent.ORDEN_COMPLETADA, enrichedData);
-
-    return { success: true };
-  }
-
-  // ============================================================
-  // IMPRESIÓN REMOTA BT via Socket
-  // Permite delegar la impresión a un dispositivo con BT conectado
-  // ============================================================
-
-  @SubscribeMessage(SocketEvent.PRINT_REGISTER)
-  handlePrintRegister(
-    @ConnectedSocket() client: Socket,
-    @MessageBody() data: { negocioId?: string, deviceName?: string },
-  ) {
-    const room = `printers:${data.negocioId ?? 'default'}`;
-    client.join(room);
-    const clientData = this.connectedClients.get(client.id);
-    if (clientData) {
-      clientData.rooms.add(room);
-      (clientData as any).isPrintServer = true;
-      (clientData as any).deviceName = data.deviceName || 'Dispositivo Desconocido';
-      (clientData as any).deviceId = (data as any).deviceId || client.id;
-      (clientData as any).negocioId = data.negocioId ?? 'default';
-    }
-    this.logger.log(`Dispositivo ${client.id} (${data.deviceName}, ID: ${(clientData as any)?.deviceId}) registrado como servidor de impresión en ${room}`);
-    client.emit(SocketEvent.PRINT_REGISTERED, { ok: true, room });
-    
-    // Broadcast the updated list to everyone in the namespace or just those who care
-    this.broadcastPrintServers(data.negocioId ?? 'default');
-    
-    return { success: true };
-  }
-
-  @SubscribeMessage(SocketEvent.GET_PRINT_SERVERS)
-  handleGetPrintServers(
-    @ConnectedSocket() client: Socket,
-    @MessageBody() data: { negocioId?: string },
-  ) {
-    const negocioId = data?.negocioId ?? 'default';
-    const servers = this.getPrintServersForNegocio(negocioId);
-    client.emit(SocketEvent.PRINT_SERVERS_UPDATE, { negocioId, servers });
-    return { success: true, servers };
-  }
-
-  private broadcastPrintServers(negocioId: string) {
-    const servers = this.getPrintServersForNegocio(negocioId);
-    this.server.emit(SocketEvent.PRINT_SERVERS_UPDATE, { negocioId, servers });
-  }
-
-  private getPrintServersForNegocio(negocioId: string) {
-    const room = `printers:${negocioId}`;
-    const servers: any[] = [];
-    this.connectedClients.forEach((clientData, clientId) => {
-      if (clientData.rooms.has(room) && (clientData as any).isPrintServer) {
-        servers.push({
-          socketId: clientId, // Mantener compatibilidad
-          serverId: (clientData as any).deviceId || clientId, // ID persistente
-          deviceName: (clientData as any).deviceName || 'Dispositivo',
-          status: 'online',
-        });
-      }
-    });
-    return servers;
-  }
-
-  @SubscribeMessage(SocketEvent.PRINT_REQUEST)
-  handlePrintRequest(
-    @ConnectedSocket() client: Socket,
-    @MessageBody() payload: PrintJobPayload & { targetSocketId?: string },
-  ) {
-    const room = `printers:${payload.negocioId ?? 'default'}`;
-    this.logger.log(`[PRINT DEBUG] Print request received from client ${client.id} - jobId=${payload.jobId} type=${payload.type} target=${payload.targetSocketId || 'all'} → room=${room}`);
-    
-    if (payload.targetSocketId) {
-      // Intentar buscar el socketId real asumiendo que targetSocketId es un deviceId
-      let actualTargetSocketId = payload.targetSocketId;
-      for (const [clientId, data] of this.connectedClients.entries()) {
-        if ((data as any).deviceId === payload.targetSocketId) {
-          actualTargetSocketId = clientId;
-          break;
-        }
-      }
-
-      // Reenviar el trabajo solo al dispositivo seleccionado
-      const targetSockets = (this.server as any).adapter.rooms.get(actualTargetSocketId);
-      this.logger.log(`[PRINT DEBUG] Target sockets size: ${targetSockets ? targetSockets.size : 0} for mapped ID ${actualTargetSocketId}`);
-      if (!targetSockets || targetSockets.size === 0) {
-        this.logger.warn(`El servidor destino ${payload.targetSocketId} no está conectado.`);
-        this.server.emit(`print:ack:${payload.jobId}`, { jobId: payload.jobId, success: false, error: 'El dispositivo seleccionado no está conectado o cerró la app.' });
-        return { success: false, error: 'Dispositivo desconectado' };
-      }
-      this.server.to(actualTargetSocketId).emit(SocketEvent.PRINT_JOB, payload);
-      this.logger.log(`[PRINT DEBUG] Emitted PRINT_JOB to actual targetSocketId ${actualTargetSocketId}`);
-    } else {
-      // Reenviar el trabajo a todos los dispositivos en la sala de impresoras
-      const roomSockets = (this.server as any).adapter.rooms.get(room);
-      this.logger.log(`[PRINT DEBUG] Room ${room} sockets size: ${roomSockets ? roomSockets.size : 0}`);
-      if (!roomSockets || roomSockets.size === 0) {
-        this.logger.warn(`No hay servidores en la sala ${room}.`);
-        this.server.emit(`print:ack:${payload.jobId}`, { jobId: payload.jobId, success: false, error: 'No hay servidores de impresión conectados actualmente.' });
-        return { success: false, error: 'Sin servidores' };
-      }
-      this.server.to(room).emit(SocketEvent.PRINT_JOB, payload);
-      this.logger.log(`[PRINT DEBUG] Emitted PRINT_JOB to room ${room}`);
-    }
-    
-    return { success: true, jobId: payload.jobId };
-  }
-
-  @SubscribeMessage(SocketEvent.PRINT_DONE)
-  handlePrintDone(
-    @ConnectedSocket() client: Socket,
-    @MessageBody() payload: PrintAckPayload,
-  ) {
-    this.logger.log(`Print done jobId=${payload.jobId} success=${payload.success}`);
-    // Notificar al solicitante original por evento dinámico
-    this.server.emit(`print:ack:${payload.jobId}`, payload);
-    return { success: true };
-  }
-
-  // ============================================================
-  // MÉTODOS HELPER PARA EMITIR DESDE SERVICIOS
-  // ============================================================
-
-  emitToRoom(room: string, event: string, data: any) {
-    this.server.to(room).emit(event, { ...data, timestamp: Date.now() });
-  }
-
-  emitToKitchen(event: string, data: any) {
-    this.emitToRoom(Room.KITCHEN, event, data);
-  }
-
-  emitToCaja(event: string, data: any) {
-    this.emitToRoom(Room.CAJA, event, data);
-  }
-
-  emitToAll(event: string, data: any) {
-    this.logger.log(`Broadcasting event ${event} to all clients in namespace`);
-    this.server.emit(event, { ...data, timestamp: Date.now() });
-  }
-
-  // ============================================================
-  // MÉTODOS PARA FUTUROS MÓDULOS
-  // ============================================================
-
-  emitToInventario(event: string, data: any) {
-    this.emitToRoom(Room.INVENTARIO, event, data);
-    // Para simplificar a clientes que no se unen al room
-    this.emitToAll(event, data);
-  }
-
-  emitToInsumos(event: string, data: any) {
-    this.emitToRoom(Room.INSUMOS, event, data);
-    this.emitToAll(event, data);
-  }
-
-  emitToProductos(event: string, data: any) {
-    this.emitToRoom(Room.PRODUCTOS, event, data);
-    this.emitToAll(event, data);
-  }
-
-  emitToCategorias(event: string, data: any) {
-    this.emitToRoom(Room.CATEGORIAS, event, data);
-    this.emitToAll(event, data);
-  }
-
-  emitToGastos(event: string, data: any) {
-    this.emitToRoom(Room.GASTOS, event, data);
-    this.emitToAll(event, data);
-  }
-
-  emitToVentas(event: string, data: any) {
-    this.logger.log(`Emitting to Ventas room and all clients: ${event}`);
-    this.emitToRoom(Room.VENTAS, event, data);
-    this.emitToAll(event, data);
-  }
-
-  emitNuevoDomicilio(domicilio: any) {
-    this.logger.log(`Emitting nuevoDomicilio: ${domicilio.orderIdWA || domicilio.IDdomicilio}`);
-    this.emitToRoom(Room.DOMICILIOS, SocketEvent.NUEVO_DOMICILIO, domicilio);
-    this.emitToRoom(Room.VENTAS, SocketEvent.NUEVO_DOMICILIO, domicilio);
-    this.emitToRoom(Room.CAJA, SocketEvent.NUEVO_DOMICILIO, domicilio);
-    this.emitToAll(SocketEvent.NUEVO_DOMICILIO, domicilio);
-  }
-
-  emitDomicilioActualizado(domicilio: any) {
-    this.logger.log(`Emitting domicilioActualizado: ${domicilio.orderIdWA || domicilio.IDdomicilio}`);
-    this.emitToRoom(Room.DOMICILIOS, SocketEvent.DOMICILIO_ACTUALIZADO, domicilio);
-    this.emitToRoom(Room.VENTAS, SocketEvent.DOMICILIO_ACTUALIZADO, domicilio);
-    this.emitToRoom(Room.CAJA, SocketEvent.DOMICILIO_ACTUALIZADO, domicilio);
-    this.emitToAll(SocketEvent.DOMICILIO_ACTUALIZADO, domicilio);
-  }
-
-  emitDomicilioTimeout(domicilio: any) {
-    this.logger.log(`Emitting domicilioTimeout: ${domicilio.orderIdWA || domicilio.IDdomicilio}`);
-    this.emitToRoom(Room.DOMICILIOS, SocketEvent.DOMICILIO_TIMEOUT, domicilio);
-    this.emitToRoom(Room.VENTAS, SocketEvent.DOMICILIO_TIMEOUT, domicilio);
-    this.emitToRoom(Room.CAJA, SocketEvent.DOMICILIO_TIMEOUT, domicilio);
-    this.emitToAll(SocketEvent.DOMICILIO_TIMEOUT, domicilio);
-  }
-
-  // ============================================================
-  // UTILIDADES
-  // ============================================================
-
-  getConnectedClientsCount(): number {
-    return this.connectedClients.size;
-  }
-
-  getClientsInRoom(room: string): string[] {
-    const roomClients = (this.server as any).adapter.rooms.get(room);
-    return roomClients ? [...roomClients] : [];
-  }
-
-  getRooms(): string[] {
-    const rooms = new Set<string>();
-    this.connectedClients.forEach((client) => {
-      client.rooms.forEach((room) => rooms.add(room));
-    });
-    return [...rooms];
-  }
-}
+// ============================================================
+// Q'HUBO MOR ERP - AppGateway
+// ============================================================
+// Gateway WebSocket genérico y escalable para el ERP
+//
+// CARACTERÍSTICAS:
+// - Soporte para múltiples módulos (POS, Inventario, Insumos, Gastos, Caja)
+// - Rooms dinámicos por módulo
+// - Validación de autenticación
+// - Tipado estricto con socket-types
+//
+// ESTRUCTURA DE ROOMS:
+// - kitchen: Pedidos de cocina
+// - caja: Actualizaciones de caja
+// - inventario: Actualizaciones de inventario (futuro)
+// - insumos: Actualizaciones de insumos (futuro)
+// - gastos: Actualizaciones de gastos (futuro)
+//
+// EVENTOS:
+// - joinRoom/leaveRoom: Unirse/salir de rooms dinámicos
+// - events por módulo: Cada módulo tiene sus propios eventos
+// ============================================================
+
+import {
+  WebSocketGateway,
+  WebSocketServer,
+  SubscribeMessage,
+  ConnectedSocket,
+  OnGatewayConnection,
+  OnGatewayDisconnect,
+  MessageBody,
+} from '@nestjs/websockets';
+import { Server, Socket } from 'socket.io';
+import { Logger, forwardRef, Inject } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import { SocketEvent, Room } from './types/socket.types';
+import { ReservasInventarioService } from './reservas.service';
+import type { PrintJobPayload, PrintAckPayload } from './types/socket.types';
+
+interface ConnectedClient {
+  socket: Socket;
+  rooms: Set<string>;
+  userId?: string;
+}
+
+@WebSocketGateway({
+  cors: { origin: '*' },
+  namespace: '/pos',
+  transports: ['websocket', 'polling'],
+})
+export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
+  @WebSocketServer()
+  server: Server;
+
+  private readonly logger = new Logger(AppGateway.name);
+  private connectedClients = new Map<string, ConnectedClient>();
+
+  constructor(
+    private readonly jwtService: JwtService,
+    @Inject(forwardRef(() => ReservasInventarioService))
+    private readonly reservasService: ReservasInventarioService,
+  ) {}
+
+  handleConnection(client: Socket) {
+    try {
+      const token = client.handshake.auth?.token;
+      const isFidelidadGuest =
+        client.handshake.auth?.role === 'fidelidad' ||
+        client.handshake.query?.role === 'fidelidad' ||
+        token === 'fidelidad-guest';
+
+      if (!token && !isFidelidadGuest) {
+        this.logger.warn(`Client ${client.id} rejected: No token provided`);
+        client.emit(SocketEvent.ERROR, { message: 'Token requerido', code: 'AUTH_NO_TOKEN' });
+        client.disconnect();
+        return;
+      }
+
+      let userId: string | undefined;
+      try {
+        // Decode token to get user ID
+        const decoded = this.jwtService.verify(token);
+        userId = decoded.sub; // Assuming the token has 'sub' as user ID
+      } catch (e) {
+        this.logger.warn(`Client ${client.id} provided invalid token`);
+        // We might not want to disconnect them immediately if they are just logging out
+      }
+
+      this.connectedClients.set(client.id, {
+        socket: client,
+        rooms: new Set(),
+        userId,
+      });
+      
+      // Automatically join a personal room for direct messages
+      if (userId) {
+        const personalRoom = `user_${userId}`;
+        client.join(personalRoom);
+        const clientData = this.connectedClients.get(client.id);
+        if (clientData) clientData.rooms.add(personalRoom);
+        this.logger.log(`Client ${client.id} mapped to user ${userId} and joined ${personalRoom}`);
+      } else {
+        this.logger.log(`Client connected without valid userId: ${client.id}`);
+      }
+    } catch (error) {
+      this.logger.error(`Connection error for ${client.id}:`, error);
+      client.disconnect();
+    }
+  }
+
+  handleDisconnect(client: Socket) {
+    const clientData = this.connectedClients.get(client.id);
+    if (clientData) {
+      this.logger.log(`Client disconnected: ${client.id} (was in rooms: ${[...clientData.rooms].join(', ')})`);
+      this.connectedClients.delete(client.id);
+      
+      if ((clientData as any).isPrintServer) {
+        this.broadcastPrintServers((clientData as any).negocioId ?? 'default');
+      }
+    }
+    this.reservasService.liberarTodasReservasDeSocket(client.id);
+  }
+
+  @SubscribeMessage('reservar_producto')
+  handleReservarProducto(client: Socket, payload: { productoId: string; cantidad: number }) {
+    this.reservasService.reservarProducto(client.id, payload.productoId, payload.cantidad);
+  }
+
+  @SubscribeMessage('liberar_reservas')
+  handleLiberarReservas(client: Socket) {
+    this.reservasService.liberarTodasReservasDeSocket(client.id);
+  }
+
+  @SubscribeMessage('get_reservas')
+  handleGetReservas(client: Socket) {
+    const reservas = this.reservasService.getAllReservations();
+    client.emit('init_reservas', reservas);
+  }
+
+  @SubscribeMessage(SocketEvent.JOIN_ROOM)
+  handleJoinRoom(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { room: string },
+  ) {
+    const room = data.room;
+    if (!room) {
+      client.emit(SocketEvent.ERROR, { message: 'Room es requerido', code: 'ROOM_REQUIRED' });
+      return { success: false, error: 'Room es requerido' };
+    }
+
+    const clientData = this.connectedClients.get(client.id);
+    if (!clientData) {
+      return { success: false, error: 'Cliente no encontrado' };
+    }
+
+    client.join(room);
+    clientData.rooms.add(room);
+
+    this.logger.log(`Client ${client.id} joined room: ${room}`);
+
+    return {
+      success: true,
+      event: SocketEvent.JOINED,
+      data: { room, timestamp: Date.now() },
+    };
+  }
+
+  @SubscribeMessage(SocketEvent.LEAVE_ROOM)
+  handleLeaveRoom(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { room: string },
+  ) {
+    const room = data.room;
+    if (!room) {
+      return { success: false, error: 'Room es requerido' };
+    }
+
+    const clientData = this.connectedClients.get(client.id);
+    if (clientData) {
+      client.leave(room);
+      clientData.rooms.delete(room);
+      this.logger.log(`Client ${client.id} left room: ${room}`);
+      
+      if (room.startsWith('printers:')) {
+        (clientData as any).isPrintServer = false;
+        const negocioId = room.split(':')[1] || 'default';
+        this.broadcastPrintServers(negocioId);
+      }
+    }
+
+    return { success: true };
+  }
+
+  @SubscribeMessage('joinFidelidad')
+  handleJoinFidelidad(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { cedula?: string; clienteId?: number },
+  ) {
+    if (data?.cedula) {
+      client.join(`fidelidad_cedula_${data.cedula}`);
+      this.logger.log(`Client ${client.id} joined fidelidad_cedula_${data.cedula}`);
+    }
+    if (data?.clienteId) {
+      client.join(`fidelidad_cliente_${data.clienteId}`);
+      this.logger.log(`Client ${client.id} joined fidelidad_cliente_${data.clienteId}`);
+    }
+    return { success: true, event: 'joinedFidelidad', data };
+  }
+
+  // ============================================================
+  // EVENTOS POS / VENTAS
+  // ============================================================
+
+  @SubscribeMessage(SocketEvent.NUEVA_ORDEN)
+  handleNuevaOrden(@MessageBody() data: any) {
+    this.logger.log(`Nueva orden received: ${data.ventaId || data.venta?.pedido}`);
+
+    const enrichedData = { ...data, timestamp: Date.now(), module: 'POS' };
+
+    this.server.to(Room.KITCHEN).emit(SocketEvent.ORDEN_RECIBIDA, enrichedData);
+    this.server.to(Room.KITCHEN).emit(SocketEvent.ORDEN_ACTUALIZADA_KITCHEN, enrichedData);
+    this.server.to(Room.CAJA).emit(SocketEvent.ORDEN_ACTUALIZADA_CAJA, enrichedData);
+    this.server.to(Room.VENTAS).emit(SocketEvent.ORDEN_RECIBIDA, enrichedData);
+    this.server.to(Room.VENTAS).emit(SocketEvent.NUEVA_ORDEN, enrichedData);
+    this.emitToAll(SocketEvent.ORDEN_RECIBIDA, enrichedData);
+    this.emitToAll(SocketEvent.NUEVA_ORDEN, enrichedData);
+
+    return { success: true };
+  }
+
+  @SubscribeMessage(SocketEvent.ORDEN_ACTUALIZADA)
+  handleOrdenActualizada(@MessageBody() data: any) {
+    this.logger.log(`Orden actualizada received: ${data.ventaId || data.IDventas}`);
+
+    const enrichedData = { ...data, timestamp: Date.now(), module: 'POS' };
+
+    this.server.to(Room.KITCHEN).emit(SocketEvent.ORDEN_ACTUALIZADA_KITCHEN, enrichedData);
+    this.server.to(Room.CAJA).emit(SocketEvent.ORDEN_ACTUALIZADA_CAJA, enrichedData);
+    this.server.to(Room.CAJA).emit(SocketEvent.ORDEN_ACTUALIZADA, enrichedData);
+    this.server.to(Room.VENTAS).emit(SocketEvent.ORDEN_ACTUALIZADA, enrichedData);
+    this.emitToAll(SocketEvent.ORDEN_ACTUALIZADA, enrichedData);
+
+    return { success: true };
+  }
+
+  @SubscribeMessage(SocketEvent.ORDEN_COMPLETADA)
+  handleOrdenCompletada(@MessageBody() data: any) {
+    this.logger.log(`Orden completada received: ${data.ventaId}`);
+
+    const enrichedData = { ...data, timestamp: Date.now(), module: 'POS' };
+
+    this.server.to(Room.CAJA).emit(SocketEvent.ORDEN_COMPLETADA, enrichedData);
+
+    return { success: true };
+  }
+
+  // ============================================================
+  // IMPRESIÓN REMOTA BT via Socket
+  // Permite delegar la impresión a un dispositivo con BT conectado
+  // ============================================================
+
+  @SubscribeMessage(SocketEvent.PRINT_REGISTER)
+  handlePrintRegister(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { negocioId?: string, deviceName?: string },
+  ) {
+    const room = `printers:${data.negocioId ?? 'default'}`;
+    client.join(room);
+    const clientData = this.connectedClients.get(client.id);
+    if (clientData) {
+      clientData.rooms.add(room);
+      (clientData as any).isPrintServer = true;
+      (clientData as any).deviceName = data.deviceName || 'Dispositivo Desconocido';
+      (clientData as any).deviceId = (data as any).deviceId || client.id;
+      (clientData as any).negocioId = data.negocioId ?? 'default';
+    }
+    this.logger.log(`Dispositivo ${client.id} (${data.deviceName}, ID: ${(clientData as any)?.deviceId}) registrado como servidor de impresión en ${room}`);
+    client.emit(SocketEvent.PRINT_REGISTERED, { ok: true, room });
+    
+    // Broadcast the updated list to everyone in the namespace or just those who care
+    this.broadcastPrintServers(data.negocioId ?? 'default');
+    
+    return { success: true };
+  }
+
+  @SubscribeMessage(SocketEvent.GET_PRINT_SERVERS)
+  handleGetPrintServers(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { negocioId?: string },
+  ) {
+    const negocioId = data?.negocioId ?? 'default';
+    const servers = this.getPrintServersForNegocio(negocioId);
+    client.emit(SocketEvent.PRINT_SERVERS_UPDATE, { negocioId, servers });
+    return { success: true, servers };
+  }
+
+  private broadcastPrintServers(negocioId: string) {
+    const servers = this.getPrintServersForNegocio(negocioId);
+    this.server.emit(SocketEvent.PRINT_SERVERS_UPDATE, { negocioId, servers });
+  }
+
+  private getPrintServersForNegocio(negocioId: string) {
+    const room = `printers:${negocioId}`;
+    const servers: any[] = [];
+    this.connectedClients.forEach((clientData, clientId) => {
+      if (clientData.rooms.has(room) && (clientData as any).isPrintServer) {
+        servers.push({
+          socketId: clientId, // Mantener compatibilidad
+          serverId: (clientData as any).deviceId || clientId, // ID persistente
+          deviceName: (clientData as any).deviceName || 'Dispositivo',
+          status: 'online',
+        });
+      }
+    });
+    return servers;
+  }
+
+  @SubscribeMessage(SocketEvent.PRINT_REQUEST)
+  handlePrintRequest(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() payload: PrintJobPayload & { targetSocketId?: string },
+  ) {
+    const room = `printers:${payload.negocioId ?? 'default'}`;
+    this.logger.log(`[PRINT DEBUG] Print request received from client ${client.id} - jobId=${payload.jobId} type=${payload.type} target=${payload.targetSocketId || 'all'} → room=${room}`);
+    
+    if (payload.targetSocketId) {
+      // Intentar buscar el socketId real asumiendo que targetSocketId es un deviceId
+      let actualTargetSocketId = payload.targetSocketId;
+      for (const [clientId, data] of this.connectedClients.entries()) {
+        if ((data as any).deviceId === payload.targetSocketId) {
+          actualTargetSocketId = clientId;
+          break;
+        }
+      }
+
+      // Reenviar el trabajo solo al dispositivo seleccionado
+      const targetSockets = (this.server as any).adapter.rooms.get(actualTargetSocketId);
+      this.logger.log(`[PRINT DEBUG] Target sockets size: ${targetSockets ? targetSockets.size : 0} for mapped ID ${actualTargetSocketId}`);
+      if (!targetSockets || targetSockets.size === 0) {
+        this.logger.warn(`El servidor destino ${payload.targetSocketId} no está conectado.`);
+        this.server.emit(`print:ack:${payload.jobId}`, { jobId: payload.jobId, success: false, error: 'El dispositivo seleccionado no está conectado o cerró la app.' });
+        return { success: false, error: 'Dispositivo desconectado' };
+      }
+      this.server.to(actualTargetSocketId).emit(SocketEvent.PRINT_JOB, payload);
+      this.logger.log(`[PRINT DEBUG] Emitted PRINT_JOB to actual targetSocketId ${actualTargetSocketId}`);
+    } else {
+      // Reenviar el trabajo a todos los dispositivos en la sala de impresoras
+      const roomSockets = (this.server as any).adapter.rooms.get(room);
+      this.logger.log(`[PRINT DEBUG] Room ${room} sockets size: ${roomSockets ? roomSockets.size : 0}`);
+      if (!roomSockets || roomSockets.size === 0) {
+        this.logger.warn(`No hay servidores en la sala ${room}.`);
+        this.server.emit(`print:ack:${payload.jobId}`, { jobId: payload.jobId, success: false, error: 'No hay servidores de impresión conectados actualmente.' });
+        return { success: false, error: 'Sin servidores' };
+      }
+      this.server.to(room).emit(SocketEvent.PRINT_JOB, payload);
+      this.logger.log(`[PRINT DEBUG] Emitted PRINT_JOB to room ${room}`);
+    }
+    
+    return { success: true, jobId: payload.jobId };
+  }
+
+  @SubscribeMessage(SocketEvent.PRINT_DONE)
+  handlePrintDone(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() payload: PrintAckPayload,
+  ) {
+    this.logger.log(`Print done jobId=${payload.jobId} success=${payload.success}`);
+    // Notificar al solicitante original por evento dinámico
+    this.server.emit(`print:ack:${payload.jobId}`, payload);
+    return { success: true };
+  }
+
+  // ============================================================
+  // MÉTODOS HELPER PARA EMITIR DESDE SERVICIOS
+  // ============================================================
+
+  emitToRoom(room: string, event: string, data: any) {
+    this.server.to(room).emit(event, { ...data, timestamp: Date.now() });
+  }
+
+  emitToKitchen(event: string, data: any) {
+    this.emitToRoom(Room.KITCHEN, event, data);
+  }
+
+  emitToCaja(event: string, data: any) {
+    this.emitToRoom(Room.CAJA, event, data);
+  }
+
+  emitToAll(event: string, data: any) {
+    this.logger.log(`Broadcasting event ${event} to all clients in namespace`);
+    this.server.emit(event, { ...data, timestamp: Date.now() });
+  }
+
+  // ============================================================
+  // MÉTODOS PARA FUTUROS MÓDULOS
+  // ============================================================
+
+  emitToInventario(event: string, data: any) {
+    this.emitToRoom(Room.INVENTARIO, event, data);
+    // Para simplificar a clientes que no se unen al room
+    this.emitToAll(event, data);
+  }
+
+  emitToInsumos(event: string, data: any) {
+    this.emitToRoom(Room.INSUMOS, event, data);
+    this.emitToAll(event, data);
+  }
+
+  emitToProductos(event: string, data: any) {
+    this.emitToRoom(Room.PRODUCTOS, event, data);
+    this.emitToAll(event, data);
+  }
+
+  emitToCategorias(event: string, data: any) {
+    this.emitToRoom(Room.CATEGORIAS, event, data);
+    this.emitToAll(event, data);
+  }
+
+  emitToGastos(event: string, data: any) {
+    this.emitToRoom(Room.GASTOS, event, data);
+    this.emitToAll(event, data);
+  }
+
+  emitToVentas(event: string, data: any) {
+    this.logger.log(`Emitting to Ventas room and all clients: ${event}`);
+    this.emitToRoom(Room.VENTAS, event, data);
+    this.emitToAll(event, data);
+  }
+
+  emitNuevoDomicilio(domicilio: any) {
+    this.logger.log(`Emitting nuevoDomicilio: ${domicilio.orderIdWA || domicilio.IDdomicilio}`);
+    this.emitToRoom(Room.DOMICILIOS, SocketEvent.NUEVO_DOMICILIO, domicilio);
+    this.emitToRoom(Room.VENTAS, SocketEvent.NUEVO_DOMICILIO, domicilio);
+    this.emitToRoom(Room.CAJA, SocketEvent.NUEVO_DOMICILIO, domicilio);
+    this.emitToAll(SocketEvent.NUEVO_DOMICILIO, domicilio);
+  }
+
+  emitDomicilioActualizado(domicilio: any) {
+    this.logger.log(`Emitting domicilioActualizado: ${domicilio.orderIdWA || domicilio.IDdomicilio}`);
+    this.emitToRoom(Room.DOMICILIOS, SocketEvent.DOMICILIO_ACTUALIZADO, domicilio);
+    this.emitToRoom(Room.VENTAS, SocketEvent.DOMICILIO_ACTUALIZADO, domicilio);
+    this.emitToRoom(Room.CAJA, SocketEvent.DOMICILIO_ACTUALIZADO, domicilio);
+    this.emitToAll(SocketEvent.DOMICILIO_ACTUALIZADO, domicilio);
+  }
+
+  emitDomicilioTimeout(domicilio: any) {
+    this.logger.log(`Emitting domicilioTimeout: ${domicilio.orderIdWA || domicilio.IDdomicilio}`);
+    this.emitToRoom(Room.DOMICILIOS, SocketEvent.DOMICILIO_TIMEOUT, domicilio);
+    this.emitToRoom(Room.VENTAS, SocketEvent.DOMICILIO_TIMEOUT, domicilio);
+    this.emitToRoom(Room.CAJA, SocketEvent.DOMICILIO_TIMEOUT, domicilio);
+    this.emitToAll(SocketEvent.DOMICILIO_TIMEOUT, domicilio);
+  }
+
+  emitFidelidadActualizada(payload: any) {
+    this.logger.log(`Emitting fidelidad:actualizada for clienteId: ${payload.clienteId}`);
+    if (payload.cedula) {
+      this.server.to(`fidelidad_cedula_${payload.cedula}`).emit(SocketEvent.FIDELIDAD_ACTUALIZADA, payload);
+    }
+    if (payload.clienteId) {
+      this.server.to(`fidelidad_cliente_${payload.clienteId}`).emit(SocketEvent.FIDELIDAD_ACTUALIZADA, payload);
+    }
+    this.emitToAll(SocketEvent.FIDELIDAD_ACTUALIZADA, payload);
+  }
+
+  // ============================================================
+  // UTILIDADES
+  // ============================================================
+
+  getConnectedClientsCount(): number {
+    return this.connectedClients.size;
+  }
+
+  getClientsInRoom(room: string): string[] {
+    const roomClients = (this.server as any).adapter.rooms.get(room);
+    return roomClients ? [...roomClients] : [];
+  }
+
+  getRooms(): string[] {
+    const rooms = new Set<string>();
+    this.connectedClients.forEach((client) => {
+      client.rooms.forEach((room) => rooms.add(room));
+    });
+    return [...rooms];
+  }
+}

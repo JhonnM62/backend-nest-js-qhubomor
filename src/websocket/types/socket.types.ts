@@ -35,6 +35,8 @@ export enum SocketEvent {
   PRINT_ACK        = 'print:ack',
   GET_PRINT_SERVERS= 'print:get_servers',
   PRINT_SERVERS_UPDATE = 'print:servers_update',
+  // Fidelidad de Clientes (Web y POS)
+  FIDELIDAD_ACTUALIZADA = 'fidelidad:actualizada',
 }
 
 export enum Room {
