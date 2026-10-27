@@ -1,11 +1,15 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, Optional } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateClienteDto, UpdateClienteDto, ClienteQueryDto } from './dto/cliente.dto';
+import { CreateClienteDto, UpdateClienteDto, ClienteQueryDto, ReclamarMisionDto, SincronizarUsuarioDto } from './dto/cliente.dto';
 import { Prisma } from '@prisma/client';
+import { AppGateway } from '../websocket/app.gateway';
 
 @Injectable()
 export class ClientesService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    @Optional() private appGateway?: AppGateway,
+  ) {}
 
   async create(createClienteDto: CreateClienteDto) {
     let finalId = createClienteDto.IDcliente;
@@ -238,5 +242,197 @@ export class ClientesService {
       where: { IDcliente: id },
       data: { isActive: false, fecha_y_hora_actualizacion: new Date() }
     });
+  }
+
+  async sincronizarUsuario(dto: SincronizarUsuarioDto) {
+    const rawEmail = (dto.email || '').trim().toLowerCase();
+    if (!rawEmail) {
+      throw new BadRequestException('El correo electrónico es requerido para sincronizar el cliente.');
+    }
+
+    // 1. Buscar si ya existe un cliente con este email en el ERP
+    let cliente = await this.prisma.clientes.findFirst({
+      where: {
+        email: { equals: rawEmail, mode: 'insensitive' },
+      },
+    });
+
+    if (cliente) {
+      return {
+        IDcliente: cliente.IDcliente,
+        nombre: cliente.nombre || dto.nombre || 'Cliente VIP',
+        email: cliente.email,
+        contador: cliente.contador || 0,
+        comprasTotales: parseInt(cliente.compras || '0', 10) || 0,
+        isNew: false,
+      };
+    }
+
+    // 2. Si no existe, generar código aleatorio de máximo 6 dígitos que no se repita
+    let finalId = Math.floor(10000 + Math.random() * 900000); // 10000 a 999999 (máx 6 dígitos)
+    let isUnique = false;
+    while (!isUnique) {
+      const exists = await this.prisma.clientes.findUnique({
+        where: { IDcliente: finalId },
+      });
+      if (!exists) {
+        isUnique = true;
+      } else {
+        finalId = Math.floor(10000 + Math.random() * 900000);
+      }
+    }
+
+    // 3. Registrar el cliente directamente en el ERP
+    const nuevo = await this.prisma.clientes.create({
+      data: {
+        IDcliente: finalId,
+        nombre: dto.nombre?.trim() || 'Cliente VIP',
+        email: rawEmail,
+        contador: 0,
+        compras: '0',
+        isActive: true,
+        observaciones: 'Cliente registrado desde la web/Google.',
+        fecha_y_hora_creacion: new Date(),
+      },
+    });
+
+    return {
+      IDcliente: nuevo.IDcliente,
+      nombre: nuevo.nombre,
+      email: nuevo.email,
+      contador: 0,
+      comprasTotales: 0,
+      isNew: true,
+    };
+  }
+
+  async reclamarMision(dto: ReclamarMisionDto) {
+    const rawCedula = (dto.cedula || '').toString().trim().replace(/^#/, '');
+    if (!rawCedula && !dto.email) {
+      throw new BadRequestException('El código de cliente o correo es obligatorio.');
+    }
+
+    const { tipoMision, nombre, whatsapp } = dto;
+    if (!['GOOGLE_REVIEW', 'REDES_SOCIALES'].includes(tipoMision)) {
+      throw new BadRequestException('Tipo de misión no válido.');
+    }
+
+    const tagMision = `[MISION_${tipoMision}_OK]`;
+
+    // Buscar si el cliente ya existe por código (IDcliente), cédula o email
+    const orConditions: Prisma.ClientesWhereInput[] = [];
+    if (!isNaN(Number(rawCedula))) {
+      orConditions.push({ IDcliente: Number(rawCedula) });
+      orConditions.push({ cedula: BigInt(rawCedula) });
+    }
+    if (dto.email) {
+      orConditions.push({ email: { equals: dto.email.trim().toLowerCase(), mode: 'insensitive' } });
+    }
+    if (orConditions.length === 0) {
+      orConditions.push({ IDcliente: -1 });
+    }
+
+    let cliente = await this.prisma.clientes.findFirst({
+      where: { OR: orConditions },
+    });
+
+    // Validar si ya reclamó este sello
+    if (cliente && cliente.observaciones && cliente.observaciones.includes(tagMision)) {
+      throw new BadRequestException(
+        tipoMision === 'GOOGLE_REVIEW'
+          ? 'Ya has acreditado previamente el sello de la misión de Google Maps.'
+          : 'Ya has acreditado previamente el sello de la misión de Redes Sociales.'
+      );
+    }
+
+    let finalCliente: any;
+
+    if (cliente) {
+      // Cliente existente: sumar 1 sello (contador) y 1 a compras
+      const contadorActual = cliente.contador || 0;
+      let nuevoContador = contadorActual + 1;
+      if (nuevoContador > 10) {
+        nuevoContador = 10;
+      }
+      const comprasActuales = parseInt(cliente.compras || '0', 10) || 0;
+      const nuevasCompras = comprasActuales + 1;
+
+      const nota = `${cliente.observaciones ? cliente.observaciones + ' ' : ''}${tagMision}`;
+
+      finalCliente = await this.prisma.clientes.update({
+        where: { IDcliente: cliente.IDcliente },
+        data: {
+          contador: nuevoContador,
+          compras: nuevasCompras.toString(),
+          observaciones: nota,
+          whatsapp: cliente.whatsapp || (whatsapp ? whatsapp.trim() : null),
+          nombre: cliente.nombre || (nombre ? nombre.trim() : 'Cliente VIP'),
+          fecha_y_hora_actualizacion: new Date(),
+        },
+      });
+    } else {
+      // Cliente nuevo: registrar en POS con ID único de 4 a 5 dígitos
+      let finalId = Math.floor(1000 + Math.random() * 90000);
+      let isUnique = false;
+      while (!isUnique) {
+        const exists = await this.prisma.clientes.findUnique({
+          where: { IDcliente: finalId },
+        });
+        if (!exists) {
+          isUnique = true;
+        } else {
+          finalId = Math.floor(1000 + Math.random() * 90000);
+        }
+      }
+
+      finalCliente = await this.prisma.clientes.create({
+        data: {
+          IDcliente: finalId,
+          nombre: nombre && nombre.trim() ? nombre.trim() : 'Cliente Frecuente',
+          cedula: !isNaN(Number(rawCedula)) ? BigInt(rawCedula) : null,
+          whatsapp: whatsapp ? whatsapp.trim() : null,
+          contador: 1,
+          compras: '1',
+          observaciones: `${tagMision} Registrado desde Misiones Web.`,
+          isActive: true,
+          fecha_y_hora_creacion: new Date(),
+        },
+      });
+    }
+
+    // Emitir en vivo por WebSocket para que la tarjeta se actualice al instante
+    if (this.appGateway) {
+      try {
+        this.appGateway.emitFidelidadActualizada({
+          clienteId: finalCliente.IDcliente,
+          cedula: finalCliente.cedula ? finalCliente.cedula.toString() : null,
+          nombre: finalCliente.nombre,
+          contador: finalCliente.contador || 1,
+          comprasTotales: parseInt(finalCliente.compras || '1', 10),
+          hito5: (finalCliente.contador || 1) >= 5,
+          hito10: (finalCliente.contador || 1) >= 10,
+          granizadoDisponible: (finalCliente.contador || 1) >= 10,
+          descuentoIntermedioDisponible: (finalCliente.contador || 1) >= 5,
+          timestamp: new Date().toISOString(),
+        });
+      } catch (e) {
+        // Ignorar fallo de websocket
+      }
+    }
+
+    return {
+      success: true,
+      cliente: {
+        IDcliente: finalCliente.IDcliente,
+        nombre: finalCliente.nombre,
+        cedula: finalCliente.cedula ? finalCliente.cedula.toString() : null,
+        contador: finalCliente.contador,
+        comprasTotales: parseInt(finalCliente.compras || '1', 10),
+      },
+      mensaje:
+        tipoMision === 'GOOGLE_REVIEW'
+          ? '¡Felicidades! Se ha acreditado +1 sello a tu tarjeta por tu reseña en Google Maps.'
+          : '¡Felicidades! Se ha acreditado +1 sello a tu tarjeta por seguirnos en todas las redes sociales.',
+    };
   }
 }

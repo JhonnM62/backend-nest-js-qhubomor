@@ -1,5 +1,5 @@
-import { IsOptional, IsString, IsNumber } from 'class-validator';
-import { ApiPropertyOptional } from '@nestjs/swagger';
+import { IsOptional, IsString, IsNumber, IsNotEmpty, IsIn } from 'class-validator';
+import { ApiPropertyOptional, ApiProperty } from '@nestjs/swagger';
 import { PaginationDto } from '../../common/dto/pagination.dto';
 
 export class CreateClienteDto {
@@ -75,4 +75,43 @@ export class ClienteQueryDto extends PaginationDto {
   @IsOptional()
   @IsString()
   buscar?: string;
+}
+
+export class ReclamarMisionDto {
+  @ApiProperty({ description: 'Código de cliente (máx 6 dígitos), Cédula o identificador' })
+  @IsNotEmpty()
+  @IsString()
+  cedula: string;
+
+  @ApiPropertyOptional({ description: 'Email del cliente registrado' })
+  @IsOptional()
+  @IsString()
+  email?: string;
+
+  @ApiPropertyOptional({ description: 'Nombre completo del cliente' })
+  @IsOptional()
+  @IsString()
+  nombre?: string;
+
+  @ApiPropertyOptional({ description: 'Número de WhatsApp' })
+  @IsOptional()
+  @IsString()
+  whatsapp?: string;
+
+  @ApiProperty({ description: 'Tipo de misión completada', enum: ['GOOGLE_REVIEW', 'REDES_SOCIALES'] })
+  @IsNotEmpty()
+  @IsIn(['GOOGLE_REVIEW', 'REDES_SOCIALES'])
+  tipoMision: 'GOOGLE_REVIEW' | 'REDES_SOCIALES';
+}
+
+export class SincronizarUsuarioDto {
+  @ApiProperty({ description: 'Email del usuario autenticado' })
+  @IsNotEmpty()
+  @IsString()
+  email: string;
+
+  @ApiPropertyOptional({ description: 'Nombre del usuario' })
+  @IsOptional()
+  @IsString()
+  nombre?: string;
 }
