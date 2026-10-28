@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { EstadisticasService } from '../estadisticas/estadisticas.service';
 import { tool } from '@langchain/core/tools';
@@ -9,6 +9,7 @@ import { z } from 'zod';
 export class AgentToolsService {
   constructor(
     private prisma: PrismaService,
+    @Inject(forwardRef(() => EstadisticasService))
     private estadisticas: EstadisticasService
   ) {}
 

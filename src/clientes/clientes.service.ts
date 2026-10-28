@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException, Optional } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, Optional, Inject, forwardRef } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateClienteDto, UpdateClienteDto, ClienteQueryDto, ReclamarMisionDto, SincronizarUsuarioDto } from './dto/cliente.dto';
 import { Prisma } from '@prisma/client';
@@ -11,7 +11,7 @@ export class ClientesService {
   constructor(
     private prisma: PrismaService,
     @Optional() private appGateway?: AppGateway,
-    @Optional() private aiService?: AiService,
+    @Optional() @Inject(forwardRef(() => AiService)) private aiService?: AiService,
   ) {}
 
   async create(createClienteDto: CreateClienteDto) {

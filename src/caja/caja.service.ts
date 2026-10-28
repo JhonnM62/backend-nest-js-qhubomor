@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, Inject, forwardRef } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateAperturaCierreCajaDto, UpdateCierreCajaDto, CajaQueryDto } from './dto/caja.dto';
 import { Prisma } from '@prisma/client';
@@ -13,6 +13,7 @@ export class CajaService {
     private prisma: PrismaService,
     private appGateway: AppGateway,
     private notificationsService: NotificationsService,
+    @Inject(forwardRef(() => AiService))
     private aiService: AiService,
   ) { }
 

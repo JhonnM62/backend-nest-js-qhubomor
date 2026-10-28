@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { AiController } from './ai.controller';
 import { AiService } from './ai.service';
 import { ConfiguracionModule } from '../configuracion/configuracion.module';
@@ -9,7 +9,7 @@ import { AgentService } from './agent.service';
 import { AgentController } from './agent.controller';
 
 @Module({
-  imports: [ConfiguracionModule, PrismaModule, EstadisticasModule],
+  imports: [ConfiguracionModule, PrismaModule, forwardRef(() => EstadisticasModule)],
   controllers: [AiController, AgentController],
   providers: [AiService, AgentToolsService, AgentService],
   exports: [AiService, AgentService],
