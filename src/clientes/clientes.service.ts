@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException, Optional, Inject, forwardRef } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateClienteDto, UpdateClienteDto, ClienteQueryDto, ReclamarMisionDto, SincronizarUsuarioDto } from './dto/cliente.dto';
+import { CreateClienteDto, UpdateClienteDto, ClienteQueryDto, ReclamarMisionDto, SincronizarUsuarioDto, EliminarCuentaFidelidadDto } from './dto/cliente.dto';
 import { Prisma } from '@prisma/client';
 import { AppGateway } from '../websocket/app.gateway';
 import { AiService } from '../ai/ai.service';
@@ -112,14 +112,13 @@ export class ClientesService {
       OR: [
         { whatsapp: { contains: clean } },
         { nombre: { contains: clean, mode: 'insensitive' } },
+        { email: { equals: clean, mode: 'insensitive' } },
       ],
     };
 
     if (!isNaN(Number(clean))) {
       where.OR!.push({ cedula: { equals: BigInt(clean) } });
       where.OR!.push({ IDcliente: { equals: Number(clean) } });
-    } else {
-      where.OR!.push({ nombre: { contains: clean, mode: 'insensitive' } });
     }
 
     const cliente = await this.prisma.clientes.findFirst({
@@ -162,6 +161,9 @@ export class ClientesService {
 
     const contador = cliente.contador ?? 0;
     const comprasTotales = Math.max(parseInt(cliente.compras || '0', 10) || 0, contador, ventas.length);
+    const obs = cliente.observaciones || '';
+    const misionGoogleCompletada = obs.includes('[MISION_GOOGLE_REVIEW_OK]');
+    const misionRedesCompletada = obs.includes('[MISION_REDES_SOCIALES_OK]');
 
     return {
       IDcliente: cliente.IDcliente,
@@ -174,6 +176,8 @@ export class ClientesService {
       hito10: contador >= 10,
       granizadoGratis: contador >= 10,
       sellosRestantesParaGranizado: Math.max(0, 10 - contador),
+      misionGoogleCompletada,
+      misionRedesCompletada,
       ultimasVentas: ventas.map((v) => ({
         IDventas: v.IDventas,
         pedido: v.pedido || 'Pedido',
@@ -261,12 +265,15 @@ export class ClientesService {
     });
 
     if (cliente) {
+      const obs = cliente.observaciones || '';
       return {
         IDcliente: cliente.IDcliente,
         nombre: cliente.nombre || dto.nombre || 'Cliente VIP',
         email: cliente.email,
         contador: cliente.contador || 0,
         comprasTotales: parseInt(cliente.compras || '0', 10) || 0,
+        misionGoogleCompletada: obs.includes('[MISION_GOOGLE_REVIEW_OK]'),
+        misionRedesCompletada: obs.includes('[MISION_REDES_SOCIALES_OK]'),
         isNew: false,
       };
     }
@@ -305,7 +312,53 @@ export class ClientesService {
       email: nuevo.email,
       contador: 0,
       comprasTotales: 0,
+      misionGoogleCompletada: false,
+      misionRedesCompletada: false,
       isNew: true,
+    };
+  }
+
+  async eliminarCuentaFidelidad(dto: EliminarCuentaFidelidadDto) {
+    const rawEmail = (dto.email || '').trim().toLowerCase();
+    const codigo = dto.codigoCliente;
+
+    if (!rawEmail && !codigo) {
+      throw new BadRequestException('El correo o código del cliente es requerido.');
+    }
+
+    const orConditions: Prisma.ClientesWhereInput[] = [];
+    if (rawEmail) {
+      orConditions.push({ email: { equals: rawEmail, mode: 'insensitive' } });
+    }
+    if (codigo) {
+      orConditions.push({ IDcliente: Number(codigo) });
+    }
+
+    const cliente = await this.prisma.clientes.findFirst({
+      where: { OR: orConditions },
+    });
+
+    if (!cliente) {
+      return {
+        success: true,
+        message: 'No se encontró registro del cliente en el ERP o ya había sido eliminado.',
+      };
+    }
+
+    // 1. Desvincular todas las ventas del cliente para PRESERVARLAS (no borrarlas)
+    await this.prisma.ventas.updateMany({
+      where: { clienteId: cliente.IDcliente },
+      data: { clienteId: null },
+    });
+
+    // 2. Eliminar el registro del cliente y todos sus sellos en el ERP
+    await this.prisma.clientes.delete({
+      where: { IDcliente: cliente.IDcliente },
+    });
+
+    return {
+      success: true,
+      message: 'Cuenta y sellos eliminados exitosamente del ERP. Las ventas históricas fueron preservadas.',
     };
   }
 
@@ -430,6 +483,7 @@ export class ClientesService {
           contador: nuevoContador,
           compras: nuevasCompras.toString(),
           observaciones: nota,
+          email: cliente.email || (dto.email ? dto.email.trim().toLowerCase() : null),
           whatsapp: cliente.whatsapp || (whatsapp ? whatsapp.trim() : null),
           nombre: cliente.nombre || (nombre ? nombre.trim() : 'Cliente VIP'),
           fecha_y_hora_actualizacion: new Date(),
@@ -455,6 +509,7 @@ export class ClientesService {
           IDcliente: finalId,
           nombre: nombre && nombre.trim() ? nombre.trim() : 'Cliente Frecuente',
           cedula: !isNaN(Number(rawCedula)) ? BigInt(rawCedula) : null,
+          email: dto.email ? dto.email.trim().toLowerCase() : null,
           whatsapp: whatsapp ? whatsapp.trim() : null,
           contador: 1,
           compras: '1',

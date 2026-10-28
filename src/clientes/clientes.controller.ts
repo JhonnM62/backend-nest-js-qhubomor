@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { ClientesService } from './clientes.service';
-import { CreateClienteDto, UpdateClienteDto, ClienteQueryDto, ReclamarMisionDto, SincronizarUsuarioDto } from './dto/cliente.dto';
+import { CreateClienteDto, UpdateClienteDto, ClienteQueryDto, ReclamarMisionDto, SincronizarUsuarioDto, EliminarCuentaFidelidadDto } from './dto/cliente.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { Public } from '../common/decorators/public.decorator';
 
@@ -53,6 +53,13 @@ export class ClientesController {
   @ApiOperation({ summary: 'Obtener o generar código único de cliente de máx 6 dígitos al registrarse' })
   sincronizarUsuario(@Body() dto: SincronizarUsuarioDto) {
     return this.clientesService.sincronizarUsuario(dto);
+  }
+
+  @Public()
+  @Post('fidelidad/eliminar-cuenta')
+  @ApiOperation({ summary: 'Eliminar cliente y sus sellos de fidelidad preservando las ventas' })
+  eliminarCuentaFidelidad(@Body() dto: EliminarCuentaFidelidadDto) {
+    return this.clientesService.eliminarCuentaFidelidad(dto);
   }
 
   @Get(':id')

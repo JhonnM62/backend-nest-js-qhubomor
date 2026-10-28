@@ -135,3 +135,15 @@ export class SincronizarUsuarioDto {
   @IsString()
   nombre?: string;
 }
+
+export class EliminarCuentaFidelidadDto {
+  @ApiProperty({ description: 'Email del usuario a eliminar' })
+  @IsNotEmpty()
+  @IsString()
+  email: string;
+
+  @ApiPropertyOptional({ description: 'Código del cliente si se conoce' })
+  @IsOptional()
+  @IsNumber()
+  codigoCliente?: number;
+}
