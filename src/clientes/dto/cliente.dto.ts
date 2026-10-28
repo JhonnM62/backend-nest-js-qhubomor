@@ -1,4 +1,5 @@
-import { IsOptional, IsString, IsNumber, IsNotEmpty, IsIn } from 'class-validator';
+import { IsOptional, IsString, IsNumber, IsNotEmpty, IsIn, IsArray, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
 import { ApiPropertyOptional, ApiProperty } from '@nestjs/swagger';
 import { PaginationDto } from '../../common/dto/pagination.dto';
 
@@ -77,6 +78,18 @@ export class ClienteQueryDto extends PaginationDto {
   buscar?: string;
 }
 
+export class CapturaEvidenciaDto {
+  @ApiProperty({ description: 'Plataforma de la captura', enum: ['INSTAGRAM', 'TIKTOK', 'FACEBOOK', 'GOOGLE_MAPS'] })
+  @IsNotEmpty()
+  @IsIn(['INSTAGRAM', 'TIKTOK', 'FACEBOOK', 'GOOGLE_MAPS'])
+  plataforma: 'INSTAGRAM' | 'TIKTOK' | 'FACEBOOK' | 'GOOGLE_MAPS';
+
+  @ApiProperty({ description: 'Contenido de la imagen en base64' })
+  @IsNotEmpty()
+  @IsString()
+  base64: string;
+}
+
 export class ReclamarMisionDto {
   @ApiProperty({ description: 'Código de cliente (máx 6 dígitos), Cédula o identificador' })
   @IsNotEmpty()
@@ -102,6 +115,13 @@ export class ReclamarMisionDto {
   @IsNotEmpty()
   @IsIn(['GOOGLE_REVIEW', 'REDES_SOCIALES'])
   tipoMision: 'GOOGLE_REVIEW' | 'REDES_SOCIALES';
+
+  @ApiPropertyOptional({ description: 'Capturas de evidencia para validación por IA', type: [CapturaEvidenciaDto] })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CapturaEvidenciaDto)
+  capturas?: CapturaEvidenciaDto[];
 }
 
 export class SincronizarUsuarioDto {

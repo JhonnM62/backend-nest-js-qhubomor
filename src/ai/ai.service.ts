@@ -341,6 +341,125 @@ Rules:
     }
   }
 
+  /**
+   * Valida rigurosamente con Gemini Vision si una captura de pantalla demuestra
+   * que el cliente está siguiendo a Q'hubo Mor o calificó con 5 estrellas en Google Maps.
+   */
+  async validarEvidenciaMision(
+    base64Data: string,
+    tipoMision: 'GOOGLE_REVIEW' | 'REDES_SOCIALES',
+    plataforma?: string,
+  ): Promise<{
+    esValida: boolean;
+    motivo: string;
+    plataformaDetectada: string;
+    cuentaDetectada: string;
+    estadoSeguimiento: string;
+    horaRelojVisible?: string | null;
+    bateriaVisible?: string | null;
+  }> {
+    const configIA = await this.configService.getConfiguracionIA();
+
+    if (!configIA.apiKey) {
+      this.logger.warn('No hay API Key de Gemini configurada. Se aplica aprobación fallback.');
+      return {
+        esValida: true,
+        motivo: 'Aprobación por fallback (módulo IA sin API Key activa).',
+        plataformaDetectada: plataforma || 'DESCONOCIDA',
+        cuentaDetectada: '@q.hubo_mor',
+        estadoSeguimiento: 'SIGUIENDO',
+      };
+    }
+
+    try {
+      const ai = new GoogleGenAI({ apiKey: configIA.apiKey });
+
+      // Limpiar prefijo data:image/...;base64, si viene incluido
+      let cleanBase64 = base64Data;
+      let mimeType = 'image/jpeg';
+      if (base64Data.includes(';base64,')) {
+        const parts = base64Data.split(';base64,');
+        mimeType = parts[0].replace('data:', '') || 'image/jpeg';
+        cleanBase64 = parts[1];
+      }
+
+      const systemInstruction = `Eres un auditor antifraude para el restaurante Q'hubo Mor. Tu labor es analizar rigurosamente una captura de pantalla para validar si el cliente realmente cumplió la misión solicitada.
+
+Tipo de misión: ${tipoMision}
+Plataforma requerida: ${plataforma || 'Cualquiera (Instagram, TikTok, Facebook, Google Maps)'}
+
+Cuentas oficiales de Q'hubo Mor:
+- Instagram: @q.hubo_mor o q.hubo_mor o Q'hubo Mor
+- TikTok: @q.hubo_mor o Q'hubo Mor
+- Facebook: Q'hubo Mor Oficial o Q'hubo Mor
+- Google Maps: Restaurante Q'hubo Mor
+
+REGLAS ESTRICTAS DE VALIDACIÓN:
+1. RECHAZAR de inmediato si NO es una captura de pantalla real de la app (rechazar memes, fotos de comida, paredes, selfies, fotos borrosas, pantallas en negro o imágenes irrelevantes).
+2. Para REDES SOCIALES (Instagram, TikTok, Facebook):
+   - Debe apreciarse la cuenta oficial de Q'hubo Mor.
+   - REQUISITO CRÍTICO: Debe confirmarse que el usuario YA ESTÁ SIGUIENDO la cuenta.
+     * En Instagram/TikTok/Facebook, cuando el usuario SIGUE la cuenta, el botón dice "Siguiendo" / "Following" / "Amigos" o tiene el icono con check '✓'.
+     * Si el botón dice "Seguir" o "Follow", significa que NO está siguiendo la cuenta y DEBE SER RECHAZADA.
+3. Para GOOGLE MAPS:
+   - Debe ser la pantalla de reseña para el restaurante Q'hubo Mor.
+   - Debe mostrar calificación visible de 5 estrellas.
+   - La reseña o calificación debe estar publicada / enviada.
+4. METADATOS VISUALES:
+   - Extrae la hora exacta visible en el reloj de la barra de estado superior del celular (ej: "10:45 AM", "18:50"). Si no es visible, retorna null.
+   - Extrae el porcentaje de batería visible (ej: "85%"). Si no es visible, retorna null.`;
+
+      const responseSchema: Schema = {
+        type: Type.OBJECT,
+        properties: {
+          esValida: { type: Type.BOOLEAN, description: 'True solo si cumple todos los requisitos' },
+          motivo: { type: Type.STRING, description: 'Explicación clara en español' },
+          plataformaDetectada: { type: Type.STRING, description: 'INSTAGRAM, TIKTOK, FACEBOOK, GOOGLE_MAPS o DESCONOCIDA' },
+          cuentaDetectada: { type: Type.STRING, description: 'Cuenta o nombre que se lee en la captura' },
+          estadoSeguimiento: { type: Type.STRING, description: 'SIGUIENDO, NO_SIGUE, RESEÑA_5_ESTRELLAS, NO_CALIFICA o DESCONOCIDO' },
+          horaRelojVisible: { type: Type.STRING, nullable: true, description: 'Hora en barra superior o null' },
+          bateriaVisible: { type: Type.STRING, nullable: true, description: 'Batería en barra superior o null' },
+        },
+        required: ['esValida', 'motivo', 'plataformaDetectada', 'estadoSeguimiento'],
+      };
+
+      const response = await ai.models.generateContent({
+        model: configIA.modeloDefecto || 'gemini-2.5-flash',
+        contents: [
+          {
+            role: 'user',
+            parts: [
+              { text: `Audita esta captura de pantalla para la misión ${tipoMision} en ${plataforma || 'redes'}.` },
+              {
+                inlineData: {
+                  data: cleanBase64,
+                  mimeType: mimeType,
+                },
+              },
+            ],
+          },
+        ],
+        config: {
+          systemInstruction: systemInstruction,
+          temperature: 0.1,
+          responseMimeType: 'application/json',
+          responseSchema: responseSchema,
+        },
+      });
+
+      if (!response.text) {
+        throw new BadRequestException('La IA no pudo procesar la captura de pantalla.');
+      }
+
+      const result = this.repairAndParseJSON(response.text);
+      return result;
+    } catch (error: any) {
+      this.logger.error(`Error validando evidencia de misión con IA: ${error.message}`);
+      if (error instanceof BadRequestException) throw error;
+      throw new BadRequestException(`No se pudo verificar la captura con IA: ${error.message}`);
+    }
+  }
+
   async extractDataFromText(text: string, context: string) {
     const configIA = await this.configService.getConfiguracionIA();
 

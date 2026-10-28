@@ -3,12 +3,15 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateClienteDto, UpdateClienteDto, ClienteQueryDto, ReclamarMisionDto, SincronizarUsuarioDto } from './dto/cliente.dto';
 import { Prisma } from '@prisma/client';
 import { AppGateway } from '../websocket/app.gateway';
+import { AiService } from '../ai/ai.service';
+import * as crypto from 'crypto';
 
 @Injectable()
 export class ClientesService {
   constructor(
     private prisma: PrismaService,
     @Optional() private appGateway?: AppGateway,
+    @Optional() private aiService?: AiService,
   ) {}
 
   async create(createClienteDto: CreateClienteDto) {
@@ -345,6 +348,68 @@ export class ClientesService {
       );
     }
 
+    // =========================================================================
+    // VALIDACIÓN ANTIFRAUDE E INTELIGENCIA ARTIFICIAL (GEMINI VISION)
+    // =========================================================================
+    const auditEvidenceTags: string[] = [];
+
+    if (dto.capturas && dto.capturas.length > 0) {
+      for (const cap of dto.capturas) {
+        if (!cap.base64 || cap.base64.length < 50) continue;
+
+        // 1. Huella digital criptográfica (SHA-256)
+        const cleanBase64 = cap.base64.replace(/^data:image\/\w+;base64,/, '');
+        const imageHash = crypto.createHash('sha256').update(cleanBase64).digest('hex').substring(0, 16);
+
+        // Validar si este hash ya fue utilizado en el sistema por cualquier cliente
+        const hashTag = `HASH:${imageHash}`;
+        const dupHash = await this.prisma.clientes.findFirst({
+          where: { observaciones: { contains: hashTag } },
+        });
+        if (dupHash) {
+          throw new BadRequestException('Esta captura de pantalla ya fue utilizada anteriormente para reclamar un sello.');
+        }
+
+        // 2. Validación con IA (Gemini Vision)
+        if (this.aiService) {
+          const veredicto = await this.aiService.validarEvidenciaMision(
+            cap.base64,
+            dto.tipoMision,
+            cap.plataforma,
+          );
+
+          if (!veredicto.esValida) {
+            throw new BadRequestException(veredicto.motivo || 'La captura no cumple los requisitos para acreditar el sello.');
+          }
+
+          // 3. Anti-duplicados por hora + batería visible en la captura
+          if (veredicto.horaRelojVisible && veredicto.bateriaVisible) {
+            const horaBatTag = `HORA_BAT:${veredicto.horaRelojVisible}_${veredicto.bateriaVisible}`;
+            const dupHora = await this.prisma.clientes.findFirst({
+              where: { observaciones: { contains: horaBatTag } },
+            });
+            if (dupHora && dupHora.IDcliente !== cliente?.IDcliente) {
+              throw new BadRequestException(
+                `Se detectó una captura con la misma hora visible (${veredicto.horaRelojVisible}) y batería (${veredicto.bateriaVisible}) ya registrada por otro usuario. Por favor sube una captura propia y reciente.`
+              );
+            }
+            auditEvidenceTags.push(horaBatTag);
+          }
+
+          auditEvidenceTags.push(hashTag);
+          if (veredicto.horaRelojVisible) {
+            auditEvidenceTags.push(`HORA:${veredicto.horaRelojVisible}`);
+          }
+        } else {
+          auditEvidenceTags.push(hashTag);
+        }
+      }
+    } else {
+      throw new BadRequestException('Debes adjuntar al menos una captura de pantalla válida como evidencia.');
+    }
+
+    const extraAudit = auditEvidenceTags.length > 0 ? ` ${auditEvidenceTags.join(' ')}` : '';
+
     let finalCliente: any;
 
     if (cliente) {
@@ -357,7 +422,7 @@ export class ClientesService {
       const comprasActuales = parseInt(cliente.compras || '0', 10) || 0;
       const nuevasCompras = comprasActuales + 1;
 
-      const nota = `${cliente.observaciones ? cliente.observaciones + ' ' : ''}${tagMision}`;
+      const nota = `${cliente.observaciones ? cliente.observaciones + ' ' : ''}${tagMision}${extraAudit}`;
 
       finalCliente = await this.prisma.clientes.update({
         where: { IDcliente: cliente.IDcliente },
@@ -393,7 +458,7 @@ export class ClientesService {
           whatsapp: whatsapp ? whatsapp.trim() : null,
           contador: 1,
           compras: '1',
-          observaciones: `${tagMision} Registrado desde Misiones Web.`,
+          observaciones: `${tagMision}${extraAudit} Registrado desde Misiones Web.`,
           isActive: true,
           fecha_y_hora_creacion: new Date(),
         },
