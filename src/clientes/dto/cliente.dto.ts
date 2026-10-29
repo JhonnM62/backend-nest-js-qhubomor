@@ -147,3 +147,15 @@ export class EliminarCuentaFidelidadDto {
   @IsNumber()
   codigoCliente?: number;
 }
+
+export class ActualizarCedulaWebDto {
+  @ApiProperty({ description: 'Código único (IDcliente) o email del cliente' })
+  @IsNotEmpty()
+  @IsString()
+  identificador: string;
+
+  @ApiProperty({ description: 'Número de cédula único para vincular' })
+  @IsNotEmpty()
+  @IsString()
+  cedula: string;
+}

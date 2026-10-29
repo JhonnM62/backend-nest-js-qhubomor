@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException, Optional, Inject, forwardRef } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateClienteDto, UpdateClienteDto, ClienteQueryDto, ReclamarMisionDto, SincronizarUsuarioDto, EliminarCuentaFidelidadDto } from './dto/cliente.dto';
+import { CreateClienteDto, UpdateClienteDto, ClienteQueryDto, ReclamarMisionDto, SincronizarUsuarioDto, EliminarCuentaFidelidadDto, ActualizarCedulaWebDto } from './dto/cliente.dto';
 import { Prisma } from '@prisma/client';
 import { AppGateway } from '../websocket/app.gateway';
 import { AiService } from '../ai/ai.service';
@@ -40,6 +40,20 @@ export class ClientesService {
     }
 
     const { cedula, ...rest } = createClienteDto;
+
+    if (cedula) {
+      const existingCedula = await this.prisma.clientes.findFirst({
+        where: {
+          cedula: BigInt(cedula),
+          isActive: true,
+        },
+      });
+      if (existingCedula) {
+        throw new BadRequestException(
+          `El número de cédula ${cedula} ya está registrado para el cliente "${existingCedula.nombre || existingCedula.IDcliente}".`
+        );
+      }
+    }
 
     return this.prisma.clientes.create({
       data: {
@@ -164,11 +178,13 @@ export class ClientesService {
     const obs = cliente.observaciones || '';
     const misionGoogleCompletada = obs.includes('[MISION_GOOGLE_REVIEW_OK]');
     const misionRedesCompletada = obs.includes('[MISION_REDES_SOCIALES_OK]');
+    const cedulaBloqueada = obs.includes('[CEDULA_VINCULADA_WEB]');
 
     return {
       IDcliente: cliente.IDcliente,
       nombre: cliente.nombre || 'Cliente VIP',
       cedula: cliente.cedula ? cliente.cedula.toString() : null,
+      cedulaBloqueada,
       whatsapp: cliente.whatsapp || null,
       contador,
       comprasTotales,
@@ -221,6 +237,21 @@ export class ClientesService {
 
     const { cedula, ...rest } = updateClienteDto;
 
+    if (cedula) {
+      const existingCedula = await this.prisma.clientes.findFirst({
+        where: {
+          cedula: BigInt(cedula),
+          IDcliente: { not: id },
+          isActive: true,
+        },
+      });
+      if (existingCedula) {
+        throw new BadRequestException(
+          `El número de cédula ${cedula} ya está registrado para otro cliente ("${existingCedula.nombre || existingCedula.IDcliente}").`
+        );
+      }
+    }
+
     const updated = await this.prisma.clientes.update({
       where: { IDcliente: id },
       data: {
@@ -229,6 +260,19 @@ export class ClientesService {
         fecha_y_hora_actualizacion: new Date(),
       },
     });
+
+    if (this.appGateway) {
+      try {
+        this.appGateway.server.emit('clienteActualizado', {
+          IDcliente: updated.IDcliente,
+          nombre: updated.nombre,
+          cedula: updated.cedula ? updated.cedula.toString() : null,
+        });
+        this.appGateway.server.emit('ordenActualizada');
+      } catch (e) {
+        console.warn('Aviso emitiendo socket al actualizar cliente:', e);
+      }
+    }
 
     return {
       ...updated,
@@ -553,6 +597,105 @@ export class ClientesService {
         tipoMision === 'GOOGLE_REVIEW'
           ? '¡Felicidades! Se ha acreditado +1 sello a tu tarjeta por tu reseña en Google Maps.'
           : '¡Felicidades! Se ha acreditado +1 sello a tu tarjeta por seguirnos en todas las redes sociales.',
+    };
+  }
+
+  async actualizarCedulaWeb(dto: ActualizarCedulaWebDto) {
+    const rawId = (dto.identificador || '').trim().replace(/^#/, '');
+    const cleanCedula = (dto.cedula || '').toString().trim().replace(/\D/g, '');
+
+    if (!rawId) {
+      throw new BadRequestException('El identificador del cliente es requerido.');
+    }
+
+    if (!cleanCedula || cleanCedula.length < 5 || cleanCedula.length > 15) {
+      throw new BadRequestException('El número de cédula debe ser válido (entre 5 y 15 dígitos numéricos).');
+    }
+
+    // 1. Buscar al cliente por IDcliente o Email
+    const orConditions: Prisma.ClientesWhereInput[] = [];
+    if (!isNaN(Number(rawId))) {
+      orConditions.push({ IDcliente: Number(rawId) });
+    }
+    orConditions.push({ email: { equals: rawId, mode: 'insensitive' } });
+
+    const cliente = await this.prisma.clientes.findFirst({
+      where: {
+        OR: orConditions,
+        isActive: true,
+      },
+    });
+
+    if (!cliente) {
+      throw new NotFoundException('Cliente no encontrado con el identificador proporcionado.');
+    }
+
+    // 2. Regla: Validar si la cédula ya fue vinculada previamente desde la web (solo 1 vez)
+    const obs = cliente.observaciones || '';
+    if (obs.includes('[CEDULA_VINCULADA_WEB]')) {
+      throw new BadRequestException(
+        'Tu número de cédula ya fue registrado anteriormente y no se puede modificar nuevamente desde la web. Si requieres actualizarlo, por favor solicítalo en la caja del restaurante.'
+      );
+    }
+
+    // 3. Regla: Validar que no existan otros números de cédula iguales
+    const cedulaBigInt = BigInt(cleanCedula);
+    const clienteExistente = await this.prisma.clientes.findFirst({
+      where: {
+        cedula: cedulaBigInt,
+        IDcliente: { not: cliente.IDcliente },
+        isActive: true,
+      },
+    });
+
+    if (clienteExistente) {
+      throw new BadRequestException(
+        `El número de cédula ${cleanCedula} ya se encuentra registrado con otro usuario. Si crees que se trata de un error, por favor consúltanos en el restaurante.`
+      );
+    }
+
+    // 4. Actualizar cédula y marcar etiqueta de bloqueo web
+    const nuevaObs = `${obs} [CEDULA_VINCULADA_WEB]`.trim();
+    const updated = await this.prisma.clientes.update({
+      where: { IDcliente: cliente.IDcliente },
+      data: {
+        cedula: cedulaBigInt,
+        observaciones: nuevaObs,
+        fecha_y_hora_actualizacion: new Date(),
+      },
+    });
+
+    // 5. Emitir evento Socket para refresco en tiempo real
+    if (this.appGateway) {
+      try {
+        this.appGateway.server.emit('clienteActualizado', {
+          IDcliente: updated.IDcliente,
+          nombre: updated.nombre,
+          cedula: cleanCedula,
+        });
+        this.appGateway.emitFidelidadActualizada({
+          clienteId: updated.IDcliente,
+          cedula: cleanCedula,
+          nombre: updated.nombre,
+          contador: updated.contador || 0,
+          comprasTotales: parseInt(updated.compras || '0', 10),
+          hito5: (updated.contador || 0) >= 5,
+          hito10: (updated.contador || 0) >= 10,
+          granizadoDisponible: (updated.contador || 0) >= 10,
+          descuentoIntermedioDisponible: (updated.contador || 0) >= 5,
+          timestamp: new Date().toISOString(),
+        });
+      } catch (e) {
+        console.warn('Aviso emitiendo socket al actualizar cedula:', e);
+      }
+    }
+
+    return {
+      success: true,
+      message: 'Cédula vinculada exitosamente a tu tarjeta de fidelidad.',
+      IDcliente: updated.IDcliente,
+      cedula: cleanCedula,
+      cedulaBloqueada: true,
     };
   }
 }

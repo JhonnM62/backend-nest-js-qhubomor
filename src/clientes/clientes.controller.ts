@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { ClientesService } from './clientes.service';
-import { CreateClienteDto, UpdateClienteDto, ClienteQueryDto, ReclamarMisionDto, SincronizarUsuarioDto, EliminarCuentaFidelidadDto } from './dto/cliente.dto';
+import { CreateClienteDto, UpdateClienteDto, ClienteQueryDto, ReclamarMisionDto, SincronizarUsuarioDto, EliminarCuentaFidelidadDto, ActualizarCedulaWebDto } from './dto/cliente.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { Public } from '../common/decorators/public.decorator';
 
@@ -60,6 +60,13 @@ export class ClientesController {
   @ApiOperation({ summary: 'Eliminar cliente y sus sellos de fidelidad preservando las ventas' })
   eliminarCuentaFidelidad(@Body() dto: EliminarCuentaFidelidadDto) {
     return this.clientesService.eliminarCuentaFidelidad(dto);
+  }
+
+  @Public()
+  @Post('fidelidad/actualizar-cedula')
+  @ApiOperation({ summary: 'Vincular o actualizar número de cédula del cliente (editable solo una vez desde la web)' })
+  actualizarCedulaWeb(@Body() dto: ActualizarCedulaWebDto) {
+    return this.clientesService.actualizarCedulaWeb(dto);
   }
 
   @Get(':id')
