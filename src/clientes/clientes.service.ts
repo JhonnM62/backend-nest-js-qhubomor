@@ -1,9 +1,10 @@
 import { Injectable, NotFoundException, BadRequestException, Optional, Inject, forwardRef } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateClienteDto, UpdateClienteDto, ClienteQueryDto, ReclamarMisionDto, SincronizarUsuarioDto, EliminarCuentaFidelidadDto, ActualizarCedulaWebDto } from './dto/cliente.dto';
+import { CreateClienteDto, UpdateClienteDto, ClienteQueryDto, ReclamarMisionDto, SincronizarUsuarioDto, EliminarCuentaFidelidadDto, ActualizarCedulaWebDto, SincronizarCompraExternaDto } from './dto/cliente.dto';
 import { Prisma } from '@prisma/client';
 import { AppGateway } from '../websocket/app.gateway';
 import { AiService } from '../ai/ai.service';
+import { VentasService } from '../ventas/ventas.service';
 import * as crypto from 'crypto';
 
 @Injectable()
@@ -12,6 +13,7 @@ export class ClientesService {
     private prisma: PrismaService,
     @Optional() private appGateway?: AppGateway,
     @Optional() @Inject(forwardRef(() => AiService)) private aiService?: AiService,
+    @Optional() @Inject(forwardRef(() => VentasService)) private ventasService?: VentasService,
   ) {}
 
   async create(createClienteDto: CreateClienteDto) {
@@ -696,6 +698,111 @@ export class ClientesService {
       IDcliente: updated.IDcliente,
       cedula: cleanCedula,
       cedulaBloqueada: true,
+    };
+  }
+
+  async sincronizarCompraExterna(dto: SincronizarCompraExternaDto) {
+    const { ventaIdExterna, accion, cliente, platosValidos, origen } = dto;
+    if (!ventaIdExterna) {
+      throw new BadRequestException('ventaIdExterna es obligatorio');
+    }
+
+    const cleanCedula = cliente?.cedula ? String(cliente.cedula).replace(/\D/g, '') : '';
+    const cleanTelefono = cliente?.telefono ? String(cliente.telefono).replace(/\D/g, '') : '';
+    const cleanNombre = cliente?.nombre?.trim() || 'Cliente';
+
+    if (!cleanCedula && !cleanTelefono) {
+      throw new BadRequestException('Se requiere al menos cédula o teléfono del cliente');
+    }
+
+    // 1. Buscar al cliente en la base de datos de Q\'hubo Mor
+    const orCond: Prisma.ClientesWhereInput[] = [];
+    if (cleanCedula && !isNaN(Number(cleanCedula))) {
+      orCond.push({ cedula: BigInt(cleanCedula) });
+    }
+    if (cleanTelefono) {
+      orCond.push({ whatsapp: { contains: cleanTelefono } });
+    }
+
+    let targetCliente = await this.prisma.clientes.findFirst({
+      where: {
+        isActive: true,
+        OR: orCond,
+      },
+    });
+
+    // Si no existe, lo creamos para que empiece a acumular
+    if (!targetCliente) {
+      let finalId = Math.floor(10000 + Math.random() * 900000);
+      let isUnique = false;
+      while (!isUnique) {
+        const dup = await this.prisma.clientes.findUnique({ where: { IDcliente: finalId } });
+        if (!dup) isUnique = true;
+        else finalId = Math.floor(10000 + Math.random() * 900000);
+      }
+
+      targetCliente = await this.prisma.clientes.create({
+        data: {
+          IDcliente: finalId,
+          nombre: cleanNombre,
+          cedula: cleanCedula && !isNaN(Number(cleanCedula)) ? BigInt(cleanCedula) : null,
+          whatsapp: cleanTelefono || null,
+          contador: 0,
+          compras: '0',
+          observaciones: `Registrado automáticamente desde convenio comidas (${origen || 'restaurante'}).`,
+          isActive: true,
+          fecha_y_hora_creacion: new Date(),
+        },
+      });
+    }
+
+    // 2. Gestionar la etiqueta de compra externa en observaciones: [COMPRA_EXTERNA:ventaId:platos]
+    let obs = targetCliente.observaciones || '';
+    const regexTag = new RegExp(`\\[COMPRA_EXTERNA:${ventaIdExterna}:\\d+\\]`, 'g');
+    obs = obs.replace(regexTag, '').trim();
+
+    if (accion === 'PAGADO' && platosValidos > 0) {
+      obs = `${obs} [COMPRA_EXTERNA:${ventaIdExterna}:${platosValidos}]`.trim();
+    }
+
+    const updatedCliente = await this.prisma.clientes.update({
+      where: { IDcliente: targetCliente.IDcliente },
+      data: {
+        observaciones: obs,
+        fecha_y_hora_actualizacion: new Date(),
+      },
+    });
+
+    // 3. Recalcular la fidelidad si VentasService está disponible
+    let nuevoContador = updatedCliente.contador || 0;
+    if (this.ventasService) {
+      nuevoContador = await this.ventasService.recalcularFidelidadCliente(targetCliente.IDcliente);
+    } else if (this.appGateway) {
+      try {
+        this.appGateway.emitFidelidadActualizada({
+          clienteId: targetCliente.IDcliente,
+          cedula: targetCliente.cedula ? targetCliente.cedula.toString() : null,
+          nombre: targetCliente.nombre,
+          contador: nuevoContador,
+          comprasTotales: parseInt(updatedCliente.compras || '0', 10),
+          hito5: nuevoContador >= 5,
+          hito10: nuevoContador >= 10,
+          granizadoDisponible: nuevoContador >= 10,
+          descuentoIntermedioDisponible: nuevoContador >= 5,
+          timestamp: new Date().toISOString(),
+        });
+      } catch (e) {}
+    }
+
+    return {
+      success: true,
+      accion,
+      IDcliente: targetCliente.IDcliente,
+      contador: nuevoContador,
+      platosValidos: accion === 'PAGADO' ? platosValidos : 0,
+      mensaje: accion === 'PAGADO'
+        ? `Se sincronizaron +${platosValidos} platos de comida a la tarjeta de fidelidad de ${targetCliente.nombre}.`
+        : `Se desvincularon los platos de la venta ${ventaIdExterna} de la tarjeta de fidelidad.`
     };
   }
 }

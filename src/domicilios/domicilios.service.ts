@@ -1,6 +1,7 @@
 import { Injectable, BadRequestException, UnauthorizedException, Logger, NotFoundException } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { PrismaService } from '../prisma/prisma.service';
+import { Prisma } from '@prisma/client';
 import { AiService } from '../ai/ai.service';
 import { ConfiguracionService } from '../configuracion/configuracion.service';
 import { AppGateway } from '../websocket/app.gateway';
@@ -99,6 +100,56 @@ export class DomiciliosService {
       this.logger.error(`Error en mapeo IA de domicilio: ${err.message}`);
     }
 
+    // 4.1 Resolver o auto-crear cliente para fidelidad
+    let matchedClienteId: number | null = payload.clienteId ? Number(payload.clienteId) : null;
+    const cleanCedula = payload.clienteCedula ? String(payload.clienteCedula).replace(/\D/g, '') : '';
+    const cleanPhone = clienteTelefono ? clienteTelefono.replace(/\D/g, '') : '';
+
+    if (!matchedClienteId && (cleanCedula || cleanPhone)) {
+      try {
+        const orCond: Prisma.ClientesWhereInput[] = [];
+        if (cleanCedula && !isNaN(Number(cleanCedula))) {
+          orCond.push({ cedula: BigInt(cleanCedula) });
+        }
+        if (cleanPhone) {
+          orCond.push({ whatsapp: { contains: cleanPhone } });
+        }
+        const existingCli = await this.prisma.clientes.findFirst({
+          where: { isActive: true, OR: orCond },
+        });
+
+        if (existingCli) {
+          matchedClienteId = existingCli.IDcliente;
+        } else if (clienteNombre || cleanCedula || cleanPhone) {
+          let newId = Math.floor(10000 + Math.random() * 900000);
+          let unique = false;
+          while (!unique) {
+            const ex = await this.prisma.clientes.findUnique({ where: { IDcliente: newId } });
+            if (!ex) unique = true;
+            else newId = Math.floor(10000 + Math.random() * 900000);
+          }
+          const created = await this.prisma.clientes.create({
+            data: {
+              IDcliente: newId,
+              nombre: clienteNombre || (cleanCedula ? `Cliente CC ${cleanCedula}` : 'Cliente WhatsApp'),
+              cedula: cleanCedula && !isNaN(Number(cleanCedula)) ? BigInt(cleanCedula) : null,
+              whatsapp: cleanPhone || null,
+              direccion: direccion || null,
+              contador: 0,
+              compras: '0',
+              observaciones: 'Registrado automáticamente desde domicilio WhatsApp.',
+              isActive: true,
+            },
+          });
+          matchedClienteId = created.IDcliente;
+        }
+      } catch (e: any) {
+        this.logger.warn(`No se pudo resolver cliente para domicilio: ${e.message}`);
+      }
+    }
+
+    const origenConCliente = matchedClienteId ? `whatsapp_bot:cliente:${matchedClienteId}` : 'whatsapp_bot';
+
     // 4.1 Si el local es de Comida/Restaurante y el pedido NO CONTIENE comida (es solo granizados/bebidas)
     if (mapeoResult?.isComidaBusiness && !mapeoResult?.tieneComida) {
       this.logger.warn(
@@ -151,6 +202,7 @@ export class DomiciliosService {
         totalCalculado: mapeoResult.totalCalculado || totalWANum,
         metodoPagoWA,
         estado: 'RECIENTE',
+        origen: origenConCliente,
         timestampPedido,
       },
     });
@@ -360,12 +412,35 @@ export class DomiciliosService {
           select: { comandaImpresaAt: true, cocinaInicioAt: true },
         });
         if (ventaExistente) {
+          const updateVentaData: any = {
+            comandaImpresaAt: ventaExistente.comandaImpresaAt || now,
+            cocinaInicioAt: ventaExistente.cocinaInicioAt || now,
+          };
+
+          if (!(ventaExistente as any).clienteId) {
+            let cidToLink: number | null = null;
+            if (updated.origen && updated.origen.includes('cliente:')) {
+              const parts = updated.origen.split('cliente:');
+              cidToLink = parseInt(parts[1], 10) || null;
+            }
+            if (!cidToLink && updated.clienteTelefono) {
+              const cleanP = updated.clienteTelefono.replace(/\D/g, '');
+              if (cleanP) {
+                const cli = await this.prisma.clientes.findFirst({
+                  where: { isActive: true, whatsapp: { contains: cleanP } },
+                  select: { IDcliente: true },
+                });
+                if (cli) cidToLink = cli.IDcliente;
+              }
+            }
+            if (cidToLink) {
+              updateVentaData.clienteId = cidToLink;
+            }
+          }
+
           await this.prisma.ventas.update({
             where: { IDventas: ventaId },
-            data: {
-              comandaImpresaAt: ventaExistente.comandaImpresaAt || now,
-              cocinaInicioAt: ventaExistente.cocinaInicioAt || now,
-            },
+            data: updateVentaData,
           });
           await this.prisma.orderventas.updateMany({
             where: { IDventas: ventaId },

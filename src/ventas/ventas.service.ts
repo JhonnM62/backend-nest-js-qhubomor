@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException, Logger } from '@nestjs/common';
+import axios from 'axios';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateVentaDto, CreateOrderVentaDto, CreateVentaCompletaDto, VentaQueryDto } from './dto/venta.dto';
 import { Prisma } from '@prisma/client';
@@ -401,29 +402,61 @@ export class VentasService {
       },
     });
 
-    // 3. Cantidad total de productos / compras en las ventas activas
-    let totalItemsVentas = 0;
-    for (const v of ventasActivas) {
-      const itemsEnVenta = (v.ordenVentas || []).reduce(
-        (sum, item) => sum + (item.cantidad || 1),
-        0
-      );
-      totalItemsVentas += itemsEnVenta > 0 ? itemsEnVenta : 1;
+    // 1.1 Compras externas de comida sincronizadas: [COMPRA_EXTERNA:ventaId:platos]
+    const comprasExternas: number[] = [];
+    const matchExternas = Array.from(obs.matchAll(/\[COMPRA_EXTERNA:[^:]+:(\d+)\]/g));
+    for (const m of matchExternas) {
+      const cant = parseInt(m[1], 10) || 0;
+      if (cant > 0) {
+        comprasExternas.push(cant);
+      }
     }
 
+    // Helper para identificar si un ítem es empaque o desechable
+    const esDesechableOEmpaque = (nombre?: string | null, categoria?: string | null) => {
+      const text = `${nombre || ''} ${categoria || ''}`.toLowerCase();
+      return /tapa|caja|vaso|empaque|desechable|bolsa|envase|cubierto/i.test(text);
+    };
+
+    // 3. Extraer eventos de compra válidos (solo productos facturados > $0, excluyendo empaques)
+    const eventosCompras: number[] = [];
+
+    for (const v of ventasActivas) {
+      const itemsValidos = (v.ordenVentas || []).filter((item) => {
+        const precio = Number(item.precio || item.precioTotal || 0);
+        // Regla 1: Precios $0 NO suman sellos (ej. granizados promo 2x2 por comida)
+        if (precio <= 0) return false;
+
+        // Regla 2: Desechables y empaques NO suman sellos
+        if (esDesechableOEmpaque(item.nombre, item.categoria || item.categoriaProducto)) {
+          return false;
+        }
+
+        return true;
+      });
+
+      const cantValida = itemsValidos.reduce(
+        (sum, item) => sum + (Number(item.cantidad) || 1),
+        0
+      );
+      if (cantValida > 0) {
+        eventosCompras.push(cantValida);
+      }
+    }
+
+    // Agregar compras externas de comida sincronizadas
+    for (const cantExt of comprasExternas) {
+      eventosCompras.push(cantExt);
+    }
+
+    const totalItemsVentas = eventosCompras.reduce((s, c) => s + c, 0);
     const comprasTotales = sellosMisiones + totalItemsVentas;
 
     // 4. Calcular el progreso del ciclo del contador (0 a 10 con checkpoints en 5 y 10)
     let contador = sellosMisiones;
     if (contador > 5) contador = 5;
 
-    for (const v of ventasActivas) {
-      const itemsEnVenta = (v.ordenVentas || []).reduce(
-        (sum, item) => sum + (item.cantidad || 1),
-        0
-      );
-      const cantidad = itemsEnVenta > 0 ? itemsEnVenta : 1;
-
+    for (const cantidad of eventosCompras) {
       if (contador >= 10) {
         contador = 0;
       }
@@ -431,9 +464,9 @@ export class VentasService {
       const suma = contador + cantidad;
 
       if (contador < 5 && suma > 5) {
-        contador = 5;
+        contador = 5; // Pausa en checkpoint 5
       } else if (suma > 10) {
-        contador = 10;
+        contador = 10; // Pausa en checkpoint 10
       } else {
         contador = suma;
       }
@@ -1058,6 +1091,7 @@ export class VentasService {
             data: { estado: 'COBRADO' },
           });
         } catch (e) {}
+        this.dispararSincronizacionFidelidadExterna(id, 'PAGADO').catch(() => {});
       }
       this.appGateway.emitToVentas(SocketEvent.REFRESH_VENTAS, { action: 'updateEstado', venta: updatedVentaWithOrders });
     }
@@ -1566,7 +1600,9 @@ export class VentasService {
           data: { estado: 'COBRADO' },
         });
       } catch (e) {}
-    } else if (estado === 'CANCELADO') {
+      this.dispararSincronizacionFidelidadExterna(id, 'PAGADO').catch(() => {});
+    } else if (estado === 'CANCELADO' || estado === 'ANULADO') {
+      this.dispararSincronizacionFidelidadExterna(id, 'ANULADO').catch(() => {});
       try {
         await this.prisma.domicilioWA.updateMany({
           where: { ventaId: id },
@@ -1933,6 +1969,7 @@ export class VentasService {
     if (venta.clienteId) {
       await this.recalcularFidelidadCliente(venta.clienteId);
     }
+    this.dispararSincronizacionFidelidadExterna(id, 'ANULADO').catch(() => {});
 
     return result;
   }
@@ -2175,4 +2212,63 @@ export class VentasService {
     }
     return { success: true, timestamp: now };
   }
+
+  async dispararSincronizacionFidelidadExterna(ventaId: string, accion: 'PAGADO' | 'ANULADO') {
+    const externalUrl = process.env.FIDELIDAD_EXTERNA_URL;
+    if (!externalUrl) return;
+
+    try {
+      const venta = await this.prisma.ventas.findUnique({
+        where: { IDventas: ventaId },
+        include: {
+          ordenVentas: true,
+          clienteRelacion: true,
+        },
+      });
+
+      if (!venta) return;
+
+      const esDesechableOEmpaque = (nombre?: string | null, categoria?: string | null) => {
+        const text = `${nombre || ''} ${categoria || ''}`.toLowerCase();
+        return /tapa|caja|vaso|empaque|desechable|bolsa|envase|cubierto/i.test(text);
+      };
+
+      const platosValidos = (venta.ordenVentas || []).filter((item) => {
+        const precio = Number(item.precio || item.precioTotal || 0);
+        if (precio <= 0) return false;
+        if (esDesechableOEmpaque(item.nombre, item.categoria || item.categoriaProducto)) {
+          return false;
+        }
+        return true;
+      }).reduce((sum, item) => sum + (Number(item.cantidad) || 1), 0);
+
+      if (accion === 'PAGADO' && platosValidos <= 0) return;
+
+      const cliente = venta.clienteRelacion;
+      const cleanCedula = cliente?.cedula ? cliente.cedula.toString() : '';
+      const cleanTelefono = cliente?.whatsapp || (venta as any).telefono || '';
+      const cleanNombre = cliente?.nombre || venta.cliente || 'Cliente';
+
+      if (!cleanCedula && !cleanTelefono) return;
+
+      const payload = {
+        ventaIdExterna: ventaId,
+        accion,
+        cliente: {
+          cedula: cleanCedula || undefined,
+          telefono: cleanTelefono || undefined,
+          nombre: cleanNombre,
+        },
+        platosValidos,
+        origen: process.env.APP_NAME || 'restaurante_externo',
+      };
+
+      const targetEndpoint = externalUrl.replace(/\/+$/, '') + '/api/v1/clientes/fidelidad/sincronizar-compra-externa';
+      await axios.post(targetEndpoint, payload, { timeout: 7000 });
+      this.logger.log('Sincronizacion fidelidad externa enviada (' + accion + ') venta ' + ventaId);
+    } catch (err: any) {
+      this.logger.warn('No se pudo sincronizar fidelidad externa para venta ' + ventaId + ': ' + (err?.message || err));
+    }
+  }
+
 }

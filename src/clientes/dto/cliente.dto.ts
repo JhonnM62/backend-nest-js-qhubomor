@@ -159,3 +159,46 @@ export class ActualizarCedulaWebDto {
   @IsString()
   cedula: string;
 }
+
+export class ClienteExternoDto {
+  @ApiPropertyOptional({ description: 'Cédula del cliente' })
+  @IsOptional()
+  @IsString()
+  cedula?: string;
+
+  @ApiPropertyOptional({ description: 'Teléfono o WhatsApp' })
+  @IsOptional()
+  @IsString()
+  telefono?: string;
+
+  @ApiPropertyOptional({ description: 'Nombre del cliente' })
+  @IsOptional()
+  @IsString()
+  nombre?: string;
+}
+
+export class SincronizarCompraExternaDto {
+  @ApiProperty({ description: 'ID de la venta en el sistema externo' })
+  @IsNotEmpty()
+  @IsString()
+  ventaIdExterna: string;
+
+  @ApiProperty({ description: 'Acción realizada: PAGADO o ANULADO', enum: ['PAGADO', 'ANULADO'] })
+  @IsNotEmpty()
+  @IsIn(['PAGADO', 'ANULADO'])
+  accion: 'PAGADO' | 'ANULADO';
+
+  @ApiProperty({ description: 'Datos del cliente para vincular' })
+  @ValidateNested()
+  @Type(() => ClienteExternoDto)
+  cliente: ClienteExternoDto;
+
+  @ApiProperty({ description: 'Cantidad de platos válidos facturados (sin contar empaques ni $0)' })
+  @IsNumber()
+  platosValidos: number;
+
+  @ApiPropertyOptional({ description: 'Origen del sistema (ej. restaurante2, fogata)' })
+  @IsOptional()
+  @IsString()
+  origen?: string;
+}
