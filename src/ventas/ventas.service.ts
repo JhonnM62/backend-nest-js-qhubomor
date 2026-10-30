@@ -1787,8 +1787,19 @@ export class VentasService {
         registroDeTiempo: nuevoRegistro,
         cocinaInicioAt: cocinaInicioAtUpdate,
         cocinaFinAt: cocinaFinAtUpdate,
+        clienteId: updateData.clienteId !== undefined ? (updateData.clienteId ? Number(updateData.clienteId) : null) : venta.clienteId,
+        cliente: updateData.cliente !== undefined ? updateData.cliente : venta.cliente,
       },
     });
+
+    const effectiveClienteId = (updateData.clienteId ? Number(updateData.clienteId) : null) || venta.clienteId;
+    if (effectiveClienteId && (estadoUpdate === 'PAGADO' || estadoUpdate === 'COBRADO')) {
+      try {
+        await this.recalcularFidelidadCliente(effectiveClienteId);
+      } catch (err: any) {
+        this.logger.error('Error al recalcular fidelidad tras cobrar: ' + (err?.message || err));
+      }
+    }
 
     // FIX: always emit with full ordenVentas to prevent frontend stale-data issues
     const updated = await this.prisma.ventas.findUnique({
