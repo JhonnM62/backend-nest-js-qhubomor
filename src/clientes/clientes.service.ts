@@ -303,12 +303,23 @@ export class ClientesService {
       throw new BadRequestException('El correo electrónico es requerido para sincronizar el cliente.');
     }
 
-    // 1. Buscar si ya existe un cliente con este email en el ERP
+    // 1. Buscar si ya existe un cliente con este email en el ERP (priorizar activo más reciente)
     let cliente = await this.prisma.clientes.findFirst({
       where: {
         email: { equals: rawEmail, mode: 'insensitive' },
+        isActive: true,
       },
+      orderBy: { fecha_y_hora_actualizacion: 'desc' },
     });
+
+    if (!cliente) {
+      cliente = await this.prisma.clientes.findFirst({
+        where: {
+          email: { equals: rawEmail, mode: 'insensitive' },
+        },
+        orderBy: { fecha_y_hora_actualizacion: 'desc' },
+      });
+    }
 
     if (cliente) {
       const obs = cliente.observaciones || '';
@@ -851,35 +862,86 @@ export class ClientesService {
       },
     });
 
+    const esWhatsapp = (cleanId.length === 10 && cleanId.startsWith('3')) ||
+                       (cleanId.length === 12 && cleanId.startsWith('573'));
+    const cleanPhone = cleanId.length === 12 && cleanId.startsWith('57') ? cleanId.slice(2) : cleanId;
+
     if (!existingClient) {
-      if (currentClient) {
-        const yaTieneWhatsapp = currentClient.whatsapp && (
-          currentClient.whatsapp.includes(cleanId) ||
-          (cleanId.length === 10 && currentClient.whatsapp.includes(`57${cleanId}`)) ||
-          (cleanId.length === 12 && cleanId.startsWith('57') && currentClient.whatsapp.includes(cleanId.slice(2)))
-        );
-        const yaTieneCedula = currentClient.cedula && String(currentClient.cedula) === cleanId;
-        const yaTieneId = String(currentClient.IDcliente) === cleanId;
-        if (yaTieneWhatsapp || yaTieneCedula || yaTieneId) {
-          return {
-            success: true,
-            message: 'Tu cuenta ya se encuentra vinculada con este identificador.',
-            cliente: {
-              IDcliente: currentClient.IDcliente,
-              nombre: currentClient.nombre,
-              contador: currentClient.contador,
-            },
-            merged: false,
-          };
+      // 3A. No existe cliente previo con ese número/cédula en el ERP:
+      // Se registra directamente en la cuenta actual del cliente
+      if (!currentClient) {
+        let finalId = Math.floor(10000 + Math.random() * 900000);
+        let isUnique = false;
+        while (!isUnique) {
+          const exists = await this.prisma.clientes.findUnique({ where: { IDcliente: finalId } });
+          if (!exists) isUnique = true;
+          else finalId = Math.floor(10000 + Math.random() * 900000);
         }
+
+        currentClient = await this.prisma.clientes.create({
+          data: {
+            IDcliente: finalId,
+            nombre: dto.nombre?.trim() || 'Cliente VIP',
+            email: rawEmail,
+            contador: 0,
+            compras: '0',
+            isActive: true,
+            whatsapp: esWhatsapp ? cleanPhone : null,
+            cedula: !esWhatsapp && !isNaN(Number(cleanId)) ? BigInt(cleanId) : null,
+            observaciones: 'Cliente registrado desde la web/Google.',
+            fecha_y_hora_creacion: new Date(),
+          },
+        });
+      } else {
+        const updateData: Prisma.ClientesUpdateInput = {
+          fecha_y_hora_actualizacion: new Date(),
+        };
+        if (dto.nombre && (!currentClient.nombre || currentClient.nombre.startsWith('Cliente'))) {
+          updateData.nombre = dto.nombre.trim();
+        }
+        if (esWhatsapp) {
+          updateData.whatsapp = cleanPhone;
+        } else if (!isNaN(Number(cleanId))) {
+          updateData.cedula = BigInt(cleanId);
+        }
+
+        currentClient = await this.prisma.clientes.update({
+          where: { IDcliente: currentClient.IDcliente },
+          data: updateData,
+        });
       }
 
-      throw new NotFoundException(
-        'No se ha encontrado en la base de datos ninguna cuenta con ese número de WhatsApp o identificación. Revisa tu número de WhatsApp o identificación.'
-      );
+      if (this.appGateway) {
+        try {
+          this.appGateway.server.emit('clienteActualizado', {
+            IDcliente: currentClient.IDcliente,
+            nombre: currentClient.nombre,
+            cedula: currentClient.cedula ? currentClient.cedula.toString() : null,
+            whatsapp: currentClient.whatsapp || null,
+          });
+        } catch (e) {}
+      }
+
+      return {
+        success: true,
+        encontrado: false,
+        merged: false,
+        cliente: {
+          IDcliente: currentClient.IDcliente,
+          nombre: currentClient.nombre,
+          email: currentClient.email,
+          cedula: currentClient.cedula ? currentClient.cedula.toString() : null,
+          whatsapp: currentClient.whatsapp || null,
+          contador: currentClient.contador || 0,
+          comprasTotales: parseInt(currentClient.compras || '0', 10) || 0,
+        },
+        message: esWhatsapp
+          ? `No se encontró en la base de datos el cliente registrado con el WhatsApp ${cleanPhone}. Tu número ha sido registrado exitosamente en tu cuenta (Código POS #${currentClient.IDcliente}) para que empieces a acumular puntos.`
+          : `No se encontró en la base de datos el cliente registrado con la identificación ${cleanId}. Tu documento ha sido registrado exitosamente en tu cuenta (Código POS #${currentClient.IDcliente}) para que empieces a acumular puntos.`,
+      };
     }
 
-    // Cuenta previa encontrada -> FUSIONAR y unificar pedidos/sellos
+    // 3B. Cuenta previa encontrada -> FUSIONAR y unificar pedidos/sellos
     const obs = existingClient.observaciones || '';
     const updatedObs = obs.includes('[VINCULADO_WEB]') ? obs : `${obs} [VINCULADO_WEB]`.trim();
     
@@ -893,8 +955,8 @@ export class ClientesService {
       updateData.nombre = dto.nombre.trim();
     }
 
-    if (cleanId.length === 10 && cleanId.startsWith('3')) {
-      updateData.whatsapp = cleanId;
+    if (esWhatsapp) {
+      updateData.whatsapp = cleanPhone;
     } else if (!existingClient.cedula && !isNaN(Number(cleanId))) {
       updateData.cedula = BigInt(cleanId);
     }
@@ -927,25 +989,29 @@ export class ClientesService {
       } catch (e) {}
     }
 
+    const clienteFinal = await this.prisma.clientes.findUnique({
+      where: { IDcliente: targetClient.IDcliente },
+    }) || targetClient;
+
     // 5. Emitir eventos de websocket
     if (this.appGateway) {
       try {
         this.appGateway.server.emit('clienteActualizado', {
-          IDcliente: targetClient.IDcliente,
-          nombre: targetClient.nombre,
-          cedula: targetClient.cedula ? targetClient.cedula.toString() : null,
-          whatsapp: targetClient.whatsapp || null,
+          IDcliente: clienteFinal.IDcliente,
+          nombre: clienteFinal.nombre,
+          cedula: clienteFinal.cedula ? clienteFinal.cedula.toString() : null,
+          whatsapp: clienteFinal.whatsapp || null,
         });
         this.appGateway.emitFidelidadActualizada({
-          clienteId: targetClient.IDcliente,
-          cedula: targetClient.cedula ? targetClient.cedula.toString() : null,
-          nombre: targetClient.nombre,
-          contador: targetClient.contador || 0,
-          comprasTotales: parseInt(targetClient.compras || '0', 10),
-          hito5: (targetClient.contador || 0) >= 5,
-          hito10: (targetClient.contador || 0) >= 10,
-          granizadoDisponible: (targetClient.contador || 0) >= 10,
-          descuentoIntermedioDisponible: (targetClient.contador || 0) >= 5,
+          clienteId: clienteFinal.IDcliente,
+          cedula: clienteFinal.cedula ? clienteFinal.cedula.toString() : null,
+          nombre: clienteFinal.nombre,
+          contador: clienteFinal.contador || 0,
+          comprasTotales: parseInt(clienteFinal.compras || '0', 10),
+          hito5: (clienteFinal.contador || 0) >= 5,
+          hito10: (clienteFinal.contador || 0) >= 10,
+          granizadoDisponible: (clienteFinal.contador || 0) >= 10,
+          descuentoIntermedioDisponible: (clienteFinal.contador || 0) >= 5,
           timestamp: new Date().toISOString(),
         });
       } catch (e) {}
@@ -953,19 +1019,18 @@ export class ClientesService {
 
     return {
       success: true,
+      encontrado: true,
       merged,
       cliente: {
-        IDcliente: targetClient.IDcliente,
-        nombre: targetClient.nombre,
-        email: targetClient.email,
-        cedula: targetClient.cedula ? targetClient.cedula.toString() : null,
-        whatsapp: targetClient.whatsapp || null,
-        contador: targetClient.contador || 0,
-        comprasTotales: parseInt(targetClient.compras || '0', 10),
+        IDcliente: clienteFinal.IDcliente,
+        nombre: clienteFinal.nombre,
+        email: clienteFinal.email,
+        cedula: clienteFinal.cedula ? clienteFinal.cedula.toString() : null,
+        whatsapp: clienteFinal.whatsapp || null,
+        contador: clienteFinal.contador || 0,
+        comprasTotales: parseInt(clienteFinal.compras || '0', 10),
       },
-      message: merged
-        ? '¡Cuenta unificada con éxito! Hemos vinculado tus pedidos y sellos acumulados anteriores.'
-        : '¡Identificación vinculada exitosamente a tu tarjeta!',
+      message: `¡Cliente encontrado en la base de datos! Tu código POS asignado se ha actualizado a #${clienteFinal.IDcliente} con todos tus sellos y compras anteriores vinculadas.`,
     };
   }
 
