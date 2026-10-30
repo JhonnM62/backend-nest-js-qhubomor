@@ -1490,24 +1490,38 @@ ${dynamicPackagingInstructions}
           encontradoEnCatalogo: true,
         });
       } else {
-        // Si no se encontró en catálogo
-        let precioEst = parentesisPrecio > 0 ? parentesisPrecio : 0;
-        let precioUnitEst = precioEst > 0 ? Math.round(precioEst / cantidad) : 0;
-        totalCalculado += precioEst;
+        // Si no se encontró en catálogo y corresponde al otro negocio, agregar a itemsExternos
+        if (isGranizadosBusiness && this.pedidoTieneComida(nombreLimpio)) {
+          itemsExternos.push({
+            nombre: nombreLimpio,
+            cantidad,
+            observacion: 'Comida rápida de otro comercio',
+          });
+        } else if (isComidaBusiness && /granizado|coctel|cremoso|smirnoff|four loko|mojito/i.test(nombreLimpio)) {
+          itemsExternos.push({
+            nombre: nombreLimpio,
+            cantidad,
+            observacion: 'Granizado de otro comercio',
+          });
+        } else {
+          let precioEst = parentesisPrecio > 0 ? parentesisPrecio : 0;
+          let precioUnitEst = precioEst > 0 ? Math.round(precioEst / cantidad) : 0;
+          totalCalculado += precioEst;
 
-        itemsPropios.push({
-          nombre: nombreLimpio,
-          cantidad,
-          precioUnitario: precioUnitEst,
-          precioTotal: precioEst,
-          descuento: 0,
-          comentarios: '',
-          encontradoEnCatalogo: false,
-        });
+          itemsPropios.push({
+            nombre: nombreLimpio,
+            cantidad,
+            precioUnitario: precioUnitEst,
+            precioTotal: precioEst,
+            descuento: 0,
+            comentarios: '',
+            encontradoEnCatalogo: false,
+          });
+        }
       }
     }
 
-    if (totalCalculado === 0 && totalWA) {
+    if (totalCalculado === 0 && itemsPropios.length > 0 && totalWA) {
       totalCalculado = parseMontoCOP(totalWA);
     }
 
@@ -1603,6 +1617,21 @@ ${dynamicPackagingInstructions}
         }
       }
     }
+
+    // Filtrar estrictamente de itemsPropios cualquier plato del otro negocio o presente en itemsExternos
+    itemsPropios = itemsPropios.filter((it) => {
+      const itName = String(it.nombre || '').toLowerCase();
+      if (isGranizadosBusiness && this.pedidoTieneComida(itName)) {
+        return false;
+      }
+      if (isComidaBusiness && /granizado|coctel|cremoso|smirnoff|four loko|mojito/i.test(itName)) {
+        return false;
+      }
+      if (itemsExternos.some((ext) => String(ext.nombre || '').toLowerCase() === itName)) {
+        return false;
+      }
+      return true;
+    });
 
     // Identificador de productos de empaque / desechables / tapas
     const empaqueIds = new Set(

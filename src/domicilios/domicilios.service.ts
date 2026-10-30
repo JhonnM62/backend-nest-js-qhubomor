@@ -162,6 +162,22 @@ export class DomiciliosService {
       };
     }
 
+    // 4.2 Si el local es de Granizados/Bebidas y el pedido NO CONTIENE granizados/items propios
+    // (es exclusivo de comida rápida/otro comercio sin ningún producto de este local)
+    const tieneItemsPropios = Array.isArray(mapeoResult?.itemsPropios) && mapeoResult.itemsPropios.length > 0;
+    const tieneItemsExternos = Array.isArray(mapeoResult?.itemsExternos) && mapeoResult.itemsExternos.length > 0;
+
+    if (!tieneItemsPropios && (tieneItemsExternos || mapeoResult?.tieneComida)) {
+      this.logger.warn(
+        `[DOMICILIOS] Pedido ${orderIdWA} es EXCLUSIVO de otro comercio / comida rápida (${tieneItemsExternos ? mapeoResult.itemsExternos.map((e: any) => e.nombre).join(', ') : 'sin items propios'}). IGNORANDO pedido en este local de granizados.`
+      );
+      return {
+        ok: true,
+        action: 'ignored',
+        message: 'Pedido exclusivo de comida externa ignorado en local de granizados',
+      };
+    }
+
     // 5. Verificar si el pedido ya existe en BD (actualización vs creación)
     const existing = await this.prisma.domicilioWA.findUnique({
       where: { orderIdWA },
@@ -179,7 +195,7 @@ export class DomiciliosService {
           itemsMapeados: mapeoResult.itemsPropios,
           itemsExternos: mapeoResult.itemsExternos,
           totalWA: totalWANum,
-          totalCalculado: mapeoResult.totalCalculado || totalWANum,
+          totalCalculado: Number(mapeoResult.totalCalculado || 0),
           metodoPagoWA,
         },
       });
@@ -199,7 +215,7 @@ export class DomiciliosService {
         itemsMapeados: mapeoResult.itemsPropios,
         itemsExternos: mapeoResult.itemsExternos,
         totalWA: totalWANum,
-        totalCalculado: mapeoResult.totalCalculado || totalWANum,
+        totalCalculado: Number(mapeoResult.totalCalculado || 0),
         metodoPagoWA,
         estado: 'RECIENTE',
         origen: origenConCliente,
