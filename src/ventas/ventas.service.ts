@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, Logger } from '@nestjs/common';
+import { Injectable, NotFoundException, Logger, Optional, Inject, forwardRef } from '@nestjs/common';
 import axios from 'axios';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateVentaDto, CreateOrderVentaDto, CreateVentaCompletaDto, VentaQueryDto } from './dto/venta.dto';
@@ -8,6 +8,7 @@ import { InsumosService } from '../insumos/insumos.service';
 import { AppGateway } from '../websocket/app.gateway';
 import { SocketEvent } from '../websocket/types/socket.types';
 import { FacturacionService } from '../facturacion/facturacion.service';
+import { PartnerSyncService } from '../clientes/partner-sync.service';
 
 @Injectable()
 export class VentasService {
@@ -20,6 +21,7 @@ export class VentasService {
     private insumosService: InsumosService,
     private appGateway: AppGateway,
     private facturacionService: FacturacionService,
+    @Optional() @Inject(forwardRef(() => PartnerSyncService)) private partnerSyncService?: PartnerSyncService,
   ) {}
 
   async getConfiguracionNegocioCached() {
@@ -498,6 +500,20 @@ export class VentasService {
       });
     } catch (e) {
       // Ignorar fallo de websocket para no interrumpir
+    }
+
+    // 7. Sincronizar sellos bidireccionalmente a los POS asociados (Restaurante <-> Granizados)
+    if (this.partnerSyncService) {
+      this.partnerSyncService
+        .syncSellos(clienteId, {
+          contador,
+          comprasTotales,
+          accion: 'RECALCULO',
+          origen: process.env.APP_NAME || 'ventas',
+        })
+        .catch((err) =>
+          this.logger.warn(`No se pudo sincronizar sellos de cliente #${clienteId} con partner: ${err.message}`)
+        );
     }
 
     return contador;
@@ -2225,8 +2241,12 @@ export class VentasService {
   }
 
   async dispararSincronizacionFidelidadExterna(ventaId: string, accion: 'PAGADO' | 'ANULADO') {
-    const externalUrl = process.env.FIDELIDAD_EXTERNA_URL;
-    if (!externalUrl) return;
+    const partnerUrls = this.partnerSyncService
+      ? this.partnerSyncService.getPartnerUrls()
+      : process.env.FIDELIDAD_EXTERNA_URL
+      ? [process.env.FIDELIDAD_EXTERNA_URL]
+      : [];
+    if (!partnerUrls.length) return;
 
     try {
       const venta = await this.prisma.ventas.findUnique({
@@ -2274,9 +2294,17 @@ export class VentasService {
         origen: process.env.APP_NAME || 'restaurante_externo',
       };
 
-      const targetEndpoint = externalUrl.replace(/\/+$/, '') + '/api/v1/clientes/fidelidad/sincronizar-compra-externa';
-      await axios.post(targetEndpoint, payload, { timeout: 7000 });
-      this.logger.log('Sincronizacion fidelidad externa enviada (' + accion + ') venta ' + ventaId);
+      for (const pUrl of partnerUrls) {
+        try {
+          const targetEndpoint = pUrl.replace(/\/+$/, '') + '/clientes/fidelidad/sincronizar-compra-externa';
+          await axios.post(targetEndpoint, payload, { timeout: 7000 });
+          this.logger.log('Sincronizacion fidelidad externa enviada (' + accion + ') a ' + pUrl + ' para venta ' + ventaId);
+        } catch (postErr: any) {
+          this.logger.warn('Fallo envio a ' + pUrl + ': ' + postErr.message);
+        }
+      }
+
+
     } catch (err: any) {
       this.logger.warn('No se pudo sincronizar fidelidad externa para venta ' + ventaId + ': ' + (err?.message || err));
     }

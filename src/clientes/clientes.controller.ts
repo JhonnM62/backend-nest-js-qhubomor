@@ -8,6 +8,7 @@ import {
   Delete,
   Query,
   UseGuards,
+  Headers,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { ClientesService } from './clientes.service';
@@ -78,10 +79,58 @@ export class ClientesController {
     return this.clientesService.vincularIdentificador(dto);
   }
 
+  @Public()
   @Post('fidelidad/sincronizar-compra-externa')
   @ApiOperation({ summary: 'Sincronizar compras de comida realizadas en aplicaciones o restaurantes externos para sumar/restar sellos' })
   sincronizarCompraExterna(@Body() dto: SincronizarCompraExternaDto) {
     return this.clientesService.sincronizarCompraExterna(dto);
+  }
+
+  // ─── Endpoints de Sincronización Inter-POS (CRUD Completo de Clientes y Sellos) ───
+
+  @Public()
+  @Post('sync/upsert')
+  @ApiOperation({ summary: 'Sincronizar creación o unificación de cliente entre comercios/apps' })
+  syncUpsertCliente(
+    @Body() dto: any,
+    @Headers('x-sync-token') syncToken?: string,
+    @Headers('x-sync-origin') syncOrigin?: string,
+  ) {
+    return this.clientesService.handleSyncUpsert(dto, syncOrigin);
+  }
+
+  @Public()
+  @Patch('sync/:id')
+  @ApiOperation({ summary: 'Sincronizar actualización de cliente entre comercios/apps' })
+  syncUpdateCliente(
+    @Param('id') id: string,
+    @Body() dto: any,
+    @Headers('x-sync-token') syncToken?: string,
+    @Headers('x-sync-origin') syncOrigin?: string,
+  ) {
+    return this.clientesService.handleSyncUpdate(Number(id), dto, syncOrigin);
+  }
+
+  @Public()
+  @Post('sync/sellos')
+  @ApiOperation({ summary: 'Sincronizar sellos y fidelidad de cliente bidireccionalmente' })
+  syncSellosCliente(
+    @Body() dto: any,
+    @Headers('x-sync-token') syncToken?: string,
+    @Headers('x-sync-origin') syncOrigin?: string,
+  ) {
+    return this.clientesService.handleSyncSellos(dto, syncOrigin);
+  }
+
+  @Public()
+  @Delete('sync/:id')
+  @ApiOperation({ summary: 'Sincronizar eliminación/desactivación de cliente entre comercios/apps' })
+  syncRemoveCliente(
+    @Param('id') id: string,
+    @Headers('x-sync-token') syncToken?: string,
+    @Headers('x-sync-origin') syncOrigin?: string,
+  ) {
+    return this.clientesService.handleSyncRemove(Number(id), syncOrigin);
   }
 
   @Get(':id')

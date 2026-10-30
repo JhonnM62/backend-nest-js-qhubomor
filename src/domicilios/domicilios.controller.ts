@@ -22,6 +22,19 @@ export class DomiciliosController {
   }
 
   /**
+   * Sincroniza entre apps asociadas (Restaurante <-> Granizados) cuando un domicilio es tomado o mapeado con un cliente.
+   */
+  @Public()
+  @Post('sync-tomado')
+  @HttpCode(HttpStatus.OK)
+  async syncTomado(
+    @Body() payload: any,
+    @Headers('x-sync-token') syncToken?: string,
+  ) {
+    return this.domiciliosService.handleSyncDomicilioTomado(payload);
+  }
+
+  /**
    * Lista todos los pedidos de domicilios (para la pestaña "Domis" en la app).
    */
   @Get()

@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException, UnauthorizedException, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, BadRequestException, UnauthorizedException, Logger, NotFoundException, Optional, Inject, forwardRef } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { PrismaService } from '../prisma/prisma.service';
 import { Prisma } from '@prisma/client';
@@ -6,6 +6,7 @@ import { AiService } from '../ai/ai.service';
 import { ConfiguracionService } from '../configuracion/configuracion.service';
 import { AppGateway } from '../websocket/app.gateway';
 import { NotificationsService } from '../notifications/notifications.service';
+import { PartnerSyncService } from '../clientes/partner-sync.service';
 
 @Injectable()
 export class DomiciliosService {
@@ -18,6 +19,7 @@ export class DomiciliosService {
     private readonly configService: ConfiguracionService,
     private readonly appGateway: AppGateway,
     private readonly notificationsService: NotificationsService,
+    @Optional() @Inject(forwardRef(() => PartnerSyncService)) private readonly partnerSyncService?: PartnerSyncService,
   ) {}
 
   async handleWebhook(payload: any, tokenHeader?: string) {
@@ -100,7 +102,7 @@ export class DomiciliosService {
       this.logger.error(`Error en mapeo IA de domicilio: ${err.message}`);
     }
 
-    // 4.1 Resolver o auto-crear cliente para fidelidad
+    // 4.1 Resolver o auto-crear cliente para fidelidad (sincronizado con partner POS)
     let matchedClienteId: number | null = payload.clienteId ? Number(payload.clienteId) : null;
     const cleanCedula = payload.clienteCedula ? String(payload.clienteCedula).replace(/\D/g, '') : '';
     const cleanPhone = clienteTelefono ? clienteTelefono.replace(/\D/g, '') : '';
@@ -114,20 +116,52 @@ export class DomiciliosService {
         if (cleanPhone) {
           orCond.push({ whatsapp: { contains: cleanPhone } });
         }
-        const existingCli = await this.prisma.clientes.findFirst({
+        let existingCli = await this.prisma.clientes.findFirst({
           where: { isActive: true, OR: orCond },
         });
+
+        // 1. Si no existe en la base de datos local, consultar si ya está registrado en alguna app partner
+        if (!existingCli && this.partnerSyncService) {
+          try {
+            const partnerCli = await this.partnerSyncService.buscarClienteEnPartners(cleanPhone, cleanCedula);
+            if (partnerCli && partnerCli.IDcliente) {
+              const partnerId = Number(partnerCli.IDcliente);
+              existingCli = await this.prisma.clientes.create({
+                data: {
+                  IDcliente: partnerId,
+                  nombre: partnerCli.nombre || clienteNombre || 'Cliente',
+                  cedula: partnerCli.cedula ? BigInt(partnerCli.cedula) : (cleanCedula && !isNaN(Number(cleanCedula)) ? BigInt(cleanCedula) : null),
+                  whatsapp: partnerCli.whatsapp || cleanPhone || null,
+                  direccion: direccion || partnerCli.direccion || null,
+                  contador: Number(partnerCli.contador || 0),
+                  compras: String(partnerCli.comprasTotales || partnerCli.compras || '0'),
+                  observaciones: 'Sincronizado automáticamente desde app partner en domicilio WhatsApp.',
+                  isActive: true,
+                },
+              });
+              this.logger.log(`Cliente adoptado con ID #${partnerId} desde partner para pedido ${orderIdWA}`);
+            }
+          } catch (e: any) {
+            this.logger.warn(`Error buscando cliente en partner para pedido ${orderIdWA}: ${e.message}`);
+          }
+        }
 
         if (existingCli) {
           matchedClienteId = existingCli.IDcliente;
         } else if (clienteNombre || cleanCedula || cleanPhone) {
-          let newId = Math.floor(10000 + Math.random() * 900000);
+          // 2. Cliente 100% nuevo en ambos sistemas: generar ID determinista basado en teléfono/cédula
+          const detId = this.partnerSyncService
+            ? this.partnerSyncService.generarIdDeterminista(cleanPhone, cleanCedula)
+            : Math.floor(100000 + Math.random() * 900000);
+
+          let newId = detId;
           let unique = false;
           while (!unique) {
             const ex = await this.prisma.clientes.findUnique({ where: { IDcliente: newId } });
             if (!ex) unique = true;
-            else newId = Math.floor(10000 + Math.random() * 900000);
+            else newId = Math.floor(100000 + Math.random() * 900000);
           }
+
           const created = await this.prisma.clientes.create({
             data: {
               IDcliente: newId,
@@ -142,6 +176,13 @@ export class DomiciliosService {
             },
           });
           matchedClienteId = created.IDcliente;
+
+          // Sincronizar de inmediato al partner para que lo cree con este mismo ID
+          if (this.partnerSyncService) {
+            this.partnerSyncService.syncUpsertCliente(created).catch((err) =>
+              this.logger.warn(`No se pudo sincronizar cliente nuevo #${created.IDcliente} con partner: ${err.message}`)
+            );
+          }
         }
       } catch (e: any) {
         this.logger.warn(`No se pudo resolver cliente para domicilio: ${e.message}`);
@@ -469,7 +510,100 @@ export class DomiciliosService {
     }
 
     this.appGateway.emitDomicilioActualizado(updated);
+
+    // Comunicar inmediatamente a la otra app (Restaurante <-> Granizados) que este domicilio fue tomado y mapeado
+    if (this.partnerSyncService && updated.orderIdWA) {
+      let finalCid: number | null = null;
+      if (updated.origen && updated.origen.includes('cliente:')) {
+        const parts = updated.origen.split('cliente:');
+        finalCid = parseInt(parts[1], 10) || null;
+      }
+      if (finalCid) {
+        this.partnerSyncService
+          .syncDomicilioTomado(updated.orderIdWA, {
+            clienteId: finalCid,
+            clienteNombre: updated.clienteNombre,
+            estado: estadoFinal,
+            atendidoPor: updated.atendidoPor || 'POS',
+          })
+          .catch((err) =>
+            this.logger.warn(`No se pudo comunicar domicilio tomado #${updated.orderIdWA} al partner: ${err.message}`)
+          );
+      }
+    }
+
     return updated;
+  }
+
+  /**
+   * Recibe la notificación de que el domicilio fue tomado y mapeado con un cliente desde la app partner.
+   * Actualiza el registro local para que ambas apps muestren exactamente la misma tarjeta de cliente y estado.
+   */
+  async handleSyncDomicilioTomado(dto: {
+    orderIdWA: string;
+    clienteId: number;
+    clienteNombre?: string | null;
+    estado?: string;
+    atendidoPor?: string | null;
+  }) {
+    if (!dto.orderIdWA || !dto.clienteId) {
+      throw new BadRequestException('orderIdWA y clienteId son requeridos');
+    }
+
+    this.logger.log(`[SYNC DOMICILIO TOMADO] Domicilio #${dto.orderIdWA} tomado con cliente #${dto.clienteId} (${dto.clienteNombre})`);
+
+    // 1. Asegurar que el cliente exista localmente con ese mismo ID
+    let localCli = await this.prisma.clientes.findUnique({
+      where: { IDcliente: Number(dto.clienteId) },
+    });
+
+    if (!localCli) {
+      try {
+        localCli = await this.prisma.clientes.create({
+          data: {
+            IDcliente: Number(dto.clienteId),
+            nombre: dto.clienteNombre || 'Cliente WhatsApp',
+            contador: 0,
+            compras: '0',
+            observaciones: 'Adoptado desde partner al tomar domicilio.',
+            isActive: true,
+            fecha_y_hora_creacion: new Date(),
+          },
+        });
+      } catch (e: any) {
+        this.logger.warn(`No se pudo auto-crear cliente local para sync domicilio: ${e.message}`);
+      }
+    }
+
+    // 2. Actualizar el registro local en DomicilioWA
+    const dom = await this.prisma.domicilioWA.findUnique({
+      where: { orderIdWA: dto.orderIdWA },
+    });
+
+    if (dom) {
+      const nuevoOrigen = `whatsapp_bot:cliente:${dto.clienteId}`;
+      const dataToUpdate: any = {
+        origen: nuevoOrigen,
+        clienteNombre: dto.clienteNombre || dom.clienteNombre,
+      };
+
+      // Si aún estaba RECIENTE y el partner lo tomó, actualizar estado
+      if (dom.estado === 'RECIENTE' && dto.estado && dto.estado !== 'RECIENTE') {
+        dataToUpdate.estado = dto.estado;
+        dataToUpdate.atendidoAt = new Date();
+        dataToUpdate.atendidoPor = dto.atendidoPor || 'Partner POS';
+      }
+
+      const updated = await this.prisma.domicilioWA.update({
+        where: { orderIdWA: dto.orderIdWA },
+        data: dataToUpdate,
+      });
+
+      this.appGateway.emitDomicilioActualizado(updated);
+      return { success: true, domicilio: updated };
+    }
+
+    return { success: false, message: 'Domicilio no encontrado en este local' };
   }
 
   async remove(id: string) {

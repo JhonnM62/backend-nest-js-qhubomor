@@ -1,34 +1,61 @@
-import { Injectable, NotFoundException, BadRequestException, Optional, Inject, forwardRef } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, Optional, Inject, forwardRef, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateClienteDto, UpdateClienteDto, ClienteQueryDto, ReclamarMisionDto, SincronizarUsuarioDto, EliminarCuentaFidelidadDto, ActualizarCedulaWebDto, SincronizarCompraExternaDto, VincularIdentificadorDto } from './dto/cliente.dto';
 import { Prisma } from '@prisma/client';
 import { AppGateway } from '../websocket/app.gateway';
 import { AiService } from '../ai/ai.service';
 import { VentasService } from '../ventas/ventas.service';
+import { PartnerSyncService, SyncClientePayload, SyncSellosPayload } from './partner-sync.service';
 import * as crypto from 'crypto';
 
 @Injectable()
 export class ClientesService {
+  private readonly logger = new Logger(ClientesService.name);
+
   constructor(
     private prisma: PrismaService,
     @Optional() private appGateway?: AppGateway,
     @Optional() @Inject(forwardRef(() => AiService)) private aiService?: AiService,
     @Optional() @Inject(forwardRef(() => VentasService)) private ventasService?: VentasService,
+    @Optional() private partnerSyncService?: PartnerSyncService,
   ) {}
 
-  async create(createClienteDto: CreateClienteDto) {
+  async create(createClienteDto: CreateClienteDto, isSyncRequest = false) {
     let finalId = createClienteDto.IDcliente;
 
     if (!finalId) {
-      // Generar un ID aleatorio de 4 a 5 dígitos que no exista
-      let isUnique = false;
-      while (!isUnique) {
-        finalId = Math.floor(1000 + Math.random() * 90000); // 1000 a 99999
-        const exists = await this.prisma.clientes.findUnique({
-          where: { IDcliente: finalId }
-        });
-        if (!exists) {
-          isUnique = true;
+      // 1. Antes de inventar un ID, consultar si el cliente ya existe en alguna app partner
+      if (this.partnerSyncService) {
+        try {
+          const partnerCli = await this.partnerSyncService.buscarClienteEnPartners(
+            createClienteDto.whatsapp,
+            createClienteDto.cedula ? String(createClienteDto.cedula) : null
+          );
+          if (partnerCli && partnerCli.IDcliente) {
+            finalId = Number(partnerCli.IDcliente);
+            this.logger.log(`ID #${finalId} adoptado desde partner para nuevo cliente local`);
+          }
+        } catch (e: any) {
+          this.logger.warn(`Error buscando cliente en partner: ${e.message}`);
+        }
+      }
+
+      // 2. Si no existe en el partner, generar ID determinista a partir de teléfono o cédula
+      if (!finalId) {
+        if (this.partnerSyncService) {
+          finalId = this.partnerSyncService.generarIdDeterminista(
+            createClienteDto.whatsapp,
+            createClienteDto.cedula ? String(createClienteDto.cedula) : null
+          );
+        } else {
+          finalId = Math.floor(100000 + Math.random() * 900000);
+        }
+
+        // Verificar que no colisione localmente
+        let exists = await this.prisma.clientes.findUnique({ where: { IDcliente: finalId } });
+        while (exists) {
+          finalId = Math.floor(100000 + Math.random() * 900000);
+          exists = await this.prisma.clientes.findUnique({ where: { IDcliente: finalId } });
         }
       }
     } else {
@@ -57,7 +84,7 @@ export class ClientesService {
       }
     }
 
-    return this.prisma.clientes.create({
+    const created = await this.prisma.clientes.create({
       data: {
         ...rest,
         cedula: cedula ? BigInt(cedula) : null,
@@ -65,6 +92,15 @@ export class ClientesService {
         fecha_y_hora_creacion: new Date(),
       },
     });
+
+    // 3. Si no es una petición que ya proviene de un sync, sincronizar hacia el partner
+    if (!isSyncRequest && this.partnerSyncService) {
+      this.partnerSyncService.syncUpsertCliente(created).catch((err) =>
+        this.logger.warn(`No se pudo sincronizar creación de cliente #${created.IDcliente}: ${err.message}`)
+      );
+    }
+
+    return created;
   }
 
   async findAll(query: any) {
@@ -228,7 +264,7 @@ export class ClientesService {
     };
   }
 
-  async update(id: number, updateClienteDto: UpdateClienteDto) {
+  async update(id: number, updateClienteDto: UpdateClienteDto, isSyncRequest = false) {
     const cliente = await this.prisma.clientes.findUnique({
       where: { IDcliente: id },
     });
@@ -276,13 +312,20 @@ export class ClientesService {
       }
     }
 
+    // Sincronizar actualización con partner apps
+    if (!isSyncRequest && this.partnerSyncService) {
+      this.partnerSyncService.syncUpdateCliente(id, updateClienteDto).catch((err) =>
+        this.logger.warn(`No se pudo enviar syncUpdateCliente de #${id}: ${err.message}`)
+      );
+    }
+
     return {
       ...updated,
       cedula: updated.cedula ? Number(updated.cedula) : null,
     };
   }
 
-  async remove(id: number) {
+  async remove(id: number, isSyncRequest = false) {
     const cliente = await this.prisma.clientes.findUnique({
       where: { IDcliente: id },
     });
@@ -291,10 +334,230 @@ export class ClientesService {
       throw new NotFoundException(`Cliente con ID ${id} no encontrado`);
     }
 
-    return this.prisma.clientes.update({
+    const removed = await this.prisma.clientes.update({
       where: { IDcliente: id },
       data: { isActive: false, fecha_y_hora_actualizacion: new Date() }
     });
+
+    if (!isSyncRequest && this.partnerSyncService) {
+      this.partnerSyncService.syncRemoveCliente(id).catch((err) =>
+        this.logger.warn(`No se pudo enviar syncRemoveCliente de #${id}: ${err.message}`)
+      );
+    }
+
+    return removed;
+  }
+
+  // ─── Controladores de eventos de Sincronización Inter-POS ───
+
+  /**
+   * Recibe la creación o unificación de un cliente desde otra app.
+   * Si ya existía localmente con otro ID pero mismo teléfono/cédula, reconcilia y unifica el ID.
+   */
+  async handleSyncUpsert(payload: SyncClientePayload, origin?: string) {
+    const incomingId = Number(payload.IDcliente);
+    if (!incomingId) throw new BadRequestException('IDcliente es requerido');
+
+    const cleanPhone = payload.whatsapp ? payload.whatsapp.replace(/\D/g, '') : '';
+    const cleanCedula = payload.cedula ? String(payload.cedula).replace(/\D/g, '') : '';
+
+    this.logger.log(`[SYNC UPSERT] Procesando cliente #${incomingId} (${payload.nombre}) desde origen "${origin || 'desconocido'}"`);
+
+    // 1. Buscar si ya existe por IDcliente exacto
+    let cliById = await this.prisma.clientes.findUnique({
+      where: { IDcliente: incomingId },
+    });
+
+    // 2. Buscar si existe por teléfono o cédula con otro ID diferente
+    const orCond: Prisma.ClientesWhereInput[] = [];
+    if (cleanCedula && !isNaN(Number(cleanCedula))) {
+      orCond.push({ cedula: BigInt(cleanCedula) });
+    }
+    if (cleanPhone) {
+      orCond.push({ whatsapp: { contains: cleanPhone } });
+    }
+
+    const cliByPhoneOrCedula = orCond.length > 0
+      ? await this.prisma.clientes.findFirst({
+          where: { isActive: true, OR: orCond },
+        })
+      : null;
+
+    if (cliByPhoneOrCedula && cliByPhoneOrCedula.IDcliente !== incomingId) {
+      // Reconciliación: el cliente existía con otro ID (ej. 398028) y ahora se adopta el ID canónico (528419)
+      const oldId = cliByPhoneOrCedula.IDcliente;
+      this.logger.log(`[SYNC MERGE] Unificando cliente local #${oldId} hacia el ID canónico #${incomingId}`);
+
+      if (cliById) {
+        // incomingId ya existía, migrar ventas del oldId al incomingId
+        await this.prisma.ventas.updateMany({
+          where: { clienteId: oldId },
+          data: { clienteId: incomingId },
+        });
+        await this.prisma.domicilioWA.updateMany({
+          where: { origen: { contains: `cliente:${oldId}` } },
+          data: { origen: `whatsapp_bot:cliente:${incomingId}` },
+        });
+        await this.prisma.clientes.delete({
+          where: { IDcliente: oldId },
+        }).catch(() => {});
+      } else {
+        // incomingId es nuevo en esta DB: migrar en transacción segura
+        await this.prisma.$transaction(async (tx) => {
+          await tx.clientes.create({
+            data: {
+              IDcliente: incomingId,
+              nombre: payload.nombre || cliByPhoneOrCedula.nombre,
+              cedula: cleanCedula && !isNaN(Number(cleanCedula)) ? BigInt(cleanCedula) : cliByPhoneOrCedula.cedula,
+              whatsapp: cleanPhone || cliByPhoneOrCedula.whatsapp,
+              direccion: payload.direccion || cliByPhoneOrCedula.direccion,
+              contador: payload.contador ?? cliByPhoneOrCedula.contador,
+              compras: payload.compras ?? cliByPhoneOrCedula.compras,
+              observaciones: payload.observaciones || cliByPhoneOrCedula.observaciones,
+              isActive: true,
+            },
+          });
+          await tx.ventas.updateMany({
+            where: { clienteId: oldId },
+            data: { clienteId: incomingId },
+          });
+          await tx.domicilioWA.updateMany({
+            where: { origen: { contains: `cliente:${oldId}` } },
+            data: { origen: `whatsapp_bot:cliente:${incomingId}` },
+          });
+          await tx.clientes.delete({
+            where: { IDcliente: oldId },
+          });
+        });
+      }
+      cliById = await this.prisma.clientes.findUnique({ where: { IDcliente: incomingId } });
+    }
+
+    let finalCliente: any;
+    if (cliById) {
+      // Actualizar cliente existente
+      finalCliente = await this.prisma.clientes.update({
+        where: { IDcliente: incomingId },
+        data: {
+          nombre: payload.nombre || cliById.nombre,
+          cedula: cleanCedula && !isNaN(Number(cleanCedula)) ? BigInt(cleanCedula) : cliById.cedula,
+          whatsapp: cleanPhone || cliById.whatsapp,
+          direccion: payload.direccion || cliById.direccion,
+          contador: payload.contador !== undefined ? Number(payload.contador) : cliById.contador,
+          compras: payload.compras !== undefined ? String(payload.compras) : cliById.compras,
+          isActive: payload.isActive ?? true,
+          fecha_y_hora_actualizacion: new Date(),
+        },
+      });
+    } else {
+      // Crear nuevo cliente con el ID exacto del partner
+      finalCliente = await this.prisma.clientes.create({
+        data: {
+          IDcliente: incomingId,
+          nombre: payload.nombre || 'Cliente',
+          cedula: cleanCedula && !isNaN(Number(cleanCedula)) ? BigInt(cleanCedula) : null,
+          whatsapp: cleanPhone || null,
+          direccion: payload.direccion || null,
+          contador: Number(payload.contador || 0),
+          compras: String(payload.compras || '0'),
+          observaciones: payload.observaciones || `Sincronizado desde app partner (${origin || 'POS'}).`,
+          isActive: true,
+          fecha_y_hora_creacion: new Date(),
+        },
+      });
+    }
+
+    // Emitir eventos en tiempo real
+    if (this.appGateway) {
+      try {
+        this.appGateway.emitFidelidadActualizada({
+          clienteId: finalCliente.IDcliente,
+          cedula: finalCliente.cedula ? finalCliente.cedula.toString() : null,
+          nombre: finalCliente.nombre,
+          contador: finalCliente.contador || 0,
+          comprasTotales: parseInt(finalCliente.compras || '0', 10),
+          hito5: (finalCliente.contador || 0) >= 5,
+          hito10: (finalCliente.contador || 0) >= 10,
+          granizadoDisponible: (finalCliente.contador || 0) >= 10,
+          descuentoIntermedioDisponible: (finalCliente.contador || 0) >= 5,
+          timestamp: new Date().toISOString(),
+        });
+        this.appGateway.server.emit('clienteActualizado', {
+          IDcliente: finalCliente.IDcliente,
+          nombre: finalCliente.nombre,
+          cedula: finalCliente.cedula ? finalCliente.cedula.toString() : null,
+        });
+      } catch (e) {}
+    }
+
+    return { success: true, cliente: finalCliente };
+  }
+
+  /**
+   * Recibe la actualización de sellos y fidelidad desde otra app.
+   */
+  async handleSyncSellos(payload: SyncSellosPayload, origin?: string) {
+    const cid = Number(payload.clienteId);
+    if (!cid) throw new BadRequestException('clienteId es requerido');
+
+    this.logger.log(`[SYNC SELLOS] Actualizando sellos de cliente #${cid} a ${payload.contador}/10 desde "${origin || 'partner'}"`);
+
+    const cliente = await this.prisma.clientes.findUnique({
+      where: { IDcliente: cid },
+    });
+
+    if (!cliente) {
+      this.logger.warn(`[SYNC SELLOS] Cliente #${cid} no existe localmente, intentando adoptarlo...`);
+      return { success: false, message: `Cliente #${cid} no encontrado localmente` };
+    }
+
+    const updated = await this.prisma.clientes.update({
+      where: { IDcliente: cid },
+      data: {
+        contador: Number(payload.contador || 0),
+        compras: payload.comprasTotales !== undefined ? String(payload.comprasTotales) : cliente.compras,
+        fecha_y_hora_actualizacion: new Date(),
+      },
+    });
+
+    if (this.appGateway) {
+      try {
+        this.appGateway.emitFidelidadActualizada({
+          clienteId: updated.IDcliente,
+          cedula: updated.cedula ? updated.cedula.toString() : null,
+          nombre: updated.nombre,
+          contador: updated.contador || 0,
+          comprasTotales: parseInt(updated.compras || '0', 10),
+          hito5: (updated.contador || 0) >= 5,
+          hito10: (updated.contador || 0) >= 10,
+          granizadoDisponible: (updated.contador || 0) >= 10,
+          descuentoIntermedioDisponible: (updated.contador || 0) >= 5,
+          timestamp: new Date().toISOString(),
+        });
+      } catch (e) {}
+    }
+
+    return { success: true, IDcliente: updated.IDcliente, contador: updated.contador };
+  }
+
+  /**
+   * Recibe la actualización de campos de cliente desde otra app.
+   */
+  async handleSyncUpdate(id: number, data: any, origin?: string) {
+    const cliente = await this.prisma.clientes.findUnique({ where: { IDcliente: id } });
+    if (!cliente) return { success: false, message: 'Cliente no encontrado' };
+
+    return this.update(id, data, true);
+  }
+
+  /**
+   * Recibe la eliminación/desactivación de cliente desde otra app.
+   */
+  async handleSyncRemove(id: number, origin?: string) {
+    const cliente = await this.prisma.clientes.findUnique({ where: { IDcliente: id } });
+    if (!cliente) return { success: false, message: 'Cliente no encontrado' };
+
+    return this.remove(id, true);
   }
 
   async sincronizarUsuario(dto: SincronizarUsuarioDto) {
