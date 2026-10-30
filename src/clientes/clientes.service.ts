@@ -829,9 +829,18 @@ export class ClientesService {
     const orConds: Prisma.ClientesWhereInput[] = [
       { whatsapp: { contains: cleanId } },
     ];
+    if (cleanId.length === 12 && cleanId.startsWith('57')) {
+      orConds.push({ whatsapp: { contains: cleanId.slice(2) } });
+    }
+    if (cleanId.length === 10 && cleanId.startsWith('3')) {
+      orConds.push({ whatsapp: { contains: `57${cleanId}` } });
+    }
     if (!isNaN(Number(cleanId))) {
       orConds.push({ cedula: BigInt(cleanId) });
-      orConds.push({ IDcliente: Number(cleanId) });
+      const numId = Number(cleanId);
+      if (numId > 0 && numId <= 2147483647) {
+        orConds.push({ IDcliente: numId });
+      }
     }
 
     const existingClient = await this.prisma.clientes.findFirst({
@@ -842,99 +851,52 @@ export class ClientesService {
       },
     });
 
-    let targetClient: any;
-    let merged = false;
-
-    if (existingClient) {
-      // Caso A: Existe una cuenta previa con sellos/compras -> FUSIONAR
-      const obs = existingClient.observaciones || '';
-      const updatedObs = obs.includes('[VINCULADO_WEB]') ? obs : `${obs} [VINCULADO_WEB]`.trim();
-      
-      const updateData: Prisma.ClientesUpdateInput = {
-        email: rawEmail,
-        observaciones: updatedObs,
-        fecha_y_hora_actualizacion: new Date(),
-      };
-
-      if (dto.nombre && (!existingClient.nombre || existingClient.nombre.startsWith('Cliente'))) {
-        updateData.nombre = dto.nombre.trim();
-      }
-
-      if (cleanId.length === 10 && cleanId.startsWith('3')) {
-        updateData.whatsapp = cleanId;
-      } else if (!existingClient.cedula && !isNaN(Number(cleanId))) {
-        updateData.cedula = BigInt(cleanId);
-      }
-
-      targetClient = await this.prisma.clientes.update({
-        where: { IDcliente: existingClient.IDcliente },
-        data: updateData,
-      });
-
-      // Si existía un cliente web temporal vacío con ese mismo email, desactivarlo
-      if (currentClient && currentClient.IDcliente !== existingClient.IDcliente) {
-        try {
-          await this.prisma.clientes.update({
-            where: { IDcliente: currentClient.IDcliente },
-            data: {
-              isActive: false,
-              email: null,
-              observaciones: `${currentClient.observaciones || ''} [FUSIONADO_CON:${existingClient.IDcliente}]`.trim(),
-            },
-          });
-        } catch (e) {}
-      }
-
-      merged = true;
-    } else if (currentClient) {
-      // Caso B: El cliente de Google ya existía y solo le agregamos el WhatsApp o Cédula
-      const obs = currentClient.observaciones || '';
-      const updateData: Prisma.ClientesUpdateInput = {
-        observaciones: obs.includes('[VINCULADO_WEB]') ? obs : `${obs} [VINCULADO_WEB]`.trim(),
-        fecha_y_hora_actualizacion: new Date(),
-      };
-
-      if (cleanId.length === 10 && cleanId.startsWith('3')) {
-        updateData.whatsapp = cleanId;
-      } else {
-        updateData.cedula = BigInt(cleanId);
-      }
-
-      targetClient = await this.prisma.clientes.update({
-        where: { IDcliente: currentClient.IDcliente },
-        data: updateData,
-      });
-    } else {
-      // Caso C: No existía ninguno, creamos el cliente directamente con su email y WhatsApp/Cédula
-      let finalId = Math.floor(10000 + Math.random() * 900000);
-      let isUnique = false;
-      while (!isUnique) {
-        const dup = await this.prisma.clientes.findUnique({ where: { IDcliente: finalId } });
-        if (!dup) isUnique = true;
-        else finalId = Math.floor(10000 + Math.random() * 900000);
-      }
-
-      const createData: Prisma.ClientesUncheckedCreateInput = {
-        IDcliente: finalId,
-        nombre: dto.nombre?.trim() || 'Cliente VIP',
-        email: rawEmail,
-        contador: 0,
-        compras: '0',
-        isActive: true,
-        observaciones: 'Cliente registrado desde la web con vinculación inicial [VINCULADO_WEB].',
-        fecha_y_hora_creacion: new Date(),
-      };
-
-      if (cleanId.length === 10 && cleanId.startsWith('3')) {
-        createData.whatsapp = cleanId;
-      } else {
-        createData.cedula = BigInt(cleanId);
-      }
-
-      targetClient = await this.prisma.clientes.create({
-        data: createData,
-      });
+    if (!existingClient) {
+      throw new NotFoundException(
+        'No se ha encontrado en la base de datos ninguna cuenta con ese número de WhatsApp o identificación. Revisa tu número de WhatsApp o identificación.'
+      );
     }
+
+    // Cuenta previa encontrada -> FUSIONAR y unificar pedidos/sellos
+    const obs = existingClient.observaciones || '';
+    const updatedObs = obs.includes('[VINCULADO_WEB]') ? obs : `${obs} [VINCULADO_WEB]`.trim();
+    
+    const updateData: Prisma.ClientesUpdateInput = {
+      email: rawEmail,
+      observaciones: updatedObs,
+      fecha_y_hora_actualizacion: new Date(),
+    };
+
+    if (dto.nombre && (!existingClient.nombre || existingClient.nombre.startsWith('Cliente'))) {
+      updateData.nombre = dto.nombre.trim();
+    }
+
+    if (cleanId.length === 10 && cleanId.startsWith('3')) {
+      updateData.whatsapp = cleanId;
+    } else if (!existingClient.cedula && !isNaN(Number(cleanId))) {
+      updateData.cedula = BigInt(cleanId);
+    }
+
+    const targetClient = await this.prisma.clientes.update({
+      where: { IDcliente: existingClient.IDcliente },
+      data: updateData,
+    });
+
+    // Si existía un cliente web temporal vacío con ese mismo email, desactivarlo
+    if (currentClient && currentClient.IDcliente !== existingClient.IDcliente) {
+      try {
+        await this.prisma.clientes.update({
+          where: { IDcliente: currentClient.IDcliente },
+          data: {
+            isActive: false,
+            email: null,
+            observaciones: `${currentClient.observaciones || ''} [FUSIONADO_CON:${existingClient.IDcliente}]`.trim(),
+          },
+        });
+      } catch (e) {}
+    }
+
+    const merged = true;
 
     // 4. Recalcular fidelidad si VentasService está disponible
     if (this.ventasService) {
