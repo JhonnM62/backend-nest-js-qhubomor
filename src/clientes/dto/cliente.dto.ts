@@ -202,3 +202,20 @@ export class SincronizarCompraExternaDto {
   @IsString()
   origen?: string;
 }
+
+export class VincularIdentificadorDto {
+  @ApiProperty({ description: 'Email del usuario autenticado en la web' })
+  @IsNotEmpty()
+  @IsString()
+  email: string;
+
+  @ApiProperty({ description: 'Número de WhatsApp, celular o cédula a vincular' })
+  @IsNotEmpty()
+  @IsString()
+  identificador: string;
+
+  @ApiPropertyOptional({ description: 'Nombre del usuario' })
+  @IsOptional()
+  @IsString()
+  nombre?: string;
+}

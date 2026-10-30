@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { ClientesService } from './clientes.service';
-import { CreateClienteDto, UpdateClienteDto, ClienteQueryDto, ReclamarMisionDto, SincronizarUsuarioDto, EliminarCuentaFidelidadDto, ActualizarCedulaWebDto, SincronizarCompraExternaDto } from './dto/cliente.dto';
+import { CreateClienteDto, UpdateClienteDto, ClienteQueryDto, ReclamarMisionDto, SincronizarUsuarioDto, EliminarCuentaFidelidadDto, ActualizarCedulaWebDto, SincronizarCompraExternaDto, VincularIdentificadorDto } from './dto/cliente.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { Public } from '../common/decorators/public.decorator';
 
@@ -70,6 +70,14 @@ export class ClientesController {
   }
 
   @Public()
+  
+  @Public()
+  @Post('fidelidad/vincular-identificador')
+  @ApiOperation({ summary: 'Vincular WhatsApp o Cédula a la cuenta web unificando puntos si ya existían' })
+  vincularIdentificador(@Body() dto: VincularIdentificadorDto) {
+    return this.clientesService.vincularIdentificador(dto);
+  }
+
   @Post('fidelidad/sincronizar-compra-externa')
   @ApiOperation({ summary: 'Sincronizar compras de comida realizadas en aplicaciones o restaurantes externos para sumar/restar sellos' })
   sincronizarCompraExterna(@Body() dto: SincronizarCompraExternaDto) {
