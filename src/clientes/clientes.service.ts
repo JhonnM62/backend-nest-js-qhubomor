@@ -852,6 +852,28 @@ export class ClientesService {
     });
 
     if (!existingClient) {
+      if (currentClient) {
+        const yaTieneWhatsapp = currentClient.whatsapp && (
+          currentClient.whatsapp.includes(cleanId) ||
+          (cleanId.length === 10 && currentClient.whatsapp.includes(`57${cleanId}`)) ||
+          (cleanId.length === 12 && cleanId.startsWith('57') && currentClient.whatsapp.includes(cleanId.slice(2)))
+        );
+        const yaTieneCedula = currentClient.cedula && String(currentClient.cedula) === cleanId;
+        const yaTieneId = String(currentClient.IDcliente) === cleanId;
+        if (yaTieneWhatsapp || yaTieneCedula || yaTieneId) {
+          return {
+            success: true,
+            message: 'Tu cuenta ya se encuentra vinculada con este identificador.',
+            cliente: {
+              IDcliente: currentClient.IDcliente,
+              nombre: currentClient.nombre,
+              contador: currentClient.contador,
+            },
+            merged: false,
+          };
+        }
+      }
+
       throw new NotFoundException(
         'No se ha encontrado en la base de datos ninguna cuenta con ese número de WhatsApp o identificación. Revisa tu número de WhatsApp o identificación.'
       );
