@@ -1609,7 +1609,15 @@ export class VentasService {
       },
     });
 
-    if (estado === 'PAGADO' || estado === 'COBRADO') {
+    const isPaid = estado === 'PAGADO' || estado === 'COBRADO' || 
+      (estado === 'ENTREGADO' && (
+        (venta.estado || '').toUpperCase() === 'PAGADO' ||
+        (venta.medioDePago && !['PENDIENTE', 'NO ASIGNADO', 'SIN MEDIO', 'NO_ASIGNADO', 'SIN_MEDIO'].includes((venta.medioDePago || '').toUpperCase().trim())) ||
+        Number(venta.efectivoRecibido || 0) > 0 ||
+        Number(venta.valorDeTransferencia || 0) > 0
+      ));
+
+    if (isPaid) {
       try {
         await this.prisma.domicilioWA.updateMany({
           where: { ventaId: id },
@@ -1617,6 +1625,9 @@ export class VentasService {
         });
       } catch (e) {}
       this.dispararSincronizacionFidelidadExterna(id, 'PAGADO').catch(() => {});
+      if (venta.clienteId) {
+        this.recalcularFidelidadCliente(venta.clienteId).catch(() => {});
+      }
     } else if (estado === 'CANCELADO' || estado === 'ANULADO') {
       this.dispararSincronizacionFidelidadExterna(id, 'ANULADO').catch(() => {});
       try {
@@ -1718,7 +1729,9 @@ export class VentasService {
       throw new NotFoundException(`Venta con ID ${id} no encontrada`);
     }
 
-    const estadoUpdate = updateData.estado || 'PAGADO';
+    const prevEstUpper = (venta.estado || '').toUpperCase();
+    const yaEstabaEntregado = prevEstUpper === 'ENTREGADO';
+    const estadoUpdate = updateData.estado || (yaEstabaEntregado ? 'ENTREGADO' : 'PAGADO');
     const nuevoRegistro = this.appendTiempoLog(venta.registroDeTiempo, estadoUpdate);
 
     let cocinaInicioAtUpdate = venta.cocinaInicioAt;
@@ -1808,8 +1821,11 @@ export class VentasService {
       },
     });
 
+    const isPaid = ['PAGADO', 'COBRADO'].includes(estadoUpdate) ||
+      (estadoUpdate === 'ENTREGADO' && updateData.medioDePago && !['PENDIENTE', 'NO ASIGNADO', 'SIN MEDIO', 'NO_ASIGNADO', 'SIN_MEDIO'].includes((updateData.medioDePago || '').toUpperCase().trim()));
+
     const effectiveClienteId = (updateData.clienteId ? Number(updateData.clienteId) : null) || venta.clienteId;
-    if (effectiveClienteId && (estadoUpdate === 'PAGADO' || estadoUpdate === 'COBRADO')) {
+    if (effectiveClienteId && isPaid) {
       try {
         await this.recalcularFidelidadCliente(effectiveClienteId);
       } catch (err: any) {
@@ -1827,13 +1843,14 @@ export class VentasService {
       },
     });
 
-    if (estadoUpdate === 'PAGADO' || estadoUpdate === 'COBRADO') {
+    if (isPaid) {
       try {
         await this.prisma.domicilioWA.updateMany({
           where: { ventaId: id },
           data: { estado: 'COBRADO' },
         });
       } catch (e) {}
+      this.dispararSincronizacionFidelidadExterna(id, 'PAGADO').catch(() => {});
     }
 
     this.appGateway.emitToVentas(SocketEvent.REFRESH_VENTAS, { action: 'updateEstado', venta: updated });
