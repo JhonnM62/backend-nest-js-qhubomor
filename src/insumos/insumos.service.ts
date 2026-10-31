@@ -77,7 +77,8 @@ export class InsumosService {
       insumo.IDalimentos,
       'entrada',
       insumo.cantidad || 0,
-      'Creación de insumo'
+      'Creación de insumo',
+      Number(insumo.disponible) || 0
     );
 
     this.appGateway.emitToInsumos(SocketEvent.REFRESH_INSUMOS, { action: 'create', data: insumo });
@@ -267,7 +268,8 @@ export class InsumosService {
         id,
         tipo,
         Math.abs(diferencia),
-        `Ajuste manual de stock: ${cantidadAnterior} → ${cantidadNueva}`
+        `Ajuste manual de stock: ${cantidadAnterior} → ${cantidadNueva}`,
+        cantidadNueva
       );
     }
 
@@ -440,7 +442,7 @@ export class InsumosService {
       return { insumoActualizado, nuevaCantidad, motivo };
     });
 
-    await this.registrarMovimiento(id, tipo, decimalCantidad, result.motivo);
+    await this.registrarMovimiento(id, tipo, decimalCantidad, result.motivo, result.nuevaCantidad);
 
     this.appGateway.emitToInsumos(SocketEvent.REFRESH_INSUMOS, { action: 'movimientoStock', data: result.insumoActualizado });
     this.verificarAlertasStock(result.insumoActualizado);
@@ -629,11 +631,16 @@ export class InsumosService {
     insumoId: string,
     tipo: 'entrada' | 'salida' | 'ajuste',
     cantidad: number,
-    observacion: string
+    observacion: string,
+    stockResultante?: number
   ) {
     const insumo = await this.prisma.insumos.findUnique({
       where: { IDalimentos: insumoId },
     });
+
+    const cantInsumos = stockResultante !== undefined
+      ? Math.round(Number(stockResultante))
+      : (insumo ? Math.round(Number(insumo.disponible)) : 0);
 
     await this.prisma.orderinventario.create({
       data: {
@@ -646,6 +653,7 @@ export class InsumosService {
         disponible: tipo === 'entrada' ? 'Si' : 'No',
         fechaYHora: new Date(),
         seCompro: tipo === 'entrada' ? 'Si' : 'No',
+        cantInsumos: cantInsumos,
       },
     });
   }
@@ -677,7 +685,7 @@ export class InsumosService {
       },
     });
 
-    await this.registrarMovimiento(insumoId, 'salida', decimalCantidad, observacion);
+    await this.registrarMovimiento(insumoId, 'salida', decimalCantidad, observacion, nuevaCantidad);
 
     this.appGateway.emitToInsumos(SocketEvent.REFRESH_INSUMOS, { action: 'descontarStock', id: insumoId, cantidadActual: nuevaCantidad });
     this.verificarAlertasStock(insumoActualizado);
@@ -721,7 +729,7 @@ export class InsumosService {
       data: dataToUpdate,
     });
 
-    await this.registrarMovimiento(insumoId, 'entrada', decimalCantidad, observacion);
+    await this.registrarMovimiento(insumoId, 'entrada', decimalCantidad, observacion, nuevaCantidad);
 
     this.appGateway.emitToInsumos(SocketEvent.REFRESH_INSUMOS, { action: 'agregarStock', id: insumoId, cantidadActual: nuevaCantidad });
     this.verificarAlertasStock(insumoActualizado);
