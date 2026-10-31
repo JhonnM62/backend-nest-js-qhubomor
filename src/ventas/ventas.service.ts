@@ -420,59 +420,90 @@ export class VentasService {
       return /tapa|caja|vaso|empaque|desechable|bolsa|envase|cubierto/i.test(text);
     };
 
-    // 3. Extraer eventos de compra válidos (solo productos facturados > $0, excluyendo empaques)
-    const eventosCompras: number[] = [];
+    // Helper para identificar si un ítem o venta es cortesía o redención gratuita ($0)
+    const esItemGratisORedencion = (item: any, venta: any) => {
+      // 1. Si la venta completa se cobró en $0 (redención 100% gratuita o cortesía)
+      if (Number(venta.totalInput || 0) <= 0) return true;
+
+      // 2. Si el precio facturado del ítem es 0 o negativo
+      const precioFacturado = Number(
+        item.precioTotal !== null && item.precioTotal !== undefined
+          ? item.precioTotal
+          : item.precio
+      );
+      if (precioFacturado <= 0) return true;
+
+      // 3. Si en comentarios o modificadores tiene indicación de regalo/premio/fidelidad
+      const coment = `${item.comentarios || ''} ${item.nombre || ''}`.toLowerCase();
+      if (/granizado gratis|premio fidelidad|premio 10\/10|cortesia/i.test(coment)) return true;
+
+      return false;
+    };
+
+    // 3. Procesar eventos de compra válidos y redenciones de premios
+    let totalItemsVentas = 0;
+    let contador = sellosMisiones;
+    if (contador > 5) contador = 5;
 
     for (const v of ventasActivas) {
-      const itemsValidos = (v.ordenVentas || []).filter((item) => {
-        const precio = Number(item.precio || item.precioTotal || 0);
-        // Regla 1: Precios $0 NO suman sellos (ej. granizados promo 2x2 por comida)
-        if (precio <= 0) return false;
+      let cantValida = 0;
+      let esRedencion = false;
 
-        // Regla 2: Desechables y empaques NO suman sellos
+      for (const item of (v.ordenVentas || [])) {
         if (esDesechableOEmpaque(item.nombre, item.categoria || item.categoriaProducto)) {
-          return false;
+          continue;
         }
 
-        return true;
-      });
+        if (esItemGratisORedencion(item, v)) {
+          esRedencion = true;
+          continue;
+        }
 
-      const cantValida = itemsValidos.reduce(
-        (sum, item) => sum + (Number(item.cantidad) || 1),
-        0
-      );
-      if (cantValida > 0) {
-        eventosCompras.push(cantValida);
+        cantValida += (Number(item.cantidad) || 1);
+      }
+
+      // Si la venta fue exclusivamente redención de premio / cortesía $0
+      if (esRedencion && cantValida === 0) {
+        // Redención de Granizado Gratis: confirma las 10 compras alcanzadas
+        contador = 10;
+      } else {
+        // Si el cliente ya había alcanzado 10 compras, la siguiente compra
+        // reinicia el ciclo desde 0 + los productos de la nueva compra
+        if (contador >= 10) {
+          contador = 0;
+        }
+
+        if (cantValida > 0) {
+          totalItemsVentas += cantValida;
+          const suma = contador + cantValida;
+          if (contador < 5 && suma > 5) {
+            contador = 5; // Pausa en checkpoint 5
+          } else if (suma >= 10) {
+            contador = 10; // Queda listo en 10
+          } else {
+            contador = suma;
+          }
+        }
       }
     }
 
     // Agregar compras externas de comida sincronizadas
     for (const cantExt of comprasExternas) {
-      eventosCompras.push(cantExt);
-    }
-
-    const totalItemsVentas = eventosCompras.reduce((s, c) => s + c, 0);
-    const comprasTotales = sellosMisiones + totalItemsVentas;
-
-    // 4. Calcular el progreso del ciclo del contador (0 a 10 con checkpoints en 5 y 10)
-    let contador = sellosMisiones;
-    if (contador > 5) contador = 5;
-
-    for (const cantidad of eventosCompras) {
       if (contador >= 10) {
         contador = 0;
       }
-
-      const suma = contador + cantidad;
-
+      totalItemsVentas += cantExt;
+      const suma = contador + cantExt;
       if (contador < 5 && suma > 5) {
-        contador = 5; // Pausa en checkpoint 5
-      } else if (suma > 10) {
-        contador = 10; // Pausa en checkpoint 10
+        contador = 5;
+      } else if (suma >= 10) {
+        contador = 10;
       } else {
         contador = suma;
       }
     }
+
+    const comprasTotales = sellosMisiones + totalItemsVentas;
 
     // 5. Guardar en la base de datos ERP
     await this.prisma.clientes.update({
